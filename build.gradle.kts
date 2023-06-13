@@ -37,15 +37,15 @@ ext {
 version = "%s%s".format(Locale.ROOT, baseVersion, versionExtension)
 
 
-/*patches {
+patches {
     submodule = "Minestom"
     patches = file("minestom-patches")
     target = file("patched-minestom")
     addAsSafeDirectory.set(false)
-}*/
+}
 
 tasks {
     register("rebuildPatches") {
-        //dependsOn(makePatches)
+        dependsOn(makePatches)
     }
 }
