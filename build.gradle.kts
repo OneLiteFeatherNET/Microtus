@@ -2,7 +2,7 @@ import org.ajoberstar.grgit.Grgit
 import java.util.*
 
 plugins {
-    id("net.minecraftforge.gitpatcher") version "0.10.+"
+    // id("net.minecraftforge.gitpatcher") version "0.10.+"
     id("org.ajoberstar.grgit") version "5.2.0"
 }
 
@@ -23,6 +23,7 @@ var snapshot by extra("-SNAPSHOT")
 
 group = "net.onelitefeather"
 
+
 ext {
     val git: Grgit = Grgit.open {
         dir = File("$rootDir/.git")
@@ -32,17 +33,19 @@ ext {
 }
 
 
+
 version = "%s%s".format(Locale.ROOT, baseVersion, extension)
 
 
-patches {
-    submodule = "minestom"
+/*patches {
+    submodule = "Minestom"
     patches = file("minestom-patches")
-    target = file("patches-minestom")
-}
+    target = file("patched-minestom")
+    addAsSafeDirectory.set(false)
+}*/
 
 tasks {
     register("rebuildPatches") {
-        dependsOn(makePatches)
+        //dependsOn(makePatches)
     }
 }
