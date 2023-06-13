@@ -5,22 +5,23 @@ Subject: [PATCH] Add player gamemode change event
 
 
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 5149b5e910d355980afb9ba81e687e0bcedc305b..6abb43fd4d5de1d748dbbd25056b25977429e28b 100644
+index 5149b5e910d355980afb9ba81e687e0bcedc305b..e5d8e405ad1eedc240442fc381685baa1ef9ba61 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -1297,13 +1297,22 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          return gameMode;
      }
  
-+
++    // Microtus start - Add gamemode change event
      /**
       * Changes the player {@link GameMode}
       *
       * @param gameMode the new player GameMode
-      */
+-     */
 -    public void setGameMode(@NotNull GameMode gameMode) {
 -        this.gameMode = gameMode;
-+    // Microtus start - Add gamemode change event
++     * @return true if the gamemode was changed successfully, false otherwise (cancelled by event)
++     */
 +    public boolean setGameMode(@NotNull GameMode gameMode) {
 +        PlayerGameModeChangeEvent playerGameModeChangeEvent = new PlayerGameModeChangeEvent(this, gameMode);
 +        EventDispatcher.call(playerGameModeChangeEvent);
