@@ -1,0 +1,163 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Tue, 13 Jun 2023 23:17:53 +0200
+Subject: [PATCH] Add player gamemode change event
+
+
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index 5149b5e910d355980afb9ba81e687e0bcedc305b..6abb43fd4d5de1d748dbbd25056b25977429e28b 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -1297,13 +1297,22 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         return gameMode;
+     }
+ 
++
+     /**
+      * Changes the player {@link GameMode}
+      *
+      * @param gameMode the new player GameMode
+      */
+-    public void setGameMode(@NotNull GameMode gameMode) {
+-        this.gameMode = gameMode;
++    // Microtus start - Add gamemode change event
++    public boolean setGameMode(@NotNull GameMode gameMode) {
++        PlayerGameModeChangeEvent playerGameModeChangeEvent = new PlayerGameModeChangeEvent(this, gameMode);
++        EventDispatcher.call(playerGameModeChangeEvent);
++        if (playerGameModeChangeEvent.isCancelled()) {
++            // Abort
++            return false;
++        }
++        this.gameMode = playerGameModeChangeEvent.getNewGameMode();
++        // Microtus end - Add gamemode change event
+         // Condition to prevent sending the packets before spawning the player
+         if (isActive()) {
+             sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.CHANGE_GAMEMODE, gameMode.id()));
+@@ -1334,8 +1343,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         if (isActive()) {
+             refreshAbilities();
+         }
++        return true; // Microtus - Add gamemode change event
+     }
+ 
++
+     /**
+      * Gets if this player is in creative. Used for code readability.
+      *
+diff --git a/src/main/java/net/minestom/server/event/player/PlayerGameModeChangeEvent.java b/src/main/java/net/minestom/server/event/player/PlayerGameModeChangeEvent.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..8ced8497feac0a3aa2b625ab7606567d671055c2
+--- /dev/null
++++ b/src/main/java/net/minestom/server/event/player/PlayerGameModeChangeEvent.java
+@@ -0,0 +1,55 @@
++package net.minestom.server.event.player;
++
++import net.minestom.server.entity.GameMode;
++import net.minestom.server.entity.Player;
++import net.minestom.server.event.trait.CancellableEvent;
++import net.minestom.server.event.trait.PlayerInstanceEvent;
++import org.jetbrains.annotations.NotNull;
++
++/**
++ * Called when the gamemode of a player is being modified.
++ */
++public class PlayerGameModeChangeEvent implements PlayerInstanceEvent, CancellableEvent {
++    private final Player player;
++    private GameMode newGameMode;
++
++    private boolean cancelled;
++
++    public PlayerGameModeChangeEvent(@NotNull Player player, @NotNull GameMode newGameMode) {
++        this.player = player;
++        this.newGameMode = newGameMode;
++    }
++
++    /**
++     * Gets the target gamemode.
++     *
++     * @return the target gamemode
++     */
++    public @NotNull GameMode getNewGameMode() {
++        return newGameMode;
++    }
++
++    /**
++     * Changes the target gamemode.
++     *
++     * @param newGameMode the new target gamemode
++     */
++    public void setNewGameMode(@NotNull GameMode newGameMode) {
++        this.newGameMode = newGameMode;
++    }
++
++    @Override
++    public boolean isCancelled() {
++        return cancelled;
++    }
++
++    @Override
++    public void setCancelled(boolean cancel) {
++        this.cancelled = cancel;
++    }
++
++    @Override
++    public @NotNull Player getPlayer() {
++        return player;
++    }
++}
+diff --git a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
+index bd9b1ef7cb79058fd74299b3be653821fca6a064..da0bc9a7a883153117b069041305b95be35b8a89 100644
+--- a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
++++ b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
+@@ -34,17 +34,41 @@ public class PlayerIntegrationTest {
+         var connection = env.createConnection();
+         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
+         assertEquals(instance, player.getInstance());
++        // Microtus start - Add gamemode change event
++
++        // Abilities
++        {
++            player.setGameMode(GameMode.CREATIVE);
++            assertAbilities(player, true, false, true, true);
++            player.setGameMode(GameMode.SPECTATOR);
++            assertAbilities(player, true, true, true, false);
++            player.setGameMode(GameMode.CREATIVE);
++            assertAbilities(player, true, true, true, true);
++            player.setGameMode(GameMode.ADVENTURE);
++            assertAbilities(player, false, false, false, false);
++            player.setGameMode(GameMode.SURVIVAL);
++            assertAbilities(player, false, false, false, false);
++        }
+ 
+-        player.setGameMode(GameMode.CREATIVE);
+-        assertAbilities(player, true, false, true, true);
+-        player.setGameMode(GameMode.SPECTATOR);
+-        assertAbilities(player, true, true, true, false);
+-        player.setGameMode(GameMode.CREATIVE);
+-        assertAbilities(player, true, true, true, true);
+-        player.setGameMode(GameMode.ADVENTURE);
+-        assertAbilities(player, false, false, false, false);
+-        player.setGameMode(GameMode.SURVIVAL);
+-        assertAbilities(player, false, false, false, false);
++        var listener = env.listen(net.minestom.server.event.player.PlayerGameModeChangeEvent.class);
++        // Normal change
++        {
++            listener.followup();
++            assertTrue(player.setGameMode(GameMode.ADVENTURE));
++        }
++        // Change target gamemode event
++        {
++            listener.followup(event -> event.setNewGameMode(GameMode.SPECTATOR));
++            assertTrue(player.setGameMode(GameMode.CREATIVE));
++            assertEquals(GameMode.SPECTATOR, player.getGameMode());
++        }
++        // Cancel event
++        {
++            listener.followup(event -> event.setCancelled(true));
++            assertFalse(player.setGameMode(GameMode.CREATIVE));
++            assertEquals(GameMode.SPECTATOR, player.getGameMode());
++        }
++        // Microtus end - Add gamemode change event
+     }
+ 
+     @Test
