@@ -2,7 +2,7 @@ import org.ajoberstar.grgit.Grgit
 import java.util.*
 
 plugins {
-    // id("net.minecraftforge.gitpatcher") version "0.10.+"
+    id("net.minecraftforge.gitpatcher") version "0.10.+"
     id("org.ajoberstar.grgit") version "5.2.0"
 }
 
@@ -18,7 +18,7 @@ if (!File("$rootDir/.git").exists()) {
 }
 
 var baseVersion by extra("1.0.0")
-var extension by extra("")
+var versionExtension by extra("")
 var snapshot by extra("-SNAPSHOT")
 
 group = "net.onelitefeather"
@@ -29,12 +29,12 @@ ext {
         dir = File("$rootDir/.git")
     }
     val revision = git.head().abbreviatedId
-    extension = "%s+%s".format(Locale.ROOT, snapshot, revision)
+    versionExtension = "%s+%s".format(Locale.ROOT, snapshot, revision)
 }
 
 
 
-version = "%s%s".format(Locale.ROOT, baseVersion, extension)
+version = "%s%s".format(Locale.ROOT, baseVersion, versionExtension)
 
 
 /*patches {
