@@ -5,24 +5,41 @@ Subject: [PATCH] Add github publishing
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..79521cf1df2b3272bca9eed707cd5a12e71e3469 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..de1391fb81d1c25a5b70e483375ef068b4b26622 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -3,11 +3,12 @@ plugins {
+@@ -1,13 +1,29 @@
++import org.ajoberstar.grgit.Grgit
++import java.util.*
++
+ plugins {
+     `java-library`
      id("minestom.publishing-conventions")
      id("minestom.native-conventions")
      alias(libs.plugins.blossom)
 +    publishing
++    id("org.ajoberstar.grgit") version "5.2.0"
++}
++var baseVersion by extra("1.0.0")
++var versionExtension by extra("")
++var snapshot by extra("-SNAPSHOT")
++
++ext {
++    val git: Grgit = Grgit.open {
++        dir = File("$rootDir/.git")
++    }
++    val revision = git.head().abbreviatedId
++    versionExtension = "%s+%s".format(Locale.ROOT, snapshot, revision)
  }
  
  allprojects {
      group = "net.minestom.server"
 -    version = "1.0"
-+    version = "1.0.0"
++    version = "%s%s".format(Locale.ROOT, baseVersion, versionExtension)
      description = "Lightweight and multi-threaded Minecraft server implementation"
  }
  
-@@ -96,4 +97,57 @@ dependencies {
+@@ -96,4 +112,57 @@ dependencies {
      api("io.github.jglrxavpok.hephaistos:common:${libs.versions.hephaistos.get()}")
      api("io.github.jglrxavpok.hephaistos:gson:${libs.versions.hephaistos.get()}")
  }
