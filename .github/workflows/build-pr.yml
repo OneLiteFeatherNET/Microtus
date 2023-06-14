@@ -23,4 +23,4 @@ jobs:
           git config --global user.name "Github Actions"
           git submodule update --init
           ./gradlew applyPatches
-          ./gradlew :patched-minestom:jar
+          ./gradlew :patched-minestom:classes
