@@ -1,0 +1,76 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Wed, 14 Jun 2023 09:38:27 +0200
+Subject: [PATCH] Add github publishing
+
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..8a6f967da39a2ed5f413fb8289f6701c63dde8d8 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -3,6 +3,7 @@ plugins {
+     id("minestom.publishing-conventions")
+     id("minestom.native-conventions")
+     alias(libs.plugins.blossom)
++    publishing
+ }
+ 
+ allprojects {
+@@ -96,4 +97,57 @@ dependencies {
+     api("io.github.jglrxavpok.hephaistos:common:${libs.versions.hephaistos.get()}")
+     api("io.github.jglrxavpok.hephaistos:gson:${libs.versions.hephaistos.get()}")
+ }
++publishing {
++    publications {
++        create<MavenPublication>("mavenJava") {
++            from(components.findByName("java"))
++            groupId = "net.onelitefeather"
++            artifactId = "minestom"
++            version = rootProject.version.toString()
++            pom {
++                name.set("Minestom")
++                description.set("")
++                url.set("https://github.com/OneLiteFeatherNET/Microtus")
++                licenses {
++                    license {
++                        name.set("AGPL-3.0")
++                        url.set("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
++                    }
++                }
++                issueManagement {
++                    system.set("Github")
++                    url.set("https://github.com/OneLiteFeatherNET/Microtus/issues")
++                }
++                developers {
++                    developer {
++                        id.set("themeinerlp")
++                        name.set("Phillipp Glanz")
++                        email.set("p.glanz@madfix.me")
++                    }
++                    developer {
++                        id.set("theEvilReaper")
++                        name.set("Steffen Wonning")
++                        email.set("steffenwx@gmail.com")
++                    }
++                }
++                scm {
++                    connection.set("scm:git@github.com:OneLiteFeatherNET/Microtus.git")
++                    developerConnection.set("scm:git@github.com:git@github.com:OneLiteFeatherNET/Microtus.git")
++                    url.set("https://github.com/OneLiteFeatherNET/Microtus")
++                }
++            }
++        }
++        repositories {
++            maven {
++                val releasesRepoUrl = "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus"
++                val snapshotsRepoUrl = "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus"
++                url = if (version.toString().endsWith("SNAPSHOT")) uri(snapshotsRepoUrl) else uri(releasesRepoUrl)
++                credentials {
++                    username = System.getenv("GITHUB_ACTOR")
++                    password = System.getenv("GITHUB_TOKEN")
++                }
++            }
++        }
++    }
++}
+ 
