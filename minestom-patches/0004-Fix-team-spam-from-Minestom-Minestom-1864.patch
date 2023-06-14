@@ -1,0 +1,150 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Wed, 14 Jun 2023 12:49:17 +0200
+Subject: [PATCH] Fix team spam from Minestom/Minestom#1864
+
+
+diff --git a/src/main/java/net/minestom/server/entity/LivingEntity.java b/src/main/java/net/minestom/server/entity/LivingEntity.java
+index 2ad6068041e31ac0e71034fda4d2aa6b36ebc48b..4e7d2215ef6c4de4c46407e4a9dee4f218c7a643 100644
+--- a/src/main/java/net/minestom/server/entity/LivingEntity.java
++++ b/src/main/java/net/minestom/server/entity/LivingEntity.java
+@@ -518,7 +518,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+         super.updateNewViewer(player);
+         player.sendPacket(new LazyPacket(this::getEquipmentsPacket));
+         player.sendPacket(new LazyPacket(this::getPropertiesPacket));
+-        if (getTeam() != null) player.sendPacket(getTeam().createTeamsCreationPacket());
++        // if (getTeam() != null) player.sendPacket(getTeam().createTeamsCreationPacket()); // Microtus - Fix team spam
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index e5d8e405ad1eedc240442fc381685baa1ef9ba61..a13ee12c7305e4ca03a7fcacce032abba7c8b072 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -284,8 +284,16 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         this.skin = skinInitEvent.getSkin();
+         // FIXME: when using Geyser, this line remove the skin of the client
+         PacketUtils.broadcastPacket(getAddPlayerToList());
++
+         for (var player : MinecraftServer.getConnectionManager().getOnlinePlayers()) {
+-            if (player != this) sendPacket(player.getAddPlayerToList());
++            // Microtus start - Fix team spawm
++            if (player != this) {
++                sendPacket(player.getAddPlayerToList());
++                if (player.displayName != null) {
++                    sendPacket(new PlayerInfoUpdatePacket(PlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME, player.infoEntry()));
++                }
++            }
++            // Microtus end - Fix team spawm
+         }
+ 
+         //Teams
+@@ -1419,12 +1427,14 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         return heldSlot;
+     }
+ 
+-    public void setTeam(Team team) {
++    // Microtus start - Fix team spawm
++    /*public void setTeam(Team team) {
+         super.setTeam(team);
+         if (team != null) {
+             PacketUtils.broadcastPacket(team.createTeamsCreationPacket());
+         }
+-    }
++    }*/
++    // Microtus end - Fix team spawm
+ 
+     /**
+      * Changes the tag below the name.
+@@ -1977,10 +1987,12 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         if (hasPassenger()) {
+             connection.sendPacket(getPassengersPacket());
+         }
+-        // Team
++        // Microtus start - Fix team spawm
++        /*// Team
+         if (this.getTeam() != null) {
+             connection.sendPacket(this.getTeam().createTeamsCreationPacket());
+-        }
++        }*/
++        // Microtus end - Fix team spawm
+         connection.sendPacket(new EntityHeadLookPacket(getEntityId(), position.yaw()));
+     }
+ 
+diff --git a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
+index da0bc9a7a883153117b069041305b95be35b8a89..e6c072999208de7db4361950a87d2aee8586890b 100644
+--- a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
++++ b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
+@@ -193,4 +193,72 @@ public class PlayerIntegrationTest {
+         assertEquals(dimensionNamespace, player.getDeathLocation().dimension());
+         assertEquals(5, player.getDeathLocation().position().x());
+     }
++    // Microtus start - Fix team spam
++    @Test
++    public void displayNameTest(Env env) {
++        var instance = env.createFlatInstance();
++        var connection = env.createConnection();
++        var tracker = connection.trackIncoming(PlayerInfoUpdatePacket.class);
++        var player = connection.connect(instance, new Pos(0, 42, 0)).join();
++
++        player.setDisplayName(net.kyori.adventure.text.Component.text("Display Name!"));
++
++        var connection2 = env.createConnection();
++        var tracker2 = connection2.trackIncoming(PlayerInfoUpdatePacket.class);
++        connection2.connect(instance, new Pos(0, 42, 0)).join();
++
++        var displayNamePackets = tracker2.collect().stream().filter((packet) ->
++                        packet.actions().stream().anyMatch((act) -> act == PlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME))
++                .count();
++        assertEquals(1, displayNamePackets);
++
++        var tracker3 = connection2.trackIncoming(PlayerInfoUpdatePacket.class);
++
++        player.setDisplayName(net.kyori.adventure.text.Component.text("Other Name!"));
++
++        var displayNamePackets2 = tracker3.collect().stream().filter((packet) ->
++                        packet.actions().stream().anyMatch((act) -> act == PlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME))
++                .count();
++        assertEquals(1, displayNamePackets2);
++
++        var displayNamePackets3 = tracker.collect().stream().filter((packet) ->
++                        packet.actions().stream().anyMatch((act) -> act == PlayerInfoUpdatePacket.Action.UPDATE_DISPLAY_NAME))
++                .count();
++        assertEquals(2, displayNamePackets3);
++    }
++
++    @Test
++    public void teamPacketTest(Env env) {
++        var team = env.process().team().createTeam("minestom");
++
++        var instance = env.createFlatInstance();
++        var connection = env.createConnection();
++        var tracker = connection.trackIncoming(TeamsPacket.class);
++        var player = connection.connect(instance, new Pos(0, 42, 0)).join();
++
++        // Make sure team is sent to player on join
++        var createPackets = tracker.collect().stream().filter((packet) ->
++                        packet.action() instanceof TeamsPacket.CreateTeamAction)
++                .count();
++        assertEquals(1, createPackets);
++
++
++        var tracker2 = connection.trackIncoming(TeamsPacket.class);
++        var tracker3 = connection.trackIncoming(TeamsPacket.class);
++        player.setTeam(team);
++        player.setTeam(team);
++
++        // Check for repeated team creation
++        var createPackets2 = tracker2.collect().stream().filter((packet) ->
++                        packet.action() instanceof TeamsPacket.CreateTeamAction)
++                .count();
++        assertEquals(0, createPackets2);
++
++        // Check for repeated team member add
++        var addMemberPackets = tracker3.collect().stream().filter((packet) ->
++                        packet.action() instanceof TeamsPacket.AddEntitiesToTeamAction)
++                .count();
++        assertEquals(1, addMemberPackets);
++    }
++    // Microtus end - Fix team spam
+ }
