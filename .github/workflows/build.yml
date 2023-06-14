@@ -3,12 +3,6 @@ on:
   push:
     branches:
       - master
-  pull_request:
-    types:
-      - opened
-      - reopened
-      - synchronize
-      - labeled
 jobs:
   build:
     # Run on all label events (won't be duplicated) or all push events or on PR syncs not from the same repo
