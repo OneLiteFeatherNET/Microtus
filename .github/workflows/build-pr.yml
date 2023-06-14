@@ -18,4 +18,8 @@ jobs:
           distribution: temurin
           java-version: 17
       - name: Build on ${{ matrix.os }}
-        run: ./gradlew applyPatches :patched-minestom:jar
+        run: |
+          git config --global user.email "no-reply@github.com"
+          git config --global user.name "Github Actions"
+          ./gradlew applyPatches
+          ./gradlew :patched-minestom:jar
