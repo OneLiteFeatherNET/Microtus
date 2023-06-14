@@ -18,4 +18,4 @@ jobs:
           distribution: temurin
           java-version: 17
       - name: Build on ${{ matrix.os }}
-        run: ./gradlew clean applyPatches build
+        run: ./gradlew applyPatches :patched-minestom:jar
