@@ -3174,7 +3174,7 @@ index e267df9c6de360e77c1e2dd32bd57b35b5fe781b..c795637049c1ce0283b67726e7c3dc6a
      ByteBuffer nioBuffer;
      final boolean resizable;
 diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-index 6ee3308c6aeb10e262f9db51fdc11a4aa6fa984a..09f3ffa1b17c1d15b2f9ad55e21e0b2268dcf2a4 100644
+index 6ee3308c6aeb10e262f9db51fdc11a4aa6fa984a..403a1cca7de4bf5b888dddff8cc04d3e97e8b9b8 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 +++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 @@ -6,11 +6,13 @@ import net.minestom.server.coordinate.Point;
@@ -3223,15 +3223,15 @@ index 6ee3308c6aeb10e262f9db51fdc11a4aa6fa984a..09f3ffa1b17c1d15b2f9ad55e21e0b22
 +
 +    static final TypeImpl<Point> VECTOR3 = new TypeImpl<>(Point.class,
 +            (buffer, value) -> {
-+                buffer.write(FLOAT, (float) value.x());
-+                buffer.write(FLOAT, (float) value.y());
-+                buffer.write(FLOAT, (float) value.z());
++                buffer.write(DOUBLE, value.x());
++                buffer.write(DOUBLE, value.y());
++                buffer.write(DOUBLE, value.z());
 +                return -1;
 +            },
 +            buffer -> {
-+                final float x = buffer.read(FLOAT);
-+                final float y = buffer.read(FLOAT);
-+                final float z = buffer.read(FLOAT);
++                final double x = buffer.read(DOUBLE);
++                final double y = buffer.read(DOUBLE);
++                final double z = buffer.read(DOUBLE);
 +                return new Vec(x, y, z);
 +            });
 +    static final TypeImpl<Quaternion> QUATERNION = new TypeImpl<>(Quaternion.class,
