@@ -1,0 +1,30 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: theEvilReaper <steffenwx@gmail.com>
+Date: Mon, 19 Jun 2023 19:39:05 +0200
+Subject: [PATCH] Add missing InventoryCloseEvent call in the closeInventory
+ method
+
+
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index a13ee12c7305e4ca03a7fcacce032abba7c8b072..84801686e542a79b55ca5bb3d911655f039e63a6 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -30,6 +30,7 @@ import net.minestom.server.entity.fakeplayer.FakePlayer;
+ import net.minestom.server.entity.metadata.PlayerMeta;
+ import net.minestom.server.entity.vehicle.PlayerVehicleInformation;
+ import net.minestom.server.event.EventDispatcher;
++import net.minestom.server.event.inventory.InventoryCloseEvent;
+ import net.minestom.server.event.inventory.InventoryOpenEvent;
+ import net.minestom.server.event.item.ItemDropEvent;
+ import net.minestom.server.event.item.ItemUpdateStateEvent;
+@@ -1513,6 +1514,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         }
+ 
+         if (openInventory == getOpenInventory()) {
++            // Microtus start - 1.19.3 trigger inventory close
++            InventoryCloseEvent closeEvent = new InventoryCloseEvent(openInventory, this);
++            EventDispatcher.call(closeEvent);
++            // Microtus end - 1.19.3 trigger inventory close
+             CloseWindowPacket closeWindowPacket;
+             if (openInventory == null) {
+                 closeWindowPacket = new CloseWindowPacket((byte) 0);
