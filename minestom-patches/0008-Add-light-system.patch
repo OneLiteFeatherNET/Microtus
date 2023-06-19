@@ -1,0 +1,2083 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Mon, 19 Jun 2023 23:05:21 +0200
+Subject: [PATCH] Add light system
+
+
+diff --git a/demo/src/main/java/net/minestom/demo/PlayerInit.java b/demo/src/main/java/net/minestom/demo/PlayerInit.java
+index 72003b6f63e87733cfbf5b75e87414c53bfdf47a..590a86012d1d109ba30c681c366837136e6eae3d 100644
+--- a/demo/src/main/java/net/minestom/demo/PlayerInit.java
++++ b/demo/src/main/java/net/minestom/demo/PlayerInit.java
+@@ -32,6 +32,7 @@ import net.minestom.server.utils.MathUtils;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+ import net.minestom.server.utils.time.TimeUnit;
+ import net.minestom.server.world.DimensionType;
++import net.minestom.server.instance.LightingChunk; // Microtus - Lightning support
+ 
+ import java.time.Duration;
+ import java.util.Collection;
+@@ -123,6 +124,7 @@ public class PlayerInit {
+ 
+         InstanceContainer instanceContainer = instanceManager.createInstanceContainer(DimensionType.OVERWORLD);
+         instanceContainer.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
++        instanceContainer.setChunkSupplier(LightingChunk::new); // Microtus - Lightning support
+ 
+         if (false) {
+             System.out.println("start");
+diff --git a/src/main/java/net/minestom/server/collision/BoundingBox.java b/src/main/java/net/minestom/server/collision/BoundingBox.java
+index 6e7599a85a7bf13d5d782947eb2666aaa25cd59d..feac842cb51edb46f9a9402ab66589496ee143b4 100644
+--- a/src/main/java/net/minestom/server/collision/BoundingBox.java
++++ b/src/main/java/net/minestom/server/collision/BoundingBox.java
+@@ -4,6 +4,7 @@ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Pos;
+ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.entity.Entity;
++import net.minestom.server.instance.block.BlockFace; // Microtus - Lightning support
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+@@ -33,6 +34,13 @@ public final class BoundingBox implements Shape {
+         this(width, height, depth, new Vec(-width / 2, 0, -depth / 2));
+     }
+ 
++    // Microtus start - Lightning support
++    @Override
++    public boolean isOccluded(@NotNull Shape shape, @NotNull BlockFace face) {
++        return false;
++    }
++    // Microtus end - Lightning support
++
+     @Override
+     @ApiStatus.Experimental
+     public boolean intersectBox(@NotNull Point positionRelative, @NotNull BoundingBox boundingBox) {
+diff --git a/src/main/java/net/minestom/server/collision/CollisionUtils.java b/src/main/java/net/minestom/server/collision/CollisionUtils.java
+index 43c34a592a6c54b48bb433e87b4ec25aeb2c1f99..6a3ea0ab2e52e2a237c917db9fcca2e698f4f777 100644
+--- a/src/main/java/net/minestom/server/collision/CollisionUtils.java
++++ b/src/main/java/net/minestom/server/collision/CollisionUtils.java
+@@ -112,8 +112,9 @@ public final class CollisionUtils {
+                     new Pos(newPosition.x(), newPosition.y(), currentPosition.z());
+         };
+     }
+-
+-    public static Shape parseBlockShape(String str, Registry.BlockEntry blockEntry) {
+-        return ShapeImpl.parseBlockFromRegistry(str, blockEntry);
++    // Microtus start - Lightning support
++    public static Shape parseBlockShape(String collision, String occlusion, Registry.BlockEntry blockEntry) {
++        return ShapeImpl.parseBlockFromRegistry(collision, occlusion, blockEntry);
+     }
++    // Microtus end - Lightning support
+ }
+diff --git a/src/main/java/net/minestom/server/collision/Shape.java b/src/main/java/net/minestom/server/collision/Shape.java
+index c4f7a04eb5999d69d77314abfe4d56b6f4f9fd29..419ee18709d0e2628940b2e0cd09a51589766d8d 100644
+--- a/src/main/java/net/minestom/server/collision/Shape.java
++++ b/src/main/java/net/minestom/server/collision/Shape.java
+@@ -1,11 +1,17 @@
+ package net.minestom.server.collision;
+ 
+ import net.minestom.server.coordinate.Point;
++import net.minestom.server.instance.block.BlockFace; // Microtus - Lightning support
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+ 
+ @ApiStatus.Experimental
+ public interface Shape {
++
++    // Microtus - Lightning support
++    // TODO: Add documentation
++    boolean isOccluded(@NotNull Shape shape, @NotNull BlockFace face);
++
+     /**
+      * Checks if two bounding boxes intersect.
+      *
+diff --git a/src/main/java/net/minestom/server/collision/ShapeImpl.java b/src/main/java/net/minestom/server/collision/ShapeImpl.java
+index 870c17c2afd1411534cb09394c3c3f4a66690cd9..263439c3952547c12e89ae3fee8f625eb6c4cf44 100644
+--- a/src/main/java/net/minestom/server/collision/ShapeImpl.java
++++ b/src/main/java/net/minestom/server/collision/ShapeImpl.java
+@@ -5,28 +5,38 @@ import it.unimi.dsi.fastutil.doubles.DoubleList;
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.instance.block.Block;
++import net.minestom.server.instance.block.BlockFace; // Microtus - Lightning support
+ import net.minestom.server.registry.Registry;
+ import org.jetbrains.annotations.NotNull;
+ 
++import java.util.ArrayList; // Microtus - Lightning support
++import java.util.List; // Microtus - Lightning support
+ import java.util.regex.Matcher;
+ import java.util.regex.Pattern;
+ 
+ final class ShapeImpl implements Shape {
+     private static final Pattern PATTERN = Pattern.compile("\\d.\\d{1,3}", Pattern.MULTILINE);
+     private final BoundingBox[] blockSections;
++    private final BoundingBox[] collisionBoundingBoxes; // Microtus - Lightning support
+     private final Point relativeStart, relativeEnd;
+ 
++    private final BoundingBox[] occlusionBoundingBoxes; // Microtus - Lightning support
++    private final byte blockOcclusion; // Microtus - Lightning support
++    private final byte airOcclusion; // Microtus - Lightning support
++
+     private final Registry.BlockEntry blockEntry;
+     private Block block;
+ 
+-    private ShapeImpl(BoundingBox[] boundingBoxes, Registry.BlockEntry blockEntry) {
++    private ShapeImpl(BoundingBox[] boundingBoxes, BoundingBox[] occlusionBoundingBoxes, Registry.BlockEntry blockEntry ) { // Microtus - Lightning support
+         this.blockSections = boundingBoxes;
+         this.blockEntry = blockEntry;
++        this.collisionBoundingBoxes = boundingBoxes; // Microtus - Lightning support
++        this.occlusionBoundingBoxes = occlusionBoundingBoxes; // Microtus - Lightning support
+         // Find bounds
+         {
+             double minX = 1, minY = 1, minZ = 1;
+             double maxX = 0, maxY = 0, maxZ = 0;
+-            for (BoundingBox blockSection : blockSections) {
++            for (BoundingBox blockSection : collisionBoundingBoxes) { // Microtus - Lightning support
+                 // Min
+                 if (blockSection.minX() < minX) minX = blockSection.minX();
+                 if (blockSection.minY() < minY) minY = blockSection.minY();
+@@ -39,9 +49,21 @@ final class ShapeImpl implements Shape {
+             this.relativeStart = new Vec(minX, minY, minZ);
+             this.relativeEnd = new Vec(maxX, maxY, maxZ);
+         }
++        // Microtus start - Lightning support
++        byte airFaces = 0;
++        byte fullFaces = 0;
++        for (BlockFace f : BlockFace.values()) {
++            final byte res = isFaceCovered(computeOcclusionSet(f));
++            airFaces |= ((res == 0) ? 0b1 : 0b0) << (byte) f.ordinal();
++            fullFaces |= ((res == 2) ? 0b1 : 0b0) << (byte) f.ordinal();
++        }
++
++        this.airOcclusion = airFaces;
++        this.blockOcclusion = fullFaces;
++        // Microtus end - Lightning support
+     }
+ 
+-    static ShapeImpl parseBlockFromRegistry(String str, Registry.BlockEntry blockEntry) {
++    static private BoundingBox[] parseRegistryBoundingBoxString(String str) { // Microtus - Lightning support
+         final Matcher matcher = PATTERN.matcher(str);
+         DoubleList vals = new DoubleArrayList();
+         while (matcher.find()) {
+@@ -66,9 +88,41 @@ final class ShapeImpl implements Shape {
+             assert bb.minZ() == minZ;
+             boundingBoxes[i] = bb;
+         }
+-        return new ShapeImpl(boundingBoxes, blockEntry);
++        return boundingBoxes; // Microtus - Lightning support
++    }
++
++    // Microtus start - Lightning support
++    /**
++     * Computes the occlusion for a given face.
++     *
++     * @param covering The rectangle set to check for covering.
++     * @return 0 if face is not covered, 1 if face is covered partially, 2 if face is fully covered.
++     */
++    private static byte isFaceCovered(List<Rectangle> covering) {
++        if (covering.isEmpty()) return 0;
++        Rectangle r = new Rectangle(0, 0, 1, 1);
++        List<Rectangle> toCover = new ArrayList<>();
++        toCover.add(r);
++        for (Rectangle rect : covering) {
++            List<Rectangle> nextCovering = new ArrayList<>();
++            for (Rectangle toCoverRect : toCover) {
++                List<Rectangle> remaining = getRemaining(rect, toCoverRect);
++                nextCovering.addAll(remaining);
++            }
++            toCover = nextCovering;
++            if (toCover.isEmpty()) return 2;
++        }
++        return 1;
++    }
++
++    static ShapeImpl parseBlockFromRegistry(String collision, String occlusion, Registry.BlockEntry blockEntry) {
++        BoundingBox[] collisionBoundingBoxes = parseRegistryBoundingBoxString(collision);
++        BoundingBox[] occlusionBoundingBoxes = blockEntry.occludes() ? parseRegistryBoundingBoxString(occlusion) : new BoundingBox[0];
++        return new ShapeImpl(collisionBoundingBoxes, occlusionBoundingBoxes, blockEntry);
+     }
+ 
++    // Microtus end - Lightning support
++
+     @Override
+     public @NotNull Point relativeStart() {
+         return relativeStart;
+@@ -79,9 +133,35 @@ final class ShapeImpl implements Shape {
+         return relativeEnd;
+     }
+ 
++    // Microtus start - Lightning support
++
++    @Override
++    public boolean isOccluded(@NotNull Shape shape, @NotNull BlockFace face) {
++        final ShapeImpl shapeImpl = ((ShapeImpl) shape);
++        final boolean hasBlockOcclusion = (((blockOcclusion >> face.ordinal()) & 1) == 1);
++        final boolean hasBlockOcclusionOther = ((shapeImpl.blockOcclusion >> face.getOppositeFace().ordinal()) & 1) == 1;
++
++        if (blockEntry.lightEmission() > 0) return hasBlockOcclusionOther;
++
++        // If either face is full, return true
++        if (hasBlockOcclusion || hasBlockOcclusionOther) return true;
++
++        final boolean hasAirOcclusion = (((airOcclusion >> face.ordinal()) & 1) == 1);
++        final boolean hasAirOcclusionOther = ((shapeImpl.airOcclusion >> face.getOppositeFace().ordinal()) & 1) == 1;
++
++        // If a single face is air, return false
++        if (hasAirOcclusion || hasAirOcclusionOther) return false;
++
++        // Comparing two partial faces. Computation needed
++        List<Rectangle> allRectangles = shapeImpl.computeOcclusionSet(face.getOppositeFace());
++        allRectangles.addAll(computeOcclusionSet(face));
++        return isFaceCovered(allRectangles) == 2;
++    }
++    // Microtus end - Lightning support
++
+     @Override
+     public boolean intersectBox(@NotNull Point position, @NotNull BoundingBox boundingBox) {
+-        for (BoundingBox blockSection : blockSections) {
++        for (BoundingBox blockSection : collisionBoundingBoxes) { // Microtus - Lightning support
+             if (boundingBox.intersectBox(position, blockSection)) return true;
+         }
+         return false;
+@@ -91,7 +171,7 @@ final class ShapeImpl implements Shape {
+     public boolean intersectBoxSwept(@NotNull Point rayStart, @NotNull Point rayDirection,
+                                      @NotNull Point shapePos, @NotNull BoundingBox moving, @NotNull SweepResult finalResult) {
+         boolean hitBlock = false;
+-        for (BoundingBox blockSection : blockSections) {
++        for (BoundingBox blockSection : collisionBoundingBoxes) { // Microtus - Lightning support
+             // Update final result if the temp result collision is sooner than the current final result
+             if (RayUtils.BoundingBoxIntersectionCheck(moving, rayStart, rayDirection, blockSection, shapePos, finalResult)) {
+                 finalResult.collidedShapePosition = shapePos;
+@@ -108,4 +188,78 @@ final class ShapeImpl implements Shape {
+         if (block == null) this.block = block = Block.fromStateId((short) blockEntry.stateId());
+         return block;
+     }
++
++    // Microtus start - Lightning support
++    private List<Rectangle> computeOcclusionSet(BlockFace face) {
++        List<Rectangle> rSet = new ArrayList<>();
++        for (BoundingBox boundingBox : this.occlusionBoundingBoxes) {
++            switch (face) {
++                case NORTH -> // negative Z
++                {
++                    if (boundingBox.minZ() == 0)
++                        rSet.add(new Rectangle(boundingBox.minX(), boundingBox.minY(), boundingBox.maxX(), boundingBox.maxY()));
++                }
++                case SOUTH -> // positive Z
++                {
++                    if (boundingBox.maxZ() == 1)
++                        rSet.add(new Rectangle(boundingBox.minX(), boundingBox.minY(), boundingBox.maxX(), boundingBox.maxY()));
++                }
++                case WEST -> // negative X
++                {
++                    if (boundingBox.minX() == 0)
++                        rSet.add(new Rectangle(boundingBox.minY(), boundingBox.minZ(), boundingBox.maxY(), boundingBox.maxZ()));
++                }
++                case EAST -> // positive X
++                {
++                    if (boundingBox.maxX() == 1)
++                        rSet.add(new Rectangle(boundingBox.minY(), boundingBox.minZ(), boundingBox.maxY(), boundingBox.maxZ()));
++                }
++                case BOTTOM -> // negative Y
++                {
++                    if (boundingBox.minY() == 0)
++                        rSet.add(new Rectangle(boundingBox.minX(), boundingBox.minZ(), boundingBox.maxX(), boundingBox.maxZ()));
++                }
++                case TOP -> // positive Y
++                {
++                    if (boundingBox.maxY() == 1)
++                        rSet.add(new Rectangle(boundingBox.minX(), boundingBox.minZ(), boundingBox.maxX(), boundingBox.maxZ()));
++                }
++            }
++        }
++        return rSet;
++    }
++
++    private static List<Rectangle> getRemaining(Rectangle covering, Rectangle toCover) {
++        List<Rectangle> remaining = new ArrayList<>();
++        covering = clipRectangle(covering, toCover);
++        // Up
++        if (covering.y1() > toCover.y1()) {
++            remaining.add(new Rectangle(toCover.x1(), toCover.y1(), toCover.x2(), covering.y1()));
++        }
++        // Down
++        if (covering.y2() < toCover.y2()) {
++            remaining.add(new Rectangle(toCover.x1(), covering.y2(), toCover.x2(), toCover.y2()));
++        }
++        // Left
++        if (covering.x1() > toCover.x1()) {
++            remaining.add(new Rectangle(toCover.x1(), covering.y1(), covering.x1(), covering.y2()));
++        }
++        //Right
++        if (covering.x2() < toCover.x2()) {
++            remaining.add(new Rectangle(covering.x2(), covering.y1(), toCover.x2(), covering.y2()));
++        }
++        return remaining;
++    }
++
++    private static Rectangle clipRectangle(Rectangle covering, Rectangle toCover) {
++        final double x1 = Math.max(covering.x1(), toCover.x1());
++        final double y1 = Math.max(covering.y1(), toCover.y1());
++        final double x2 = Math.min(covering.x2(), toCover.x2());
++        final double y2 = Math.min(covering.y2(), toCover.y2());
++        return new Rectangle(x1, y1, x2, y2);
++    }
++
++    private record Rectangle(double x1, double y1, double x2, double y2) { }
++
++    // Microtus end - Lightning support
+ }
+diff --git a/src/main/java/net/minestom/server/instance/AnvilLoader.java b/src/main/java/net/minestom/server/instance/AnvilLoader.java
+index 9111770d834c98d3c31a60207d57462381f61177..fd02a020f4e28e6c9a03f8bf7e9a082f5eec0823 100644
+--- a/src/main/java/net/minestom/server/instance/AnvilLoader.java
++++ b/src/main/java/net/minestom/server/instance/AnvilLoader.java
+@@ -101,7 +101,7 @@ public class AnvilLoader implements IChunkLoader {
+ 
+         final ChunkReader chunkReader = new ChunkReader(chunkData);
+ 
+-        Chunk chunk = new DynamicChunk(instance, chunkX, chunkZ);
++        Chunk chunk = instance.getChunkSupplier().createChunk(instance, chunkX, chunkZ); // Microtus - Light update
+         synchronized (chunk) {
+             var yRange = chunkReader.getYRange();
+             if (yRange.getStart() < instance.getDimensionType().getMinY()) {
+@@ -375,8 +375,8 @@ public class AnvilLoader implements IChunkLoader {
+             ChunkSectionWriter sectionWriter = new ChunkSectionWriter(SupportedVersion.Companion.getLatest(), (byte) sectionY);
+ 
+             Section section = chunk.getSection(sectionY);
+-            sectionWriter.setSkyLights(section.getSkyLight());
+-            sectionWriter.setBlockLights(section.getBlockLight());
++            sectionWriter.setSkyLights(section.skyLight().array()); // Microtus - Light update
++            sectionWriter.setBlockLights(section.blockLight().array()); // Microtus - Light update
+ 
+             BiomePalette biomePalette = new BiomePalette();
+             BlockPalette blockPalette = new BlockPalette();
+diff --git a/src/main/java/net/minestom/server/instance/DynamicChunk.java b/src/main/java/net/minestom/server/instance/DynamicChunk.java
+index 027b182c84d68b8395c405270ea521c76c597e30..b1f672492b2bb549465d6fbd59e06efb496cb2a4 100644
+--- a/src/main/java/net/minestom/server/instance/DynamicChunk.java
++++ b/src/main/java/net/minestom/server/instance/DynamicChunk.java
+@@ -39,7 +39,7 @@ import static net.minestom.server.utils.chunk.ChunkUtils.toSectionRelativeCoordi
+  */
+ public class DynamicChunk extends Chunk {
+ 
+-    private List<Section> sections;
++    protected List<Section> sections; // Microtus - Light update
+ 
+     // Key = ChunkUtils#getBlockIndex
+     protected final Int2ObjectOpenHashMap<Block> entries = new Int2ObjectOpenHashMap<>(0);
+@@ -47,7 +47,6 @@ public class DynamicChunk extends Chunk {
+ 
+     private long lastChange;
+     final CachedPacket chunkCache = new CachedPacket(this::createChunkPacket);
+-    final CachedPacket lightCache = new CachedPacket(this::createLightPacket);
+ 
+     public DynamicChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
+         super(instance, chunkX, chunkZ, true);
+@@ -61,7 +60,6 @@ public class DynamicChunk extends Chunk {
+         assertLock();
+         this.lastChange = System.currentTimeMillis();
+         this.chunkCache.invalidate();
+-        this.lightCache.invalidate();
+         // Update pathfinder
+         if (columnarSpace != null) {
+             final ColumnarOcclusionFieldList columnarOcclusionFieldList = columnarSpace.occlusionFields();
+@@ -183,7 +181,7 @@ public class DynamicChunk extends Chunk {
+         this.entries.clear();
+     }
+ 
+-    private synchronized @NotNull ChunkDataPacket createChunkPacket() {
++    private @NotNull ChunkDataPacket createChunkPacket() { // Microtus - Lightning support
+         final NBTCompound heightmapsNBT;
+         // TODO: don't hardcode heightmaps
+         // Heightmap
+@@ -203,20 +201,25 @@ public class DynamicChunk extends Chunk {
+                     "WORLD_SURFACE", NBT.LongArray(encodeBlocks(worldSurface, bitsForHeight))));
+         }
+         // Data
+-        final byte[] data = ObjectPool.PACKET_POOL.use(buffer ->
+-                NetworkBuffer.makeArray(networkBuffer -> {
+-                    for (Section section : sections) networkBuffer.write(section);
+-                }));
++        // Microtus start - Light update
++        final byte[] data;
++        synchronized (this) {
++            data = ObjectPool.PACKET_POOL.use(buffer ->
++                    NetworkBuffer.makeArray(networkBuffer -> {
++                        for (Section section : sections) networkBuffer.write(section);
++                    }));
++        }
++        // Microtus end - Light update
+         return new ChunkDataPacket(chunkX, chunkZ,
+                 new ChunkData(heightmapsNBT, data, entries),
+-                createLightData());
++                createLightData(true)); // Microtus - Light update
+     }
+ 
+-    private synchronized @NotNull UpdateLightPacket createLightPacket() {
+-        return new UpdateLightPacket(chunkX, chunkZ, createLightData());
++    @NotNull UpdateLightPacket createLightPacket() { // Microtus - Light update
++        return new UpdateLightPacket(chunkX, chunkZ, createLightData(false)); // Microtus - Light update
+     }
+ 
+-    private LightData createLightData() {
++    protected LightData createLightData(boolean sendAll) { // Microtus - Light update
+         BitSet skyMask = new BitSet();
+         BitSet blockMask = new BitSet();
+         BitSet emptySkyMask = new BitSet();
+@@ -227,8 +230,8 @@ public class DynamicChunk extends Chunk {
+         int index = 0;
+         for (Section section : sections) {
+             index++;
+-            final byte[] skyLight = section.getSkyLight();
+-            final byte[] blockLight = section.getBlockLight();
++            final byte[] skyLight = section.skyLight().array(); // Microtus - Light update
++            final byte[] blockLight = section.blockLight().array(); // Microtus - Light update
+             if (skyLight.length != 0) {
+                 skyLights.add(skyLight);
+                 skyMask.set(index);
+diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
+index b7c5affa63ebe29d30996718c3402d8348137f7d..58bf4617c2a3b03f9c67a17573edc656be097f28 100644
+--- a/src/main/java/net/minestom/server/instance/Instance.java
++++ b/src/main/java/net/minestom/server/instance/Instance.java
+@@ -34,6 +34,7 @@ import net.minestom.server.timer.Scheduler;
+ import net.minestom.server.utils.ArrayUtils;
+ import net.minestom.server.utils.PacketUtils;
+ import net.minestom.server.utils.chunk.ChunkCache;
++import net.minestom.server.utils.chunk.ChunkSupplier; // Microtus - Lightning support
+ import net.minestom.server.utils.chunk.ChunkUtils;
+ import net.minestom.server.utils.time.Cooldown;
+ import net.minestom.server.utils.time.TimeUnit;
+@@ -278,6 +279,14 @@ public abstract class Instance implements Block.Getter, Block.Setter,
+         setGenerator(chunkGenerator != null ? new ChunkGeneratorCompatibilityLayer(chunkGenerator) : null);
+     }
+ 
++    public abstract void setChunkSupplier(@NotNull ChunkSupplier chunkSupplier); // Microtus - Light update
++
++    /**
++     * Gets the chunk supplier of the instance.
++     * @return the chunk supplier of the instance
++     */
++    public abstract ChunkSupplier getChunkSupplier(); // Microtus - Light update
++
+     /**
+      * Gets the generator associated with the instance
+      *
+diff --git a/src/main/java/net/minestom/server/instance/InstanceContainer.java b/src/main/java/net/minestom/server/instance/InstanceContainer.java
+index 1c222f04de9a72390e4d8bcc56495eb4314e9b99..98deb500cac863b83ec8b8aaa170edf5e3d1edd8 100644
+--- a/src/main/java/net/minestom/server/instance/InstanceContainer.java
++++ b/src/main/java/net/minestom/server/instance/InstanceContainer.java
+@@ -328,10 +328,14 @@ public class InstanceContainer extends Instance {
+                                 if (forkChunk != null) {
+                                     applyFork(forkChunk, sectionModifier);
+                                     // Update players
+-                                    if (forkChunk instanceof DynamicChunk dynamicChunk) {
++                                    // Microtus start - Light update
++                                    if (forkChunk instanceof LightingChunk lightingChunk) {
++                                        lightingChunk.chunkCache.invalidate();
++                                        lightingChunk.lightCache.invalidate();
++                                    } else if (forkChunk instanceof DynamicChunk dynamicChunk) {
+                                         dynamicChunk.chunkCache.invalidate();
+-                                        dynamicChunk.lightCache.invalidate();
+                                     }
++                                    // Microtus end - Light update
+                                     forkChunk.sendChunk();
+                                 } else {
+                                     final long index = ChunkUtils.getChunkIndex(start);
+diff --git a/src/main/java/net/minestom/server/instance/LightingChunk.java b/src/main/java/net/minestom/server/instance/LightingChunk.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..daacb3cef5523ff643086c1cf4fef9e555a9db5c
+--- /dev/null
++++ b/src/main/java/net/minestom/server/instance/LightingChunk.java
+@@ -0,0 +1,385 @@
++package net.minestom.server.instance;
++
++import net.minestom.server.MinecraftServer;
++import net.minestom.server.collision.Shape;
++import net.minestom.server.coordinate.Point;
++import net.minestom.server.coordinate.Vec;
++import net.minestom.server.instance.block.Block;
++import net.minestom.server.instance.block.BlockFace;
++import net.minestom.server.light.Light;
++import net.minestom.server.network.packet.server.CachedPacket;
++import net.minestom.server.network.packet.server.play.data.LightData;
++import net.minestom.server.timer.ExecutionType;
++import net.minestom.server.timer.Task;
++import net.minestom.server.timer.TaskSchedule;
++import net.minestom.server.utils.NamespaceID;
++import net.minestom.server.utils.chunk.ChunkUtils;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.*;
++import java.util.concurrent.ConcurrentHashMap;
++import java.util.stream.Collectors;
++import java.util.stream.IntStream;
++import java.util.stream.Stream;
++
++// Microtus - Light update
++public class LightingChunk extends DynamicChunk {
++    private int[] heightmap;
++    final CachedPacket lightCache = new CachedPacket(this::createLightPacket);
++    boolean sendNeighbours = true;
++
++    enum LightType {
++        SKY,
++        BLOCK
++    }
++
++    private static final Set<NamespaceID> DIFFUSE_SKY_LIGHT = Set.of(
++            Block.COBWEB.namespace(),
++            Block.ICE.namespace(),
++            Block.HONEY_BLOCK.namespace(),
++            Block.SLIME_BLOCK.namespace(),
++            Block.WATER.namespace(),
++            Block.ACACIA_LEAVES.namespace(),
++            Block.AZALEA_LEAVES.namespace(),
++            Block.BIRCH_LEAVES.namespace(),
++            Block.DARK_OAK_LEAVES.namespace(),
++            Block.FLOWERING_AZALEA_LEAVES.namespace(),
++            Block.JUNGLE_LEAVES.namespace(),
++            Block.OAK_LEAVES.namespace(),
++            Block.SPRUCE_LEAVES.namespace(),
++            Block.SPAWNER.namespace(),
++            Block.BEACON.namespace(),
++            Block.END_GATEWAY.namespace(),
++            Block.CHORUS_PLANT.namespace(),
++            Block.CHORUS_FLOWER.namespace(),
++            Block.FROSTED_ICE.namespace(),
++            Block.SEAGRASS.namespace(),
++            Block.TALL_SEAGRASS.namespace(),
++            Block.LAVA.namespace()
++    );
++
++    public LightingChunk(@NotNull Instance instance, int chunkX, int chunkZ) {
++        super(instance, chunkX, chunkZ);
++    }
++
++    private boolean checkSkyOcclusion(Block block) {
++        if (block == Block.AIR) return false;
++        if (DIFFUSE_SKY_LIGHT.contains(block.namespace())) return true;
++
++        Shape shape = block.registry().collisionShape();
++        boolean occludesTop = Block.AIR.registry().collisionShape().isOccluded(shape, BlockFace.TOP);
++        boolean occludesBottom = Block.AIR.registry().collisionShape().isOccluded(shape, BlockFace.BOTTOM);
++
++        return occludesBottom || occludesTop;
++    }
++
++    private void invalidateSection(int coordinate) {
++        for (int i = -1; i <= 1; i++) {
++            for (int j = -1; j <= 1; j++) {
++                Chunk neighborChunk = instance.getChunk(chunkX + i, chunkZ + j);
++                if (neighborChunk == null) continue;
++
++                if (neighborChunk instanceof LightingChunk lightingChunk) {
++                    lightingChunk.lightCache.invalidate();
++                    lightingChunk.chunkCache.invalidate();
++                }
++
++                for (int k = -1; k <= 1; k++) {
++                    if (k + coordinate < neighborChunk.getMinSection() || k + coordinate >= neighborChunk.getMaxSection()) continue;
++                    neighborChunk.getSection(k + coordinate).blockLight().invalidate();
++                    neighborChunk.getSection(k + coordinate).skyLight().invalidate();
++                }
++            }
++        }
++    }
++
++    @Override
++    public void setBlock(int x, int y, int z, @NotNull Block block) {
++        super.setBlock(x, y, z, block);
++        this.heightmap = null;
++
++        // Invalidate neighbor chunks, since they can be updated by this block change
++        int coordinate = ChunkUtils.getChunkCoordinate(y);
++        invalidateSection(coordinate);
++
++        this.lightCache.invalidate();
++    }
++
++    public void sendLighting() {
++        if (!isLoaded()) return;
++        sendPacketToViewers(lightCache);
++    }
++
++    public int[] calculateHeightMap() {
++        if (this.heightmap != null) return this.heightmap;
++        var heightmap = new int[CHUNK_SIZE_X * CHUNK_SIZE_Z];
++
++        int minY = instance.getDimensionType().getMinY();
++        int maxY = instance.getDimensionType().getMinY() + instance.getDimensionType().getHeight();
++
++        synchronized (this) {
++            for (int x = 0; x < CHUNK_SIZE_X; x++) {
++                for (int z = 0; z < CHUNK_SIZE_Z; z++) {
++                    int height = maxY;
++                    while (height > minY) {
++                        Block block = getBlock(x, height, z, Condition.TYPE);
++                        if (checkSkyOcclusion(block)) break;
++                        height--;
++                    }
++                    heightmap[z << 4 | x] = (height + 1);
++                }
++            }
++        }
++
++        this.heightmap = heightmap;
++        return heightmap;
++    }
++
++    @Override
++    protected LightData createLightData(boolean sendAll) {
++        BitSet skyMask = new BitSet();
++        BitSet blockMask = new BitSet();
++        BitSet emptySkyMask = new BitSet();
++        BitSet emptyBlockMask = new BitSet();
++        List<byte[]> skyLights = new ArrayList<>();
++        List<byte[]> blockLights = new ArrayList<>();
++
++        int index = 0;
++        for (Section section : sections) {
++            boolean wasUpdatedBlock = false;
++            boolean wasUpdatedSky = false;
++
++            if (section.blockLight().requiresUpdate()) {
++                relightSection(instance, this.chunkX, index + minSection, chunkZ, LightType.BLOCK);
++                wasUpdatedBlock = true;
++            } else if (section.blockLight().requiresSend()) {
++                wasUpdatedBlock = true;
++            }
++
++            if (section.skyLight().requiresUpdate()) {
++                relightSection(instance, this.chunkX, index + minSection, chunkZ, LightType.SKY);
++                wasUpdatedSky = true;
++            } else if (section.skyLight().requiresSend()) {
++                wasUpdatedSky = true;
++            }
++
++            index++;
++
++            final byte[] skyLight = section.skyLight().array();
++            final byte[] blockLight = section.blockLight().array();
++
++            // System.out.println("Relit sky: " + wasUpdatedSky + " block: " + wasUpdatedBlock + " for section " + (index + minSection) + " in chunk " + chunkX + " " + chunkZ);
++
++            if ((wasUpdatedSky || sendAll) && this.instance.getDimensionType().isSkylightEnabled()) {
++                if (skyLight.length != 0) {
++                    skyLights.add(skyLight);
++                    skyMask.set(index);
++                } else {
++                    emptySkyMask.set(index);
++                }
++            }
++
++            if (wasUpdatedBlock || sendAll) {
++                if (blockLight.length != 0) {
++                    blockLights.add(blockLight);
++                    blockMask.set(index);
++                } else {
++                    emptyBlockMask.set(index);
++                }
++            }
++        }
++
++        if (sendNeighbours) {
++            updateAfterGeneration(this);
++            sendNeighbours = false;
++        }
++
++        return new LightData(true,
++                skyMask, blockMask,
++                emptySkyMask, emptyBlockMask,
++                skyLights, blockLights);
++    }
++
++    private static final Set<LightingChunk> sendQueue = ConcurrentHashMap.newKeySet();
++    private static Task sendingTask = null;
++
++    private static void updateAfterGeneration(LightingChunk chunk) {
++        for (int i = -1; i <= 1; i++) {
++            for (int j = -1; j <= 1; j++) {
++                Chunk neighborChunk = chunk.instance.getChunk(chunk.chunkX + i, chunk.chunkZ + j);
++                if (neighborChunk == null) continue;
++
++                if (neighborChunk instanceof LightingChunk lightingChunk) {
++                    sendQueue.add(lightingChunk);
++                }
++            }
++        }
++
++        if (sendingTask == null) {
++            sendingTask = MinecraftServer.getSchedulerManager().scheduleTask(() -> {
++                sendingTask = null;
++
++                for (LightingChunk f : sendQueue) {
++                    if (f.isLoaded()) {
++                        f.sections.forEach(s -> {
++                            s.blockLight().invalidate();
++                            s.skyLight().invalidate();
++                        });
++                        f.sendLighting();
++                        sendQueue.remove(f);
++                    }
++
++                    f.chunkCache.invalidate();
++                }
++            }, TaskSchedule.tick(5), TaskSchedule.stop(), ExecutionType.ASYNC);
++        }
++    }
++
++    private static void flushQueue(Instance instance, Set<Point> queue, LightType type) {
++        var updateQueue =
++                queue.parallelStream()
++                        .map(sectionLocation -> {
++                            Chunk chunk = instance.getChunk(sectionLocation.blockX(), sectionLocation.blockZ());
++                            if (chunk == null) return null;
++
++                            if (type == LightType.BLOCK) {
++                                return chunk.getSection(sectionLocation.blockY()).blockLight()
++                                        .calculateExternal(instance, chunk, sectionLocation.blockY());
++                            } else {
++                                return chunk.getSection(sectionLocation.blockY()).skyLight()
++                                        .calculateExternal(instance, chunk, sectionLocation.blockY());
++                            }
++                        })
++                        .filter(Objects::nonNull)
++                        .toList()
++                        .parallelStream()
++                        .flatMap(light -> light.flip().stream())
++                        .collect(Collectors.toSet());
++
++        if (updateQueue.size() > 0) {
++            flushQueue(instance, updateQueue, type);
++        }
++    }
++
++    public static void relight(Instance instance, Collection<Chunk> chunks) {
++        Set<Point> toPropagate = chunks
++                .parallelStream()
++                .flatMap(chunk -> IntStream
++                        .range(chunk.getMinSection(), chunk.getMaxSection())
++                        .mapToObj(index -> Map.entry(index, chunk)))
++                .map(chunkIndex -> {
++                    final Chunk chunk = chunkIndex.getValue();
++                    final int section = chunkIndex.getKey();
++
++                    chunk.getSection(section).blockLight().invalidate();
++                    chunk.getSection(section).skyLight().invalidate();
++
++                    return new Vec(chunk.getChunkX(), section, chunk.getChunkZ());
++                }).collect(Collectors.toSet());
++
++        synchronized (instance) {
++            relight(instance, toPropagate, LightType.BLOCK);
++            relight(instance, toPropagate, LightType.SKY);
++        }
++    }
++
++    private static Set<Point> getNearbyRequired(Instance instance, Point point) {
++        Set<Point> collected = new HashSet<>();
++        collected.add(point);
++
++        for (int x = point.blockX() - 1; x <= point.blockX() + 1; x++) {
++            for (int z = point.blockZ() - 1; z <= point.blockZ() + 1; z++) {
++                Chunk chunkCheck = instance.getChunk(x, z);
++                if (chunkCheck == null) continue;
++
++                for (int y = point.blockY() - 1; y <= point.blockY() + 1; y++) {
++                    Point sectionPosition = new Vec(x, y, z);
++
++                    if (sectionPosition.blockY() < chunkCheck.getMaxSection() && sectionPosition.blockY() >= chunkCheck.getMinSection()) {
++                        Section s = chunkCheck.getSection(sectionPosition.blockY());
++                        if (!s.blockLight().requiresUpdate() && !s.skyLight().requiresUpdate()) continue;
++
++                        collected.add(sectionPosition);
++                    }
++                }
++            }
++        }
++
++        return collected;
++    }
++
++    private static Set<Point> collectRequiredNearby(Instance instance, Point point) {
++        final Set<Point> found = new HashSet<>();
++        final ArrayDeque<Point> toCheck = new ArrayDeque<>();
++
++        toCheck.add(point);
++        found.add(point);
++
++        while (toCheck.size() > 0) {
++            final Point current = toCheck.poll();
++            final Set<Point> nearby = getNearbyRequired(instance, current);
++            nearby.forEach(p -> {
++                if (!found.contains(p)) {
++                    found.add(p);
++                    toCheck.add(p);
++                }
++            });
++        }
++
++        return found;
++    }
++
++    static void relightSection(Instance instance, int chunkX, int sectionY, int chunkZ) {
++        relightSection(instance, chunkX, sectionY, chunkZ, LightType.BLOCK);
++        relightSection(instance, chunkX, sectionY, chunkZ, LightType.SKY);
++    }
++
++    private static void relightSection(Instance instance, int chunkX, int sectionY, int chunkZ, LightType type) {
++        Chunk c = instance.getChunk(chunkX, chunkZ);
++        if (c == null) return;
++
++        Set<Point> collected = collectRequiredNearby(instance, new Vec(chunkX, sectionY, chunkZ));
++        // System.out.println("Calculating " + chunkX + " " + sectionY + " " + chunkZ + " | " + collected.size());
++
++        synchronized (instance) {
++            relight(instance, collected, type);
++        }
++    }
++
++    private static void relight(Instance instance, Set<Point> sections, LightType type) {
++        Set<Point> toPropagate = sections
++                .parallelStream()
++                // .stream()
++                .map(chunkIndex -> {
++                    final Chunk chunk = instance.getChunk(chunkIndex.blockX(), chunkIndex.blockZ());
++                    final int section = chunkIndex.blockY();
++                    if (chunk == null) return null;
++                    if (type == LightType.BLOCK) return chunk.getSection(section).blockLight().calculateInternal(chunk.getInstance(), chunk.getChunkX(), section, chunk.getChunkZ());
++                    else return chunk.getSection(section).skyLight().calculateInternal(chunk.getInstance(), chunk.getChunkX(), section, chunk.getChunkZ());
++                }).filter(Objects::nonNull)
++                .flatMap(lightSet -> lightSet.flip().stream())
++                .collect(Collectors.toSet())
++                // .stream()
++                .parallelStream()
++                .flatMap(sectionLocation -> {
++                    final Chunk chunk = instance.getChunk(sectionLocation.blockX(), sectionLocation.blockZ());
++                    final int section = sectionLocation.blockY();
++                    if (chunk == null) return Stream.empty();
++
++                    final Light light = type == LightType.BLOCK ? chunk.getSection(section).blockLight() : chunk.getSection(section).skyLight();
++                    light.calculateExternal(chunk.getInstance(), chunk, section);
++
++                    return light.flip().stream();
++                }).collect(Collectors.toSet());
++
++        flushQueue(instance, toPropagate, type);
++    }
++
++    @Override
++    public @NotNull Chunk copy(@NotNull Instance instance, int chunkX, int chunkZ) {
++        LightingChunk lightingChunk = new LightingChunk(instance, chunkX, chunkZ);
++        lightingChunk.sections = sections.stream().map(Section::clone).toList();
++        lightingChunk.entries.putAll(entries);
++        return lightingChunk;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/instance/Section.java b/src/main/java/net/minestom/server/instance/Section.java
+index f9c4e49bfc2f813486aac34d2cdac8d59a5f7a14..c6658f52570283f1de21c79d6676c776d4ca65f5 100644
+--- a/src/main/java/net/minestom/server/instance/Section.java
++++ b/src/main/java/net/minestom/server/instance/Section.java
+@@ -1,28 +1,28 @@
+ package net.minestom.server.instance;
+ 
+ import net.minestom.server.instance.palette.Palette;
++import net.minestom.server.light.Light; // Microtus - Lightning support
+ import net.minestom.server.network.NetworkBuffer;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import static net.minestom.server.network.NetworkBuffer.SHORT;
+ 
+ public final class Section implements NetworkBuffer.Writer {
+-    private Palette blockPalette;
+-    private Palette biomePalette;
+-    private byte[] skyLight;
+-    private byte[] blockLight;
+ 
+-    private Section(Palette blockPalette, Palette biomePalette,
+-                    byte[] skyLight, byte[] blockLight) {
++    private final Palette blockPalette; // Microtus - Lightning support
++    private final Palette biomePalette; // Microtus - Lightning support
++    private final Light skyLight; // Microtus - Lightning support
++    private final Light blockLight; // Microtus - Lightning support
++
++    private Section(Palette blockPalette, Palette biomePalette) {
+         this.blockPalette = blockPalette;
+         this.biomePalette = biomePalette;
+-        this.skyLight = skyLight;
+-        this.blockLight = blockLight;
++        this.skyLight = Light.sky(blockPalette); // Microtus - Lightning support
++        this.blockLight = Light.block(blockPalette); // Microtus - Lightning support
+     }
+ 
+     public Section() {
+-        this(Palette.blocks(), Palette.biomes(),
+-                new byte[0], new byte[0]);
++        this(Palette.blocks(), Palette.biomes()); // Microtus - Lightning support
+     }
+ 
+     public Palette blockPalette() {
+@@ -32,34 +32,32 @@ public final class Section implements NetworkBuffer.Writer {
+     public Palette biomePalette() {
+         return biomePalette;
+     }
+-
+-    public byte[] getSkyLight() {
+-        return skyLight;
++    // Microtus start - Lightning support
++    public void setSkyLight(byte[] copyArray) {
++        this.skyLight.set(copyArray);
+     }
+ 
+-    public void setSkyLight(byte[] skyLight) {
+-        this.skyLight = skyLight;
++    public void setBlockLight(byte[] copyArray) {
++        this.blockLight.set(copyArray);
+     }
+ 
+-    public byte[] getBlockLight() {
+-        return blockLight;
++    public Light skyLight() {
++        return skyLight;
+     }
+ 
+-    public void setBlockLight(byte[] blockLight) {
+-        this.blockLight = blockLight;
++    public Light blockLight() {
++        return blockLight;
+     }
++    // Microtus end - Lightning support
+ 
+     public void clear() {
+         this.blockPalette.fill(0);
+         this.biomePalette.fill(0);
+-        this.skyLight = new byte[0];
+-        this.blockLight = new byte[0];
+     }
+ 
+     @Override
+     public @NotNull Section clone() {
+-        return new Section(blockPalette.clone(), biomePalette.clone(),
+-                skyLight.clone(), blockLight.clone());
++        return new Section(this.blockPalette.clone(), this.biomePalette.clone()); // Microtus - Lightning support
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minestom/server/instance/SharedInstance.java b/src/main/java/net/minestom/server/instance/SharedInstance.java
+index d9c4012680bc8147faa706a3b3787a6466a3d2b2..4af2ace5c7bc7bf074bf1b1324e935b01a78d0f7 100644
+--- a/src/main/java/net/minestom/server/instance/SharedInstance.java
++++ b/src/main/java/net/minestom/server/instance/SharedInstance.java
+@@ -6,6 +6,7 @@ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.instance.block.BlockFace;
+ import net.minestom.server.instance.block.BlockHandler;
+ import net.minestom.server.instance.generator.Generator;
++import net.minestom.server.utils.chunk.ChunkSupplier; // Microtus - Lightning support
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ 
+@@ -75,6 +76,18 @@ public class SharedInstance extends Instance {
+         return instanceContainer.saveChunksToStorage();
+     }
+ 
++    // Microtus start - Light update
++    @Override
++    public void setChunkSupplier(@NotNull ChunkSupplier chunkSupplier) {
++        instanceContainer.setChunkSupplier(chunkSupplier);
++    }
++
++    @Override
++    public ChunkSupplier getChunkSupplier() {
++        return instanceContainer.getChunkSupplier();
++    }
++    // Microtus end - Light update
++
+     @Override
+     public @Nullable Generator generator() {
+         return instanceContainer.generator();
+diff --git a/src/main/java/net/minestom/server/instance/batch/AbsoluteBlockBatch.java b/src/main/java/net/minestom/server/instance/batch/AbsoluteBlockBatch.java
+index 91af487eb6bfe53d79482b4697900ec4884207c6..954a4dc3d241c253e665740d123dbc14a34d35aa 100644
+--- a/src/main/java/net/minestom/server/instance/batch/AbsoluteBlockBatch.java
++++ b/src/main/java/net/minestom/server/instance/batch/AbsoluteBlockBatch.java
+@@ -6,12 +6,16 @@ import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
+ import net.minestom.server.instance.Chunk;
+ import net.minestom.server.instance.Instance;
+ import net.minestom.server.instance.InstanceContainer;
++import net.minestom.server.instance.LightingChunk; // Microtus - Light update
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ 
++import java.util.HashSet; // Microtus - Light update
++import java.util.Set; // Microtus - Light update
++import java.util.concurrent.ConcurrentHashMap; // Microtus - Light update
+ import java.util.concurrent.CountDownLatch;
+ import java.util.concurrent.atomic.AtomicInteger;
+ 
+@@ -125,6 +129,7 @@ public class AbsoluteBlockBatch implements Batch<Runnable> {
+         final AbsoluteBlockBatch inverse = this.options.shouldCalculateInverse() ? new AbsoluteBlockBatch(inverseOption) : null;
+         synchronized (chunkBatchesMap) {
+             AtomicInteger counter = new AtomicInteger();
++            Set<Chunk> updated = ConcurrentHashMap.newKeySet(); // Microtus - Light update
+             for (var entry : Long2ObjectMaps.fastIterable(chunkBatchesMap)) {
+                 final long chunkIndex = entry.getLongKey();
+                 final int chunkX = ChunkUtils.getChunkCoordX(chunkIndex);
+@@ -146,6 +151,26 @@ public class AbsoluteBlockBatch implements Batch<Runnable> {
+                                 callback.run();
+                             }
+                         }
++                        // Microtus start - Light update
++                        Set<Chunk> expanded = new HashSet<>();
++                        for (Chunk chunk : updated) {
++                            for (int i = -1; i <= 1; ++i) {
++                                for (int j = -1; j <= 1; ++j) {
++                                    Chunk toAdd = instance.getChunk(chunk.getChunkX() + i, chunk.getChunkZ() + j);
++                                    if (toAdd != null) {
++                                        expanded.add(toAdd);
++                                    }
++                                }
++                            }
++                        }
++
++                        // Update the chunk's light
++                        for (Chunk chunk : expanded) {
++                            if (chunk instanceof LightingChunk dc) {
++                                dc.sendLighting();
++                            }
++                        }
++                        // Microtus end - Light update
+                     }
+                 });
+                 if (inverse != null) inverse.chunkBatchesMap.put(chunkIndex, chunkInverse);
+diff --git a/src/main/java/net/minestom/server/light/BlockLight.java b/src/main/java/net/minestom/server/light/BlockLight.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..dd79e92a07121a8b6d67003f0023eaee75df71b5
+--- /dev/null
++++ b/src/main/java/net/minestom/server/light/BlockLight.java
+@@ -0,0 +1,361 @@
++package net.minestom.server.light;
++
++import it.unimi.dsi.fastutil.ints.IntArrayFIFOQueue;
++import net.minestom.server.coordinate.Point;
++import net.minestom.server.coordinate.Vec;
++import net.minestom.server.instance.Chunk;
++import net.minestom.server.instance.Instance;
++import net.minestom.server.instance.Section;
++import net.minestom.server.instance.block.Block;
++import net.minestom.server.instance.block.BlockFace;
++import net.minestom.server.instance.palette.Palette;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Arrays;
++import java.util.HashSet;
++import java.util.Map;
++import java.util.Set;
++
++import static net.minestom.server.light.LightCompute.*;
++import static net.minestom.server.light.LightCompute.emptyContent;
++
++// Microtus - Light update
++final class BlockLight implements Light {
++    private final Palette blockPalette;
++
++    private byte[] content;
++    private byte[] contentPropagation;
++    private byte[] contentPropagationSwap;
++
++    private byte[][] borders;
++    private byte[][] bordersPropagation;
++    private byte[][] bordersPropagationSwap;
++    private boolean isValidBorders = true;
++    private boolean needsSend = true;
++    private Set<Point> toUpdateSet = new HashSet<>();
++
++    BlockLight(Palette blockPalette) {
++        this.blockPalette = blockPalette;
++    }
++
++    @Override
++    public Set<Point> flip() {
++        if (this.bordersPropagationSwap != null)
++            this.bordersPropagation = this.bordersPropagationSwap;
++
++        if (this.contentPropagationSwap != null)
++            this.contentPropagation = this.contentPropagationSwap;
++
++        this.bordersPropagationSwap = null;
++        this.contentPropagationSwap = null;
++
++        if (toUpdateSet == null) return Set.of();
++        return toUpdateSet;
++    }
++
++    static IntArrayFIFOQueue buildInternalQueue(Palette blockPalette, Block[] blocks) {
++        IntArrayFIFOQueue lightSources = new IntArrayFIFOQueue();
++        // Apply section light
++        blockPalette.getAllPresent((x, y, z, stateId) -> {
++            final Block block = Block.fromStateId((short) stateId);
++            assert block != null;
++            final byte lightEmission = (byte) block.registry().lightEmission();
++
++            final int index = x | (z << 4) | (y << 8);
++            blocks[index] = block;
++            if (lightEmission > 0) {
++                lightSources.enqueue(index | (lightEmission << 12));
++            }
++        });
++        return lightSources;
++    }
++
++    private static Block getBlock(Palette palette, int x, int y, int z) {
++        return Block.fromStateId((short)palette.get(x, y, z));
++    }
++
++    private static IntArrayFIFOQueue buildExternalQueue(Instance instance, Block[] blocks, Map<BlockFace, Point> neighbors, byte[][] borders) {
++        IntArrayFIFOQueue lightSources = new IntArrayFIFOQueue();
++
++        for (BlockFace face : BlockFace.values()) {
++            Point neighborSection = neighbors.get(face);
++            if (neighborSection == null) continue;
++
++            Chunk chunk = instance.getChunk(neighborSection.blockX(), neighborSection.blockZ());
++            if (chunk == null) continue;
++
++            byte[] neighborFace = chunk.getSection(neighborSection.blockY()).blockLight().getBorderPropagation(face.getOppositeFace());
++            if (neighborFace == null) continue;
++
++            for (int bx = 0; bx < 16; bx++) {
++                for (int by = 0; by < 16; by++) {
++                    final int borderIndex = bx * SECTION_SIZE + by;
++                    byte lightEmission = neighborFace[borderIndex];
++
++                    if (borders != null && borders[face.ordinal()] != null) {
++                        final int internalEmission = borders[face.ordinal()][borderIndex];
++                        if (lightEmission <= internalEmission) continue;
++                    }
++
++                    final int k = switch (face) {
++                        case WEST, BOTTOM, NORTH -> 0;
++                        case EAST, TOP, SOUTH -> 15;
++                    };
++
++                    final int posTo = switch (face) {
++                        case NORTH, SOUTH -> bx | (k << 4) | (by << 8);
++                        case WEST, EAST -> k | (by << 4) | (bx << 8);
++                        default -> bx | (by << 4) | (k << 8);
++                    };
++
++                    Section otherSection = chunk.getSection(neighborSection.blockY());
++
++                    final Block blockFrom = (switch (face) {
++                        case NORTH, SOUTH -> getBlock(otherSection.blockPalette(), bx, by, 15 - k);
++                        case WEST, EAST -> getBlock(otherSection.blockPalette(), 15 - k, bx, by);
++                        default -> getBlock(otherSection.blockPalette(), bx, 15 - k, by);
++                    });
++
++                    if (blocks == null) continue;
++                    Block blockTo = blocks[posTo];
++
++                    if (blockTo == null && blockFrom != null) {
++                        if (blockFrom.registry().collisionShape().isOccluded(Block.AIR.registry().collisionShape(), face.getOppositeFace()))
++                            continue;
++                    } else if (blockTo != null && blockFrom == null) {
++                        if (Block.AIR.registry().collisionShape().isOccluded(blockTo.registry().collisionShape(), face))
++                            continue;
++                    } else if (blockTo != null && blockFrom != null) {
++                        if (blockFrom.registry().collisionShape().isOccluded(blockTo.registry().collisionShape(), face.getOppositeFace()))
++                            continue;
++                    }
++
++                    if (lightEmission > 0) {
++                        final int index = posTo | (lightEmission << 12);
++                        lightSources.enqueue(index);
++                    }
++                }
++            }
++        }
++
++        return lightSources;
++    }
++
++    @Override
++    public void copyFrom(byte @NotNull [] array) {
++        if (array.length == 0) this.content = null;
++        else this.content = array.clone();
++    }
++
++    @Override
++    public Light calculateInternal(Instance instance, int chunkX, int sectionY, int chunkZ) {
++        Chunk chunk = instance.getChunk(chunkX, chunkZ);
++        if (chunk == null) {
++            this.toUpdateSet = Set.of();
++            return this;
++        }
++
++        this.isValidBorders = true;
++
++        Set<Point> toUpdate = new HashSet<>();
++
++        // Update single section with base lighting changes
++        Block[] blocks = new Block[SECTION_SIZE * SECTION_SIZE * SECTION_SIZE];
++        IntArrayFIFOQueue queue = buildInternalQueue(blockPalette, blocks);
++
++        LightCompute.Result result = LightCompute.compute(blocks, queue);
++        this.content = result.light();
++        this.borders = result.borders();
++
++        // Propagate changes to neighbors and self
++        for (int i = -1; i <= 1; i++) {
++            for (int j = -1; j <= 1; j++) {
++                Chunk neighborChunk = instance.getChunk(chunkX + i, chunkZ + j);
++                if (neighborChunk == null) continue;
++
++                for (int k = -1; k <= 1; k++) {
++                    Vec neighborPos = new Vec(chunkX + i, sectionY + k, chunkZ + j);
++
++                    if (neighborPos.blockY() >= neighborChunk.getMinSection() && neighborPos.blockY() < neighborChunk.getMaxSection()) {
++                        toUpdate.add(new Vec(neighborChunk.getChunkX(), neighborPos.blockY(), neighborChunk.getChunkZ()));
++                        neighborChunk.getSection(neighborPos.blockY()).blockLight().invalidatePropagation();
++                    }
++                }
++            }
++        }
++
++        toUpdate.add(new Vec(chunk.getChunkX(), sectionY, chunk.getChunkZ()));
++        this.toUpdateSet = toUpdate;
++
++        return this;
++    }
++
++    @Override
++    public void invalidate() {
++        invalidatePropagation();
++    }
++
++    @Override
++    public boolean requiresUpdate() {
++        return !isValidBorders;
++    }
++
++    @Override
++    public void set(byte[] copyArray) {
++        this.content = copyArray.clone();
++    }
++
++    @Override
++    public boolean requiresSend() {
++        boolean res = needsSend;
++        needsSend = false;
++        return res;
++    }
++
++    private void clearCache() {
++        this.contentPropagation = null;
++        this.bordersPropagation = null;
++        isValidBorders = true;
++        needsSend = true;
++    }
++
++    @Override
++    public byte[] array() {
++        if (content == null) return new byte[0];
++        if (contentPropagation == null) return content;
++        var res = bake(contentPropagation, content);
++        if (res == emptyContent) return new byte[0];
++        return res;
++    }
++
++    private boolean compareBorders(byte[] a, byte[] b) {
++        if (b == null && a == null) return true;
++        if (b == null || a == null) return false;
++
++        if (a.length != b.length) return false;
++        for (int i = 0; i < a.length; i++) {
++            if (a[i] > b[i]) return false;
++        }
++        return true;
++    }
++
++    private Block[] blocks() {
++        Block[] blocks = new Block[SECTION_SIZE * SECTION_SIZE * SECTION_SIZE];
++
++        blockPalette.getAllPresent((x, y, z, stateId) -> {
++            final Block block = Block.fromStateId((short) stateId);
++            assert block != null;
++            final int index = x | (z << 4) | (y << 8);
++            blocks[index] = block;
++        });
++
++        return blocks;
++    }
++
++    @Override
++    public Light calculateExternal(Instance instance, Chunk chunk, int sectionY) {
++        if (!isValidBorders) clearCache();
++
++        Map<BlockFace, Point> neighbors = Light.getNeighbors(chunk, sectionY);
++
++        Block[] blocks = blocks();
++        IntArrayFIFOQueue queue = buildExternalQueue(instance, blocks, neighbors, borders);
++        LightCompute.Result result = LightCompute.compute(blocks, queue);
++
++        byte[] contentPropagationTemp = result.light();
++        byte[][] borderTemp = result.borders();
++
++        this.contentPropagationSwap = bake(contentPropagationSwap, contentPropagationTemp);
++        this.bordersPropagationSwap = combineBorders(bordersPropagation, borderTemp);
++
++        Set<Point> toUpdate = new HashSet<>();
++
++        // Propagate changes to neighbors and self
++        for (var entry : neighbors.entrySet()) {
++            var neighbor = entry.getValue();
++            var face = entry.getKey();
++
++            byte[] next = borderTemp[face.ordinal()];
++            byte[] current = getBorderPropagation(face);
++
++            if (!compareBorders(next, current)) {
++                toUpdate.add(neighbor);
++            }
++        }
++
++        this.toUpdateSet = toUpdate;
++        return this;
++    }
++
++    private byte[][] combineBorders(byte[][] b1, byte[][] b2) {
++        if (b1 == null) return b2;
++
++        byte[][] newBorder = new byte[FACES.length][];
++        Arrays.setAll(newBorder, i -> new byte[SIDE_LENGTH]);
++        for (int i = 0; i < FACES.length; i++) {
++            newBorder[i] = combineBorders(b1[i], b2[i]);
++        }
++        return newBorder;
++    }
++
++    private byte[] bake(byte[] content1, byte[] content2) {
++        if (content1 == null && content2 == null) return emptyContent;
++        if (content1 == emptyContent && content2 == emptyContent) return emptyContent;
++
++        if (content1 == null) return content2;
++        if (content2 == null) return content1;
++
++        byte[] lightMax = new byte[LIGHT_LENGTH];
++        for (int i = 0; i < content1.length; i++) {
++            // Lower
++            byte l1 = (byte) (content1[i] & 0x0F);
++            byte l2 = (byte) (content2[i] & 0x0F);
++
++            // Upper
++            byte u1 = (byte) ((content1[i] >> 4) & 0x0F);
++            byte u2 = (byte) ((content2[i] >> 4) & 0x0F);
++
++            byte lower = (byte) Math.max(l1, l2);
++            byte upper = (byte) Math.max(u1, u2);
++
++            lightMax[i] = (byte) (lower | (upper << 4));
++        }
++        return lightMax;
++    }
++
++    @Override
++    public byte[] getBorderPropagation(BlockFace face) {
++        if (!isValidBorders) clearCache();
++
++        if (borders == null && bordersPropagation == null) return new byte[SIDE_LENGTH];
++        if (borders == null) return bordersPropagation[face.ordinal()];
++        if (bordersPropagation == null) return borders[face.ordinal()];
++
++        return combineBorders(bordersPropagation[face.ordinal()], borders[face.ordinal()]);
++    }
++
++    @Override
++    public void invalidatePropagation() {
++        this.isValidBorders = false;
++        this.needsSend = false;
++        this.bordersPropagation = null;
++        this.contentPropagation = null;
++    }
++
++    @Override
++    public int getLevel(int x, int y, int z) {
++        var array = array();
++        int index = x | (z << 4) | (y << 8);
++        return LightCompute.getLight(array, index);
++    }
++
++    private byte[] combineBorders(byte[] b1, byte[] b2) {
++        byte[] newBorder = new byte[SIDE_LENGTH];
++        for (int i = 0; i < newBorder.length; i++) {
++            var previous = b2[i];
++            var current = b1[i];
++            newBorder[i] = (byte) Math.max(previous, current);
++        }
++        return newBorder;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/light/Light.java b/src/main/java/net/minestom/server/light/Light.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..9de4ddcc45c5228d31915389e20e9f7bb6406989
+--- /dev/null
++++ b/src/main/java/net/minestom/server/light/Light.java
+@@ -0,0 +1,80 @@
++package net.minestom.server.light;
++
++import net.minestom.server.coordinate.Point;
++import net.minestom.server.coordinate.Vec;
++import net.minestom.server.instance.Chunk;
++import net.minestom.server.instance.Instance;
++import net.minestom.server.instance.block.BlockFace;
++import net.minestom.server.instance.palette.Palette;
++import net.minestom.server.utils.Direction;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.HashMap;
++import java.util.Map;
++import java.util.Set;
++
++// Microtus - Light update
++
++public interface Light {
++    static Light sky(@NotNull Palette blockPalette) {
++        return new SkyLight(blockPalette);
++    }
++
++    static Light block(@NotNull Palette blockPalette) {
++        return new BlockLight(blockPalette);
++    }
++
++    boolean requiresSend();
++
++    @ApiStatus.Internal
++    byte[] array();
++
++    Set<Point> flip();
++
++    void copyFrom(byte @NotNull [] array);
++
++    @ApiStatus.Internal
++    Light calculateExternal(Instance instance, Chunk chunk, int sectionY);
++
++    @ApiStatus.Internal
++    byte[] getBorderPropagation(BlockFace oppositeFace);
++
++    @ApiStatus.Internal
++    void invalidatePropagation();
++
++    int getLevel(int x, int y, int z);
++
++    @ApiStatus.Internal
++    Light calculateInternal(Instance instance, int chunkX, int chunkY, int chunkZ);
++
++    void invalidate();
++
++    boolean requiresUpdate();
++
++    void set(byte[] copyArray);
++
++    @ApiStatus.Internal
++    static Map<BlockFace, Point> getNeighbors(Chunk chunk, int sectionY) {
++        int chunkX = chunk.getChunkX();
++        int chunkZ = chunk.getChunkZ();
++
++        Map<BlockFace, Point> links = new HashMap<>();
++
++        for (BlockFace face : BlockFace.values()) {
++            Direction direction = face.toDirection();
++            int x = chunkX + direction.normalX();
++            int z = chunkZ + direction.normalZ();
++            int y = sectionY + direction.normalY();
++
++            Chunk foundChunk = chunk.getInstance().getChunk(x, z);
++
++            if (foundChunk == null) continue;
++            if (y - foundChunk.getMinSection() > foundChunk.getMaxSection() || y - foundChunk.getMinSection() < 0) continue;
++
++            links.put(face, new Vec(foundChunk.getChunkX(), y, foundChunk.getChunkZ()));
++        }
++
++        return links;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/light/LightCompute.java b/src/main/java/net/minestom/server/light/LightCompute.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..51a9eb73be25b54a55651253d54c9b720f1e5605
+--- /dev/null
++++ b/src/main/java/net/minestom/server/light/LightCompute.java
+@@ -0,0 +1,118 @@
++package net.minestom.server.light;
++
++import it.unimi.dsi.fastutil.ints.IntArrayFIFOQueue;
++import net.minestom.server.instance.block.Block;
++import net.minestom.server.instance.block.BlockFace;
++import net.minestom.server.instance.palette.Palette;
++import net.minestom.server.utils.Direction;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.LinkedList;
++import java.util.Objects;
++
++import static net.minestom.server.light.BlockLight.buildInternalQueue;
++
++// Microtus - Light update
++final class LightCompute {
++    static final BlockFace[] FACES = BlockFace.values();
++    static final int LIGHT_LENGTH = 16 * 16 * 16 / 2;
++    static final int SIDE_LENGTH = 16 * 16;
++    static final int SECTION_SIZE = 16;
++
++    private static final byte[][] emptyBorders = new byte[FACES.length][SIDE_LENGTH];
++    static final byte[] emptyContent = new byte[LIGHT_LENGTH];
++
++    static @NotNull Result compute(Palette blockPalette) {
++        Block[] blocks = new Block[4096];
++        return LightCompute.compute(blocks, buildInternalQueue(blockPalette, blocks));
++    }
++
++    static @NotNull Result compute(Block[] blocks, IntArrayFIFOQueue lightPre) {
++        if (lightPre.isEmpty()) {
++            return new Result(emptyContent, emptyBorders);
++        }
++
++        byte[][] borders = new byte[FACES.length][SIDE_LENGTH];
++        byte[] lightArray = new byte[LIGHT_LENGTH];
++
++        var lightSources = new LinkedList<Integer>();
++
++        while (!lightPre.isEmpty()) {
++            int index = lightPre.dequeueInt();
++
++            final int x = index & 15;
++            final int z = (index >> 4) & 15;
++            final int y = (index >> 8) & 15;
++            final int newLightLevel = (index >> 12) & 15;
++            final int newIndex = x | (z << 4) | (y << 8);
++
++            final int oldLightLevel = getLight(lightArray, newIndex);
++
++            if (oldLightLevel < newLightLevel) {
++                placeLight(lightArray, newIndex, newLightLevel);
++                lightSources.add(index);
++            }
++        }
++
++        while (!lightSources.isEmpty()) {
++            final int index = lightSources.poll();
++            final int x = index & 15;
++            final int z = (index >> 4) & 15;
++            final int y = (index >> 8) & 15;
++            final int lightLevel = (index >> 12) & 15;
++
++            for (BlockFace face : FACES) {
++                Direction dir = face.toDirection();
++                final int xO = x + dir.normalX();
++                final int yO = y + dir.normalY();
++                final int zO = z + dir.normalZ();
++                final byte newLightLevel = (byte) (lightLevel - 1);
++                // Handler border
++                if (xO < 0 || xO >= SECTION_SIZE || yO < 0 || yO >= SECTION_SIZE || zO < 0 || zO >= SECTION_SIZE) {
++                    final byte[] border = borders[face.ordinal()];
++                    final int borderIndex = switch (face) {
++                        case WEST, EAST -> y * SECTION_SIZE + z;
++                        case BOTTOM, TOP -> x * SECTION_SIZE + z;
++                        case NORTH, SOUTH -> x * SECTION_SIZE + y;
++                    };
++                    border[borderIndex] = newLightLevel;
++                    continue;
++                }
++                // Section
++                final int newIndex = xO | (zO << 4) | (yO << 8);
++                if (getLight(lightArray, newIndex) + 2 <= lightLevel) {
++                    final Block currentBlock = Objects.requireNonNullElse(blocks[x | (z << 4) | (y << 8)], Block.AIR);
++
++                    final Block propagatedBlock = Objects.requireNonNullElse(blocks[newIndex], Block.AIR);
++                    boolean airAir = currentBlock.isAir() && propagatedBlock.isAir();
++                    if (!airAir && currentBlock.registry().collisionShape().isOccluded(propagatedBlock.registry().collisionShape(), face)) continue;
++                    placeLight(lightArray, newIndex, newLightLevel);
++                    lightSources.add(newIndex | (newLightLevel << 12));
++                }
++            }
++        }
++        return new Result(lightArray, borders);
++    }
++
++    record Result(byte[] light, byte[][] borders) {
++        Result {
++            assert light.length == LIGHT_LENGTH : "Only 16x16x16 sections are supported: " + light.length;
++        }
++
++        public byte getLight(int x, int y, int z) {
++            return (byte) LightCompute.getLight(light, x | (z << 4) | (y << 8));
++        }
++    }
++
++    private static void placeLight(byte[] light, int index, int value) {
++        final int shift = (index & 1) << 2;
++        final int i = index >>> 1;
++        light[i] = (byte) ((light[i] & (0xF0 >>> shift)) | (value << shift));
++    }
++
++    static int getLight(byte[] light, int index) {
++        if (index >>> 1 >= light.length) return 0;
++        final int value = light[index >>> 1];
++        return ((value >>> ((index & 1) << 2)) & 0xF);
++    }
++}
+diff --git a/src/main/java/net/minestom/server/light/SkyLight.java b/src/main/java/net/minestom/server/light/SkyLight.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..8cc61e2bf44309fecb5bf3328394b1a865ffd81a
+--- /dev/null
++++ b/src/main/java/net/minestom/server/light/SkyLight.java
+@@ -0,0 +1,399 @@
++package net.minestom.server.light;
++
++import it.unimi.dsi.fastutil.ints.IntArrayFIFOQueue;
++import net.minestom.server.coordinate.Point;
++import net.minestom.server.coordinate.Vec;
++import net.minestom.server.instance.Chunk;
++import net.minestom.server.instance.Instance;
++import net.minestom.server.instance.LightingChunk;
++import net.minestom.server.instance.Section;
++import net.minestom.server.instance.block.Block;
++import net.minestom.server.instance.block.BlockFace;
++import net.minestom.server.instance.palette.Palette;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Arrays;
++import java.util.HashSet;
++import java.util.Map;
++import java.util.Set;
++
++import static net.minestom.server.light.LightCompute.*;
++
++// Microtus - Light update
++final class SkyLight implements Light {
++    private final Palette blockPalette;
++
++    private byte[] content;
++    private byte[] contentPropagation;
++    private byte[] contentPropagationSwap;
++
++    private byte[][] borders;
++    private byte[][] bordersPropagation;
++    private byte[][] bordersPropagationSwap;
++    private boolean isValidBorders = true;
++    private boolean needsSend = true;
++
++    private Set<Point> toUpdateSet = new HashSet<>();
++
++    private boolean fullyLit = false;
++    private static final byte[][] bordersFullyLit = new byte[6][SIDE_LENGTH];
++    private static final byte[] contentFullyLit = new byte[LIGHT_LENGTH];
++
++    static {
++        Arrays.fill(contentFullyLit, (byte) -1);
++        for (byte[] border : bordersFullyLit) {
++            Arrays.fill(border, (byte) 14);
++        }
++    }
++
++    SkyLight(Palette blockPalette) {
++        this.blockPalette = blockPalette;
++    }
++
++    @Override
++    public Set<Point> flip() {
++        if (this.bordersPropagationSwap != null)
++            this.bordersPropagation = this.bordersPropagationSwap;
++
++        if (this.contentPropagationSwap != null)
++            this.contentPropagation = this.contentPropagationSwap;
++
++        this.bordersPropagationSwap = null;
++        this.contentPropagationSwap = null;
++
++        if (toUpdateSet == null) return Set.of();
++        return toUpdateSet;
++    }
++
++    static IntArrayFIFOQueue buildInternalQueue(Chunk c, int sectionY) {
++        IntArrayFIFOQueue lightSources = new IntArrayFIFOQueue();
++
++        if (c instanceof LightingChunk lc) {
++            int[] heightmap = lc.calculateHeightMap();
++            int maxY = c.getInstance().getDimensionType().getMinY() + c.getInstance().getDimensionType().getHeight();
++            int sectionMaxY = (sectionY + 1) * 16 - 1;
++            int sectionMinY = sectionY * 16;
++
++            for (int x = 0; x < 16; x++) {
++                for (int z = 0; z < 16; z++) {
++                    int height = heightmap[z << 4 | x];
++
++                    for (int y = Math.min(sectionMaxY, maxY); y >= Math.max(height, sectionMinY); y--) {
++                        int index = x | (z << 4) | ((y % 16) << 8);
++                        lightSources.enqueue(index | (15 << 12));
++                    }
++                }
++            }
++        }
++
++        return lightSources;
++    }
++
++    private static Block getBlock(Palette palette, int x, int y, int z) {
++        return Block.fromStateId((short)palette.get(x, y, z));
++    }
++
++    private static IntArrayFIFOQueue buildExternalQueue(Instance instance, Block[] blocks, Map<BlockFace, Point> neighbors, byte[][] borders) {
++        IntArrayFIFOQueue lightSources = new IntArrayFIFOQueue();
++
++        for (BlockFace face : BlockFace.values()) {
++            Point neighborSection = neighbors.get(face);
++            if (neighborSection == null) continue;
++
++            Chunk chunk = instance.getChunk(neighborSection.blockX(), neighborSection.blockZ());
++            if (chunk == null) continue;
++
++            byte[] neighborFace = chunk.getSection(neighborSection.blockY()).skyLight().getBorderPropagation(face.getOppositeFace());
++            if (neighborFace == null) continue;
++
++            for (int bx = 0; bx < 16; bx++) {
++                for (int by = 0; by < 16; by++) {
++                    final int borderIndex = bx * SECTION_SIZE + by;
++                    byte lightEmission = neighborFace[borderIndex];
++
++                    if (borders != null && borders[face.ordinal()] != null) {
++                        final int internalEmission = borders[face.ordinal()][borderIndex];
++                        if (lightEmission <= internalEmission) continue;
++                    }
++
++                    if (borders != null && borders[face.ordinal()] != null) {
++                        final int internalEmission = borders[face.ordinal()][borderIndex];
++                        if (lightEmission <= internalEmission) continue;
++                    }
++                    final int k = switch (face) {
++                        case WEST, BOTTOM, NORTH -> 0;
++                        case EAST, TOP, SOUTH -> 15;
++                    };
++
++                    final int posTo = switch (face) {
++                        case NORTH, SOUTH -> bx | (k << 4) | (by << 8);
++                        case WEST, EAST -> k | (by << 4) | (bx << 8);
++                        default -> bx | (by << 4) | (k << 8);
++                    };
++
++                    Section otherSection = chunk.getSection(neighborSection.blockY());
++
++                    final Block blockFrom = (switch (face) {
++                        case NORTH, SOUTH -> getBlock(otherSection.blockPalette(), bx, by, 15 - k);
++                        case WEST, EAST -> getBlock(otherSection.blockPalette(), 15 - k, bx, by);
++                        default -> getBlock(otherSection.blockPalette(), bx, 15 - k, by);
++                    });
++
++                    if (blocks == null) continue;
++                    Block blockTo = blocks[posTo];
++
++                    if (blockTo == null && blockFrom != null) {
++                        if (blockFrom.registry().collisionShape().isOccluded(Block.AIR.registry().collisionShape(), face.getOppositeFace()))
++                            continue;
++                    } else if (blockTo != null && blockFrom == null) {
++                        if (Block.AIR.registry().collisionShape().isOccluded(blockTo.registry().collisionShape(), face))
++                            continue;
++                    } else if (blockTo != null && blockFrom != null) {
++                        if (blockFrom.registry().collisionShape().isOccluded(blockTo.registry().collisionShape(), face.getOppositeFace()))
++                            continue;
++                    }
++
++                    final int index = posTo | (lightEmission << 12);
++
++                    if (lightEmission > 0) {
++                        lightSources.enqueue(index);
++                    }
++                }
++            }
++        }
++
++        return lightSources;
++    }
++
++    @Override
++    public void copyFrom(byte @NotNull [] array) {
++        if (array.length == 0) this.content = null;
++        else this.content = array.clone();
++    }
++
++    @Override
++    public Light calculateInternal(Instance instance, int chunkX, int sectionY, int chunkZ) {
++        Chunk chunk = instance.getChunk(chunkX, chunkZ);
++        this.isValidBorders = true;
++
++        // Update single section with base lighting changes
++        Block[] blocks = blocks();
++
++        int queueSize = SECTION_SIZE * SECTION_SIZE * SECTION_SIZE;
++        IntArrayFIFOQueue queue = new IntArrayFIFOQueue(0);
++        if (!fullyLit) {
++            queue = buildInternalQueue(chunk, sectionY);
++            queueSize = queue.size();
++        }
++
++        if (queueSize == SECTION_SIZE * SECTION_SIZE * SECTION_SIZE) {
++            this.fullyLit = true;
++            this.content = contentFullyLit;
++            this.borders = bordersFullyLit;
++        } else {
++            LightCompute.Result result = LightCompute.compute(blocks, queue);
++            this.content = result.light();
++            this.borders = result.borders();
++        }
++
++        Set<Point> toUpdate = new HashSet<>();
++
++        // Propagate changes to neighbors and self
++        for (int i = -1; i <= 1; i++) {
++            for (int j = -1; j <= 1; j++) {
++                Chunk neighborChunk = instance.getChunk(chunkX + i, chunkZ + j);
++                if (neighborChunk == null) continue;
++
++                for (int k = -1; k <= 1; k++) {
++                    Vec neighborPos = new Vec(chunkX + i, sectionY + k, chunkZ + j);
++
++                    if (neighborPos.blockY() >= neighborChunk.getMinSection() && neighborPos.blockY() < neighborChunk.getMaxSection()) {
++                        toUpdate.add(new Vec(neighborChunk.getChunkX(), neighborPos.blockY(), neighborChunk.getChunkZ()));
++                        neighborChunk.getSection(neighborPos.blockY()).skyLight().invalidatePropagation();
++                    }
++                }
++            }
++        }
++
++        toUpdate.add(new Vec(chunk.getChunkX(), sectionY, chunk.getChunkZ()));
++        this.toUpdateSet = toUpdate;
++
++        return this;
++    }
++
++    @Override
++    public void invalidate() {
++        invalidatePropagation();
++    }
++
++    @Override
++    public boolean requiresUpdate() {
++        return !isValidBorders;
++    }
++
++    @Override
++    public void set(byte[] copyArray) {
++        this.content = copyArray.clone();
++    }
++
++    @Override
++    public boolean requiresSend() {
++        boolean res = needsSend;
++        needsSend = false;
++        return res;
++    }
++
++    private void clearCache() {
++        this.contentPropagation = null;
++        this.bordersPropagation = null;
++        isValidBorders = true;
++        needsSend = true;
++        fullyLit = false;
++    }
++
++    @Override
++    public byte[] array() {
++        if (content == null) return new byte[0];
++        if (contentPropagation == null) return content;
++        var res = bake(contentPropagation, content);
++        if (res == emptyContent) return new byte[0];
++        return res;
++    }
++
++    private boolean compareBorders(byte[] a, byte[] b) {
++        if (b == null && a == null) return true;
++        if (b == null || a == null) return false;
++
++        if (a.length != b.length) return false;
++        for (int i = 0; i < a.length; i++) {
++            if (a[i] > b[i]) return false;
++        }
++        return true;
++    }
++
++    private Block[] blocks() {
++        Block[] blocks = new Block[SECTION_SIZE * SECTION_SIZE * SECTION_SIZE];
++
++        blockPalette.getAllPresent((x, y, z, stateId) -> {
++            final Block block = Block.fromStateId((short) stateId);
++            assert block != null;
++            final int index = x | (z << 4) | (y << 8);
++            blocks[index] = block;
++        });
++
++        return blocks;
++    }
++
++    @Override
++    public Light calculateExternal(Instance instance, Chunk chunk, int sectionY) {
++        if (!isValidBorders) clearCache();
++
++        Map<BlockFace, Point> neighbors = Light.getNeighbors(chunk, sectionY);
++        Set<Point> toUpdate = new HashSet<>();
++
++        Block[] blocks = blocks();
++        IntArrayFIFOQueue queue;
++
++        byte[][] borderTemp = bordersFullyLit;
++        if (!fullyLit) {
++            queue = buildExternalQueue(instance, blocks, neighbors, borders);
++            LightCompute.Result result = LightCompute.compute(blocks, queue);
++
++            byte[] contentPropagationTemp = result.light();
++            borderTemp = result.borders();
++            this.contentPropagationSwap = bake(contentPropagationSwap, contentPropagationTemp);
++            this.bordersPropagationSwap = combineBorders(bordersPropagation, borderTemp);
++        } else {
++            this.contentPropagationSwap = null;
++            this.bordersPropagationSwap = null;
++        }
++
++        // Propagate changes to neighbors and self
++        for (var entry : neighbors.entrySet()) {
++            var neighbor = entry.getValue();
++            var face = entry.getKey();
++
++            byte[] next = borderTemp[face.ordinal()];
++            byte[] current = getBorderPropagation(face);
++
++            if (!compareBorders(next, current)) {
++                toUpdate.add(neighbor);
++            }
++        }
++
++        this.toUpdateSet = toUpdate;
++        return this;
++    }
++
++    private byte[][] combineBorders(byte[][] b1, byte[][] b2) {
++        if (b1 == null) return b2;
++
++        byte[][] newBorder = new byte[FACES.length][];
++        Arrays.setAll(newBorder, i -> new byte[SIDE_LENGTH]);
++        for (int i = 0; i < FACES.length; i++) {
++            newBorder[i] = combineBorders(b1[i], b2[i]);
++        }
++        return newBorder;
++    }
++
++    private byte[] bake(byte[] content1, byte[] content2) {
++        if (content1 == null && content2 == null) return emptyContent;
++        if (content1 == emptyContent && content2 == emptyContent) return emptyContent;
++
++        if (content1 == null) return content2;
++        if (content2 == null) return content1;
++
++        byte[] lightMax = new byte[LIGHT_LENGTH];
++        for (int i = 0; i < content1.length; i++) {
++            // Lower
++            byte l1 = (byte) (content1[i] & 0x0F);
++            byte l2 = (byte) (content2[i] & 0x0F);
++
++            // Upper
++            byte u1 = (byte) ((content1[i] >> 4) & 0x0F);
++            byte u2 = (byte) ((content2[i] >> 4) & 0x0F);
++
++            byte lower = (byte) Math.max(l1, l2);
++            byte upper = (byte) Math.max(u1, u2);
++
++            lightMax[i] = (byte) (lower | (upper << 4));
++        }
++        return lightMax;
++    }
++
++    @Override
++    public byte[] getBorderPropagation(BlockFace face) {
++        if (!isValidBorders) clearCache();
++
++        if (borders == null && bordersPropagation == null) return new byte[SIDE_LENGTH];
++        if (borders == null) return bordersPropagation[face.ordinal()];
++        if (bordersPropagation == null) return borders[face.ordinal()];
++
++        return combineBorders(bordersPropagation[face.ordinal()], borders[face.ordinal()]);
++    }
++
++    @Override
++    public void invalidatePropagation() {
++        this.isValidBorders = false;
++        this.needsSend = false;
++        this.bordersPropagation = null;
++        this.contentPropagation = null;
++    }
++
++    @Override
++    public int getLevel(int x, int y, int z) {
++        var array = array();
++        int index = x | (z << 4) | (y << 8);
++        return LightCompute.getLight(array, index);
++    }
++
++    private byte[] combineBorders(byte[] b1, byte[] b2) {
++        byte[] newBorder = new byte[SIDE_LENGTH];
++        for (int i = 0; i < newBorder.length; i++) {
++            var previous = b2[i];
++            var current = b1[i];
++            newBorder[i] = (byte) Math.max(previous, current);
++        }
++        return newBorder;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
+index 3e0a05ab6495d842fe1710eca68ea23af03e4094..ffa67b09f00c565c12e7726be8c00f9eea8fae2b 100644
+--- a/src/main/java/net/minestom/server/registry/Registry.java
++++ b/src/main/java/net/minestom/server/registry/Registry.java
+@@ -169,6 +169,8 @@ public final class Registry {
+         private final boolean air;
+         private final boolean solid;
+         private final boolean liquid;
++        private final boolean occludes; // Microtus - Light update
++        private final int lightEmission;  // Microtus - Light update
+         private final String blockEntity;
+         private final int blockEntityId;
+         private final Supplier<Material> materialSupplier;
+@@ -188,7 +190,9 @@ public final class Registry {
+             this.jumpFactor = main.getDouble("jumpFactor", 1);
+             this.air = main.getBoolean("air", false);
+             this.solid = main.getBoolean("solid");
++            this.occludes = main.getBoolean("occludes", true); // Microtus - Light update
+             this.liquid = main.getBoolean("liquid", false);
++            this.lightEmission = main.getInt("lightEmission", 0); // Microtus - Light update
+             {
+                 Properties blockEntity = main.section("blockEntity");
+                 if (blockEntity != null) {
+@@ -204,8 +208,9 @@ public final class Registry {
+                 this.materialSupplier = materialNamespace != null ? () -> Material.fromNamespaceId(materialNamespace) : () -> null;
+             }
+             {
+-                final String string = main.getString("collisionShape");
+-                this.shape = CollisionUtils.parseBlockShape(string, this);
++                final String collision = main.getString("collisionShape"); // Microtus - Light update
++                final String occlusion = main.getString("occlusionShape"); // Microtus - Light update
++                this.shape = CollisionUtils.parseBlockShape(collision, occlusion, this); // Microtus - Light update
+             }
+         }
+ 
+@@ -281,6 +286,16 @@ public final class Registry {
+         public Properties custom() {
+             return custom;
+         }
++
++        // Microtus start - Light update
++        public boolean occludes() {
++            return occludes;
++        }
++
++        public int lightEmission() {
++            return lightEmission;
++        }
++        // Microtus end - Light update
+     }
+ 
+     public static final class MaterialEntry implements Entry {
