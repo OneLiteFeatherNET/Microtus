@@ -1586,7 +1586,7 @@ index 9240da48ba6936070f64456720425fce7d2e905e..e9a824644cb293b73df4f84a36a20301
  
      SoundEvent BLOCK_WOOL_BREAK = SoundEventImpl.get("minecraft:block.wool.break");
 diff --git a/src/main/java/net/minestom/server/MinecraftServer.java b/src/main/java/net/minestom/server/MinecraftServer.java
-index 059ebc19b28648660fdfb1d5b0c56b3cbb1ceaf1..7c8ed797993e59339b48c70d53913aa5ce8d61be 100644
+index 059ebc19b28648660fdfb1d5b0c56b3cbb1ceaf1..3a30407d3baa1be4a63f3e45cae9ea1fa4003a98 100644
 --- a/src/main/java/net/minestom/server/MinecraftServer.java
 +++ b/src/main/java/net/minestom/server/MinecraftServer.java
 @@ -45,8 +45,8 @@ public final class MinecraftServer {
@@ -1595,7 +1595,7 @@ index 059ebc19b28648660fdfb1d5b0c56b3cbb1ceaf1..7c8ed797993e59339b48c70d53913aa5
  
 -    public static final String VERSION_NAME = "1.19.3";
 -    public static final int PROTOCOL_VERSION = 761;
-+    public static final String VERSION_NAME = "1.19.3"; // Microtus - 1.19.4 update
++    public static final String VERSION_NAME = "1.19.4"; // Microtus - 1.19.4 update
 +    public static final int PROTOCOL_VERSION = 762; // Microtus - 1.19.4 update
  
      // Threads
@@ -2386,10 +2386,10 @@ index 785ff9bbd6d3fc155cafaf11e321292e7082b790..feea0a9aeb7aa83ebf7d553e8916471e
 +}// Microtus end - 1.19.4 update
 diff --git a/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java b/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..80810eec88176cb73958414ef0cf9288b2ef84d9
+index 0000000000000000000000000000000000000000..883e35922a404dab3399382b982cf3aee41e557f
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java
-@@ -0,0 +1,78 @@
+@@ -0,0 +1,73 @@
 +package net.minestom.server.entity.damage;
 +
 +import net.minestom.server.registry.Registry;
@@ -2441,11 +2441,6 @@ index 0000000000000000000000000000000000000000..80810eec88176cb73958414ef0cf9288
 +    @Override
 +    public String toString() {
 +        return name();
-+    }
-+
-+    @Override
-+    public int id() {
-+        return id;
 +    }
 +
 +    private static NBTCompound lazyNbt = null;
@@ -2859,7 +2854,7 @@ index 0000000000000000000000000000000000000000..f574b37d77df167e5dfebc4eb479ce49
 +}
 diff --git a/src/main/java/net/minestom/server/entity/metadata/display/TextDisplayMeta.java b/src/main/java/net/minestom/server/entity/metadata/display/TextDisplayMeta.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..1500feb013f1a5b382736cc821a7a07fe10ed48a
+index 0000000000000000000000000000000000000000..013e29c8f7476f9406cb16a6d6d247d58e713f93
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/entity/metadata/display/TextDisplayMeta.java
 @@ -0,0 +1,121 @@
@@ -2911,12 +2906,12 @@ index 0000000000000000000000000000000000000000..1500feb013f1a5b382736cc821a7a07f
 +        super.metadata.setIndex(OFFSET + 2, Metadata.VarInt(value.asARGB()));
 +    }
 +
-+    public int getTextOpacity() {
-+        return super.metadata.getIndex(OFFSET + 3, -1);
++    public byte getTextOpacity() {
++        return super.metadata.getIndex(OFFSET + 3, (byte)-1);
 +    }
 +
-+    public void setTextOpacity(int value) {
-+        super.metadata.setIndex(OFFSET + 3, Metadata.VarInt(value));
++    public void setTextOpacity(byte value) {
++        super.metadata.setIndex(OFFSET + 3, Metadata.Byte(value));
 +    }
 +
 +    public boolean isShadow() {
