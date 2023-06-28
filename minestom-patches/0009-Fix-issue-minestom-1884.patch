@@ -1,0 +1,48 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Wed, 28 Jun 2023 14:26:02 +0200
+Subject: [PATCH] Fix issue minestom#1883
+
+
+diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
+index 35b34bfe35067d28eef3c66539d9fd4f0fa68c3f..6bb80cc25086533cb7a76aace4152132bd507443 100644
+--- a/src/main/java/net/minestom/server/utils/NamespaceID.java
++++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
+@@ -67,12 +67,14 @@ public final class NamespaceID implements CharSequence, Key {
+     public boolean equals(Object o) {
+         if (this == o) return true;
+         if (!(o instanceof final Key that)) return false;
+-        return Objects.equals(this.full, that.asString());
++        return Objects.equals(this.domain, that.namespace()) && Objects.equals(this.path, that.value()); // Microtus - Fix namespace hhashcode and equals
+     }
+ 
+     @Override
+     public int hashCode() {
+-        return full.hashCode();
++        int result = this.domain.hashCode(); // Microtus start - Fix namespace hhashcode and equals
++        result = (31 * result) + this.path.hashCode();
++        return result; // Microtus end - Fix namespace hhashcode and equals
+     }
+ 
+     @Override
+diff --git a/src/test/java/net/minestom/server/utils/NamespaceIDTest.java b/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
+index 2a41bf2cd11d1eb766850ef32b909c94d2a68597..4c1fd304fe5d8253da37bf602951e1975f34fcf3 100644
+--- a/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
++++ b/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
+@@ -27,6 +27,16 @@ public class NamespaceIDTest {
+         assertNotEquals(namespace, NamespaceID.from("minecraft:any2"));
+         assertEquals(namespace, Key.key("minecraft:any"));
+     }
++    // Microtus start - Fix namespace hhashcode and equals
++    @Test
++    public void hashCodeConsistentWithEquals() {
++        var namespace = NamespaceID.from("minecraft:any");
++        var key = Key.key("minecraft:any");
++
++        assertEquals(namespace, key);
++        assertEquals(namespace.hashCode(), key.hashCode());
++    }
++    // Microtus end - Fix namespace hhashcode and equals
+ 
+     @Test
+     public void atMostOneColon() {
