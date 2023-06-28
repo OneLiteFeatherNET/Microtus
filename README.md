@@ -3,6 +3,8 @@
 
 Our projects get names from animals but in latin.
 
+Discord for Discussions: [OneLiteFeather.net](https://discord.onelitefeather.net)
+
 ## Our goals
 - Include patches from open pull requests on minestom repository
 - Fixes issues from original minestom repository
