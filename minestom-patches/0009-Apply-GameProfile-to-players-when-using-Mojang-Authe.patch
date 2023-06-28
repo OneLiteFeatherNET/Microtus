@@ -1,0 +1,74 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Wed, 28 Jun 2023 14:56:09 +0200
+Subject: [PATCH] Apply GameProfile to players when using Mojang Authenication
+
+
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
+index eaf57a25c21425a957c478de154e2cd2c9a9c7a7..c327a3b5c10fa2d3c31f672044431c76031a111c 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
+@@ -1,12 +1,15 @@
+ package net.minestom.server.network.packet.client.login;
+ 
+ import com.google.gson.Gson;
++import com.google.gson.JsonElement; // Microtus - Fix gameprofile auth
+ import com.google.gson.JsonObject;
++import net.kyori.adventure.text.Component; // Microtus - Fix gameprofile auth
+ import net.minestom.server.MinecraftServer;
+ import net.minestom.server.extras.MojangAuth;
+ import net.minestom.server.extras.mojangAuth.MojangCrypt;
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.client.ClientPreplayPacket;
++import net.minestom.server.network.player.GameProfile; // Microtus - Fix gameprofile auth
+ import net.minestom.server.network.player.PlayerConnection;
+ import net.minestom.server.network.player.PlayerSocketConnection;
+ import net.minestom.server.utils.async.AsyncUtils;
+@@ -20,7 +23,9 @@ import java.net.http.HttpClient;
+ import java.net.http.HttpRequest;
+ import java.net.http.HttpResponse;
+ import java.nio.charset.StandardCharsets;
++import java.util.ArrayList; // Microtus - Fix gameprofile auth
+ import java.util.Arrays;
++import java.util.List; // Microtus - Fix gameprofile auth
+ import java.util.UUID;
+ 
+ import static net.minestom.server.network.NetworkBuffer.BYTE_ARRAY;
+@@ -72,14 +77,22 @@ public record EncryptionResponsePacket(byte[] sharedSecret,
+             client.sendAsync(request, HttpResponse.BodyHandlers.ofString()).whenComplete((response, throwable) -> {
+                 if (throwable != null) {
+                     MinecraftServer.getExceptionManager().handleException(throwable);
+-                    //todo disconnect with reason
++                    if (socketConnection.getPlayer() != null) { // Microtus start - Fix gameprofile auth
++                        socketConnection.getPlayer().kick(Component.text("Failed to contact Mojang's Session Servers (Are they down?)"));
++                    } else {
++                        socketConnection.disconnect();
++                    } // Microtus end - Fix gameprofile auth
+                     return;
+                 }
+                 try {
+                     final JsonObject gameProfile = GSON.fromJson(response.body(), JsonObject.class);
+                     if (gameProfile == null) {
+                         // Invalid response
+-                        //todo disconnect with reason
++                        if (socketConnection.getPlayer() != null) { // Microtus start - Fix gameprofile auth
++                            socketConnection.getPlayer().kick(Component.text("Failed to get data from Mojang's Session Servers (Are they down?)"));
++                        } else {
++                            socketConnection.disconnect();
++                        } // Microtus end - Fix gameprofile auth
+                         return;
+                     }
+                     socketConnection.setEncryptionKey(getSecretKey());
+@@ -89,6 +102,12 @@ public record EncryptionResponsePacket(byte[] sharedSecret,
+ 
+                     MinecraftServer.LOGGER.info("UUID of player {} is {}", loginUsername, profileUUID);
+                     CONNECTION_MANAGER.startPlayState(connection, profileUUID, profileName, true);
++                    List<GameProfile.Property> propertyList = new ArrayList<>(); // Microtus start - Fix gameprofile auth
++                    for (JsonElement element : gameProfile.get("properties").getAsJsonArray()) {
++                        JsonObject object = element.getAsJsonObject();
++                        propertyList.add(new GameProfile.Property(object.get("name").getAsString(), object.get("value").getAsString(), object.get("signature").getAsString()));
++                    }
++                    socketConnection.UNSAFE_setProfile(new GameProfile(profileUUID, profileName, propertyList)); // Microtus end - Fix gameprofile auth
+                 } catch (Exception e) {
+                     MinecraftServer.getExceptionManager().handleException(e);
+                 }
