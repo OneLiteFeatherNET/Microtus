@@ -1,0 +1,21 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Thu, 29 Jun 2023 13:58:46 +0200
+Subject: [PATCH] Update to 1.20
+
+
+diff --git a/src/main/java/net/minestom/server/MinecraftServer.java b/src/main/java/net/minestom/server/MinecraftServer.java
+index 3a30407d3baa1be4a63f3e45cae9ea1fa4003a98..d40734065f5a8d045bd42c07a34d43cbb71c1ed7 100644
+--- a/src/main/java/net/minestom/server/MinecraftServer.java
++++ b/src/main/java/net/minestom/server/MinecraftServer.java
+@@ -45,8 +45,8 @@ public final class MinecraftServer {
+ 
+     public static final ComponentLogger LOGGER = ComponentLogger.logger(MinecraftServer.class);
+ 
+-    public static final String VERSION_NAME = "1.19.4"; // Microtus - 1.19.4 update
+-    public static final int PROTOCOL_VERSION = 762; // Microtus - 1.19.4 update
++    public static final String VERSION_NAME = "1.20"; // Microtus - 1.20 update
++    public static final int PROTOCOL_VERSION = 763; // Microtus - 1.20 update
+ 
+     // Threads
+     public static final String THREAD_NAME_BENCHMARK = "Ms-Benchmark";
