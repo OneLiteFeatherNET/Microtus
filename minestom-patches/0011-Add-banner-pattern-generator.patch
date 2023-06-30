@@ -649,7 +649,7 @@ index 9f99d2950007b5c081a44804b2d17d71456512f0..51f3ccd8523e0255208308743154b9bb
  
          BLOCK_TAGS("tags/block_tags.json"),
 diff --git a/src/test/java/net/minestom/server/item/ItemMetaTest.java b/src/test/java/net/minestom/server/item/ItemMetaTest.java
-index 30ee3dd2d0585a1490ec5c81acecb46cff792405..763eae19694bbd8406dec9f988577ac19aa60e2b 100644
+index 30ee3dd2d0585a1490ec5c81acecb46cff792405..fc8d2b7faf989c1e5003e3fc24de98ef25151430 100644
 --- a/src/test/java/net/minestom/server/item/ItemMetaTest.java
 +++ b/src/test/java/net/minestom/server/item/ItemMetaTest.java
 @@ -1,12 +1,17 @@
@@ -670,7 +670,7 @@ index 30ee3dd2d0585a1490ec5c81acecb46cff792405..763eae19694bbd8406dec9f988577ac1
  import java.util.Map;
  import java.util.UUID;
  
-@@ -54,4 +59,36 @@ public class ItemMetaTest {
+@@ -54,4 +59,37 @@ public class ItemMetaTest {
          assertEquals(uuid, view.getSkullOwner());
          assertEquals(skin, view.getPlayerSkin());
      }
@@ -701,6 +701,7 @@ index 30ee3dd2d0585a1490ec5c81acecb46cff792405..763eae19694bbd8406dec9f988577ac1
 +                })
 +                .build();
 +        assertEquals(Component.text("Test Shield"), item.meta(ShieldMeta.class).getCustomName());
++        assertEquals(DyeColor.BLACK, item.meta(ShieldMeta.class).getBaseColor());
 +        assertEquals(1, item.meta(ShieldMeta.class).getPatterns().size());
 +        assertEquals(DyeColor.BLACK, item.meta(ShieldMeta.class).getPatterns().get(0).color());
 +        assertEquals(BannerPattern.PIGLIN, item.meta(ShieldMeta.class).getPatterns().get(0).pattern());
