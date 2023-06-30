@@ -1,0 +1,641 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: theEvilReaper <steffenwx@gmail.com>
+Date: Fri, 30 Jun 2023 13:50:11 +0200
+Subject: [PATCH] Add banner pattern generator
+
+
+diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
+index e31b4006fbfdf830a94ee4e8fbb6959b6dcaddbf..2f143b9d196670b7f62d128222674624efe7c38f 100644
+--- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
++++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
+@@ -34,7 +34,7 @@ public class Generators {
+         generator.generate(resource("sounds.json"), "net.minestom.server.sound", "SoundEvent", "SoundEventImpl", "SoundEvents");
+         generator.generate(resource("custom_statistics.json"), "net.minestom.server.statistic", "StatisticType", "StatisticTypeImpl", "StatisticTypes");
+         generator.generate(resource("damage_types.json"), "net.minestom.server.entity.damage", "DamageType", "DamageTypeImpl", "DamageTypes"); // Microtus - 1.19.4 update
+-
++        generator.generate(resource("banner_patterns.json"), "net.minestom.server.item.banner", "BannerPattern", "BannerPatternImpl", "BannerPatterns"); // Microtus - Banner and Shield Meta
+         // Generate fluids
+         new FluidGenerator(resource("fluids.json"), outputFolder).generate();
+ 
+diff --git a/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java b/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
+index 6e2721a275dff7552e2a67bd3d6decc8c569bf9e..cbb759818ed4a7d61769bafaf4bc3fb24776ecbc 100644
+--- a/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
++++ b/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
+@@ -19,6 +19,9 @@ import java.util.List;
+ import java.util.stream.StreamSupport;
+ 
+ public class DyeColorGenerator extends MinestomCodeGenerator {
++
++    private static final String COLOR_FILE_PACKAGE = "net.minestom.server.color"; // Microtus - Banner and shield meta
++    private static final String CLASS_NAME = "DyeColor"; // Microtus - Banner and shield meta
+     private static final Logger LOGGER = LoggerFactory.getLogger(DyeColorGenerator.class);
+     private final InputStream dyeColorsFile;
+     private final File outputFolder;
+@@ -39,11 +42,11 @@ public class DyeColorGenerator extends MinestomCodeGenerator {
+             LOGGER.error("Output folder for code generation does not exist and could not be created.");
+             return;
+         }
+-        // Important classes we use alot
+-        ClassName colorCN = ClassName.get("net.minestom.server.color", "Color");
++        // Important classes we use a lot
++        ClassName colorCN = ClassName.get(COLOR_FILE_PACKAGE, "Color");
+ 
+         JsonArray dyeColors = GSON.fromJson(new InputStreamReader(dyeColorsFile), JsonArray.class);
+-        ClassName dyeColorCN = ClassName.get("net.minestom.server.color", "DyeColor");
++        ClassName dyeColorCN = ClassName.get(COLOR_FILE_PACKAGE, CLASS_NAME);
+         // Dye Color Enum
+         TypeSpec.Builder dyeColorEnum = TypeSpec.enumBuilder(dyeColorCN)
+                 .addSuperinterface(ClassName.get("net.kyori.adventure.util", "RGBLike"))
+@@ -55,7 +58,8 @@ public class DyeColorGenerator extends MinestomCodeGenerator {
+                         FieldSpec.builder(colorCN, "textureDiffuseColor", Modifier.PRIVATE, Modifier.FINAL).build(),
+                         FieldSpec.builder(colorCN, "textColor", Modifier.PRIVATE, Modifier.FINAL).build(),
+                         FieldSpec.builder(colorCN, "fireworkColor", Modifier.PRIVATE, Modifier.FINAL).build(),
+-                        FieldSpec.builder(TypeName.INT, "mapColorId", Modifier.PRIVATE, Modifier.FINAL).build()
++                        FieldSpec.builder(TypeName.INT, "mapColorId", Modifier.PRIVATE, Modifier.FINAL).build(),
++                        FieldSpec.builder(ArrayTypeName.of(dyeColorCN), "VALUES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(CLASS_NAME + ".values()").build()  // Microtus - Banner and shield meta
+                 )
+         );
+ 
+@@ -114,7 +118,14 @@ public class DyeColorGenerator extends MinestomCodeGenerator {
+                                 .addModifiers(Modifier.PUBLIC)
+                                 .returns(TypeName.INT)
+                                 .addStatement("return this.mapColorId")
+-                                .build()
++                                .build(),
++                        MethodSpec.methodBuilder("getValue") // Microtus start - Banner and shield meta
++                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
++                                .addParameter(ParameterSpec.builder(TypeName.INT, "id").build())
++                                .addAnnotation(Nullable.class)
++                                .returns(ClassName.get(COLOR_FILE_PACKAGE, CLASS_NAME))
++                                .addCode("return VALUES[$L];", "id")
++                                .build() // Microtus end - Banner and shield meta
+                 )
+         );
+ 
+@@ -134,7 +145,7 @@ public class DyeColorGenerator extends MinestomCodeGenerator {
+         // Write files to outputFolder
+         writeFiles(
+                 List.of(
+-                        JavaFile.builder("net.minestom.server.color", dyeColorEnum.build())
++                        JavaFile.builder(COLOR_FILE_PACKAGE, dyeColorEnum.build())
+                                 .indent("    ")
+                                 .skipJavaLangImports(true)
+                                 .build()
+diff --git a/src/autogenerated/java/net/minestom/server/color/DyeColor.java b/src/autogenerated/java/net/minestom/server/color/DyeColor.java
+index 092b0580efadfd570584eb351ccc85d8a1d6dd3a..36f5a62db631029c4c0c28078377f577f250caea 100644
+--- a/src/autogenerated/java/net/minestom/server/color/DyeColor.java
++++ b/src/autogenerated/java/net/minestom/server/color/DyeColor.java
+@@ -2,6 +2,7 @@ package net.minestom.server.color;
+ 
+ import net.kyori.adventure.util.RGBLike;
+ import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ 
+ /**
+  * AUTOGENERATED by DyeColorGenerator
+@@ -39,6 +40,8 @@ public enum DyeColor implements RGBLike {
+ 
+     BLACK(new Color(0x1d1d21), new Color(0x0), new Color(0x1e1b1b), 29);
+ 
++    private static final DyeColor[] VALUES = DyeColor.values();
++
+     private final Color textureDiffuseColor;
+ 
+     private final Color textColor;
+@@ -85,4 +88,9 @@ public enum DyeColor implements RGBLike {
+     public int mapColorId() {
+         return this.mapColorId;
+     }
++
++    @Nullable
++    public static DyeColor getValue(int id) {
++        return VALUES[id];
++    }
+ }
+diff --git a/src/autogenerated/java/net/minestom/server/item/banner/BannerPatterns.java b/src/autogenerated/java/net/minestom/server/item/banner/BannerPatterns.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..b53f30b6e26a6763e727b97507e2f16e22c4b0c0
+--- /dev/null
++++ b/src/autogenerated/java/net/minestom/server/item/banner/BannerPatterns.java
+@@ -0,0 +1,89 @@
++package net.minestom.server.item.banner;
++
++/**
++ * Code autogenerated, do not edit!
++ */
++@SuppressWarnings("unused")
++interface BannerPatterns {
++    BannerPattern BASE = BannerPatternImpl.get("minecraft:base");
++
++    BannerPattern SQUARE_BOTTOM_LEFT = BannerPatternImpl.get("minecraft:square_bottom_left");
++
++    BannerPattern SQUARE_BOTTOM_RIGHT = BannerPatternImpl.get("minecraft:square_bottom_right");
++
++    BannerPattern SQUARE_TOP_LEFT = BannerPatternImpl.get("minecraft:square_top_left");
++
++    BannerPattern SQUARE_TOP_RIGHT = BannerPatternImpl.get("minecraft:square_top_right");
++
++    BannerPattern STRIPE_BOTTOM = BannerPatternImpl.get("minecraft:stripe_bottom");
++
++    BannerPattern STRIPE_TOP = BannerPatternImpl.get("minecraft:stripe_top");
++
++    BannerPattern STRIPE_LEFT = BannerPatternImpl.get("minecraft:stripe_left");
++
++    BannerPattern STRIPE_RIGHT = BannerPatternImpl.get("minecraft:stripe_right");
++
++    BannerPattern STRIPE_CENTER = BannerPatternImpl.get("minecraft:stripe_center");
++
++    BannerPattern STRIPE_MIDDLE = BannerPatternImpl.get("minecraft:stripe_middle");
++
++    BannerPattern STRIPE_DOWNRIGHT = BannerPatternImpl.get("minecraft:stripe_downright");
++
++    BannerPattern STRIPE_DOWNLEFT = BannerPatternImpl.get("minecraft:stripe_downleft");
++
++    BannerPattern SMALL_STRIPES = BannerPatternImpl.get("minecraft:small_stripes");
++
++    BannerPattern CROSS = BannerPatternImpl.get("minecraft:cross");
++
++    BannerPattern STRAIGHT_CROSS = BannerPatternImpl.get("minecraft:straight_cross");
++
++    BannerPattern TRIANGLE_BOTTOM = BannerPatternImpl.get("minecraft:triangle_bottom");
++
++    BannerPattern TRIANGLE_TOP = BannerPatternImpl.get("minecraft:triangle_top");
++
++    BannerPattern TRIANGLES_BOTTOM = BannerPatternImpl.get("minecraft:triangles_bottom");
++
++    BannerPattern TRIANGLES_TOP = BannerPatternImpl.get("minecraft:triangles_top");
++
++    BannerPattern DIAGONAL_LEFT = BannerPatternImpl.get("minecraft:diagonal_left");
++
++    BannerPattern DIAGONAL_UP_RIGHT = BannerPatternImpl.get("minecraft:diagonal_up_right");
++
++    BannerPattern DIAGONAL_UP_LEFT = BannerPatternImpl.get("minecraft:diagonal_up_left");
++
++    BannerPattern DIAGONAL_RIGHT = BannerPatternImpl.get("minecraft:diagonal_right");
++
++    BannerPattern CIRCLE = BannerPatternImpl.get("minecraft:circle");
++
++    BannerPattern RHOMBUS = BannerPatternImpl.get("minecraft:rhombus");
++
++    BannerPattern HALF_VERTICAL = BannerPatternImpl.get("minecraft:half_vertical");
++
++    BannerPattern HALF_HORIZONTAL = BannerPatternImpl.get("minecraft:half_horizontal");
++
++    BannerPattern HALF_VERTICAL_RIGHT = BannerPatternImpl.get("minecraft:half_vertical_right");
++
++    BannerPattern HALF_HORIZONTAL_BOTTOM = BannerPatternImpl.get("minecraft:half_horizontal_bottom");
++
++    BannerPattern BORDER = BannerPatternImpl.get("minecraft:border");
++
++    BannerPattern CURLY_BORDER = BannerPatternImpl.get("minecraft:curly_border");
++
++    BannerPattern GRADIENT = BannerPatternImpl.get("minecraft:gradient");
++
++    BannerPattern GRADIENT_UP = BannerPatternImpl.get("minecraft:gradient_up");
++
++    BannerPattern BRICKS = BannerPatternImpl.get("minecraft:bricks");
++
++    BannerPattern GLOBE = BannerPatternImpl.get("minecraft:globe");
++
++    BannerPattern CREEPER = BannerPatternImpl.get("minecraft:creeper");
++
++    BannerPattern SKULL = BannerPatternImpl.get("minecraft:skull");
++
++    BannerPattern FLOWER = BannerPatternImpl.get("minecraft:flower");
++
++    BannerPattern MOJANG = BannerPatternImpl.get("minecraft:mojang");
++
++    BannerPattern PIGLIN = BannerPatternImpl.get("minecraft:piglin");
++}
+diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/tameable/CatMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/tameable/CatMeta.java
+index 087743b761797b3a1dfcc6ab7f8c83816f23a0b8..529d30aa4c7447700bcf03939303725d32e0f30b 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/animal/tameable/CatMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/animal/tameable/CatMeta.java
+@@ -9,8 +9,6 @@ public class CatMeta extends TameableAnimalMeta {
+     public static final byte OFFSET = TameableAnimalMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 4;
+ 
+-    private static final DyeColor[] DYE_VALUES = DyeColor.values();
+-
+     public CatMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+     }
+@@ -41,7 +39,7 @@ public class CatMeta extends TameableAnimalMeta {
+     }
+ 
+     public @NotNull DyeColor getCollarColor() {
+-        return DYE_VALUES[super.metadata.getIndex(OFFSET + 3, DyeColor.RED.ordinal())];
++        return DyeColor.getValue(super.metadata.getIndex(OFFSET + 3, DyeColor.RED.ordinal())); // Microtus -  Banner and Shield Meta
+     }
+ 
+     public void setCollarColor(@NotNull DyeColor value) {
+diff --git a/src/main/java/net/minestom/server/item/banner/BannerPattern.java b/src/main/java/net/minestom/server/item/banner/BannerPattern.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..582bc644d4276d2aa67dcca24ba37eba6ecf4ddd
+--- /dev/null
++++ b/src/main/java/net/minestom/server/item/banner/BannerPattern.java
+@@ -0,0 +1,39 @@
++package net.minestom.server.item.banner;
++
++import net.kyori.adventure.key.Key;
++import net.minestom.server.registry.ProtocolObject;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++import java.util.Collection;
++
++// Microtus -  Banner and Shield Meta
++public sealed interface BannerPattern extends ProtocolObject, BannerPatterns permits BannerPatternImpl {
++    static @NotNull Collection<@NotNull BannerPattern> values() {
++        return BannerPatternImpl.values();
++    }
++
++    static @Nullable BannerPattern fromNamespaceId(@NotNull String namespaceID) {
++        return BannerPatternImpl.getSafe(namespaceID);
++    }
++
++    static @Nullable BannerPattern fromNamespaceId(@NotNull NamespaceID namespaceID) {
++        return fromNamespaceId(namespaceID.asString());
++    }
++
++    static @Nullable BannerPattern fromId(int id) {
++        return BannerPatternImpl.getId(id);
++    }
++
++    static @Nullable BannerPattern fromIdentifier(String identifier) {
++        return BannerPatternImpl.getIdentifier(identifier);
++    }
++
++    @Override
++    default @NotNull Key key() {
++        return ProtocolObject.super.key();
++    }
++
++    @NotNull String identifier();
++}
+diff --git a/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java b/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..063b5565ba859c2a57d6840323dc16064ffdc600
+--- /dev/null
++++ b/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java
+@@ -0,0 +1,48 @@
++package net.minestom.server.item.banner;
++
++import net.minestom.server.registry.Registry;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Collection;
++import java.util.HashMap;
++import java.util.Map;
++
++// Microtus -  Banner and Shield Meta
++public record BannerPatternImpl(NamespaceID namespace, int id, String identifier) implements BannerPattern {
++
++    private static Map<String, BannerPatternImpl> IDENTIFIERS = new HashMap<>();
++    private static final Registry.Container<BannerPattern> CONTAINER = Registry.createContainer(Registry.Resource.BANNER_PATTERNS,
++            (namespace, properties) -> {
++                int id = properties.getInt("id");
++                String identifier = properties.getString("identifier");
++                BannerPatternImpl bannerPattern = new BannerPatternImpl(NamespaceID.from(namespace), id, identifier);
++                IDENTIFIERS.put(identifier, bannerPattern);
++                return bannerPattern;
++            });
++
++    static BannerPattern get(@NotNull String namespace) {
++        return CONTAINER.get(namespace);
++    }
++
++    static BannerPattern getSafe(@NotNull String namespace) {
++        return CONTAINER.getSafe(namespace);
++    }
++
++    static BannerPattern getId(int id) {
++        return CONTAINER.getId(id);
++    }
++
++    static BannerPattern getIdentifier(@NotNull String identifier) {
++        return IDENTIFIERS.get(identifier);
++    }
++
++    static Collection<BannerPattern> values() {
++        return CONTAINER.values();
++    }
++
++    @Override
++    public String toString() {
++        return name();
++    }
++}
+diff --git a/src/main/java/net/minestom/server/item/metadata/BannerMeta.java b/src/main/java/net/minestom/server/item/metadata/BannerMeta.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..9d0a70d06e1e5db7b5b95cf8b7448f856a02dc9e
+--- /dev/null
++++ b/src/main/java/net/minestom/server/item/metadata/BannerMeta.java
+@@ -0,0 +1,165 @@
++package net.minestom.server.item.metadata;
++
++/**
++ * @author theEvilReaper
++ * @version 1.0.0
++ * @since
++ **/
++
++import net.kyori.adventure.text.Component;
++import net.minestom.server.color.DyeColor;
++import net.minestom.server.item.ItemMetaView;
++import net.minestom.server.item.banner.BannerPattern;
++import net.minestom.server.tag.Tag;
++import net.minestom.server.tag.TagHandler;
++import net.minestom.server.tag.TagReadable;
++import net.minestom.server.tag.TagSerializer;
++import org.jetbrains.annotations.Contract;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.Nullable;
++import org.jetbrains.annotations.UnknownNullability;
++import org.jglrxavpok.hephaistos.nbt.NBT;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++
++import java.util.ArrayList;
++import java.util.List;
++import java.util.Map;
++
++/**
++ * Meta for all {@link net.minestom.server.item.Material#WHITE_BANNER} and {@link net.minestom.server.item.Material#SHIELD} items
++ *
++ * @param readable data
++ */
++// Microtus -  Banner and Shield Meta
++@ApiStatus.Experimental
++public record BannerMeta(TagReadable readable) implements ItemMetaView<BannerMeta.Builder> {
++
++    private static final String PATTERN_KEY = "Pattern";
++    private static final String COLOR_KEY = "Color";
++
++    private static final Tag<Component> CUSTOM_NAME = Tag.Component("CustomName").path("BlockEntityTag");
++    private static final Tag<List<Pattern>> PATTERNS = Tag.Structure("Patterns",
++                    TagSerializer.fromCompound(Pattern::fromCompound, Pattern::asCompound))
++            .path("BlockEntityTag").list().defaultValue(List.of());
++
++
++    @Contract(value = "_, _ -> new", pure = true)
++    public static @NotNull Pattern from(@NotNull DyeColor color, @NotNull BannerPattern pattern) {
++        return new Pattern(color, pattern);
++    }
++
++    /**
++     * Get name of the marker, unused by Minestom
++     *
++     * @return name of the marker
++     */
++    public @Nullable Component getCustomName() {
++        return getTag(CUSTOM_NAME);
++    }
++
++    /**
++     * Get patterns of the banner
++     *
++     * @return patterns of the banner
++     */
++    public @NotNull List<Pattern> getPatterns() {
++        return getTag(PATTERNS);
++    }
++
++    @Override
++    public <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
++        return readable.getTag(tag);
++    }
++
++    public record Builder(TagHandler tagHandler) implements ItemMetaView.Builder {
++        public Builder() {
++            this(TagHandler.newHandler());
++        }
++
++        /**
++         * Set name of the marker, unused by Minestom
++         *
++         * @param customName name of the marker
++         * @return this
++         */
++        public @NotNull Builder customName(Component customName) {
++            setTag(CUSTOM_NAME, customName);
++            return this;
++        }
++
++        /**
++         * Set the patterns of the banner
++         *
++         * @param patterns patterns of the banner
++         * @return this
++         */
++        public @NotNull Builder patterns(@NotNull List<Pattern> patterns) {
++            setTag(PATTERNS, patterns);
++            return this;
++        }
++
++        /**
++         * Add a pattern to the banner
++         *
++         * @param pattern pattern to add
++         * @return this
++         */
++        public @NotNull Builder addPattern(Pattern pattern) {
++            var newList = new ArrayList<>(getTag(PATTERNS));
++            newList.add(pattern);
++            return patterns(newList);
++        }
++
++        /**
++         * Remove a pattern from the banner
++         *
++         * @param pattern pattern to remove
++         * @return this
++         */
++        public @NotNull Builder removePattern(Pattern pattern) {
++            var newList = new ArrayList<>(getTag(PATTERNS));
++            newList.remove(pattern);
++            return patterns(newList);
++        }
++
++        /**
++         * Clears the underlying list which contains the pattern values.
++         * @return this
++         */
++        public @NotNull Builder clearPatterns() {
++            return patterns(List.of());
++        }
++    }
++
++    public record Pattern(@NotNull DyeColor color, @NotNull BannerPattern pattern) {
++
++        /**
++         * Retrieves a banner pattern from the given {@code compound}.
++         *
++         * @param compound The NBT connection, which should be a banner pattern.
++         * @return A new created banner pattern.
++         */
++        public static @NotNull Pattern fromCompound(@NotNull NBTCompound compound) {
++            DyeColor color = compound.containsKey(COLOR_KEY) ? DyeColor.getValue(compound.getByte(COLOR_KEY)) : DyeColor.WHITE;
++            BannerPattern type;
++            if (compound.containsKey(PATTERN_KEY)) {
++                BannerPattern pattern = BannerPattern.fromIdentifier(compound.getString(PATTERN_KEY));
++                type = pattern != null ? pattern : BannerPattern.BASE;
++            } else type = BannerPattern.BASE;
++            return new Pattern(color, type);
++        }
++
++        /**
++         * Retrieves the {@link Pattern} as an {@link NBTCompound}.
++         *
++         * @return The banner pattern as a nbt compound.
++         */
++        public @NotNull NBTCompound asCompound() {
++            return NBT.Compound(Map.of(
++                    COLOR_KEY, NBT.Byte(color.ordinal()),
++                    PATTERN_KEY, NBT.String(pattern.identifier())
++            ));
++        }
++    }
++}
+diff --git a/src/main/java/net/minestom/server/item/metadata/ShieldMeta.java b/src/main/java/net/minestom/server/item/metadata/ShieldMeta.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..8f8145ad89b107e129a656818559c3fc12a2efb6
+--- /dev/null
++++ b/src/main/java/net/minestom/server/item/metadata/ShieldMeta.java
+@@ -0,0 +1,122 @@
++package net.minestom.server.item.metadata;
++
++import net.kyori.adventure.text.Component;
++import net.minestom.server.color.DyeColor;
++import net.minestom.server.item.ItemMetaView;
++import net.minestom.server.tag.Tag;
++import net.minestom.server.tag.TagHandler;
++import net.minestom.server.tag.TagReadable;
++import net.minestom.server.tag.TagSerializer;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++import org.jetbrains.annotations.UnknownNullability;
++
++import java.util.ArrayList;
++import java.util.List;
++
++// Microtus -  Banner and Shield Meta
++@ApiStatus.Experimental
++public record ShieldMeta(@NotNull TagReadable readable) implements ItemMetaView<ShieldMeta.Builder> {
++
++    private static final String BASE_KEY = "Base";
++    private static final String ENTITY_TAG = "BlockEntityTag";
++    private static final Tag<Component> CUSTOM_NAME = Tag.Component("CustomName").path(ENTITY_TAG);
++    private static final Tag<Integer> BASE_TAG = Tag.Integer(BASE_KEY).path(ENTITY_TAG);
++    private static final Tag<List<BannerMeta.Pattern>> PATTERNS = Tag.Structure("Patterns",
++                    TagSerializer.fromCompound(BannerMeta.Pattern::fromCompound, BannerMeta.Pattern::asCompound))
++            .path(ENTITY_TAG).list().defaultValue(List.of());
++
++    /**
++     * Get name of the marker, unused by Minestom
++     *
++     * @return name of the marker
++     */
++    public @Nullable Component getCustomName() {
++        return getTag(CUSTOM_NAME);
++    }
++
++    /**
++     * Get patterns of the banner
++     *
++     * @return patterns of the banner
++     */
++    public @NotNull List<BannerMeta.Pattern> getPatterns() {
++        return getTag(PATTERNS);
++    }
++
++    @Override
++    public <T> @UnknownNullability T getTag(@NotNull Tag<T> tag) {
++        return readable.getTag(tag);
++    }
++
++    public record Builder(@NotNull TagHandler tagHandler) implements ItemMetaView.Builder {
++        public Builder() {
++            this(TagHandler.newHandler());
++        }
++
++        /**
++         * Set the color which is used as base color for a shield.
++         * @param dyeColor the color to set
++         * @return the builder instance
++         */
++        public @NotNull ShieldMeta.Builder baseColor(@NotNull DyeColor dyeColor) {
++            setTag(BASE_TAG, dyeColor.ordinal());
++            return this;
++        }
++
++        /**
++         * Set name of the marker, unused by Minestom
++         *
++         * @param customName name of the marker
++         * @return this
++         */
++        public @NotNull ShieldMeta.Builder customName(@NotNull Component customName) {
++            setTag(CUSTOM_NAME, customName);
++            return this;
++        }
++
++        /**
++         * Set the patterns of the banner
++         *
++         * @param patterns patterns of the banner
++         * @return this
++         */
++        public @NotNull ShieldMeta.Builder patterns(@NotNull List<BannerMeta.Pattern> patterns) {
++            setTag(PATTERNS, patterns);
++            return this;
++        }
++
++        /**
++         * Add a pattern to the banner
++         *
++         * @param pattern pattern to add
++         * @return this
++         */
++        public @NotNull ShieldMeta.Builder addPattern(BannerMeta.Pattern pattern) {
++            var newList = new ArrayList<>(getTag(PATTERNS));
++            newList.add(pattern);
++            return patterns(newList);
++        }
++
++        /**
++         * Remove a pattern from the banner
++         *
++         * @param pattern pattern to remove
++         * @return this
++         */
++        public @NotNull ShieldMeta.Builder removePattern(BannerMeta.Pattern pattern) {
++            var newList = new ArrayList<>(getTag(PATTERNS));
++            newList.remove(pattern);
++            return patterns(newList);
++        }
++
++        /**
++         * Clears the underlying list which contains the pattern values.
++         * @return this
++         */
++        public @NotNull ShieldMeta.Builder clearPatterns() {
++            return patterns(List.of());
++        }
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
+index 9f99d2950007b5c081a44804b2d17d71456512f0..51f3ccd8523e0255208308743154b9bb2e47cfbe 100644
+--- a/src/main/java/net/minestom/server/registry/Registry.java
++++ b/src/main/java/net/minestom/server/registry/Registry.java
+@@ -150,6 +150,7 @@ public final class Registry {
+         POTION_EFFECTS("potion_effects.json"),
+         POTION_TYPES("potions.json"),
+         PARTICLES("particles.json"),
++        BANNER_PATTERNS("banner_patterns.json"), // Microtus -  Banner and Shield Meta
+         DAMAGE_TYPES("damage_types.json"), // Microtus - 1.19.4 update
+ 
+         BLOCK_TAGS("tags/block_tags.json"),
