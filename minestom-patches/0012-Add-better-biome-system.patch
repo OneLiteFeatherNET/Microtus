@@ -1,0 +1,300 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Sat, 1 Jul 2023 22:34:12 +0200
+Subject: [PATCH] Add better biome system
+
+
+diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
+index e31b4006fbfdf830a94ee4e8fbb6959b6dcaddbf..217f3a9a10aad096568ce1681758ff11afe2ae54 100644
+--- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
++++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
+@@ -25,6 +25,7 @@ public class Generators {
+ 
+         var generator = new CodeGenerator(outputFolder);
+         generator.generate(resource("blocks.json"), "net.minestom.server.instance.block", "Block", "BlockImpl", "Blocks");
++        generator.generate(resource("biomes.json"), "net.minestom.server.instance.biome", "Biome", "BiomeImpl", "Biomes"); // Microtus - Biome Update
+         generator.generate(resource("items.json"), "net.minestom.server.item", "Material", "MaterialImpl", "Materials");
+         generator.generate(resource("entities.json"), "net.minestom.server.entity", "EntityType", "EntityTypeImpl", "EntityTypes");
+         generator.generate(resource("enchantments.json"), "net.minestom.server.item", "Enchantment", "EnchantmentImpl", "Enchantments");
+diff --git a/src/main/java/net/minestom/server/instance/biome/Biome.java b/src/main/java/net/minestom/server/instance/biome/Biome.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..8f9d521974cddf439f6b6ecfbb8d5d3290295e58
+--- /dev/null
++++ b/src/main/java/net/minestom/server/instance/biome/Biome.java
+@@ -0,0 +1,44 @@
++package net.minestom.server.instance.biome;
++
++import net.minestom.server.registry.ProtocolObject;
++import net.minestom.server.registry.Registry;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.Contract;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++import java.util.Collection;
++// Microtus - Biome Update
++public sealed interface Biome extends ProtocolObject, Biomes permits BiomeImpl {
++
++    /**
++     * +     * Returns the enchantment registry.
++     * +     *
++     * +     * @return the enchantment registry
++     * +
++     */
++    @Contract(pure = true)
++    @NotNull
++    Registry.BiomeEntry registry();
++
++    @Override
++    default @NotNull NamespaceID namespace() {
++        return registry().namespace();
++    }
++
++    static @NotNull Collection<@NotNull Biome> values() {
++        return BiomeImpl.values();
++    }
++
++    static @Nullable Biome fromNamespaceId(@NotNull String namespaceID) {
++        return BiomeImpl.getSafe(namespaceID);
++    }
++
++    static Biome getId(int id) {
++        return BiomeImpl.getId(id);
++    }
++
++    static @Nullable Biome fromNamespaceId(@NotNull NamespaceID namespaceID) {
++        return fromNamespaceId(namespaceID.asString());
++    }
++}
+diff --git a/src/main/java/net/minestom/server/instance/biome/BiomeImpl.java b/src/main/java/net/minestom/server/instance/biome/BiomeImpl.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..20ecfb855582e8764e0ca6503fb771560bb66d1e
+--- /dev/null
++++ b/src/main/java/net/minestom/server/instance/biome/BiomeImpl.java
+@@ -0,0 +1,37 @@
++package net.minestom.server.instance.biome;
++
++import net.minestom.server.registry.Registry;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Collection;
++// Microtus - Biome Update
++public record BiomeImpl(Registry.BiomeEntry registry) implements Biome {
++    private static final Registry.Container<Biome> CONTAINER = Registry.createContainer(Registry.Resource.BIOMES,
++            (namespace, properties) -> new BiomeImpl(Registry.biome(namespace, properties)));
++
++    static Biome get(@NotNull String namespace) {
++        return CONTAINER.get(namespace);
++    }
++
++    static Biome getSafe(@NotNull String namespace) {
++        return CONTAINER.getSafe(namespace);
++    }
++
++    static Biome getId(int id) {
++        return CONTAINER.getId(id);
++    }
++
++    @Override
++    public int id() {
++        return 0;
++    }
++
++    static Collection<Biome> values() {
++        return CONTAINER.values();
++    }
++
++    @Override
++    public String toString() {
++        return name();
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
+index e129cb82cbc137cba4f129cf4d923b8fc4d15c7d..cfdb35644538f1c889dab02d256459ffa44ff3f0 100644
+--- a/src/main/java/net/minestom/server/registry/Registry.java
++++ b/src/main/java/net/minestom/server/registry/Registry.java
+@@ -28,6 +28,12 @@ import java.util.function.Supplier;
+  * Use at your own risk.
+  */
+ public final class Registry {
++    // Microtus start - Biome update
++    @ApiStatus.Internal
++    public static BiomeEntry biome(String namespace, @NotNull Properties main) {
++        return new BiomeEntry(namespace, main, null);
++    }
++    // Microtus end - Biome update
+ 
+     // Microtus start - 1.19.4 update
+     @ApiStatus.Internal
+@@ -141,6 +147,7 @@ public final class Registry {
+     @ApiStatus.Internal
+     public enum Resource {
+         BLOCKS("blocks.json"),
++        BIOMES("biomes.json"), // Microtus - Biome Update
+         ITEMS("items.json"),
+         ENTITIES("entities.json"),
+         ENCHANTMENTS("enchantments.json"),
+@@ -164,6 +171,92 @@ public final class Registry {
+             this.name = name;
+         }
+     }
++    // Microtus start - Biome update
++    public static final class BiomeEntry implements Entry {
++
++        private final NamespaceID namespace;
++
++        private Properties custom;
++        private final boolean humid;
++        private final double temperature;
++        private final double downfall;
++        private final String precipitation;
++        private final int fogColor;
++        private final int waterColor;
++        private final int waterFogColor;
++        private final int skyColor;
++        private final int foliageColor;
++        private final String grassColorModifier;
++
++        private BiomeEntry(String namespace, Properties main, Properties custom) {
++            this.custom = custom;
++            this.namespace = NamespaceID.from(namespace);
++            this.humid = main.getBoolean("humid");
++            this.temperature = main.getDouble("temperature");
++            this.downfall = main.getDouble("downfall");
++            this.precipitation = main.getString("precipitation");
++            this.fogColor = main.getInt("fogColor");
++            this.waterColor = main.getInt("waterColor");
++            this.waterFogColor = main.getInt("waterFogColor");
++            this.skyColor = main.getInt("skyColor");
++            this.foliageColor = main.getInt("foliageColor");
++            this.grassColorModifier = main.getString("grassColorModifier");
++        }
++
++        public Properties getCustom() {
++            return custom;
++        }
++
++        public boolean isHumid() {
++            return humid;
++        }
++
++        public double getTemperature() {
++            return temperature;
++        }
++
++        public double getDownfall() {
++            return downfall;
++        }
++
++        public String getPrecipitation() {
++            return precipitation;
++        }
++
++        public int getFogColor() {
++            return fogColor;
++        }
++
++        public int getWaterColor() {
++            return waterColor;
++        }
++
++        public int getWaterFogColor() {
++            return waterFogColor;
++        }
++
++        public int getSkyColor() {
++            return skyColor;
++        }
++
++        public int getFoliageColor() {
++            return foliageColor;
++        }
++
++        public String getGrassColorModifier() {
++            return grassColorModifier;
++        }
++
++        public @NotNull NamespaceID namespace() {
++            return namespace;
++        }
++
++        @Override
++        public Properties custom() {
++            return custom;
++        }
++    }
++    // Microtus end - Biome update
+ 
+     public static final class BlockEntry implements Entry {
+         private final NamespaceID namespace;
+@@ -448,6 +541,7 @@ public final class Registry {
+                     custom);
+         }
+     }
++
+     // Microtus start - 1.19.4 update
+     public record DamageTypeEntry(NamespaceID namespace, double exhaustion,
+                                   String messageId,
+diff --git a/src/main/java/net/minestom/server/world/biomes/Biome.java b/src/main/java/net/minestom/server/world/biomes/Biome.java
+index b58c200c1fb4787c6c383782426cf5f97b1d0943..912244a9e5dbd9ec8a6b66322b6ac42c4b00d04f 100644
+--- a/src/main/java/net/minestom/server/world/biomes/Biome.java
++++ b/src/main/java/net/minestom/server/world/biomes/Biome.java
+@@ -34,7 +34,7 @@ public final class Biome {
+ 
+     private final NamespaceID name;
+     private final float depth;
+-    private final float temperature;
++    private final double temperature;
+     private final float scale;
+     private final float downfall;
+     private final Category category;
+@@ -42,7 +42,7 @@ public final class Biome {
+     private final Precipitation precipitation;
+     private final TemperatureModifier temperatureModifier;
+ 
+-    Biome(NamespaceID name, float depth, float temperature, float scale, float downfall, Category category, BiomeEffects effects, Precipitation precipitation, TemperatureModifier temperatureModifier) {
++    Biome(NamespaceID name, float depth, double temperature, float scale, float downfall, Category category, BiomeEffects effects, Precipitation precipitation, TemperatureModifier temperatureModifier) {
+         this.name = name;
+         this.depth = depth;
+         this.temperature = temperature;
+@@ -68,7 +68,7 @@ public final class Biome {
+ 
+             nbt.set("element", NBT.Compound(element -> {
+                 element.setFloat("depth", depth);
+-                element.setFloat("temperature", temperature);
++                element.setDouble("temperature", temperature);
+                 element.setFloat("scale", scale);
+                 element.setFloat("downfall", downfall);
+                 element.setString("category", category.name().toLowerCase(Locale.ROOT));
+@@ -94,7 +94,7 @@ public final class Biome {
+         return this.depth;
+     }
+ 
+-    public float temperature() {
++    public double temperature() {
+         return this.temperature;
+     }
+ 
+diff --git a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
+index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..a99d86aec12a6569cfe56c49600db0428e937d83 100644
+--- a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
++++ b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
+@@ -2,6 +2,7 @@ package net.minestom.server.world.biomes;
+ 
+ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
++import net.minestom.server.registry.Registry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+@@ -21,7 +22,9 @@ public final class BiomeManager {
+     private final Int2ObjectMap<Biome> biomes = new Int2ObjectOpenHashMap<>();
+ 
+     public BiomeManager() {
+-        addBiome(Biome.PLAINS);
++        net.minestom.server.instance.biome.Biome.values().stream().map(biome ->
++                new Biome(biome.namespace(), 0, biome.registry().getTemperature(), 0, 0, Biome.Category.NONE, BiomeEffects.builder().build(), Biome.Precipitation.NONE, Biome.TemperatureModifier.NONE))
++                .forEach(this::addBiome);
+     }
+ 
+     /**
