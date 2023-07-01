@@ -1,0 +1,34 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Sun, 25 Jun 2023 22:11:38 +0200
+Subject: [PATCH] Replace old biome system
+
+
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index 0e771bcb4e47d28358b2fa3fb623710187110837..d4fa9859bf0bd39255fa3dab242a81d280aed37f 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -249,7 +249,6 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+     public CompletableFuture<Void> UNSAFE_init(@NotNull Instance spawnInstance) {
+         this.dimensionType = spawnInstance.getDimensionType();
+ 
+-        // "minecraft:worldgen/biome", MinecraftServer.getBiomeManager().toNBT()
+         NBTCompound nbt = NBT.Compound(Map.of(
+                 "minecraft:chat_type", Messenger.chatRegistry(),
+                 "minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT(),
+diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
+index 58ce1d73a92667e22d9a3e7c6313f14a5dce6ad2..1e829b07b48b4d422ff850b2e5c130fdbea336e5 100644
+--- a/src/main/java/net/minestom/server/registry/Registry.java
++++ b/src/main/java/net/minestom/server/registry/Registry.java
+@@ -34,6 +34,11 @@ public final class Registry {
+         return new BiomeEntry(namespace, main, null);
+     }
+ 
++    @ApiStatus.Internal
++    public static BiomeEntry biome(String namespace, @NotNull Properties main) {
++        return new BiomeEntry(namespace, main, null);
++    }
++
+     // Microtus start - 1.19.4 update
+     @ApiStatus.Internal
+     public static DamageTypeEntry damageType(String namespace, @NotNull Properties main) {

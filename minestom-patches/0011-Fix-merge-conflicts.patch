@@ -1,0 +1,969 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Sat, 1 Jul 2023 20:23:56 +0200
+Subject: [PATCH] Fix merge conflicts
+
+
+diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
+index e31b4006fbfdf830a94ee4e8fbb6959b6dcaddbf..36d58674451c5062d0f1dafeaa8b031508414ff3 100644
+--- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
++++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
+@@ -25,6 +25,7 @@ public class Generators {
+ 
+         var generator = new CodeGenerator(outputFolder);
+         generator.generate(resource("blocks.json"), "net.minestom.server.instance.block", "Block", "BlockImpl", "Blocks");
++        generator.generate(resource("biomes.json"), "net.minestom.server.instance.biome", "Biome", "BiomeImpl", "Biomes");
+         generator.generate(resource("items.json"), "net.minestom.server.item", "Material", "MaterialImpl", "Materials");
+         generator.generate(resource("entities.json"), "net.minestom.server.entity", "EntityType", "EntityTypeImpl", "EntityTypes");
+         generator.generate(resource("enchantments.json"), "net.minestom.server.item", "Enchantment", "EnchantmentImpl", "Enchantments");
+diff --git a/demo/src/main/java/net/minestom/demo/MainDemo.java b/demo/src/main/java/net/minestom/demo/MainDemo.java
+index 9ad45b6be304a5896e0771b73912d9314b9f3a03..307b985e3c8ef94854201afc4031fe123731fa39 100644
+--- a/demo/src/main/java/net/minestom/demo/MainDemo.java
++++ b/demo/src/main/java/net/minestom/demo/MainDemo.java
+@@ -7,13 +7,9 @@ import net.minestom.server.coordinate.Pos;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.event.GlobalEventHandler;
+ import net.minestom.server.event.player.PlayerLoginEvent;
+-import net.minestom.server.instance.AnvilLoader;
+ import net.minestom.server.instance.InstanceContainer;
+ import net.minestom.server.instance.InstanceManager;
+ import net.minestom.server.instance.block.Block;
+-import net.minestom.server.utils.NamespaceID;
+-import net.minestom.server.world.biomes.Biome;
+-import net.minestom.server.world.biomes.BiomeManager;
+ 
+ public class MainDemo {
+ 
+diff --git a/demo/src/main/java/net/minestom/demo/PlayerInit.java b/demo/src/main/java/net/minestom/demo/PlayerInit.java
+index 484438e91ebb327a8f54e6da8d94e22df030e08c..0b0570327df0f1e6f2ee27cceefa592739f3a467 100644
+--- a/demo/src/main/java/net/minestom/demo/PlayerInit.java
++++ b/demo/src/main/java/net/minestom/demo/PlayerInit.java
+@@ -1,8 +1,12 @@
+ package net.minestom.demo;
+ 
++import de.articdive.jnoise.generators.noise_parameters.simplex_variants.Simplex2DVariant;
++import de.articdive.jnoise.generators.noisegen.opensimplex.FastSimplexNoiseGenerator;
++import de.articdive.jnoise.pipeline.JNoise;
+ import net.kyori.adventure.text.Component;
+ import net.minestom.server.MinecraftServer;
+ import net.minestom.server.adventure.audience.Audiences;
++import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Pos;
+ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.entity.Entity;
+@@ -20,6 +24,7 @@ import net.minestom.server.event.server.ServerTickMonitorEvent;
+ import net.minestom.server.instance.Instance;
+ import net.minestom.server.instance.InstanceContainer;
+ import net.minestom.server.instance.InstanceManager;
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.inventory.Inventory;
+ import net.minestom.server.inventory.InventoryType;
+@@ -35,6 +40,7 @@ import net.minestom.server.world.DimensionType;
+ import net.minestom.server.instance.LightingChunk; // Microtus - Lightning support
+ 
+ import java.time.Duration;
++import java.util.ArrayList;
+ import java.util.Collection;
+ import java.util.Random;
+ import java.util.Set;
+@@ -123,7 +129,25 @@ public class PlayerInit {
+         InstanceManager instanceManager = MinecraftServer.getInstanceManager();
+ 
+         InstanceContainer instanceContainer = instanceManager.createInstanceContainer(DimensionType.OVERWORLD);
+-        instanceContainer.setGenerator(unit -> unit.modifier().fillHeight(0, 40, Block.STONE));
++        // Noise used for the height
++        JNoise noise = JNoise.newBuilder()
++                .fastSimplex(FastSimplexNoiseGenerator.newBuilder().setVariant2D(Simplex2DVariant.IMPROVE_X).build())
++                .build();
++        ArrayList<Biome> biomes = new ArrayList(Biome.values());
++        Random random = new Random();
++        // Set the Generator
++        instanceContainer.setGenerator(unit -> {
++            Point start = unit.absoluteStart();
++            for (int x = 0; x < unit.size().x(); x++) {
++                for (int z = 0; z < unit.size().z(); z++) {
++                    Point bottom = start.add(x, 0, z);
++                    unit.modifier().fill(bottom, bottom.add(1, 40, 1), Block.GRASS_BLOCK);
++                    for (int y = 0; y < 40; y++) {
++                        unit.modifier().setBiome(x, y, z, biomes.get(random.nextInt(biomes.size())));
++                    }
++                }
++            }
++        });
+         instanceContainer.setChunkSupplier(LightingChunk::new); // Microtus - Lightning support
+ 
+         if (false) {
+diff --git a/src/autogenerated/java/net/minestom/server/entity/EntityTypes.java b/src/autogenerated/java/net/minestom/server/entity/EntityTypes.java
+index 4c56bf3557eb5b0cd305e0deeb7d5e34b8f19127..ff95e5ea5f062093e1b9170c9fc45df0076e0dd4 100644
+--- a/src/autogenerated/java/net/minestom/server/entity/EntityTypes.java
++++ b/src/autogenerated/java/net/minestom/server/entity/EntityTypes.java
+@@ -29,6 +29,8 @@ interface EntityTypes {
+ 
+     EntityType CAT = EntityTypeImpl.get("minecraft:cat");
+ 
++    EntityType CAMEL = EntityTypeImpl.get("minecraft:camel");
++
+     EntityType CAVE_SPIDER = EntityTypeImpl.get("minecraft:cave_spider");
+ 
+     EntityType CHEST_BOAT = EntityTypeImpl.get("minecraft:chest_boat"); // Microtus - 1.19.4 update
+diff --git a/src/autogenerated/java/net/minestom/server/instance/biome/Biomes.java b/src/autogenerated/java/net/minestom/server/instance/biome/Biomes.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..31eced59ba97cdcd73e56914f1ed04210d845c0e
+--- /dev/null
++++ b/src/autogenerated/java/net/minestom/server/instance/biome/Biomes.java
+@@ -0,0 +1,133 @@
++package net.minestom.server.instance.biome;
++
++/**
++ * Code autogenerated, do not edit!
++ */
++@SuppressWarnings("unused")
++interface Biomes {
++    Biome SNOWY_SLOPES = BiomeImpl.get("minecraft:minecraft:snowy_slopes");
++
++    Biome OLD_GROWTH_PINE_TAIGA = BiomeImpl.get("minecraft:minecraft:old_growth_pine_taiga");
++
++    Biome MUSHROOM_FIELDS = BiomeImpl.get("minecraft:minecraft:mushroom_fields");
++
++    Biome TAIGA = BiomeImpl.get("minecraft:minecraft:taiga");
++
++    Biome DEEP_OCEAN = BiomeImpl.get("minecraft:minecraft:deep_ocean");
++
++    Biome ERODED_BADLANDS = BiomeImpl.get("minecraft:minecraft:eroded_badlands");
++
++    Biome FROZEN_RIVER = BiomeImpl.get("minecraft:minecraft:frozen_river");
++
++    Biome END_HIGHLANDS = BiomeImpl.get("minecraft:minecraft:end_highlands");
++
++    Biome SUNFLOWER_PLAINS = BiomeImpl.get("minecraft:minecraft:sunflower_plains");
++
++    Biome BIRCH_FOREST = BiomeImpl.get("minecraft:minecraft:birch_forest");
++
++    Biome WINDSWEPT_HILLS = BiomeImpl.get("minecraft:minecraft:windswept_hills");
++
++    Biome BAMBOO_JUNGLE = BiomeImpl.get("minecraft:minecraft:bamboo_jungle");
++
++    Biome WOODED_BADLANDS = BiomeImpl.get("minecraft:minecraft:wooded_badlands");
++
++    Biome BADLANDS = BiomeImpl.get("minecraft:minecraft:badlands");
++
++    Biome SAVANNA_PLATEAU = BiomeImpl.get("minecraft:minecraft:savanna_plateau");
++
++    Biome BEACH = BiomeImpl.get("minecraft:minecraft:beach");
++
++    Biome DARK_FOREST = BiomeImpl.get("minecraft:minecraft:dark_forest");
++
++    Biome STONY_PEAKS = BiomeImpl.get("minecraft:minecraft:stony_peaks");
++
++    Biome MANGROVE_SWAMP = BiomeImpl.get("minecraft:minecraft:mangrove_swamp");
++
++    Biome SPARSE_JUNGLE = BiomeImpl.get("minecraft:minecraft:sparse_jungle");
++
++    Biome LUKEWARM_OCEAN = BiomeImpl.get("minecraft:minecraft:lukewarm_ocean");
++
++    Biome RIVER = BiomeImpl.get("minecraft:minecraft:river");
++
++    Biome STONY_SHORE = BiomeImpl.get("minecraft:minecraft:stony_shore");
++
++    Biome WARPED_FOREST = BiomeImpl.get("minecraft:minecraft:warped_forest");
++
++    Biome SNOWY_PLAINS = BiomeImpl.get("minecraft:minecraft:snowy_plains");
++
++    Biome DRIPSTONE_CAVES = BiomeImpl.get("minecraft:minecraft:dripstone_caves");
++
++    Biome SNOWY_TAIGA = BiomeImpl.get("minecraft:minecraft:snowy_taiga");
++
++    Biome GROVE = BiomeImpl.get("minecraft:minecraft:grove");
++
++    Biome SWAMP = BiomeImpl.get("minecraft:minecraft:swamp");
++
++    Biome JAGGED_PEAKS = BiomeImpl.get("minecraft:minecraft:jagged_peaks");
++
++    Biome COLD_OCEAN = BiomeImpl.get("minecraft:minecraft:cold_ocean");
++
++    Biome FOREST = BiomeImpl.get("minecraft:minecraft:forest");
++
++    Biome LUSH_CAVES = BiomeImpl.get("minecraft:minecraft:lush_caves");
++
++    Biome BASALT_DELTAS = BiomeImpl.get("minecraft:minecraft:basalt_deltas");
++
++    Biome DEEP_COLD_OCEAN = BiomeImpl.get("minecraft:minecraft:deep_cold_ocean");
++
++    Biome ICE_SPIKES = BiomeImpl.get("minecraft:minecraft:ice_spikes");
++
++    Biome END_MIDLANDS = BiomeImpl.get("minecraft:minecraft:end_midlands");
++
++    Biome FROZEN_OCEAN = BiomeImpl.get("minecraft:minecraft:frozen_ocean");
++
++    Biome DESERT = BiomeImpl.get("minecraft:minecraft:desert");
++
++    Biome DEEP_FROZEN_OCEAN = BiomeImpl.get("minecraft:minecraft:deep_frozen_ocean");
++
++    Biome WINDSWEPT_FOREST = BiomeImpl.get("minecraft:minecraft:windswept_forest");
++
++    Biome JUNGLE = BiomeImpl.get("minecraft:minecraft:jungle");
++
++    Biome OCEAN = BiomeImpl.get("minecraft:minecraft:ocean");
++
++    Biome OLD_GROWTH_SPRUCE_TAIGA = BiomeImpl.get("minecraft:minecraft:old_growth_spruce_taiga");
++
++    Biome SNOWY_BEACH = BiomeImpl.get("minecraft:minecraft:snowy_beach");
++
++    Biome WINDSWEPT_SAVANNA = BiomeImpl.get("minecraft:minecraft:windswept_savanna");
++
++    Biome END_BARRENS = BiomeImpl.get("minecraft:minecraft:end_barrens");
++
++    Biome WARM_OCEAN = BiomeImpl.get("minecraft:minecraft:warm_ocean");
++
++    Biome DEEP_LUKEWARM_OCEAN = BiomeImpl.get("minecraft:minecraft:deep_lukewarm_ocean");
++
++    Biome FLOWER_FOREST = BiomeImpl.get("minecraft:minecraft:flower_forest");
++
++    Biome SOUL_SAND_VALLEY = BiomeImpl.get("minecraft:minecraft:soul_sand_valley");
++
++    Biome NETHER_WASTES = BiomeImpl.get("minecraft:minecraft:nether_wastes");
++
++    Biome FROZEN_PEAKS = BiomeImpl.get("minecraft:minecraft:frozen_peaks");
++
++    Biome THE_END = BiomeImpl.get("minecraft:minecraft:the_end");
++
++    Biome SMALL_END_ISLANDS = BiomeImpl.get("minecraft:minecraft:small_end_islands");
++
++    Biome OLD_GROWTH_BIRCH_FOREST = BiomeImpl.get("minecraft:minecraft:old_growth_birch_forest");
++
++    Biome CRIMSON_FOREST = BiomeImpl.get("minecraft:minecraft:crimson_forest");
++
++    Biome THE_VOID = BiomeImpl.get("minecraft:minecraft:the_void");
++
++    Biome DEEP_DARK = BiomeImpl.get("minecraft:minecraft:deep_dark");
++
++    Biome MEADOW = BiomeImpl.get("minecraft:minecraft:meadow");
++
++    Biome WINDSWEPT_GRAVELLY_HILLS = BiomeImpl.get("minecraft:minecraft:windswept_gravelly_hills");
++
++    Biome SAVANNA = BiomeImpl.get("minecraft:minecraft:savanna");
++
++    Biome PLAINS = BiomeImpl.get("minecraft:minecraft:plains");
++}
+diff --git a/src/main/java/net/minestom/server/MinecraftServer.java b/src/main/java/net/minestom/server/MinecraftServer.java
+index 3a30407d3baa1be4a63f3e45cae9ea1fa4003a98..18322b53871de14b88a3ef07d5c6aade6b3b1a29 100644
+--- a/src/main/java/net/minestom/server/MinecraftServer.java
++++ b/src/main/java/net/minestom/server/MinecraftServer.java
+@@ -26,7 +26,6 @@ import net.minestom.server.utils.PacketUtils;
+ import net.minestom.server.utils.validate.Check;
+ import net.minestom.server.world.Difficulty;
+ import net.minestom.server.world.DimensionTypeManager;
+-import net.minestom.server.world.biomes.BiomeManager;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.UnknownNullability;
+@@ -290,10 +289,6 @@ public final class MinecraftServer {
+         return serverProcess.dimension();
+     }
+ 
+-    public static BiomeManager getBiomeManager() {
+-        return serverProcess.biome();
+-    }
+-
+     public static AdvancementManager getAdvancementManager() {
+         return serverProcess.advancement();
+     }
+diff --git a/src/main/java/net/minestom/server/ServerProcess.java b/src/main/java/net/minestom/server/ServerProcess.java
+index 89ec44a64d04b59006fcbea7a5616c0ccbaf0030..aa1874a896759ff6474983a5dcaf162990ffbaac 100644
+--- a/src/main/java/net/minestom/server/ServerProcess.java
++++ b/src/main/java/net/minestom/server/ServerProcess.java
+@@ -22,7 +22,6 @@ import net.minestom.server.snapshot.Snapshotable;
+ import net.minestom.server.thread.ThreadDispatcher;
+ import net.minestom.server.timer.SchedulerManager;
+ import net.minestom.server.world.DimensionTypeManager;
+-import net.minestom.server.world.biomes.BiomeManager;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+ 
+@@ -81,11 +80,6 @@ public interface ServerProcess extends Snapshotable {
+      */
+     @NotNull DimensionTypeManager dimension();
+ 
+-    /**
+-     * Handles registered biomes.
+-     */
+-    @NotNull BiomeManager biome();
+-
+     /**
+      * Handles registered advancements.
+      */
+diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
+index 761fef7e5bd507adf4417109e922031dec42c37d..64e293032fb4e52e420c58a4a067acd4d9d001d1 100644
+--- a/src/main/java/net/minestom/server/ServerProcessImpl.java
++++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
+@@ -31,7 +31,6 @@ import net.minestom.server.timer.SchedulerManager;
+ import net.minestom.server.utils.PacketUtils;
+ import net.minestom.server.utils.collection.MappedCollection;
+ import net.minestom.server.world.DimensionTypeManager;
+-import net.minestom.server.world.biomes.BiomeManager;
+ import org.jetbrains.annotations.NotNull;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -60,7 +59,6 @@ final class ServerProcessImpl implements ServerProcess {
+     private final SchedulerManager scheduler;
+     private final BenchmarkManager benchmark;
+     private final DimensionTypeManager dimension;
+-    private final BiomeManager biome;
+     private final AdvancementManager advancement;
+     private final BossBarManager bossBar;
+     private final TagManager tag;
+@@ -87,7 +85,6 @@ final class ServerProcessImpl implements ServerProcess {
+         this.scheduler = new SchedulerManager();
+         this.benchmark = new BenchmarkManager();
+         this.dimension = new DimensionTypeManager();
+-        this.biome = new BiomeManager();
+         this.advancement = new AdvancementManager();
+         this.bossBar = new BossBarManager();
+         this.tag = new TagManager();
+@@ -147,11 +144,6 @@ final class ServerProcessImpl implements ServerProcess {
+         return dimension;
+     }
+ 
+-    @Override
+-    public @NotNull BiomeManager biome() {
+-        return biome;
+-    }
+-
+     @Override
+     public @NotNull AdvancementManager advancement() {
+         return advancement;
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index b3703129dad9aefbbaf521004d6a405abb656d74..0e771bcb4e47d28358b2fa3fb623710187110837 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -249,12 +249,12 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+     public CompletableFuture<Void> UNSAFE_init(@NotNull Instance spawnInstance) {
+         this.dimensionType = spawnInstance.getDimensionType();
+ 
++        // "minecraft:worldgen/biome", MinecraftServer.getBiomeManager().toNBT()
+         NBTCompound nbt = NBT.Compound(Map.of(
+                 "minecraft:chat_type", Messenger.chatRegistry(),
+                 "minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT(),
+-                "minecraft:worldgen/biome", MinecraftServer.getBiomeManager().toNBT(), // Microtus - 1.19.4 update
+-                "minecraft:damage_type", DamageType.getNBT()) // Microtus - 1.19.4 update
+-        ); // Microtus - 1.19.4 update
++                "minecraft:damage_type", DamageType.getNBT() // Microtus - 1.19.4 update
++        ));
+ 
+         final JoinGamePacket joinGamePacket = new JoinGamePacket(getEntityId(), false, gameMode, null,
+                 List.of(dimensionType.getName().asString()), nbt, dimensionType.toString(), dimensionType.getName().asString(),
+diff --git a/src/main/java/net/minestom/server/extras/optifine/OptifineSupport.java b/src/main/java/net/minestom/server/extras/optifine/OptifineSupport.java
+index 9f2a9584a32025b937d8b27187c1ed3b1688e973..17a325683e26fa16059ad40e818ec9b13f505e37 100644
+--- a/src/main/java/net/minestom/server/extras/optifine/OptifineSupport.java
++++ b/src/main/java/net/minestom/server/extras/optifine/OptifineSupport.java
+@@ -1,10 +1,6 @@
+ package net.minestom.server.extras.optifine;
+ 
+-import net.minestom.server.MinecraftServer;
+-import net.minestom.server.utils.NamespaceID;
+ import net.minestom.server.utils.validate.Check;
+-import net.minestom.server.world.biomes.Biome;
+-import net.minestom.server.world.biomes.BiomeManager;
+ 
+ /**
+  * Hacky class for Optifine because of an issue making the client crash if biomes 'swamp' and 'swamp_hills'
+@@ -24,10 +20,6 @@ public final class OptifineSupport {
+     public static void enable() {
+         Check.stateCondition(enabled, "Optifine support is already enabled!");
+         OptifineSupport.enabled = true;
+-
+-        BiomeManager biomeManager = MinecraftServer.getBiomeManager();
+-        biomeManager.addBiome(Biome.builder().name(NamespaceID.from("minecraft:swamp")).build());
+-        biomeManager.addBiome(Biome.builder().name(NamespaceID.from("minecraft:swamp_hills")).build());
+     }
+ 
+     public static boolean isEnabled() {
+diff --git a/src/main/java/net/minestom/server/instance/AnvilLoader.java b/src/main/java/net/minestom/server/instance/AnvilLoader.java
+index fd02a020f4e28e6c9a03f8bf7e9a082f5eec0823..8d3b757425ae15263bb059093b08a10e1bff9397 100644
+--- a/src/main/java/net/minestom/server/instance/AnvilLoader.java
++++ b/src/main/java/net/minestom/server/instance/AnvilLoader.java
+@@ -4,11 +4,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
+ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+ import it.unimi.dsi.fastutil.ints.IntIntImmutablePair;
+ import net.minestom.server.MinecraftServer;
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.instance.block.BlockHandler;
+ import net.minestom.server.utils.NamespaceID;
+ import net.minestom.server.utils.async.AsyncUtils;
+-import net.minestom.server.world.biomes.Biome;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ import org.jglrxavpok.hephaistos.mca.*;
+@@ -34,7 +34,6 @@ import java.util.concurrent.ConcurrentHashMap;
+ 
+ public class AnvilLoader implements IChunkLoader {
+     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilLoader.class);
+-    private static final Biome BIOME = Biome.PLAINS;
+ 
+     private final Map<String, RegionFile> alreadyLoaded = new ConcurrentHashMap<>();
+     private final Path path;
+@@ -190,7 +189,7 @@ public class AnvilLoader implements IChunkLoader {
+                                     int finalY = sectionY * Chunk.CHUNK_SECTION_SIZE + y;
+                                     String biomeName = sectionBiomeInformation.getBaseBiome();
+                                     Biome biome = biomeCache.computeIfAbsent(biomeName, n ->
+-                                            Objects.requireNonNullElse(MinecraftServer.getBiomeManager().getByName(NamespaceID.from(n)), BIOME));
++                                            Objects.requireNonNullElse(Biome.fromNamespaceId(NamespaceID.from(n)), Biome.PLAINS));
+                                     chunk.setBiome(finalX, finalY, finalZ, biome);
+                                 }
+                             }
+@@ -206,7 +205,7 @@ public class AnvilLoader implements IChunkLoader {
+                                     int index = x / 4 + (z / 4) * 4 + (y / 4) * 16;
+                                     String biomeName = sectionBiomeInformation.getBiomes()[index];
+                                     Biome biome = biomeCache.computeIfAbsent(biomeName, n ->
+-                                            Objects.requireNonNullElse(MinecraftServer.getBiomeManager().getByName(NamespaceID.from(n)), BIOME));
++                                            Objects.requireNonNullElse(Biome.fromNamespaceId(NamespaceID.from(n)), Biome.PLAINS));
+                                     chunk.setBiome(finalX, finalY, finalZ, biome);
+                                 }
+                             }
+@@ -398,7 +397,7 @@ public class AnvilLoader implements IChunkLoader {
+                         if (x % 4 == 0 && sectionLocalY % 4 == 0 && z % 4 == 0) {
+                             int biomeIndex = (x / 4) + (sectionLocalY / 4) * 4 * 4 + (z / 4) * 4;
+                             final Biome biome = chunk.getBiome(x, y, z);
+-                            final String biomeName = biome.name().asString();
++                            final String biomeName = biome.name();
+ 
+                             biomePalette.increaseReference(biomeName);
+                             palettedBiomes[biomeIndex] = biomePalette.getPaletteIndex(biomeName);
+diff --git a/src/main/java/net/minestom/server/instance/Chunk.java b/src/main/java/net/minestom/server/instance/Chunk.java
+index 0db0745249f1cf1e3cc6bba9822fbd333e4de5b3..a6471eb052bf4f3c7018d3f01d10a12f9bf2a5ed 100644
+--- a/src/main/java/net/minestom/server/instance/Chunk.java
++++ b/src/main/java/net/minestom/server/instance/Chunk.java
+@@ -6,6 +6,7 @@ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.entity.pathfinding.PFColumnarSpace;
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.network.packet.server.play.ChunkDataPacket;
+ import net.minestom.server.snapshot.Snapshotable;
+@@ -13,7 +14,6 @@ import net.minestom.server.tag.TagHandler;
+ import net.minestom.server.tag.Taggable;
+ import net.minestom.server.utils.chunk.ChunkSupplier;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+-import net.minestom.server.world.biomes.Biome;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.List;
+diff --git a/src/main/java/net/minestom/server/instance/DynamicChunk.java b/src/main/java/net/minestom/server/instance/DynamicChunk.java
+index 486a1bfb7f4be051a6edde83473b857cc4dd5988..96dcab3d687e31cf7d893cfef727e66232013ece 100644
+--- a/src/main/java/net/minestom/server/instance/DynamicChunk.java
++++ b/src/main/java/net/minestom/server/instance/DynamicChunk.java
+@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.entity.Entity;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.entity.pathfinding.PFBlock;
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.instance.block.BlockHandler;
+ import net.minestom.server.network.NetworkBuffer;
+@@ -22,7 +23,6 @@ import net.minestom.server.utils.ArrayUtils;
+ import net.minestom.server.utils.MathUtils;
+ import net.minestom.server.utils.ObjectPool;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+-import net.minestom.server.world.biomes.Biome;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+@@ -147,7 +147,7 @@ public class DynamicChunk extends Chunk {
+         final Section section = getSectionAt(y);
+         final int id = section.biomePalette()
+                 .get(toSectionRelativeCoordinate(x) / 4, toSectionRelativeCoordinate(y) / 4, toSectionRelativeCoordinate(z) / 4);
+-        return MinecraftServer.getBiomeManager().getById(id);
++        return Biome.getId(id);
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minestom/server/instance/GeneratorImpl.java b/src/main/java/net/minestom/server/instance/GeneratorImpl.java
+index e4169b8d9909034ff64237b0a57c11f9aff6b1f3..1dedf25e02a88b43f08df1f28f11821f1d49a785 100644
+--- a/src/main/java/net/minestom/server/instance/GeneratorImpl.java
++++ b/src/main/java/net/minestom/server/instance/GeneratorImpl.java
+@@ -4,11 +4,11 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Vec;
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.instance.generator.GenerationUnit;
+ import net.minestom.server.instance.generator.UnitModifier;
+ import net.minestom.server.instance.palette.Palette;
+-import net.minestom.server.world.biomes.Biome;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.List;
+diff --git a/src/main/java/net/minestom/server/instance/biome/Biome.java b/src/main/java/net/minestom/server/instance/biome/Biome.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..2fc252debb635fb021b224e04f0bf67c8792916b
+--- /dev/null
++++ b/src/main/java/net/minestom/server/instance/biome/Biome.java
+@@ -0,0 +1,74 @@
++package net.minestom.server.instance.biome;
++
++import net.minestom.server.coordinate.Point;
++import net.minestom.server.registry.ProtocolObject;
++import net.minestom.server.registry.Registry;
++import net.minestom.server.utils.NamespaceID;
++import net.minestom.server.utils.validate.Check;
++import org.jetbrains.annotations.Contract;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++import org.jglrxavpok.hephaistos.nbt.NBT;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++import org.jglrxavpok.hephaistos.nbt.NBTType;
++
++import java.util.Collection;
++import java.util.Locale;
++import java.util.Map;
++
++/**
++ * Represents a biome that can be placed anywhere.
++ * biome objects are expected to be reusable and therefore do not
++ * retain placement data (e.g. block position)
++ * <p>
++ * Implementations are expected to be immutable.
++ */
++
++public sealed interface Biome extends ProtocolObject, Biomes permits BiomeImpl {
++
++    /**
++     * Returns the enchantment registry.
++     *
++     * @return the enchantment registry
++     */
++    @Contract(pure = true)
++    @NotNull Registry.BiomeEntry registry();
++
++    @Override
++    default @NotNull NamespaceID namespace() {
++        return registry().namespace();
++    }
++
++    static @NotNull Collection<@NotNull Biome> values() {
++        return BiomeImpl.values();
++    }
++
++    static @Nullable Biome fromNamespaceId(@NotNull String namespaceID) {
++        return BiomeImpl.getSafe(namespaceID);
++    }
++
++    static Biome getId(int id) {
++        return BiomeImpl.getId(id);
++    }
++
++    static @Nullable Biome fromNamespaceId(@NotNull NamespaceID namespaceID) {
++        return fromNamespaceId(namespaceID.asString());
++    }
++
++    interface Setter {
++        void setBiome(int x, int y, int z, @NotNull Biome biome);
++
++        default void setBiome(@NotNull Point blockPosition, @NotNull Biome biome) {
++            setBiome(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ(), biome);
++        }
++    }
++
++    interface Getter {
++        @NotNull Biome getBiome(int x, int y, int z);
++
++        default @NotNull Biome getBiome(@NotNull Point point) {
++            return getBiome(point.blockX(), point.blockY(), point.blockZ());
++        }
++    }
++
++}
+diff --git a/src/main/java/net/minestom/server/instance/biome/BiomeImpl.java b/src/main/java/net/minestom/server/instance/biome/BiomeImpl.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..4f030a592bf2f4ca74e02af314aedc2624e9295f
+--- /dev/null
++++ b/src/main/java/net/minestom/server/instance/biome/BiomeImpl.java
+@@ -0,0 +1,39 @@
++package net.minestom.server.instance.biome;
++
++
++import net.minestom.server.registry.Registry;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Collection;
++
++public record BiomeImpl(Registry.BiomeEntry registry) implements Biome {
++
++    private static final Registry.Container<Biome> CONTAINER = Registry.createContainer(Registry.Resource.BIOMES,
++            (namespace, properties) -> new BiomeImpl(Registry.biome(namespace, properties)));
++
++    static Biome get(@NotNull String namespace) {
++        return CONTAINER.get(namespace);
++    }
++
++    static Biome getSafe(@NotNull String namespace) {
++        return CONTAINER.getSafe(namespace);
++    }
++
++    static Biome getId(int id) {
++        return CONTAINER.getId(id);
++    }
++
++    @Override
++    public int id() {
++        return 0;
++    }
++
++    static Collection<Biome> values() {
++        return CONTAINER.values();
++    }
++
++    @Override
++    public String toString() {
++        return name();
++    }
++}
+diff --git a/src/main/java/net/minestom/server/instance/generator/UnitModifier.java b/src/main/java/net/minestom/server/instance/generator/UnitModifier.java
+index 59006dec34d0d5f20b46f5ffeee9ce5e42768749..329b8c32d0caaa507b7ad3752087f94135e85735 100644
+--- a/src/main/java/net/minestom/server/instance/generator/UnitModifier.java
++++ b/src/main/java/net/minestom/server/instance/generator/UnitModifier.java
+@@ -1,8 +1,8 @@
+ package net.minestom.server.instance.generator;
+ 
+ import net.minestom.server.coordinate.Point;
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+-import net.minestom.server.world.biomes.Biome;
+ import org.jetbrains.annotations.NotNull;
+ 
+ public interface UnitModifier extends Block.Setter, Biome.Setter {
+diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
+index e129cb82cbc137cba4f129cf4d923b8fc4d15c7d..58ce1d73a92667e22d9a3e7c6313f14a5dce6ad2 100644
+--- a/src/main/java/net/minestom/server/registry/Registry.java
++++ b/src/main/java/net/minestom/server/registry/Registry.java
+@@ -29,6 +29,11 @@ import java.util.function.Supplier;
+  */
+ public final class Registry {
+ 
++    @ApiStatus.Internal
++    public static BiomeEntry biome(String namespace, @NotNull Properties main) {
++        return new BiomeEntry(namespace, main, null);
++    }
++
+     // Microtus start - 1.19.4 update
+     @ApiStatus.Internal
+     public static DamageTypeEntry damageType(String namespace, @NotNull Properties main) {
+@@ -141,6 +146,7 @@ public final class Registry {
+     @ApiStatus.Internal
+     public enum Resource {
+         BLOCKS("blocks.json"),
++        BIOMES("biomes.json"),
+         ITEMS("items.json"),
+         ENTITIES("entities.json"),
+         ENCHANTMENTS("enchantments.json"),
+@@ -165,6 +171,90 @@ public final class Registry {
+         }
+     }
+ 
++    public static final class BiomeEntry implements Entry {
++
++        private final NamespaceID namespace;
++
++        private Properties custom;
++        private final boolean humid;
++        private final double temperature;
++        private final double downfall;
++        private final String precipitation;
++        private final int fogColor;
++        private final int waterColor;
++        private final int waterFogColor;
++        private final int skyColor;
++        private final int foliageColor;
++        private final String grassColorModifier;
++
++        private BiomeEntry(String namespace, Properties main, Properties custom) {
++            this.custom = custom;
++            this.namespace = NamespaceID.from(namespace);
++            this.humid = main.getBoolean("humid");
++            this.temperature = main.getDouble("temperature");
++            this.downfall = main.getDouble("downfall");
++            this.precipitation = main.getString("precipitation");
++            this.fogColor = main.getInt("fogColor");
++            this.waterColor = main.getInt("waterColor");
++            this.waterFogColor = main.getInt("waterFogColor");
++            this.skyColor = main.getInt("skyColor");
++            this.foliageColor = main.getInt("foliageColor");
++            this.grassColorModifier = main.getString("grassColorModifier");
++        }
++
++        public Properties getCustom() {
++            return custom;
++        }
++
++        public boolean isHumid() {
++            return humid;
++        }
++
++        public double getTemperature() {
++            return temperature;
++        }
++
++        public double getDownfall() {
++            return downfall;
++        }
++
++        public String getPrecipitation() {
++            return precipitation;
++        }
++
++        public int getFogColor() {
++            return fogColor;
++        }
++
++        public int getWaterColor() {
++            return waterColor;
++        }
++
++        public int getWaterFogColor() {
++            return waterFogColor;
++        }
++
++        public int getSkyColor() {
++            return skyColor;
++        }
++
++        public int getFoliageColor() {
++            return foliageColor;
++        }
++
++        public String getGrassColorModifier() {
++            return grassColorModifier;
++        }
++
++        public @NotNull NamespaceID namespace() {
++            return namespace;
++        }
++        @Override
++        public Properties custom() {
++            return custom;
++        }
++    }
++
+     public static final class BlockEntry implements Entry {
+         private final NamespaceID namespace;
+         private final int id;
+diff --git a/src/main/java/net/minestom/server/snapshot/ChunkSnapshot.java b/src/main/java/net/minestom/server/snapshot/ChunkSnapshot.java
+index d3b933a1d0f5c19d3bc00f6dcf00eef04fe992fe..1348a9b054ce04caab281c62386c1b5113a462bb 100644
+--- a/src/main/java/net/minestom/server/snapshot/ChunkSnapshot.java
++++ b/src/main/java/net/minestom/server/snapshot/ChunkSnapshot.java
+@@ -1,8 +1,8 @@
+ package net.minestom.server.snapshot;
+ 
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.tag.TagReadable;
+-import net.minestom.server.world.biomes.Biome;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+diff --git a/src/main/java/net/minestom/server/snapshot/InstanceSnapshot.java b/src/main/java/net/minestom/server/snapshot/InstanceSnapshot.java
+index 16b770d6edf9ff3ec698c1e08e71fc53f41073a8..5a072be80a205e9c53c4e8173240fc9955b79882 100644
+--- a/src/main/java/net/minestom/server/snapshot/InstanceSnapshot.java
++++ b/src/main/java/net/minestom/server/snapshot/InstanceSnapshot.java
+@@ -1,10 +1,10 @@
+ package net.minestom.server.snapshot;
+ 
+ import net.minestom.server.coordinate.Point;
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.tag.TagReadable;
+ import net.minestom.server.world.DimensionType;
+-import net.minestom.server.world.biomes.Biome;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ import org.jetbrains.annotations.UnknownNullability;
+diff --git a/src/main/java/net/minestom/server/snapshot/SnapshotImpl.java b/src/main/java/net/minestom/server/snapshot/SnapshotImpl.java
+index 9d1e01ea8335d01e76a45c871223c104361e576b..546136d17b26f8c7e452f4b95601bc89c947c9d8 100644
+--- a/src/main/java/net/minestom/server/snapshot/SnapshotImpl.java
++++ b/src/main/java/net/minestom/server/snapshot/SnapshotImpl.java
+@@ -7,13 +7,13 @@ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.entity.EntityType;
+ import net.minestom.server.entity.GameMode;
+ import net.minestom.server.instance.Section;
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.tag.Tag;
+ import net.minestom.server.tag.TagReadable;
+ import net.minestom.server.utils.collection.IntMappedArray;
+ import net.minestom.server.utils.collection.MappedCollection;
+ import net.minestom.server.world.DimensionType;
+-import net.minestom.server.world.biomes.Biome;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+@@ -103,7 +103,7 @@ public final class SnapshotImpl {
+             final Section section = sections[getChunkCoordinate(y) - minSection];
+             final int id = section.biomePalette()
+                     .get(toSectionRelativeCoordinate(x) / 4, toSectionRelativeCoordinate(y) / 4, toSectionRelativeCoordinate(z) / 4);
+-            return MinecraftServer.getBiomeManager().getById(id);
++            return Biome.getId(id);
+         }
+ 
+         @Override
+diff --git a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
+deleted file mode 100644
+index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..0000000000000000000000000000000000000000
+--- a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
++++ /dev/null
+@@ -1,80 +0,0 @@
+-package net.minestom.server.world.biomes;
+-
+-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+-import net.minestom.server.utils.NamespaceID;
+-import org.jglrxavpok.hephaistos.nbt.NBT;
+-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+-import org.jglrxavpok.hephaistos.nbt.NBTType;
+-
+-import java.util.Collection;
+-import java.util.Collections;
+-import java.util.Map;
+-
+-
+-/**
+- * Allows servers to register custom dimensions. Also used during player joining to send the list of all existing dimensions.
+- * <p>
+- * Contains {@link Biome#PLAINS} by default but can be removed.
+- */
+-public final class BiomeManager {
+-    private final Int2ObjectMap<Biome> biomes = new Int2ObjectOpenHashMap<>();
+-
+-    public BiomeManager() {
+-        addBiome(Biome.PLAINS);
+-    }
+-
+-    /**
+-     * Adds a new biome. This does NOT send the new list to players.
+-     *
+-     * @param biome the biome to add
+-     */
+-    public synchronized void addBiome(Biome biome) {
+-        this.biomes.put(biome.id(), biome);
+-    }
+-
+-    /**
+-     * Removes a biome. This does NOT send the new list to players.
+-     *
+-     * @param biome the biome to remove
+-     */
+-    public synchronized void removeBiome(Biome biome) {
+-        this.biomes.remove(biome.id());
+-    }
+-
+-    /**
+-     * Returns an immutable copy of the biomes already registered.
+-     *
+-     * @return an immutable copy of the biomes already registered
+-     */
+-    public synchronized Collection<Biome> unmodifiableCollection() {
+-        return Collections.unmodifiableCollection(biomes.values());
+-    }
+-
+-    /**
+-     * Gets a biome by its id.
+-     *
+-     * @param id the id of the biome
+-     * @return the {@link Biome} linked to this id
+-     */
+-    public synchronized Biome getById(int id) {
+-        return biomes.get(id);
+-    }
+-
+-    public synchronized Biome getByName(NamespaceID namespaceID) {
+-        Biome biome = null;
+-        for (final Biome biomeT : biomes.values()) {
+-            if (biomeT.name().equals(namespaceID)) {
+-                biome = biomeT;
+-                break;
+-            }
+-        }
+-        return biome;
+-    }
+-
+-    public synchronized NBTCompound toNBT() {
+-        return NBT.Compound(Map.of(
+-                "type", NBT.String("minecraft:worldgen/biome"),
+-                "value", NBT.List(NBTType.TAG_Compound, biomes.values().stream().map(Biome::toNbt).toList())));
+-    }
+-}
+diff --git a/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java b/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
+index 1e8f352c6dea803bbe9cea8998fb4d03535f6177..a3bf6117dfe230a149b8727815a66b824ac1c27a 100644
+--- a/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
+@@ -1,9 +1,9 @@
+ package net.minestom.server.instance;
+ 
++import net.minestom.server.instance.biome.Biome;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.utils.NamespaceID;
+-import net.minestom.server.world.biomes.Biome;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import org.junit.jupiter.api.AfterAll;
+@@ -76,7 +76,7 @@ public class AnvilLoaderIntegrationTest {
+                     for (int x = 0; x < 16; x++) {
+                         for (int z = 0; z < 16; z++) {
+                             Biome b = chunk.getBiome(x, y, z);
+-                            assertEquals(NamespaceID.from("minecraft:plains"), b.name());
++                            assertEquals(NamespaceID.from("minecraft:plains"), b.namespace());
+                         }
+                     }
+                 }
+diff --git a/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java b/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
+index ec9b91cebac942d77f6e027b5be9fc04bf2f7eb9..40b6f9a6db00a2d2b5dad913bda40eca0105afdb 100644
+--- a/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
+@@ -1,11 +1,10 @@
+ package net.minestom.server.instance;
+ 
+-import net.minestom.testing.Env;
+-import net.minestom.testing.EnvTest;
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.instance.generator.GenerationUnit;
+-import net.minestom.server.world.biomes.Biome;
++import net.minestom.testing.Env;
++import net.minestom.testing.EnvTest;
+ import org.junit.jupiter.api.Test;
+ 
+ import static org.junit.jupiter.api.Assertions.*;
+@@ -100,8 +99,8 @@ public class GeneratorForkIntegrationTest {
+         var instance = manager.createInstanceContainer();
+         instance.setGenerator(unit -> {
+             var u = unit.fork(unit.absoluteStart(), unit.absoluteEnd().add(16, 0, 16));
+-            assertThrows(IllegalStateException.class, () -> u.modifier().setBiome(16, 0, 0, Biome.PLAINS));
+-            assertThrows(IllegalStateException.class, () -> u.modifier().fillBiome(Biome.PLAINS));
++            assertThrows(IllegalStateException.class, () -> u.modifier().setBiome(16, 0, 0, net.minestom.server.instance.biome.Biome.PLAINS));
++            assertThrows(IllegalStateException.class, () -> u.modifier().fillBiome(net.minestom.server.instance.biome.Biome.PLAINS));
+         });
+         instance.loadChunk(0, 0).join();
+     }
+diff --git a/src/test/java/net/minestom/server/instance/GeneratorTest.java b/src/test/java/net/minestom/server/instance/GeneratorTest.java
+index 4a53ede725c99c4448e28d11625476eed34189c5..18b2fc34d46e64a0d1658f11c7c1d0361a723e6b 100644
+--- a/src/test/java/net/minestom/server/instance/GeneratorTest.java
++++ b/src/test/java/net/minestom/server/instance/GeneratorTest.java
+@@ -2,12 +2,13 @@ package net.minestom.server.instance;
+ 
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Vec;
++import net.minestom.server.instance.biome.Biome;
++import net.minestom.server.instance.biome.Biomes;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.instance.generator.GenerationUnit;
+ import net.minestom.server.instance.generator.Generator;
+ import net.minestom.server.utils.MathUtils;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+-import net.minestom.server.world.biomes.Biome;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.params.ParameterizedTest;
+ import org.junit.jupiter.params.provider.Arguments;
