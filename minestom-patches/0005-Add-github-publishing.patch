@@ -4,8 +4,43 @@ Date: Wed, 14 Jun 2023 09:38:27 +0200
 Subject: [PATCH] Add github publishing
 
 
+diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
+index b63a95323b4e20af1c36f29f24c623d978016696..f93ed8ab03c523a066241cd61a05bb1fcd5b9a28 100644
+--- a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
++++ b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
+@@ -10,23 +10,13 @@ indra {
+         testWith(17)
+     }
+ 
+-    github("Minestom", "Minestom") {
++    publishAllTo("github", "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus")
++
++    github("OneLiteFeatherNET", "Microtus") {
+         ci(true)
+     }
+-    apache2License()
+-
+-    configurePublications {
+-        pom {
+-            developers {
+-                developer {
+-                    id.set("TheMode")
+-                    name.set("TheMode")
+-                }
+-                developer {
+-                    id.set("jglrxavpok")
+-                    name.set("jglrxavpok")
+-                }
+-            }
+-        }
++    license {
++        name("APGL-3.0")
++        url("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
+     }
+ }
+\ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1f2dcb7e079cc11022fd791501ab1af4dcfc3323 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..66606515d3244b280b8aa90351f2abb1413c443b 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,13 +1,40 @@
@@ -17,7 +52,7 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1f2dcb7e079cc11022fd791501ab1af4
      id("minestom.publishing-conventions")
      id("minestom.native-conventions")
      alias(libs.plugins.blossom)
-+    publishing
++    // publishing
 +    id("org.ajoberstar.grgit") version "5.2.0"
 +}
 +
@@ -25,7 +60,7 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1f2dcb7e079cc11022fd791501ab1af4
 +var versionExtension by extra("")
 +var snapshot by extra("-SNAPSHOT")
 +
-+group = "net.onelitefeather"
++group = "net.onelitefeather.microtus"
 +
 +
 +ext {
@@ -44,137 +79,71 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1f2dcb7e079cc11022fd791501ab1af4
 +version = "%s%s".format(Locale.ROOT, baseVersion, versionExtension)
 +
  allprojects {
-     group = "net.minestom.server"
+-    group = "net.minestom.server"
 -    version = "1.0"
++    group = "net.onelitefeather.microtus"
 +    version = rootProject.version
      description = "Lightweight and multi-threaded Minecraft server implementation"
  }
  
-@@ -96,4 +123,57 @@ dependencies {
-     api("io.github.jglrxavpok.hephaistos:common:${libs.versions.hephaistos.get()}")
-     api("io.github.jglrxavpok.hephaistos:gson:${libs.versions.hephaistos.get()}")
- }
-+publishing {
-+    publications {
-+        create<MavenPublication>("mavenJava") {
-+            from(components.findByName("java"))
-+            groupId = "net.onelitefeather"
-+            artifactId = "minestom"
-+            version = rootProject.version.toString()
-+            pom {
-+                name.set("Minestom")
-+                description.set("")
-+                url.set("https://github.com/OneLiteFeatherNET/Microtus")
-+                licenses {
-+                    license {
-+                        name.set("AGPL-3.0")
-+                        url.set("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
-+                    }
-+                }
-+                issueManagement {
-+                    system.set("Github")
-+                    url.set("https://github.com/OneLiteFeatherNET/Microtus/issues")
-+                }
-+                developers {
-+                    developer {
-+                        id.set("themeinerlp")
-+                        name.set("Phillipp Glanz")
-+                        email.set("p.glanz@madfix.me")
-+                    }
-+                    developer {
-+                        id.set("theEvilReaper")
-+                        name.set("Steffen Wonning")
-+                        email.set("steffenwx@gmail.com")
-+                    }
-+                }
-+                scm {
-+                    connection.set("scm:git@github.com:OneLiteFeatherNET/Microtus.git")
-+                    developerConnection.set("scm:git@github.com:git@github.com:OneLiteFeatherNET/Microtus.git")
-+                    url.set("https://github.com/OneLiteFeatherNET/Microtus")
-+                }
-+            }
-+        }
-+        repositories {
-+            maven {
-+                val releasesRepoUrl = "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus"
-+                val snapshotsRepoUrl = "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus"
-+                url = if (version.toString().endsWith("SNAPSHOT")) uri(snapshotsRepoUrl) else uri(releasesRepoUrl)
-+                credentials {
-+                    username = System.getenv("GITHUB_ACTOR")
-+                    password = System.getenv("GITHUB_TOKEN")
-+                }
-+            }
-+        }
-+    }
-+}
- 
+@@ -34,7 +61,7 @@ tasks {
+             addStringOption("-release", "17")
+             // Links to external javadocs
+             links("https://docs.oracle.com/en/java/javase/17/docs/api/")
+-            links("https://jd.adventure.kyori.net/api/${libs.versions.adventure.get()}/")
++            // links("https://jd.adventure.kyori.net/api/${libs.versions.adventure.get()}/")
+         }
+     }
+     withType<Zip> {
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..78b715f5d6e580c0ad8c279d15425d909a4c31ae 100644
+index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..d8d8282ab8663995d7dc9b7ab44282856cc42704 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
-@@ -5,17 +5,59 @@ plugins {
+@@ -1,21 +1,10 @@
+ plugins {
+     id("java-library")
+-    `maven-publish`
++    id("net.kyori.indra")
++    id("net.kyori.indra.publishing")
+ }
  
- publishing {
-     publications {
+-publishing {
+-    publications {
 -        create<MavenPublication>("maven") {
 -            groupId = "net.minestom.testing"
-+        create<MavenPublication>("mavenJava") {
-+            from(components.findByName("java"))
-+            groupId = "net.onelitefeather.testing"
-             artifactId = "testing"
+-            artifactId = "testing"
 -            version = "1.0"
 -
 -            from(components["java"])
-+            version = rootProject.version.toString()
-+            pom {
-+                name.set("Minestom-Testing")
-+                description.set("The test package of minestom(microtus)")
-+                url.set("https://github.com/OneLiteFeatherNET/Microtus")
-+                licenses {
-+                    license {
-+                        name.set("AGPL-3.0")
-+                        url.set("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
-+                    }
-+                }
-+                issueManagement {
-+                    system.set("Github")
-+                    url.set("https://github.com/OneLiteFeatherNET/Microtus/issues")
-+                }
-+                developers {
-+                    developer {
-+                        id.set("themeinerlp")
-+                        name.set("Phillipp Glanz")
-+                        email.set("p.glanz@madfix.me")
-+                    }
-+                    developer {
-+                        id.set("theEvilReaper")
-+                        name.set("Steffen Wonning")
-+                        email.set("steffenwx@gmail.com")
-+                    }
-+                }
-+                scm {
-+                    connection.set("scm:git@github.com:OneLiteFeatherNET/Microtus.git")
-+                    developerConnection.set("scm:git@github.com:git@github.com:OneLiteFeatherNET/Microtus.git")
-+                    url.set("https://github.com/OneLiteFeatherNET/Microtus")
-+                }
-+            }
-+        }
-+        repositories {
-+            maven {
-+                val releasesRepoUrl = "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus"
-+                val snapshotsRepoUrl = "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus"
-+                url = if (version.toString().endsWith("SNAPSHOT")) uri(snapshotsRepoUrl) else uri(releasesRepoUrl)
-+                credentials {
-+                    username = System.getenv("GITHUB_ACTOR")
-+                    password = System.getenv("GITHUB_TOKEN")
-+                }
-+            }
-         }
-     }
- }
- 
+-        }
+-    }
+-}
+-
 -group = "net.minestom.testing"
-+group = "net.onelitefeather.testing"
++group = "net.onelitefeather.microtus.testing"
  version = "1.0"
  
  repositories {
+@@ -36,4 +25,21 @@ dependencies {
+ 
+ tasks.getByName<Test>("test") {
+     useJUnitPlatform()
++}
++
++indra {
++    javaVersions {
++        target(17)
++        testWith(17)
++    }
++
++    publishAllTo("github", "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus")
++
++    github("OneLiteFeatherNET", "Microtus") {
++        ci(true)
++    }
++    license {
++        name("APGL-3.0")
++        url("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
++    }
+ }
+\ No newline at end of file
