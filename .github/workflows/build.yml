@@ -42,6 +42,6 @@ jobs:
           path: patched-minestom/build/libs/minestom-*.jar
       - name: Publish to Github
         run: |
-          ./gradlew :patched-minestom:publishMavenJavaPublicationToMavenRepository
+          ./gradlew :patched-minestom:publishMavenJavaPublicationToMavenRepository :patched-minestom:testing:publishMavenJavaPublicationToMavenRepository
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
