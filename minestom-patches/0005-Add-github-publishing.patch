@@ -70,10 +70,10 @@ index b63a95323b4e20af1c36f29f24c623d978016696..0c3835945e10877aa6a2f32869dd0fa5
  }
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..9e2985da04b87cdf4c0e6be2876156e188a77d75 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..e6fcec5cd925e0685b2df57d8f6fc27d242742a9 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -1,13 +1,40 @@
+@@ -1,13 +1,41 @@
 +import org.ajoberstar.grgit.Grgit
 +import java.util.*
 +
@@ -85,6 +85,7 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..9e2985da04b87cdf4c0e6be2876156e1
 +    // alias(libs.plugins.blossom)
 +    // publishing
 +    id("org.ajoberstar.grgit") version "5.2.0"
++    signing
  }
  
 +var baseVersion by extra("1.1.0")
@@ -117,7 +118,7 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..9e2985da04b87cdf4c0e6be2876156e1
      description = "Lightweight and multi-threaded Minecraft server implementation"
  }
  
-@@ -34,29 +61,31 @@ tasks {
+@@ -34,29 +62,31 @@ tasks {
              addStringOption("-release", "17")
              // Links to external javadocs
              links("https://docs.oracle.com/en/java/javase/17/docs/api/")
@@ -176,15 +177,16 @@ index dd9f97ae171e48621586752460c9cb093e0b4030..4dfc01721ce5dc6b02a0d3d16110d69d
  [libraries]
  
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..64dc9107d54b3ff92d6fc593e1bb910540a74ad4 100644
+index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..4552380a8cffdbd156e31c1176817be437a6e891 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
-@@ -1,22 +1,11 @@
+@@ -1,22 +1,12 @@
  plugins {
      id("java-library")
 -    `maven-publish`
 +    id("net.kyori.indra")
 +    id("net.kyori.indra.publishing")
++    signing
  }
  
 -publishing {
@@ -205,7 +207,7 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..64dc9107d54b3ff92d6fc593e1bb9105
  
  repositories {
      mavenCentral()
-@@ -36,4 +25,39 @@ dependencies {
+@@ -36,4 +26,39 @@ dependencies {
  
  tasks.getByName<Test>("test") {
      useJUnitPlatform()
