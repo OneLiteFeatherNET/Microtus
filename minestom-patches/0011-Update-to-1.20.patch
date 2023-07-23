@@ -1655,6 +1655,86 @@ index 3a30407d3baa1be4a63f3e45cae9ea1fa4003a98..35d1fc34c39e3ca6753ca4834f106834
  
      // Threads
      public static final String THREAD_NAME_BENCHMARK = "Ms-Benchmark";
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index b3703129dad9aefbbaf521004d6a405abb656d74..6cb53972edddd143c1a9dcd721c43d676d0ad55d 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -205,6 +205,8 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+     private Identity identity;
+     private final Pointers pointers;
+ 
++    private int portalCooldown; // Microtus - 1.20 update
++
+     public Player(@NotNull UUID uuid, @NotNull String username, @NotNull PlayerConnection playerConnection) {
+         super(EntityType.PLAYER, uuid);
+         this.username = username;
+@@ -259,7 +261,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         final JoinGamePacket joinGamePacket = new JoinGamePacket(getEntityId(), false, gameMode, null,
+                 List.of(dimensionType.getName().asString()), nbt, dimensionType.toString(), dimensionType.getName().asString(),
+                 0, 0, MinecraftServer.getChunkViewDistance(), MinecraftServer.getChunkViewDistance(),
+-                false, true, false, levelFlat, deathLocation);
++                false, true, false, levelFlat, deathLocation, portalCooldown); // Microtus - 1.20 update
+         sendPacket(joinGamePacket);
+ 
+         // Server brand name
+@@ -435,7 +437,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+ 
+             // #buildDeathScreenText can return null, check here
+             if (deathText != null) {
+-                sendPacket(new DeathCombatEventPacket(getEntityId(), -1, deathText));
++                sendPacket(new DeathCombatEventPacket(getEntityId(), deathText)); // Microtus - 1.20
+             }
+ 
+             // #buildDeathMessage can return null, check here
+@@ -463,7 +465,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         refreshHealth();
+ 
+         sendPacket(new RespawnPacket(getDimensionType().toString(), getDimensionType().getName().asString(),
+-               0, gameMode, gameMode, false, levelFlat, true, deathLocation));
++                0, gameMode, gameMode, false, levelFlat, true, deathLocation, portalCooldown)); // Microtus - 1.20 update
+ 
+         PlayerRespawnEvent respawnEvent = new PlayerRespawnEvent(this);
+         EventDispatcher.call(respawnEvent);
+@@ -987,7 +989,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         final PlayerInfoUpdatePacket addPlayerPacket = getAddPlayerToList();
+ 
+         RespawnPacket respawnPacket = new RespawnPacket(getDimensionType().toString(), getDimensionType().getName().asString(),
+-                0, gameMode, gameMode, false, levelFlat, true, deathLocation);
++                0, gameMode, gameMode, false, levelFlat, true, deathLocation, portalCooldown); // Microtus - 1.20 update
+ 
+         sendPacket(removePlayerPacket);
+         sendPacket(destroyEntitiesPacket);
+@@ -1309,6 +1311,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+     }
+ 
+     // Microtus start - Add gamemode change event
++
+     /**
+      * Changes the player {@link GameMode}
+      *
+@@ -1378,7 +1381,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+                 "The dimension needs to be different than the current one!");
+         this.dimensionType = dimensionType;
+         sendPacket(new RespawnPacket(dimensionType.toString(), getDimensionType().getName().asString(),
+-                0, gameMode, gameMode, false, levelFlat, true, deathLocation));
++                0, gameMode, gameMode, false, levelFlat, true, deathLocation, portalCooldown)); // Microtus - 1.20 update
+         refreshClientStateAfterRespawn();
+     }
+ 
+diff --git a/src/main/java/net/minestom/server/instance/DynamicChunk.java b/src/main/java/net/minestom/server/instance/DynamicChunk.java
+index 027b182c84d68b8395c405270ea521c76c597e30..98114c492f5832e802694b7741def403787e8e99 100644
+--- a/src/main/java/net/minestom/server/instance/DynamicChunk.java
++++ b/src/main/java/net/minestom/server/instance/DynamicChunk.java
+@@ -242,7 +242,8 @@ public class DynamicChunk extends Chunk {
+                 emptyBlockMask.set(index);
+             }
+         }
+-        return new LightData(true,
++        // Microtus - 1.20 update
++        return new LightData(
+                 skyMask, blockMask,
+                 emptySkyMask, emptyBlockMask,
+                 skyLights, blockLights);
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
 index 2c7aaec2ee5ed3e47ef123c4ea2cd0dcdc3e6144..034870c0ca3f9cf98d95b6b12adb02cf924e241b 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
@@ -1729,6 +1809,111 @@ index 534c3592d382fa2bf417e8e11c8bf6d40ac983db..f505c76b402da5b25d4579f138afe41f
 +        return new DeathCombatEventPacket(this.playerId, operator.apply(this.message));
      }
  }
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/EndCombatEventPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/EndCombatEventPacket.java
+index 0f385b01511efc95932934e36bc0562ec74e53f1..043992dee86036a7cc19c9902f1c0c4821d43ac0 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/EndCombatEventPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/EndCombatEventPacket.java
+@@ -5,18 +5,17 @@ import net.minestom.server.network.packet.server.ServerPacket;
+ import net.minestom.server.network.packet.server.ServerPacketIdentifier;
+ import org.jetbrains.annotations.NotNull;
+ 
+-import static net.minestom.server.network.NetworkBuffer.INT;
+ import static net.minestom.server.network.NetworkBuffer.VAR_INT;
+ 
+-public record EndCombatEventPacket(int duration, int entityId) implements ServerPacket {
++// Microtus - 1.20 update
++public record EndCombatEventPacket(int duration) implements ServerPacket {
+     public EndCombatEventPacket(@NotNull NetworkBuffer reader) {
+-        this(reader.read(VAR_INT), reader.read(INT));
++        this(reader.read(VAR_INT));
+     }
+ 
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+         writer.write(VAR_INT, duration);
+-        writer.write(INT, entityId);
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java b/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java
+index 074a34510e28197f7e409b3ae36e51081be48f60..9ebaebbdef9e1b1924a8cc2c84fb6bb45ab2a7d2 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java
+@@ -13,11 +13,16 @@ import java.util.List;
+ 
+ import static net.minestom.server.network.NetworkBuffer.*;
+ 
+-public record JoinGamePacket(int entityId, boolean isHardcore, GameMode gameMode, GameMode previousGameMode,
+-                             List<String> worlds, NBTCompound dimensionCodec, String dimensionType, String world,
+-                             long hashedSeed, int maxPlayers, int viewDistance, int simulationDistance,
+-                             boolean reducedDebugInfo, boolean enableRespawnScreen, boolean isDebug, boolean isFlat,
+-                             DeathLocation deathLocation) implements ServerPacket {
++// Microtus - 1.20 update
++public record JoinGamePacket(
++        int entityId,
++        boolean isHardcore,
++        GameMode gameMode,
++        GameMode previousGameMode,
++        List<String> worlds, NBTCompound dimensionCodec, String dimensionType, String world,
++        long hashedSeed, int maxPlayers, int viewDistance, int simulationDistance,
++        boolean reducedDebugInfo, boolean enableRespawnScreen, boolean isDebug, boolean isFlat,
++        DeathLocation deathLocation, int portalCooldown) implements ServerPacket {
+     public JoinGamePacket {
+         worlds = List.copyOf(worlds);
+     }
+@@ -27,7 +32,7 @@ public record JoinGamePacket(int entityId, boolean isHardcore, GameMode gameMode
+                 reader.readCollection(STRING), (NBTCompound) reader.read(NBT), reader.read(STRING), reader.read(STRING),
+                 reader.read(LONG), reader.read(VAR_INT), reader.read(VAR_INT), reader.read(VAR_INT),
+                 reader.read(BOOLEAN), reader.read(BOOLEAN), reader.read(BOOLEAN), reader.read(BOOLEAN),
+-                reader.read(DEATH_LOCATION));
++                reader.read(DEATH_LOCATION), reader.read(VAR_INT)); // Microtus - 1.20 update
+     }
+ 
+     @Override
+@@ -58,6 +63,7 @@ public record JoinGamePacket(int entityId, boolean isHardcore, GameMode gameMode
+         writer.write(BOOLEAN, isFlat);
+ 
+         writer.write(DEATH_LOCATION, deathLocation);
++        writer.write(VAR_INT, portalCooldown); // Microtus - 1.20 update
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/MultiBlockChangePacket.java b/src/main/java/net/minestom/server/network/packet/server/play/MultiBlockChangePacket.java
+index b9b7740eb6fe286bbb270b6a051d4a6ab3049e9f..e217e80116ef061b2101d83dfeb0b7e527b9b98b 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/MultiBlockChangePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/MultiBlockChangePacket.java
+@@ -7,24 +7,23 @@ import org.jetbrains.annotations.NotNull;
+ 
+ import static net.minestom.server.network.NetworkBuffer.*;
+ 
+-public record MultiBlockChangePacket(long chunkSectionPosition,
+-                                     boolean suppressLightUpdates,
+-                                     long[] blocks) implements ServerPacket {
++// Microtus - 1.20 update
++public record MultiBlockChangePacket(
++        long chunkSectionPosition,
++        long[] blocks
++) implements ServerPacket {
+     public MultiBlockChangePacket(int chunkX, int section, int chunkZ,
+-                                  boolean suppressLightUpdates,
+                                   long[] blocks) {
+-        this(((long) (chunkX & 0x3FFFFF) << 42) | (section & 0xFFFFF) | ((long) (chunkZ & 0x3FFFFF) << 20),
+-                suppressLightUpdates, blocks);
++        this(((long) (chunkX & 0x3FFFFF) << 42) | (section & 0xFFFFF) | ((long) (chunkZ & 0x3FFFFF) << 20), blocks);
+     }
+ 
+     public MultiBlockChangePacket(@NotNull NetworkBuffer reader) {
+-        this(reader.read(LONG), reader.read(BOOLEAN), reader.read(VAR_LONG_ARRAY));
++        this(reader.read(LONG), reader.read(VAR_LONG_ARRAY));
+     }
+ 
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+         writer.write(LONG, chunkSectionPosition);
+-        writer.write(BOOLEAN, suppressLightUpdates);
+         writer.write(VAR_LONG_ARRAY, blocks);
+     }
+ 
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/OpenSignEditorPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/OpenSignEditorPacket.java
 index 8f695caff181bc9389c50d9ff1dae38460ff0055..75cc7dec7305ec73e0d9611352522c925c14c530 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/OpenSignEditorPacket.java
@@ -1754,6 +1939,47 @@ index 8f695caff181bc9389c50d9ff1dae38460ff0055..75cc7dec7305ec73e0d9611352522c92
      public void write(@NotNull NetworkBuffer writer) {
          writer.write(BLOCK_POSITION, position);
 +        writer.write(BOOLEAN, isFrontText); // Microtus - 1.20 update
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/RespawnPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/RespawnPacket.java
+index 2aa51c061fba30a8523047923210c3d4d5558592..69b2788994bcebd2c30e168c96a4c1471359e3ef 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/RespawnPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/RespawnPacket.java
+@@ -9,14 +9,23 @@ import org.jetbrains.annotations.NotNull;
+ 
+ import static net.minestom.server.network.NetworkBuffer.*;
+ 
+-public record RespawnPacket(String dimensionType, String worldName,
+-                            long hashedSeed, GameMode gameMode, GameMode previousGameMode,
+-                            boolean isDebug, boolean isFlat, boolean copyMeta,
+-                            DeathLocation deathLocation) implements ServerPacket {
++// Microtus - 1.20 update
++public record RespawnPacket(
++        String dimensionType,
++        String worldName,
++        long hashedSeed,
++        GameMode gameMode,
++        GameMode previousGameMode,
++        boolean isDebug,
++        boolean isFlat,
++        boolean copyMeta,
++        DeathLocation deathLocation,
++        int portalCooldown
++) implements ServerPacket {
+     public RespawnPacket(@NotNull NetworkBuffer reader) {
+         this(reader.read(STRING), reader.read(STRING),
+                 reader.read(LONG), GameMode.fromId(reader.read(BYTE)), GameMode.fromId(reader.read(BYTE)),
+-                reader.read(BOOLEAN), reader.read(BOOLEAN), reader.read(BOOLEAN), reader.read(DEATH_LOCATION));
++                reader.read(BOOLEAN), reader.read(BOOLEAN), reader.read(BOOLEAN), reader.read(DEATH_LOCATION), reader.read(VAR_INT));
+     }
+ 
+     @Override
+@@ -30,6 +39,7 @@ public record RespawnPacket(String dimensionType, String worldName,
+         writer.write(BOOLEAN, isFlat);
+         writer.write(BOOLEAN, copyMeta);
+         writer.write(DEATH_LOCATION, deathLocation);
++        writer.write(VAR_INT, portalCooldown); // Microtus - 1.20 update
      }
  
      @Override
