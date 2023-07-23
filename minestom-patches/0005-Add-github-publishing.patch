@@ -5,10 +5,10 @@ Subject: [PATCH] Add github publishing
 
 
 diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-index b63a95323b4e20af1c36f29f24c623d978016696..f93ed8ab03c523a066241cd61a05bb1fcd5b9a28 100644
+index b63a95323b4e20af1c36f29f24c623d978016696..30d97cbeb3737c0fdfeb469d3a3cdca7e6fb643c 100644
 --- a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
 +++ b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-@@ -10,23 +10,13 @@ indra {
+@@ -10,23 +10,17 @@ indra {
          testWith(17)
      }
  
@@ -37,6 +37,10 @@ index b63a95323b4e20af1c36f29f24c623d978016696..f93ed8ab03c523a066241cd61a05bb1f
 +        name("APGL-3.0")
 +        url("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
      }
++}
++
++indraSonatype {
++    useAlternateSonatypeOSSHost("s01")
  }
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
