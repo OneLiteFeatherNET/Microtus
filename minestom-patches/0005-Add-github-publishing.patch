@@ -100,10 +100,10 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..66606515d3244b280b8aa90351f2abb1
      }
      withType<Zip> {
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..d8d8282ab8663995d7dc9b7ab44282856cc42704 100644
+index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..57dd01f1539549c946836a7707f499fd352129eb 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
-@@ -1,21 +1,10 @@
+@@ -1,22 +1,11 @@
  plugins {
      id("java-library")
 -    `maven-publish`
@@ -117,17 +117,18 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..d8d8282ab8663995d7dc9b7ab4428285
 -            groupId = "net.minestom.testing"
 -            artifactId = "testing"
 -            version = "1.0"
--
++group = "net.onelitefeather.microtus.testing"
+ 
 -            from(components["java"])
 -        }
 -    }
 -}
 -
 -group = "net.minestom.testing"
-+group = "net.onelitefeather.microtus.testing"
- version = "1.0"
+-version = "1.0"
  
  repositories {
+     mavenCentral()
 @@ -36,4 +25,21 @@ dependencies {
  
  tasks.getByName<Test>("test") {
