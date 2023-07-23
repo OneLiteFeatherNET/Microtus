@@ -105,7 +105,7 @@ index 0000000000000000000000000000000000000000..2cdda4d8867a291cff483f832b78dbd8
 +    }
 +}
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index dd9f97ae171e48621586752460c9cb093e0b4030..7b04f8fa9298fd8cd367caf7e8fb760084027b2f 100644
+index 4dfc01721ce5dc6b02a0d3d16110d69d3e3ef724..3396af076014ae7499c3156faf02cc688a54e43c 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -7,7 +7,7 @@ adventure = "4.12.0"

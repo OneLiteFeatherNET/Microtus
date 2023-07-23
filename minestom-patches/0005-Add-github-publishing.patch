@@ -4,11 +4,28 @@ Date: Wed, 14 Jun 2023 09:38:27 +0200
 Subject: [PATCH] Add github publishing
 
 
+diff --git a/build-logic/build.gradle.kts b/build-logic/build.gradle.kts
+index 8f641d076bc2853a2a53009d6b92288d532cb42b..7187de227dbb03f8caca514897537dc64d37d40e 100644
+--- a/build-logic/build.gradle.kts
++++ b/build-logic/build.gradle.kts
+@@ -8,9 +8,10 @@ repositories {
+ }
+ 
+ dependencies {
+-    val indraVersion = "2.0.6"
++    val indraVersion = "3.1.2"
+     implementation("org.jetbrains.kotlin", "kotlin-gradle-plugin", "1.6.10")
+     implementation("net.kyori", "indra-common", indraVersion)
++    implementation("net.kyori", "indra-common", indraVersion)
+     implementation("net.kyori", "indra-publishing-sonatype", indraVersion)
+     implementation("org.graalvm.buildtools", "native-gradle-plugin", "0.9.9")
+ }
+\ No newline at end of file
 diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-index b63a95323b4e20af1c36f29f24c623d978016696..30d97cbeb3737c0fdfeb469d3a3cdca7e6fb643c 100644
+index b63a95323b4e20af1c36f29f24c623d978016696..0c3835945e10877aa6a2f32869dd0fa56046bdd6 100644
 --- a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
 +++ b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-@@ -10,23 +10,17 @@ indra {
+@@ -10,23 +10,35 @@ indra {
          testWith(17)
      }
  
@@ -20,22 +37,31 @@ index b63a95323b4e20af1c36f29f24c623d978016696..30d97cbeb3737c0fdfeb469d3a3cdca7
      }
 -    apache2License()
 -
--    configurePublications {
--        pom {
--            developers {
--                developer {
++    license {
++        name("AGPL-3.0")
++        url("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
++        spdx("AGPL-3.0-only")
++    }
++    signWithKeyFromPrefixedProperties("onelitefeather")
+     configurePublications {
+         pom {
+             developers {
+                 developer {
 -                    id.set("TheMode")
 -                    name.set("TheMode")
--                }
--                developer {
++                    id.set("themeinerlp")
++                    name.set("Phillipp Glanz")
++                    email.set("p.glanz@madfix.me")
+                 }
+                 developer {
 -                    id.set("jglrxavpok")
 -                    name.set("jglrxavpok")
--                }
--            }
--        }
-+    license {
-+        name("APGL-3.0")
-+        url("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
++                    id.set("theEvilReaper")
++                    name.set("Steffen Wonning")
++                    email.set("steffenwx@gmail.com")
+                 }
+             }
+         }
      }
 +}
 +
@@ -44,7 +70,7 @@ index b63a95323b4e20af1c36f29f24c623d978016696..30d97cbeb3737c0fdfeb469d3a3cdca7
  }
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..66606515d3244b280b8aa90351f2abb1413c443b 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..9e2985da04b87cdf4c0e6be2876156e188a77d75 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,13 +1,40 @@
@@ -55,11 +81,12 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..66606515d3244b280b8aa90351f2abb1
      `java-library`
      id("minestom.publishing-conventions")
      id("minestom.native-conventions")
-     alias(libs.plugins.blossom)
+-    alias(libs.plugins.blossom)
++    // alias(libs.plugins.blossom)
 +    // publishing
 +    id("org.ajoberstar.grgit") version "5.2.0"
-+}
-+
+ }
+ 
 +var baseVersion by extra("1.1.0")
 +var versionExtension by extra("")
 +var snapshot by extra("-SNAPSHOT")
@@ -78,8 +105,8 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..66606515d3244b280b8aa90351f2abb1
 +        versionExtension = ""
 +    }
 +
- }
- 
++}
++
 +version = "%s%s".format(Locale.ROOT, baseVersion, versionExtension)
 +
  allprojects {
@@ -90,7 +117,7 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..66606515d3244b280b8aa90351f2abb1
      description = "Lightweight and multi-threaded Minecraft server implementation"
  }
  
-@@ -34,7 +61,7 @@ tasks {
+@@ -34,29 +61,31 @@ tasks {
              addStringOption("-release", "17")
              // Links to external javadocs
              links("https://docs.oracle.com/en/java/javase/17/docs/api/")
@@ -99,8 +126,57 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..66606515d3244b280b8aa90351f2abb1
          }
      }
      withType<Zip> {
+         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+     }
+ 
+-    blossom {
+-        val git = "src/main/java/net/minestom/server/Git.java"
+ 
+-        val gitCommit = System.getenv("GIT_COMMIT")
+-        val gitBranch = System.getenv("GIT_BRANCH")
+-        val group = System.getenv("GROUP")
+-        val artifact = System.getenv("ARTIFACT")
+-
+-        replaceToken("\"&COMMIT\"", if (gitCommit == null) "null" else "\"${gitCommit}\"", git)
+-        replaceToken("\"&BRANCH\"", if (gitBranch == null) "null" else "\"${gitBranch}\"", git)
+-        replaceToken("\"&GROUP\"", if (group == null) "null" else "\"${group}\"", git)
+-        replaceToken("\"&ARTIFACT\"", if (artifact == null) "null" else "\"${artifact}\"", git)
+-    }
+ 
+ }
+ 
++/*blossom {
++    val git = "src/main/java/net/minestom/server/Git.java"
++
++    val gitCommit = System.getenv("GIT_COMMIT")
++    val gitBranch = System.getenv("GIT_BRANCH")
++    val group = System.getenv("GROUP")
++    val artifact = System.getenv("ARTIFACT")
++
++    replaceToken("\"&COMMIT\"", if (gitCommit == null) "null" else "\"${gitCommit}\"", git)
++    replaceToken("\"&BRANCH\"", if (gitBranch == null) "null" else "\"${gitBranch}\"", git)
++    replaceToken("\"&GROUP\"", if (group == null) "null" else "\"${group}\"", git)
++    replaceToken("\"&ARTIFACT\"", if (artifact == null) "null" else "\"${artifact}\"", git)
++}*/
++
+ dependencies {
+     // Testing Framework
+     testImplementation(project(mapOf("path" to ":testing")))
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+index dd9f97ae171e48621586752460c9cb093e0b4030..4dfc01721ce5dc6b02a0d3d16110d69d3e3ef724 100644
+--- a/gradle/libs.versions.toml
++++ b/gradle/libs.versions.toml
+@@ -40,7 +40,7 @@ jmh = "1.35"
+ jcstress = "0.8"
+ 
+ # Gradle plugins
+-blossom = "1.3.0"
++blossom = "1.3.1"
+ 
+ [libraries]
+ 
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..57dd01f1539549c946836a7707f499fd352129eb 100644
+index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..64dc9107d54b3ff92d6fc593e1bb910540a74ad4 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
 @@ -1,22 +1,11 @@
@@ -129,7 +205,7 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..57dd01f1539549c946836a7707f499fd
  
  repositories {
      mavenCentral()
-@@ -36,4 +25,21 @@ dependencies {
+@@ -36,4 +25,39 @@ dependencies {
  
  tasks.getByName<Test>("test") {
      useJUnitPlatform()
@@ -147,8 +223,26 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..57dd01f1539549c946836a7707f499fd
 +        ci(true)
 +    }
 +    license {
-+        name("APGL-3.0")
++        name("AGPL-3.0")
 +        url("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
++        spdx("AGPL-3.0-only")
++    }
++    signWithKeyFromPrefixedProperties("onelitefeather")
++    configurePublications {
++        pom {
++            developers {
++                developer {
++                    id.set("themeinerlp")
++                    name.set("Phillipp Glanz")
++                    email.set("p.glanz@madfix.me")
++                }
++                developer {
++                    id.set("theEvilReaper")
++                    name.set("Steffen Wonning")
++                    email.set("steffenwx@gmail.com")
++                }
++            }
++        }
 +    }
  }
 \ No newline at end of file
