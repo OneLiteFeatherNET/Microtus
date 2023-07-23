@@ -108,3 +108,73 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1f2dcb7e079cc11022fd791501ab1af4
 +    }
 +}
  
+diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
+index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..78b715f5d6e580c0ad8c279d15425d909a4c31ae 100644
+--- a/testing/build.gradle.kts
++++ b/testing/build.gradle.kts
+@@ -5,17 +5,59 @@ plugins {
+ 
+ publishing {
+     publications {
+-        create<MavenPublication>("maven") {
+-            groupId = "net.minestom.testing"
++        create<MavenPublication>("mavenJava") {
++            from(components.findByName("java"))
++            groupId = "net.onelitefeather.testing"
+             artifactId = "testing"
+-            version = "1.0"
+-
+-            from(components["java"])
++            version = rootProject.version.toString()
++            pom {
++                name.set("Minestom-Testing")
++                description.set("The test package of minestom(microtus)")
++                url.set("https://github.com/OneLiteFeatherNET/Microtus")
++                licenses {
++                    license {
++                        name.set("AGPL-3.0")
++                        url.set("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
++                    }
++                }
++                issueManagement {
++                    system.set("Github")
++                    url.set("https://github.com/OneLiteFeatherNET/Microtus/issues")
++                }
++                developers {
++                    developer {
++                        id.set("themeinerlp")
++                        name.set("Phillipp Glanz")
++                        email.set("p.glanz@madfix.me")
++                    }
++                    developer {
++                        id.set("theEvilReaper")
++                        name.set("Steffen Wonning")
++                        email.set("steffenwx@gmail.com")
++                    }
++                }
++                scm {
++                    connection.set("scm:git@github.com:OneLiteFeatherNET/Microtus.git")
++                    developerConnection.set("scm:git@github.com:git@github.com:OneLiteFeatherNET/Microtus.git")
++                    url.set("https://github.com/OneLiteFeatherNET/Microtus")
++                }
++            }
++        }
++        repositories {
++            maven {
++                val releasesRepoUrl = "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus"
++                val snapshotsRepoUrl = "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus"
++                url = if (version.toString().endsWith("SNAPSHOT")) uri(snapshotsRepoUrl) else uri(releasesRepoUrl)
++                credentials {
++                    username = System.getenv("GITHUB_ACTOR")
++                    password = System.getenv("GITHUB_TOKEN")
++                }
++            }
+         }
+     }
+ }
+ 
+-group = "net.minestom.testing"
++group = "net.onelitefeather.testing"
+ version = "1.0"
+ 
+ repositories {
