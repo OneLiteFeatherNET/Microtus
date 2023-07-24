@@ -22,26 +22,20 @@ index 8f641d076bc2853a2a53009d6b92288d532cb42b..7187de227dbb03f8caca514897537dc6
  }
 \ No newline at end of file
 diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-index b63a95323b4e20af1c36f29f24c623d978016696..0c3835945e10877aa6a2f32869dd0fa56046bdd6 100644
+index b63a95323b4e20af1c36f29f24c623d978016696..3024e94f0a6c9821b021a3f7fa67f8501db9bf06 100644
 --- a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
 +++ b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-@@ -10,23 +10,35 @@ indra {
+@@ -10,23 +10,29 @@ indra {
          testWith(17)
      }
  
 -    github("Minestom", "Minestom") {
-+    publishAllTo("github", "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus")
-+
 +    github("OneLiteFeatherNET", "Microtus") {
          ci(true)
      }
 -    apache2License()
 -
-+    license {
-+        name("AGPL-3.0")
-+        url("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
-+        spdx("AGPL-3.0-only")
-+    }
++    mitLicense()
 +    signWithKeyFromPrefixedProperties("onelitefeather")
      configurePublications {
          pom {
