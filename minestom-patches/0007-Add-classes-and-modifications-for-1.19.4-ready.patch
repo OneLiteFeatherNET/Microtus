@@ -2019,7 +2019,7 @@ index 9ba6129d1fe4c4f344d2511503d1e09928d91af5..eede72d501c31b9d6ccc7c67c6635484
          //EMPTY_VALUES.set(TYPE_PARTICLE -> throw new UnsupportedOperationException();
          EMPTY_VALUES.set(TYPE_VILLAGERDATA, VillagerData(0, 0, 0));
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index a13ee12c7305e4ca03a7fcacce032abba7c8b072..93171392c717319c92321f7613b68fbc4356b49d 100644
+index db3c6f748130f73c9e577d8d888bfce93842af4c..133b925eedd1b29d5a5a90307020ae3bd6a529fc 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -251,7 +251,9 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
@@ -2033,7 +2033,7 @@ index a13ee12c7305e4ca03a7fcacce032abba7c8b072..93171392c717319c92321f7613b68fbc
  
          final JoinGamePacket joinGamePacket = new JoinGamePacket(getEntityId(), false, gameMode, null,
                  List.of(dimensionType.getName().asString()), nbt, dimensionType.toString(), dimensionType.getName().asString(),
-@@ -815,7 +817,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -823,7 +825,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
      @Override
      public boolean isImmune(@NotNull DamageType type) {
          if (!getGameMode().canTakeDamage()) {
@@ -2042,7 +2042,7 @@ index a13ee12c7305e4ca03a7fcacce032abba7c8b072..93171392c717319c92321f7613b68fbc
          }
          return super.isImmune(type);
      }
-@@ -1573,7 +1575,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1581,7 +1583,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
      @ApiStatus.Internal
      protected void synchronizePosition(boolean includeSelf) {
          if (includeSelf) {
@@ -3529,7 +3529,7 @@ index 0000000000000000000000000000000000000000..0d9238e6d203f65d76f47744fed1f271
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
-index 3e0a05ab6495d842fe1710eca68ea23af03e4094..9f99d2950007b5c081a44804b2d17d71456512f0 100644
+index 3187dd6a7e5d7f6b41b40073f2102e6ed63e585f..10a4f7d615927a6a0ee958abc4009174f83d53e0 100644
 --- a/src/main/java/net/minestom/server/registry/Registry.java
 +++ b/src/main/java/net/minestom/server/registry/Registry.java
 @@ -28,6 +28,14 @@ import java.util.function.Supplier;
