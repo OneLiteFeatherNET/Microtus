@@ -1656,7 +1656,7 @@ index 3a30407d3baa1be4a63f3e45cae9ea1fa4003a98..35d1fc34c39e3ca6753ca4834f106834
      // Threads
      public static final String THREAD_NAME_BENCHMARK = "Ms-Benchmark";
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index b3703129dad9aefbbaf521004d6a405abb656d74..6cb53972edddd143c1a9dcd721c43d676d0ad55d 100644
+index 2886dc65a8f79cab946434b093ae3161bf5c2cb1..2b810253fc8992c659d306de2848df739cca432f 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -205,6 +205,8 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
@@ -1695,7 +1695,7 @@ index b3703129dad9aefbbaf521004d6a405abb656d74..6cb53972edddd143c1a9dcd721c43d67
  
          PlayerRespawnEvent respawnEvent = new PlayerRespawnEvent(this);
          EventDispatcher.call(respawnEvent);
-@@ -987,7 +989,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -995,7 +997,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          final PlayerInfoUpdatePacket addPlayerPacket = getAddPlayerToList();
  
          RespawnPacket respawnPacket = new RespawnPacket(getDimensionType().toString(), getDimensionType().getName().asString(),
@@ -1704,7 +1704,7 @@ index b3703129dad9aefbbaf521004d6a405abb656d74..6cb53972edddd143c1a9dcd721c43d67
  
          sendPacket(removePlayerPacket);
          sendPacket(destroyEntitiesPacket);
-@@ -1309,6 +1311,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1317,6 +1319,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
      }
  
      // Microtus start - Add gamemode change event
@@ -1712,7 +1712,7 @@ index b3703129dad9aefbbaf521004d6a405abb656d74..6cb53972edddd143c1a9dcd721c43d67
      /**
       * Changes the player {@link GameMode}
       *
-@@ -1378,7 +1381,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1386,7 +1389,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
                  "The dimension needs to be different than the current one!");
          this.dimensionType = dimensionType;
          sendPacket(new RespawnPacket(dimensionType.toString(), getDimensionType().getName().asString(),
