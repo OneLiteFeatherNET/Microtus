@@ -637,7 +637,7 @@ index 0000000000000000000000000000000000000000..56a864253f2b2508a9c91239e1664534
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
-index 10a4f7d615927a6a0ee958abc4009174f83d53e0..5bc28a08cd7cb5b57fb90965b33550b0c7675afb 100644
+index 9f99d2950007b5c081a44804b2d17d71456512f0..51f3ccd8523e0255208308743154b9bb2e47cfbe 100644
 --- a/src/main/java/net/minestom/server/registry/Registry.java
 +++ b/src/main/java/net/minestom/server/registry/Registry.java
 @@ -150,6 +150,7 @@ public final class Registry {

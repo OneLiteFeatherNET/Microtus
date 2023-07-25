@@ -18,7 +18,7 @@ index 2ad6068041e31ac0e71034fda4d2aa6b36ebc48b..4e7d2215ef6c4de4c46407e4a9dee4f2
  
      @Override
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 37f80b3199bde6f9edb470deaaa98620fbb7e41a..db3c6f748130f73c9e577d8d888bfce93842af4c 100644
+index e5d8e405ad1eedc240442fc381685baa1ef9ba61..a13ee12c7305e4ca03a7fcacce032abba7c8b072 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -284,8 +284,16 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
@@ -39,7 +39,7 @@ index 37f80b3199bde6f9edb470deaaa98620fbb7e41a..db3c6f748130f73c9e577d8d888bfce9
          }
  
          //Teams
-@@ -1427,12 +1435,14 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1419,12 +1427,14 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          return heldSlot;
      }
  
@@ -56,7 +56,7 @@ index 37f80b3199bde6f9edb470deaaa98620fbb7e41a..db3c6f748130f73c9e577d8d888bfce9
  
      /**
       * Changes the tag below the name.
-@@ -1985,10 +1995,12 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1977,10 +1987,12 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          if (hasPassenger()) {
              connection.sendPacket(getPassengersPacket());
          }

@@ -5,10 +5,10 @@ Subject: [PATCH] Add player gamemode change event
 
 
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 33f4fe1d6b1af922d294924d58acfa1eeb3036d1..37f80b3199bde6f9edb470deaaa98620fbb7e41a 100644
+index 5149b5e910d355980afb9ba81e687e0bcedc305b..e5d8e405ad1eedc240442fc381685baa1ef9ba61 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
-@@ -1305,13 +1305,22 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1297,13 +1297,22 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          return gameMode;
      }
  
@@ -34,7 +34,7 @@ index 33f4fe1d6b1af922d294924d58acfa1eeb3036d1..37f80b3199bde6f9edb470deaaa98620
          // Condition to prevent sending the packets before spawning the player
          if (isActive()) {
              sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.CHANGE_GAMEMODE, gameMode.id()));
-@@ -1342,8 +1351,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1334,8 +1343,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          if (isActive()) {
              refreshAbilities();
          }

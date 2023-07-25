@@ -5,7 +5,7 @@ Subject: [PATCH] Update to 1.20
 
 
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index 7b04f8fa9298fd8cd367caf7e8fb760084027b2f..1ac4de31db3f89e5e3d9c800cf8240ad75ddfc6e 100644
+index 3396af076014ae7499c3156faf02cc688a54e43c..4995db5536eb34d6812f04c982b3687bcabbf0df 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -7,8 +7,9 @@ adventure = "4.12.0"

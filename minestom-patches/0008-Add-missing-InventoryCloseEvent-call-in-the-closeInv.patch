@@ -6,7 +6,7 @@ Subject: [PATCH] Add missing InventoryCloseEvent call in the closeInventory
 
 
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 133b925eedd1b29d5a5a90307020ae3bd6a529fc..2886dc65a8f79cab946434b093ae3161bf5c2cb1 100644
+index 93171392c717319c92321f7613b68fbc4356b49d..b3703129dad9aefbbaf521004d6a405abb656d74 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -30,6 +30,7 @@ import net.minestom.server.entity.fakeplayer.FakePlayer;
@@ -17,7 +17,7 @@ index 133b925eedd1b29d5a5a90307020ae3bd6a529fc..2886dc65a8f79cab946434b093ae3161
  import net.minestom.server.event.inventory.InventoryOpenEvent;
  import net.minestom.server.event.item.ItemDropEvent;
  import net.minestom.server.event.item.ItemUpdateStateEvent;
-@@ -1523,6 +1524,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1515,6 +1516,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          }
  
          if (openInventory == getOpenInventory()) {
