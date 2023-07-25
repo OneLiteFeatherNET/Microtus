@@ -144,7 +144,7 @@ index dd9f97ae171e48621586752460c9cb093e0b4030..4dfc01721ce5dc6b02a0d3d16110d69d
  [libraries]
  
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..4552380a8cffdbd156e31c1176817be437a6e891 100644
+index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..f107f7f66278199183793dcdb1e311270ba4f1b6 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
 @@ -1,22 +1,12 @@
@@ -174,7 +174,7 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..4552380a8cffdbd156e31c1176817be4
  
  repositories {
      mavenCentral()
-@@ -36,4 +26,39 @@ dependencies {
+@@ -36,4 +26,35 @@ dependencies {
  
  tasks.getByName<Test>("test") {
      useJUnitPlatform()
@@ -191,11 +191,7 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..4552380a8cffdbd156e31c1176817be4
 +    github("OneLiteFeatherNET", "Microtus") {
 +        ci(true)
 +    }
-+    license {
-+        name("AGPL-3.0")
-+        url("https://github.com/OneLiteFeatherNET/Microtus/blob/master/LICENSE")
-+        spdx("AGPL-3.0-only")
-+    }
++    mitLicense()
 +    signWithKeyFromPrefixedProperties("onelitefeather")
 +    configurePublications {
 +        pom {
