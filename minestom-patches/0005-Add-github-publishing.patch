@@ -64,7 +64,7 @@ index b63a95323b4e20af1c36f29f24c623d978016696..3024e94f0a6c9821b021a3f7fa67f850
  }
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..e6fcec5cd925e0685b2df57d8f6fc27d242742a9 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..6943781e07180d90177f721b1de9355bc23ddb17 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,13 +1,41 @@
@@ -75,13 +75,12 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..e6fcec5cd925e0685b2df57d8f6fc27d
      `java-library`
      id("minestom.publishing-conventions")
      id("minestom.native-conventions")
--    alias(libs.plugins.blossom)
-+    // alias(libs.plugins.blossom)
+     alias(libs.plugins.blossom)
 +    // publishing
 +    id("org.ajoberstar.grgit") version "5.2.0"
 +    signing
- }
- 
++}
++
 +var baseVersion by extra("1.1.0")
 +var versionExtension by extra("")
 +var snapshot by extra("-SNAPSHOT")
@@ -100,8 +99,8 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..e6fcec5cd925e0685b2df57d8f6fc27d
 +        versionExtension = ""
 +    }
 +
-+}
-+
+ }
+ 
 +version = "%s%s".format(Locale.ROOT, baseVersion, versionExtension)
 +
  allprojects {
@@ -112,7 +111,7 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..e6fcec5cd925e0685b2df57d8f6fc27d
      description = "Lightweight and multi-threaded Minecraft server implementation"
  }
  
-@@ -34,29 +62,31 @@ tasks {
+@@ -34,27 +62,29 @@ tasks {
              addStringOption("-release", "17")
              // Links to external javadocs
              links("https://docs.oracle.com/en/java/javase/17/docs/api/")
@@ -131,32 +130,29 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..e6fcec5cd925e0685b2df57d8f6fc27d
 -        val gitBranch = System.getenv("GIT_BRANCH")
 -        val group = System.getenv("GROUP")
 -        val artifact = System.getenv("ARTIFACT")
--
+ 
 -        replaceToken("\"&COMMIT\"", if (gitCommit == null) "null" else "\"${gitCommit}\"", git)
 -        replaceToken("\"&BRANCH\"", if (gitBranch == null) "null" else "\"${gitBranch}\"", git)
 -        replaceToken("\"&GROUP\"", if (group == null) "null" else "\"${group}\"", git)
 -        replaceToken("\"&ARTIFACT\"", if (artifact == null) "null" else "\"${artifact}\"", git)
 -    }
- 
- }
- 
-+/*blossom {
++}
++
++blossom {
 +    val git = "src/main/java/net/minestom/server/Git.java"
 +
 +    val gitCommit = System.getenv("GIT_COMMIT")
 +    val gitBranch = System.getenv("GIT_BRANCH")
 +    val group = System.getenv("GROUP")
 +    val artifact = System.getenv("ARTIFACT")
-+
+ 
 +    replaceToken("\"&COMMIT\"", if (gitCommit == null) "null" else "\"${gitCommit}\"", git)
 +    replaceToken("\"&BRANCH\"", if (gitBranch == null) "null" else "\"${gitBranch}\"", git)
 +    replaceToken("\"&GROUP\"", if (group == null) "null" else "\"${group}\"", git)
 +    replaceToken("\"&ARTIFACT\"", if (artifact == null) "null" else "\"${artifact}\"", git)
-+}*/
-+
+ }
+ 
  dependencies {
-     // Testing Framework
-     testImplementation(project(mapOf("path" to ":testing")))
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
 index dd9f97ae171e48621586752460c9cb093e0b4030..4dfc01721ce5dc6b02a0d3d16110d69d3e3ef724 100644
 --- a/gradle/libs.versions.toml
