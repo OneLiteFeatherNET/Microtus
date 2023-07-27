@@ -5,7 +5,7 @@ Subject: [PATCH] Fix gradle submodule for patched version
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1628720dfff045359225360ef6db74c823e124ba 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..8cb8b36d8619016123118e1d4687c164e97e4292 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -3,6 +3,28 @@ plugins {
@@ -17,9 +17,9 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1628720dfff045359225360ef6db74c8
 +    signing
 +}
 +
-+var baseVersion by extra("1.1.0")
++var baseVersion by extra("1.1.1")
 +var versionExtension by extra("")
-+var snapshot by extra("")
++var snapshot by extra("-SNAPSHOT")
 +
 +group = "net.onelitefeather.microtus"
 +
