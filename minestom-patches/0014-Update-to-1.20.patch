@@ -1738,15 +1738,37 @@ index 2886dc65a8f79cab946434b093ae3161bf5c2cb1..2b810253fc8992c659d306de2848df73
      }
  
 diff --git a/src/main/java/net/minestom/server/instance/DynamicChunk.java b/src/main/java/net/minestom/server/instance/DynamicChunk.java
-index 486a1bfb7f4be051a6edde83473b857cc4dd5988..6ed21e4eee23706673024b80581597518341a112 100644
+index 486a1bfb7f4be051a6edde83473b857cc4dd5988..40643ae4646732dd643a88cdd59e29d2b4be58c6 100644
 --- a/src/main/java/net/minestom/server/instance/DynamicChunk.java
 +++ b/src/main/java/net/minestom/server/instance/DynamicChunk.java
+@@ -240,7 +240,7 @@ public class DynamicChunk extends Chunk {
+         List<byte[]> skyLights = new ArrayList<>();
+         List<byte[]> blockLights = new ArrayList<>();
+ 
+-        return new LightData(true, skyMask, blockMask, emptySkyMask, emptyBlockMask, skyLights, blockLights);
++        return new LightData(skyMask, blockMask, emptySkyMask, emptyBlockMask, skyLights, blockLights);
+     }
+     // Microtus end - Light update
+ 
 @@ -270,7 +270,8 @@ public class DynamicChunk extends Chunk {
                  emptyBlockMask.set(index);
              }
          }
 -        return new LightData(true,
 +        // Microtus - 1.20 update
++        return new LightData(
+                 skyMask, blockMask,
+                 emptySkyMask, emptyBlockMask,
+                 skyLights, blockLights);
+diff --git a/src/main/java/net/minestom/server/instance/LightingChunk.java b/src/main/java/net/minestom/server/instance/LightingChunk.java
+index 0ff01c6bfa0659473c31c28850fad091d73a6bb0..27708f7cb1334a6a43404447a0b002aab2201a36 100644
+--- a/src/main/java/net/minestom/server/instance/LightingChunk.java
++++ b/src/main/java/net/minestom/server/instance/LightingChunk.java
+@@ -201,7 +201,7 @@ public class LightingChunk extends DynamicChunk {
+             sendNeighbours = false;
+         }
+ 
+-        return new LightData(true,
 +        return new LightData(
                  skyMask, blockMask,
                  emptySkyMask, emptyBlockMask,
