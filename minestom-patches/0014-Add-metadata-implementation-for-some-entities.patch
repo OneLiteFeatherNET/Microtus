@@ -4,6 +4,18 @@ Date: Wed, 26 Jul 2023 20:30:19 +0200
 Subject: [PATCH] Add metadata implementation for some entities
 
 
+diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
+index ff0b45ffe8ac3ce607de0c4312b11451014a11a5..8e7ad8420da6168ea2444dae90e5bc68bb32c176 100644
+--- a/src/main/java/net/minestom/server/entity/Entity.java
++++ b/src/main/java/net/minestom/server/entity/Entity.java
+@@ -1747,6 +1747,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
+         DYING,
+         CROAKING,
+         USING_TONGUE,
++        SITTING, // Microtus - Add missing entity pose
+         ROARING,
+         SNIFFING,
+         EMERGING,
 diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 index 45db42b49012a49901ca25fba753d9ab94483bfe..1bad471ee2fda90766e11ba3ab1f8ee9445bcbeb 100644
 --- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
