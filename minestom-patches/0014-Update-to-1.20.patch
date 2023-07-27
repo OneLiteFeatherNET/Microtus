@@ -1738,10 +1738,10 @@ index 2886dc65a8f79cab946434b093ae3161bf5c2cb1..2b810253fc8992c659d306de2848df73
      }
  
 diff --git a/src/main/java/net/minestom/server/instance/DynamicChunk.java b/src/main/java/net/minestom/server/instance/DynamicChunk.java
-index 027b182c84d68b8395c405270ea521c76c597e30..98114c492f5832e802694b7741def403787e8e99 100644
+index 486a1bfb7f4be051a6edde83473b857cc4dd5988..6ed21e4eee23706673024b80581597518341a112 100644
 --- a/src/main/java/net/minestom/server/instance/DynamicChunk.java
 +++ b/src/main/java/net/minestom/server/instance/DynamicChunk.java
-@@ -242,7 +242,8 @@ public class DynamicChunk extends Chunk {
+@@ -270,7 +270,8 @@ public class DynamicChunk extends Chunk {
                  emptyBlockMask.set(index);
              }
          }

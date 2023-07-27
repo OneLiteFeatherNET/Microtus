@@ -31,10 +31,10 @@ index daf0ece5bc96be7862d265f89ae8edee6958fc13..ff0b45ffe8ac3ce607de0c4312b11451
       * Gets if this entity's viewers (surrounding players) can be predicted from surrounding chunks.
       */
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index b7c5affa63ebe29d30996718c3402d8348137f7d..d6dd0549db22ee58c4057012fcc46a3aba8f087b 100644
+index 58bf4617c2a3b03f9c67a17573edc656be097f28..d6ef6fa393cb47481e998da81978d472aecd385f 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
-@@ -451,6 +451,21 @@ public abstract class Instance implements Block.Getter, Block.Setter,
+@@ -460,6 +460,21 @@ public abstract class Instance implements Block.Getter, Block.Setter,
          return new TimeUpdatePacket(worldAge, time);
      }
  
