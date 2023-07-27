@@ -17,7 +17,7 @@ index ff0b45ffe8ac3ce607de0c4312b11451014a11a5..8e7ad8420da6168ea2444dae90e5bc68
          SNIFFING,
          EMERGING,
 diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-index 45db42b49012a49901ca25fba753d9ab94483bfe..1bad471ee2fda90766e11ba3ab1f8ee9445bcbeb 100644
+index 9f4cfa4a898ca348d60883ec140a874c2b9cd8fa..1bad471ee2fda90766e11ba3ab1f8ee9445bcbeb 100644
 --- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 +++ b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 @@ -33,10 +33,7 @@ import net.minestom.server.entity.metadata.water.AxolotlMeta;
@@ -59,15 +59,18 @@ index 45db42b49012a49901ca25fba753d9ab94483bfe..1bad471ee2fda90766e11ba3ab1f8ee9
                  entry("minecraft:witch", WitchMeta::new),
                  entry("minecraft:wither", WitherMeta::new),
                  entry("minecraft:wither_skeleton", WitherSkeletonMeta::new),
-@@ -202,7 +199,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+@@ -200,7 +197,10 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+                 entry("minecraft:zombie_villager", ZombieVillagerMeta::new),
+                 entry("minecraft:zombified_piglin", ZombifiedPiglinMeta::new),
                  entry("minecraft:player", PlayerMeta::new),
-                 entry("minecraft:fishing_bobber", FishingHookMeta::new),
-                 // Microtus start - 1.20 update
--                entry("minecraft:camel", EntityMeta::new) // TODO dedicated metadata
+-                entry("minecraft:fishing_bobber", FishingHookMeta::new)
++                entry("minecraft:fishing_bobber", FishingHookMeta::new),
++                // Microtus start - 1.20 update
 +                entry("minecraft:camel", CamelMeta::new) // Microtus - entity meta update
-                 // Microtus end - 1.20 update
++                // Microtus end - 1.20 update
          );
      }
+ }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/WardenMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/WardenMeta.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..4354c9ce62a2a9053ed880d094134cdae4357cd9
