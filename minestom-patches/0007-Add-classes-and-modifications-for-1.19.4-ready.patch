@@ -3264,10 +3264,10 @@ index 6ee3308c6aeb10e262f9db51fdc11a4aa6fa984a..90e2bd8d5a3503796d3450b2d01ee629
                         @NotNull TypeWriter<T> writer,
                         @NotNull TypeReader<T> reader) implements NetworkBuffer.Type<T> {
 diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
-index e381d1a638eb2a73cc052a8217b2fd4f1e044574..7ca210148b423997f0fd614a065b772329911d31 100644
+index e381d1a638eb2a73cc052a8217b2fd4f1e044574..871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
-@@ -58,32 +58,35 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
+@@ -58,33 +58,34 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
              register(0x03, ClientChatAckPacket::new);
              register(0x04, ClientCommandChatPacket::new);
              register(0x05, ClientChatMessagePacket::new);
@@ -3297,6 +3297,7 @@ index e381d1a638eb2a73cc052a8217b2fd4f1e044574..7ca210148b423997f0fd614a065b7723
 -            register(0x1D, ClientEntityActionPacket::new);
 -            register(0x1E, ClientSteerVehiclePacket::new);
 -            register(0x1F, ClientPongPacket::new);
+-            register(0x20, ClientChatSessionUpdatePacket::new);
 +            // Microtus start - 1.19.4 update
 +            register(0x06, ClientChatSessionUpdatePacket::new);
 +            register(0x07, ClientStatusPacket::new);
@@ -3325,11 +3326,10 @@ index e381d1a638eb2a73cc052a8217b2fd4f1e044574..7ca210148b423997f0fd614a065b7723
 +            register(0x1e, ClientEntityActionPacket::new);
 +            register(0x1f, ClientSteerVehiclePacket::new);
 +            register(0x20, ClientPongPacket::new);
-+            // Microtus end - 1.19.4 update
-             register(0x20, ClientChatSessionUpdatePacket::new);
              register(0x21, ClientSetRecipeBookStatePacket::new);
              register(0x22, ClientSetDisplayedRecipePacket::new);
-@@ -94,12 +97,14 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
+             register(0x23, ClientNameItemPacket::new);
+@@ -94,12 +95,14 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
              register(0x27, ClientSetBeaconEffectPacket::new);
              register(0x28, ClientHeldItemChangePacket::new);
              register(0x29, ClientUpdateCommandBlockPacket::new);
