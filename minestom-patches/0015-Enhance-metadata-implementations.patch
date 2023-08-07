@@ -5,10 +5,18 @@ Subject: [PATCH] Enhance metadata implementations
 
 
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/FrogMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/FrogMeta.java
-index a98c919b7939627199f292f63061baefea70f591..a2d8642dbea8042a7509d0bafc2f25e9695f809d 100644
+index a98c919b7939627199f292f63061baefea70f591..f8ebe95a2eb670337d47180a8943217efbaad292 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/FrogMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/FrogMeta.java
-@@ -12,27 +12,53 @@ public class FrogMeta extends AnimalMeta {
+@@ -3,6 +3,7 @@ package net.minestom.server.entity.metadata.animal;
+ import net.minestom.server.entity.Entity;
+ import net.minestom.server.entity.Metadata;
+ import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ 
+ public class FrogMeta extends AnimalMeta {
+     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
+@@ -12,27 +13,64 @@ public class FrogMeta extends AnimalMeta {
          super(entity, metadata);
      }
  
@@ -62,6 +70,17 @@ index a98c919b7939627199f292f63061baefea70f591..a2d8642dbea8042a7509d0bafc2f25e9
  
 -        private final static FrogMeta.Variant[] VALUES = values();
 +        private static final FrogMeta.Variant[] VALUES = values();
++
++        // Microtus start - meta update
++        /**
++         * Add method to get a variant from a frog over the ordinal id
++         * @param id the ordinal id
++         * @return the entry which matches with the id
++         */
++        public static @Nullable FrogMeta.Variant getVariant(int id) {
++            return id >= 0 && id <= VALUES.length ? VALUES[id] : null;
++        }
++        // Microtus end - meta update
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java
@@ -234,3 +253,16 @@ index 54902744760ff77762bfdab3f5a71cf9117b35fa..1e39f9b4c70bbaa74b7aec1769619a2a
      }
 -
  }
+diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
+index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..8f7b9c9c47bf3eedc0143ca2cfc824e9dbc8104a 100644
+--- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
++++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
+@@ -549,7 +549,7 @@ final class NetworkBufferTypes {
+             },
+             buffer -> {
+                 final int ordinal = buffer.read(VAR_INT);
+-                return FrogMeta.Variant.values()[ordinal];
++                return FrogMeta.Variant.getVariant(ordinal); // Microtus - meta update
+             });
+     // Microtus start - 1.19.4 update
+     static final TypeImpl<SnifferMeta.State> SNIFFER_STATE = new TypeImpl<>(SnifferMeta.State.class,
