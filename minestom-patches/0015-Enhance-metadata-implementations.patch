@@ -65,9 +65,18 @@ index a98c919b7939627199f292f63061baefea70f591..a2d8642dbea8042a7509d0bafc2f25e9
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java
-index f830d79b46083bd671eaee0ba964c3d483f1b48f..4cf03f90d00cf12c6ae9b4e660e4969414172d11 100644
+index f830d79b46083bd671eaee0ba964c3d483f1b48f..6d78f6cf69a410d58317945439070c7a9b7dac85 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java
+@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
+ 
+ public class GoatMeta extends AnimalMeta {
+     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
+-    public static final byte MAX_OFFSET = OFFSET + 1;
++    public static final byte MAX_OFFSET = OFFSET + 3;
+ 
+     public GoatMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
 @@ -19,4 +19,22 @@ public class GoatMeta extends AnimalMeta {
      public void setScreaming(boolean screaming) {
          metadata.setIndex(OFFSET, Metadata.Boolean(screaming));
