@@ -266,3 +266,28 @@ index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..8f7b9c9c47bf3eedc0143ca2cfc824e9
              });
      // Microtus start - 1.19.4 update
      static final TypeImpl<SnifferMeta.State> SNIFFER_STATE = new TypeImpl<>(SnifferMeta.State.class,
+diff --git a/src/test/java/net/minestom/server/entity/metadata/animal/FrogMetaTest.java b/src/test/java/net/minestom/server/entity/metadata/animal/FrogMetaTest.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..dff4f20dac5cfb5dc02c815ef381f91fc093fa97
+--- /dev/null
++++ b/src/test/java/net/minestom/server/entity/metadata/animal/FrogMetaTest.java
+@@ -0,0 +1,18 @@
++package net.minestom.server.entity.metadata.animal;
++
++import net.minestom.server.entity.metadata.animal.FrogMeta.Variant;
++import org.junit.jupiter.api.Test;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++// Microtus - meta update + add test for the variant read method
++class FrogMetaTest {
++
++    @Test
++    void testFrogVariantRead() {
++        assertEquals(Variant.WARM, Variant.getVariant(Variant.WARM.ordinal()));
++        assertEquals(Variant.TEMPERATE, Variant.getVariant(0));
++        assertNull(Variant.getVariant(-1));
++        assertNull(Variant.getVariant(100));
++    }
++}
+\ No newline at end of file
