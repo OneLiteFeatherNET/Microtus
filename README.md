@@ -12,6 +12,15 @@ Discord for discussion: [OneLiteFeather.net](https://discord.onelitefeather.net)
   - Include new features
   - Try to stay updated with original minecraft cycle
 - Release cycle of 2 weeks
+## Usage of Jitpack:
+
+Some of the project's dependencies are only available in the Jitpack repository. 
+To ensure a seamless experience, kindly include this repository in your project configuration to prevent any potential issues.
+
+```kt
+maven("https://jitpack.io")
+```
+
 ## Usage of microtus
 Since 23.07.2023 we are now official on the maven central for releases and snapshots.  
 To use Microtus in your projects you need: 
