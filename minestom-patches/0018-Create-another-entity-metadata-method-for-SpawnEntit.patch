@@ -1,0 +1,43 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Phillipp Glanz <p.glanz@madfix.me>
+Date: Mon, 16 Oct 2023 23:29:39 +0200
+Subject: [PATCH] Create another entity metadata method for SpawnEntityPacket
+ to fix casting errors
+
+
+diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
+index 8e7ad8420da6168ea2444dae90e5bc68bb32c176..5fc596af89b5845daedb678484e56df8e4a45598 100644
+--- a/src/main/java/net/minestom/server/entity/Entity.java
++++ b/src/main/java/net/minestom/server/entity/Entity.java
+@@ -283,6 +283,18 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
+         return this.entityMeta;
+     }
+ 
++    // Microtus start - Fix switch entity type
++    /**
++     * Gets raw metadata of this entity.
++     * Its used for switch an entity type ingame.
++     *
++     * @return metadata of this entity.
++     */
++    @NotNull EntityMeta getRawEntityMeta() {
++        return this.entityMeta;
++    }
++    // Microtus end - Fix switch entity type
++
+     /**
+      * Teleports the entity only if the chunk at {@code position} is loaded or if
+      * {@link Instance#hasEnabledAutoChunkLoad()} returns true.
+diff --git a/src/main/java/net/minestom/server/entity/EntitySpawnType.java b/src/main/java/net/minestom/server/entity/EntitySpawnType.java
+index c1d23ebdb7a8ac85eac5bfb80f91652e629b5f8f..1441be1d8124de6aa53aa69e959c9c7cf2c8752f 100644
+--- a/src/main/java/net/minestom/server/entity/EntitySpawnType.java
++++ b/src/main/java/net/minestom/server/entity/EntitySpawnType.java
+@@ -66,7 +66,7 @@ public enum EntitySpawnType {
+     private static SpawnEntityPacket basicEntity(Entity entity) {
+         int data = 0;
+         short velocityX = 0, velocityZ = 0, velocityY = 0;
+-        if (entity.getEntityMeta() instanceof ObjectDataProvider objectDataProvider) {
++        if (entity.getRawEntityMeta() instanceof ObjectDataProvider objectDataProvider) { // Microtus - Fix switch entity type
+             data = objectDataProvider.getObjectData();
+             if (objectDataProvider.requiresVelocityPacketAtSpawn()) {
+                 final var velocity = entity.getVelocityForPacket();
