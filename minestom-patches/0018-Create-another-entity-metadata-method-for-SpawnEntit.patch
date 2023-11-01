@@ -5,6 +5,19 @@ Subject: [PATCH] Create another entity metadata method for SpawnEntityPacket
  to fix casting errors
 
 
+diff --git a/build.gradle.kts b/build.gradle.kts
+index fad12af7e68b23ca80139fa3cc4c7d5a5f2aaa26..03f7f4bb0833e0be3fe541153363d6f3e4812807 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -11,7 +11,7 @@ plugins {
+     signing
+ }
+ 
+-var baseVersion by extra("1.2.0")
++var baseVersion by extra("1.2.1")
+ var versionExtension by extra("")
+ var snapshot by extra("-SNAPSHOT")
+ 
 diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
 index 8e7ad8420da6168ea2444dae90e5bc68bb32c176..5fc596af89b5845daedb678484e56df8e4a45598 100644
 --- a/src/main/java/net/minestom/server/entity/Entity.java
@@ -41,3 +54,68 @@ index c1d23ebdb7a8ac85eac5bfb80f91652e629b5f8f..1441be1d8124de6aa53aa69e959c9c7c
              data = objectDataProvider.getObjectData();
              if (objectDataProvider.requiresVelocityPacketAtSpawn()) {
                  final var velocity = entity.getVelocityForPacket();
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index 2b810253fc8992c659d306de2848df739cca432f..793f4abe2114abfae136a1733ba483e51a235f48 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -27,6 +27,7 @@ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.effects.Effects;
+ import net.minestom.server.entity.damage.DamageType;
+ import net.minestom.server.entity.fakeplayer.FakePlayer;
++import net.minestom.server.entity.metadata.EntityMeta;
+ import net.minestom.server.entity.metadata.PlayerMeta;
+ import net.minestom.server.entity.vehicle.PlayerVehicleInformation;
+ import net.minestom.server.event.EventDispatcher;
+@@ -840,7 +841,11 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+     }
+ 
+     @Override
+-    public @NotNull PlayerMeta getEntityMeta() {
++    public @NotNull EntityMeta getEntityMeta() {
++        return super.getEntityMeta();
++    }
++
++    public @NotNull PlayerMeta getPlayerData() {
+         return (PlayerMeta) super.getEntityMeta();
+     }
+ 
+@@ -850,7 +855,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+      * @return the player additional hearts
+      */
+     public float getAdditionalHearts() {
+-        return getEntityMeta().getAdditionalHearts();
++        return getPlayerData().getAdditionalHearts();
+     }
+ 
+     /**
+@@ -859,7 +864,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+      * @param additionalHearts the count of additional hearts
+      */
+     public void setAdditionalHearts(float additionalHearts) {
+-        getEntityMeta().setAdditionalHearts(additionalHearts);
++        getPlayerData().setAdditionalHearts(additionalHearts);
+     }
+ 
+     /**
+diff --git a/src/main/java/net/minestom/server/listener/PlayerDiggingListener.java b/src/main/java/net/minestom/server/listener/PlayerDiggingListener.java
+index fbdfe21c2cec8a5085aed299c6dc91fa04840f7c..996af630761044115b8913edb1446125b0031559 100644
+--- a/src/main/java/net/minestom/server/listener/PlayerDiggingListener.java
++++ b/src/main/java/net/minestom/server/listener/PlayerDiggingListener.java
+@@ -2,6 +2,7 @@ package net.minestom.server.listener;
+ 
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Pos;
++import net.minestom.server.entity.EntityType;
+ import net.minestom.server.entity.GameMode;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.entity.metadata.PlayerMeta;
+@@ -134,7 +135,8 @@ public final class PlayerDiggingListener {
+     }
+ 
+     private static void updateItemState(Player player) {
+-        PlayerMeta meta = player.getEntityMeta();
++        if (player.getEntityType() != EntityType.PLAYER) return;
++        PlayerMeta meta = player.getPlayerData();
+         if (!meta.isHandActive()) return;
+         Player.Hand hand = meta.getActiveHand();
+ 
