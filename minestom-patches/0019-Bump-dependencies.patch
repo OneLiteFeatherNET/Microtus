@@ -5,7 +5,7 @@ Subject: [PATCH] Bump dependencies
 
 
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index 01c3f8d80bc23a627af5e27b48ffba052cfe1190..d98aaf35563b5560bd20e84dc9d45016d19d1b2c 100644
+index 01c3f8d80bc23a627af5e27b48ffba052cfe1190..7fec678ea6cae07244872a434bcf4b4f3ab5a0f4 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -3,30 +3,29 @@ metadata.format.version = "1.1"
@@ -15,7 +15,7 @@ index 01c3f8d80bc23a627af5e27b48ffba052cfe1190..d98aaf35563b5560bd20e84dc9d45016
 -adventure = "4.12.0"
 -kotlin = "1.7.22"
 +adventure = "4.14.0"
-+kotlin = "1.8.22"
++kotlin = "1.9.20"
  hydrazine = "1.7.2"
  dependencyGetter = "v1.0.1"
  data = "1.20-rv2" # Microtous - 1.20 temp change to ce version
@@ -25,9 +25,10 @@ index 01c3f8d80bc23a627af5e27b48ffba052cfe1190..d98aaf35563b5560bd20e84dc9d45016
 +jetbrainsAnnotations = "24.0.1"
  
  # Terminal / Logging
- tinylog = "2.5.0"
+-tinylog = "2.5.0"
 -jline = "3.21.0"
-+jline = "3.23.0"
++tinylog = "2.6.2"
++jline = "3.24.1"
  
  # Performance / Data Structures
 -caffeine = "3.1.2"
@@ -41,10 +42,11 @@ index 01c3f8d80bc23a627af5e27b48ffba052cfe1190..d98aaf35563b5560bd20e84dc9d45016
  
  # Test
 -junit-jupiter = "5.8.2"
-+junit-jupiter = "5.9.3"
- junit-platform = "1.8.2"
+-junit-platform = "1.8.2"
 -mockito = "4.2.0"
-+mockito = "5.3.1"
++junit-jupiter = "5.10.1"
++junit-platform = "1.10.1"
++mockito = "5.7.0"
  
  # Code Generation
  javaPoet = "1.13.0"
@@ -53,7 +55,7 @@ index 01c3f8d80bc23a627af5e27b48ffba052cfe1190..d98aaf35563b5560bd20e84dc9d45016
  
  # JMH
 -jmh = "1.35"
-+jmh = "1.36"
++jmh = "1.37"
  
  # JCStress
 -jcstress = "0.8"
