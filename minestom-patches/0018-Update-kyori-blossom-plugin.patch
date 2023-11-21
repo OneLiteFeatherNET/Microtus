@@ -57,7 +57,7 @@ index fad12af7e68b23ca80139fa3cc4c7d5a5f2aaa26..d73027f741cd0f432671434e701b2f10
      // Testing Framework
      testImplementation(project(mapOf("path" to ":testing")))
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index 4995db5536eb34d6812f04c982b3687bcabbf0df..8fb4d18752059de5ef1fa72d234bb714000f738f 100644
+index c0505628d7499d9f57760fa2490ab5e2aa855f2b..01c3f8d80bc23a627af5e27b48ffba052cfe1190 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -41,7 +41,7 @@ jmh = "1.35"
