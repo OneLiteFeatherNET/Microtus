@@ -5,21 +5,19 @@ Subject: [PATCH] Update to 1.20
 
 
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index 3396af076014ae7499c3156faf02cc688a54e43c..4995db5536eb34d6812f04c982b3687bcabbf0df 100644
+index 33df9255b1906802c01bffbbe043f873791fb896..c0505628d7499d9f57760fa2490ab5e2aa855f2b 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
-@@ -7,8 +7,9 @@ adventure = "4.12.0"
+@@ -7,7 +7,8 @@ adventure = "4.12.0"
  kotlin = "1.7.22"
  hydrazine = "1.7.2"
  dependencyGetter = "v1.0.1"
 -minestomData = "e6ebd0fb9b" # Microtus - 1.19.4 update
--hephaistos = "2.5.3"
 +data = "1.20-rv2" # Microtous - 1.20 temp change to ce version
 +#minestomData = "e6ebd0fb9b" # Microtus - 1.19.4 update
-+hephaistos = "2.6.0"
+ hephaistos = "2.6.1"
  jetbrainsAnnotations = "23.0.0"
  
- # Terminal / Logging
 @@ -59,7 +60,7 @@ kotlin-stdlib-jdk8 = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib-jdk
  # Miscellaneous
  hydrazine = { group = "com.github.MadMartian", name = "hydrazine-path-finding", version.ref = "hydrazine" }

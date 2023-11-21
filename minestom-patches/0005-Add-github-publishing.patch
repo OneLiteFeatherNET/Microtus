@@ -131,7 +131,7 @@ index 016d4d22e766be9b9d59f3594b701cdf9f00a24f..fad12af7e68b23ca80139fa3cc4c7d5a
  
  dependencies {
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index dd9f97ae171e48621586752460c9cb093e0b4030..4dfc01721ce5dc6b02a0d3d16110d69d3e3ef724 100644
+index b3da234609fcb6f3ab1866a2fc806719b29f97f2..aa55f63eac78a8ad2ac28f8832ff94c2675e79fa 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -40,7 +40,7 @@ jmh = "1.35"
