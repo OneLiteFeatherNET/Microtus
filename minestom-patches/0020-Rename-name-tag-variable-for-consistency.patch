@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: theEvilReaper <steffenwx@gmail.com>
+Date: Wed, 20 Sep 2023 21:22:39 +0200
+Subject: [PATCH] Rename name tag variable for consistency
+
+
+diff --git a/src/main/java/net/minestom/server/item/ItemMeta.java b/src/main/java/net/minestom/server/item/ItemMeta.java
+index 65d37d2d41f96fb5df241ee5609747da273c373f..e89215a55259d23d7e27b457c1f25b278698a280 100644
+--- a/src/main/java/net/minestom/server/item/ItemMeta.java
++++ b/src/main/java/net/minestom/server/item/ItemMeta.java
+@@ -47,7 +47,7 @@ public sealed interface ItemMeta extends TagReadable, NetworkBuffer.Writer
+ 
+     @Contract(pure = true)
+     default @Nullable Component getDisplayName() {
+-        return getTag(ItemTags.NAME);
++        return getTag(ItemTags.DISPLAY_NAME); // Microtus - Rename name tag to DISPLAY_NAME for consistency
+     }
+ 
+     @Contract(pure = true)
+@@ -123,7 +123,7 @@ public sealed interface ItemMeta extends TagReadable, NetworkBuffer.Writer
+ 
+         @Contract("_ -> this")
+         default @NotNull Builder displayName(@Nullable Component displayName) {
+-            return set(ItemTags.NAME, displayName);
++            return set(ItemTags.DISPLAY_NAME, displayName);
+         }
+ 
+         @Contract("_ -> this")
+diff --git a/src/main/java/net/minestom/server/item/ItemTags.java b/src/main/java/net/minestom/server/item/ItemTags.java
+index e59bf0b3ca19d7a557cf0e3c728b2ebdf9fa45d9..38ae8730884f41493469b9bccb3a26c81f801bf3 100644
+--- a/src/main/java/net/minestom/server/item/ItemTags.java
++++ b/src/main/java/net/minestom/server/item/ItemTags.java
+@@ -16,7 +16,8 @@ final class ItemTags {
+     static final Tag<Boolean> UNBREAKABLE = Tag.Boolean("Unbreakable").defaultValue(false);
+     static final Tag<Integer> HIDE_FLAGS = Tag.Integer("HideFlags").defaultValue(0);
+     static final Tag<Integer> CUSTOM_MODEL_DATA = Tag.Integer("CustomModelData").defaultValue(0);
+-    static final Tag<Component> NAME = Tag.Component("Name").path("display");
++    // Microtus - Rename name tag to DISPLAY_NAME for consistency
++    static final Tag<Component> DISPLAY_NAME = Tag.Component("Name").path("display");
+     static final Tag<List<Component>> LORE = Tag.Component("Lore").path("display").list().defaultValue(List.of());
+     static final Tag<Map<Enchantment, Short>> ENCHANTMENTS = Tag.Structure("Enchantments", ENCHANTMENT_SERIALIZER).list().map(enchantmentEntry -> {
+         Map<Enchantment, Short> map = new HashMap<>();
+@@ -30,4 +31,7 @@ final class ItemTags {
+     static final Tag<List<ItemAttribute>> ATTRIBUTES = Tag.Structure("AttributeModifiers", ATTRIBUTE_SERIALIZER).list().defaultValue(List.of());
+     static final Tag<List<String>> CAN_PLACE_ON = Tag.String("CanPlaceOn").list().defaultValue(List.of());
+     static final Tag<List<String>> CAN_DESTROY = Tag.String("CanDestroy").list().defaultValue(List.of());
++
++    // Microtus - Rename name tag to DISPLAY_NAME for consistency
++    private ItemTags () { }
+ }
