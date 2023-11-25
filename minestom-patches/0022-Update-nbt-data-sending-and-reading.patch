@@ -1,0 +1,38 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: theEvilReaper <steffenwx@gmail.com>
+Date: Sat, 25 Nov 2023 22:41:48 +0100
+Subject: [PATCH] Update nbt data sending and reading
+
+
+diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
+index 8f7b9c9c47bf3eedc0143ca2cfc824e9dbc8104a..2aee4d35ace0efca03fc254f9885b2bdc538dea2 100644
+--- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
++++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
+@@ -237,7 +237,13 @@ final class NetworkBufferTypes {
+                     buffer.nbtWriter = nbtWriter;
+                 }
+                 try {
+-                    nbtWriter.writeNamed("", value);
++                    // Microtus start - update nbt sending and reading
++                    if (value == NBTEnd.INSTANCE) {
++                        buffer.write(BYTE, (byte) NBTType.TAG_End.getOrdinal());
++                    } else {
++                        nbtWriter.writeNamed("", value);
++                    }
++                    // Microtus end - update nbt sending and reading
+                 } catch (IOException e) {
+                     throw new RuntimeException(e);
+                 }
+@@ -313,7 +319,11 @@ final class NetworkBufferTypes {
+                 buffer.write(BOOLEAN, true);
+                 buffer.write(VAR_INT, value.material().id());
+                 buffer.write(BYTE, (byte) value.amount());
+-                buffer.write(NBT, value.meta().toNBT());
++                // Microtus start - update nbt send when the item has not data
++                // Vanilla does not write an empty object, just an end tag.
++                NBTCompound nbtData = value.meta().toNBT();
++                buffer.write(NBT, nbtData.isEmpty() ? NBTEnd.INSTANCE : nbtData);
++                // Microtus end - update nbt sending and reading
+                 return -1;
+             },
+             buffer -> {
