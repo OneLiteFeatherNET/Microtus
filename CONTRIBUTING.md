@@ -1,7 +1,7 @@
 Contributing to Microtus
 ========================
 
-The team at Microtus is happy when you are willing to contribute to our project.
+We (the Microtus team) would be very glad if you want to contribute to the project.
 The process to contribute requires some guidelines that you need to follow. 
 These help us to improve the project and maintain a consistent style for each contributor
 
@@ -60,7 +60,7 @@ Steps to add a new patch:
 Now you can create a merge request to add your patch to the repository.
 
 > ❗Please add documentation to your patch and provide some unit tests if possible.
-> Tests helps us to track if a feature works expected or not
+> Tests helps us to track if a feature works as expected or not
 
 ## Modifying Patches
 
@@ -69,7 +69,7 @@ There are several methods which can be used to modify a patch.
 
 ### Method 1 - Fixup commits
 
-When your changes are not to complex, you can use the fixup commits to modify a patch.
+If your changes are not to complex, you can use the fixup commits to modify a patch.
 
 This method has the benefit of being able to compile to test your change without
 messing with your HEADs.
