@@ -23,6 +23,29 @@ index 7187de227dbb03f8caca514897537dc64d37d40e..3a0c1601dec65a93ba254ecc7ed64327
 +    implementation("org.graalvm.buildtools", "native-gradle-plugin", "0.9.28")
  }
 \ No newline at end of file
+diff --git a/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts
+index 4065014d4c051dccac13b21722a1eccd91f21c04..f68f1b722c48088701c148c8a8c7dc9790f3fa99 100644
+--- a/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts
++++ b/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts
+@@ -15,14 +15,14 @@ java {
+ }
+ 
+ tasks {
+-    withType<JavaCompile> {
++    compileJava {
+         // We are fully aware, that we should be suppressing these instead of ignoring them here, but man keep my terminal clean.
+         options.compilerArgs.addAll(listOf("-Xlint:none", "-Xlint:-deprecation", "-Xlint:-unchecked"))
+     }
+-    withType<Test> {
++    test {
+         useJUnitPlatform()
+         // Viewable packets make tracking harder. Could be re-enabled later.
+         jvmArgs("-Dminestom.viewable-packet=false")
+         jvmArgs("-Dminestom.inside-test=true")
+     }
+-}
+\ No newline at end of file
++}
 diff --git a/build.gradle.kts b/build.gradle.kts
 index d73027f741cd0f432671434e701b2f10d438a5ec..89d7646525797562adf1081aef4bb7f580dd0047 100644
 --- a/build.gradle.kts
@@ -2002,14 +2025,38 @@ index 589b3fbbb813fa09f0d7c522f07244fa4b847b2c..ec1b676b8216c4bf651ef0be949b31f1
  }
  
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 3fb63e467ef2d6fe82c96f53718e5b8292c36ad4..6dc04b663ca575b9e82d559883533212694fa751 100644
+index 3fb63e467ef2d6fe82c96f53718e5b8292c36ad4..3132b76599b16ff0466e986d55a2dfd49e48a90a 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -15,6 +15,91 @@ pluginManagement {
-     includeBuild("build-logic")
+@@ -1,23 +1,106 @@
++rootProject.name = "Minestom"
++include("code-generators")
++include("jmh-benchmarks")
++include("jcstress-tests")
++include("demo")
++include("testing")
++
+ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+ 
+-dependencyResolutionManagement {
++pluginManagement {
+     repositories {
+-        maven("https://jitpack.io")
+         mavenCentral()
++        gradlePluginPortal()
+     }
++    includeBuild("build-logic")
  }
  
+-pluginManagement {
 +dependencyResolutionManagement {
+     repositories {
++        maven("https://jitpack.io")
+         mavenCentral()
+-        gradlePluginPortal()
+     }
+-    includeBuild("build-logic")
+-}
 +    versionCatalogs {
 +        create("libs") {
 +            version("adventure", "4.14.0")
@@ -2021,7 +2068,13 @@ index 3fb63e467ef2d6fe82c96f53718e5b8292c36ad4..6dc04b663ca575b9e82d559883533212
 +            version("junit.suite", "1.10.1")
 +            version("jmh", "1.37")
 +            version("hephaistos", "2.6.1")
-+
+ 
+-rootProject.name = "Minestom"
+-include("code-generators")
+-include("jmh-benchmarks")
+-include("jcstress-tests")
+-include("demo")
+-include("testing")
 +            library("adventure.api", "net.kyori", "adventure-api").versionRef("adventure")
 +            library("adventure.serializer.gson", "net.kyori", "adventure-text-serializer-gson").versionRef("adventure")
 +            library("adventure.serializer.legacy", "net.kyori", "adventure-text-serializer-legacy").versionRef("adventure")
@@ -2094,6 +2147,3 @@ index 3fb63e467ef2d6fe82c96f53718e5b8292c36ad4..6dc04b663ca575b9e82d559883533212
 +        }
 +    }
 +}
- rootProject.name = "Minestom"
- include("code-generators")
- include("jmh-benchmarks")
