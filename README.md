@@ -12,6 +12,11 @@ Discord for discussion: [OneLiteFeather.net](https://discord.onelitefeather.net)
   - Include new features
   - Try to stay updated with original minecraft cycle
 - Release cycle of 2 weeks
+
+## Project contribution:
+
+For details how you can contribute to the project please read our [Contributing](CONTRIBUTING.md).
+
 ## Usage of Jitpack:
 
 Some of the project's dependencies are only available in the Jitpack repository. 
