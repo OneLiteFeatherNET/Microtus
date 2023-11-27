@@ -3,7 +3,7 @@ Contributing to Microtus
 
 The team at Microtus is happy when you are willing to contribute to our project.
 The process to contribute requires some guidelines that you need to follow. 
-These guidelines help us improve the project and maintain a consistent style for each contributor
+These help us to improve the project and maintain a consistent style for each contributor
 
 ## Use a Personal Fork and not an Organization
 
@@ -73,6 +73,28 @@ When your changes are not to complex, you can use the fixup commits to modify a 
 
 This method has the benefit of being able to compile to test your change without
 messing with your HEADs.
+
+#### Manual method
+
+This method works by a temporarily reset of your `HEAD` to the desired commit to edit it using `git rebase`.
+
+1. When you have changes, type `git stash` to store them for a later use
+   - You can use `git stash pop` to restore the changes at a later point
+2. Use the `git rebase -i base` command to rebase your branch with a specific target
+   - When your editor doesn't have a "menu" at the bottom, you are using the `vim` editor.
+   - If you don't know how to use `vim`, and don't have the indention to learn it, enter `:q!` and press enter
+   - Then type `export EDITOR=nano` and press enter
+   - This will change the editor to `nano` which is easier to use
+3. Replace the `pick` with ``edit for the commit or patch that you want to modify and save the changes
+   - To avoid issues please do this only for **one** commit at the time
+4. Add / Make the changes you want to make for the patch
+5. Type `git add .` or `git add <file>` to add the changes to the staging area
+6. Type `git commit --amend` to commit
+   - ❗***Make sure to add `--amend`*** to the command otherwise a new patch will be created
+7. Type `git rebase --continue` to continue the rebase process
+8. Navigate to the root directory from Microtus
+9. Type `./gradlew rebuildPatches` to rebuild the patches
+10. Now you can create a merge request to add your modified patches back to this repository
 
 ### Automatic method
 
