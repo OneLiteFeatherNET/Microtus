@@ -31,7 +31,7 @@ Most of them can be obtained in (most) package managers on different platforms.
 
 The project uses a patch oriented way to apply changes to the source code from Minestom.
 This behavior is similar to the [PaperMC](https://github.com/PaperMC) project. 
-In our case we do this not because there a problem with the license, but because we want to keep the project as modular as possible.
+In our case we do this not because there a problem with the license, but we want to keep the project as modular as possible.
 The modulation means that we can drop or update patches without any problems.
 
 The complete structure of the project relies on patches. So it is important to have a basic acknowledgement of git.
@@ -78,13 +78,13 @@ messing with your HEADs.
 
 1. Make your changes at HEAD;
 2. Navigation to `patched-minestom` directory in the terminal
-2. Type `git add .` or `git add <file>` to add the changes to the staging area
-3. A commit message is not required for this because it is only  a temporary commit
-4. Type `git commit -a --fixuop <commitHash>`
+3. Type `git add .` or `git add <file>` to add the changes to the staging area
+4. A commit message is not required for this because it is only  a temporary commit
+5. Type `git commit -a --fixup <commitHash>`
    - Replace `<commitHash>` with the hash of the commit you want to modify
    - You can find the required hash when you type `git log` into your terminal
-5. Rebease with the autosquash option:
+6. Rebase with the autosquash option:
    - `git rebase -i --autosquash <base>`
-6. Go back to the root project folder
-7. Type `./gradlew rebuildPatches` to rebuild the patches
-8. After the task was successful, you see that the patch was modified and contains now your changes
+7. Go back to the root project folder
+8. Type `./gradlew rebuildPatches` to rebuild the patches
+9. After the task was successful, you see that the patch was modified and contains now your changes
