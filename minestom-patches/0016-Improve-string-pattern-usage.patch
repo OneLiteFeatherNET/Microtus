@@ -4,6 +4,47 @@ Date: Sat, 5 Aug 2023 23:04:05 +0200
 Subject: [PATCH] Improve string pattern usage
 
 
+diff --git a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
+index e8922654e4f71aa447bf71af42c86ec2760de3ed..a2e7120e992d52c7e9bbb8246e1ed9e442181d34 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
+@@ -23,14 +23,19 @@ import java.net.SocketAddress;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.UUID;
++import java.util.regex.Pattern;
+ 
+ import static net.minestom.server.network.NetworkBuffer.*;
+ 
+ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress,
+                               int serverPort, int nextState) implements ClientPreplayPacket {
+ 
+-    private final static Logger LOGGER = LoggerFactory.getLogger(HandshakePacket.class);
++    // Microtus start - improve string pattern usage + add private constructor
++    private static final Logger LOGGER = LoggerFactory.getLogger(HandshakePacket.class);
+ 
++    private static final Pattern UUID_REPLACEMENT =
++            Pattern.compile("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)");
++    // Microtus end - improve string pattern usage + add private constructor
+     /**
+      * Text sent if a player tries to connect with an invalid version of the client
+      */
+@@ -84,12 +89,11 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
+                         ((java.net.InetSocketAddress) connection.getRemoteAddress()).getPort());
+                 socketConnection.setRemoteAddress(socketAddress);
+ 
++                // Microtus start - improve string pattern usage + add private constructor
+                 UUID playerUuid = java.util.UUID.fromString(
+-                        split[2]
+-                                .replaceFirst(
+-                                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"
+-                                )
++                        UUID_REPLACEMENT.matcher(split[2]).replaceAll("$1-$2-$3-$4-$5")
+                 );
++                // Microtus end - improve string pattern usage + add private constructor
+ 
+                 List<GameProfile.Property> properties = new ArrayList<>();
+                 if (hasProperties) {
 diff --git a/src/main/java/net/minestom/server/utils/UniqueIdUtils.java b/src/main/java/net/minestom/server/utils/UniqueIdUtils.java
 index 242a6a1b55102507c15ffa37ff26abcac38f6823..f894c867452c9bd1849d9d01c98a71880c1e450b 100644
 --- a/src/main/java/net/minestom/server/utils/UniqueIdUtils.java
