@@ -8,8 +8,8 @@ These help us to improve the project and maintain a consistent style for each co
 ## Use a Personal Fork and not an Organization
 
 If you want to contribute to Microtus, please fork the repository to your personal account and not to an organization.
-This is because GitHub does not allow to fork a repository from an organization to another organization. 
-If you fork the repository to an organization, you will not be able to create a pull request.
+This is because GitHub does not allow to push as maintainer of our fork into a repository from an organization to another organization. 
+If you fork the repository to an organization, you can open a pr, but we want to accept it.
 
 We much prefer to have PRs show as merged, so please do not use repositories
 on organizations for PRs.
@@ -56,6 +56,7 @@ Steps to add a new patch:
 4. Type `git commit -m "Your commit message"` to commit the changes
 5. Run `./gradlew rebuildPatches` in the main directory from Microtus to convert your commit into a new patch
 6. After the task was successful, you can find your new patch in `/minestom-patches` directory
+7. Now you need to create another commit for push the patch as a file
 
 Now you can create a merge request to add your patch to the repository.
 
