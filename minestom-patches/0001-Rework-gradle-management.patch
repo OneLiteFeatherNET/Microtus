@@ -65,7 +65,7 @@ index b63a95323b4e20af1c36f29f24c623d978016696..acc49b1f22ccd61d4a2e57c38adba9dd
  }
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1917289f8db4ca066610bbe16621b9927030e4f7 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..c60fd26d22b37bab68d98aaef5798d02eeef440e 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,13 +1,40 @@
@@ -82,9 +82,9 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1917289f8db4ca066610bbe16621b992
 +    signing
 +}
 +
-+var baseVersion by extra("1.2.0")
++var baseVersion by extra("1.2.1")
 +var versionExtension by extra("")
-+var snapshot by extra("-SNAPSHOT")
++var snapshot by extra("")
 +
 +group = "net.onelitefeather.microtus"
 +
@@ -272,7 +272,7 @@ index 2230bb02892d10d6756722105337ae6434cc8a35..3fb63e467ef2d6fe82c96f53718e5b82
  dependencyResolutionManagement {
      repositories {
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..f107f7f66278199183793dcdb1e311270ba4f1b6 100644
+index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..c9c68b0066296e89eb59324373fd50125c5c2f9f 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
 @@ -1,22 +1,12 @@
@@ -302,7 +302,7 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..f107f7f66278199183793dcdb1e31127
  
  repositories {
      mavenCentral()
-@@ -36,4 +26,35 @@ dependencies {
+@@ -36,4 +26,34 @@ dependencies {
  
  tasks.getByName<Test>("test") {
      useJUnitPlatform()
@@ -314,10 +314,9 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..f107f7f66278199183793dcdb1e31127
 +        testWith(17)
 +    }
 +
-+    publishAllTo("github", "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus")
-+
 +    github("OneLiteFeatherNET", "Microtus") {
 +        ci(true)
++        publishing(false)
 +    }
 +    mitLicense()
 +    signWithKeyFromPrefixedProperties("onelitefeather")
