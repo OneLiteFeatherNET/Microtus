@@ -5,10 +5,10 @@ Subject: [PATCH] Rework gradle management
 
 
 diff --git a/build-logic/build.gradle.kts b/build-logic/build.gradle.kts
-index 8f641d076bc2853a2a53009d6b92288d532cb42b..40a50945d234439246176bba0d1b8f84297f9eb1 100644
+index 8f641d076bc2853a2a53009d6b92288d532cb42b..1ee73c65139fd730df4f868d8a443320b6be307b 100644
 --- a/build-logic/build.gradle.kts
 +++ b/build-logic/build.gradle.kts
-@@ -8,9 +8,10 @@ repositories {
+@@ -8,9 +8,11 @@ repositories {
  }
  
  dependencies {
@@ -19,13 +19,22 @@ index 8f641d076bc2853a2a53009d6b92288d532cb42b..40a50945d234439246176bba0d1b8f84
 +    implementation("net.kyori", "indra-common", indraVersion)
      implementation("net.kyori", "indra-publishing-sonatype", indraVersion)
      implementation("org.graalvm.buildtools", "native-gradle-plugin", "0.9.9")
++    implementation("io.github.gradle-nexus", "publish-plugin", "2.0.0-rc-1")
  }
 \ No newline at end of file
 diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-index b63a95323b4e20af1c36f29f24c623d978016696..acc49b1f22ccd61d4a2e57c38adba9dd51d6d83a 100644
+index b63a95323b4e20af1c36f29f24c623d978016696..d9af25dd00549449f429e79af70a431fefb86b8e 100644
 --- a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
 +++ b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-@@ -10,23 +10,30 @@ indra {
+@@ -2,6 +2,7 @@ plugins {
+     id("net.kyori.indra")
+     id("net.kyori.indra.publishing")
+     id("net.kyori.indra.publishing.sonatype")
++    id("io.github.gradle-nexus.publish-plugin")
+ }
+ 
+ indra {
+@@ -10,23 +11,30 @@ indra {
          testWith(17)
      }
  
@@ -65,7 +74,7 @@ index b63a95323b4e20af1c36f29f24c623d978016696..acc49b1f22ccd61d4a2e57c38adba9dd
  }
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..097af51e388c023e51d3424312210c97c45f4f59 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..1917289f8db4ca066610bbe16621b9927030e4f7 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,13 +1,40 @@
@@ -82,9 +91,9 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..097af51e388c023e51d3424312210c97
 +    signing
 +}
 +
-+var baseVersion by extra("1.1.2")
++var baseVersion by extra("1.2.0")
 +var versionExtension by extra("")
-+var snapshot by extra("")
++var snapshot by extra("-SNAPSHOT")
 +
 +group = "net.onelitefeather.microtus"
 +
