@@ -2078,14 +2078,14 @@ zz(9jF2x7ZR{w+p)ETCW06PVt0YnZ>gW9^sr&~`%a_7j-Ful~*4=o|&TM@k@Px2z>^
 t{*Ed16F~3V5p+(suF-++X8+nHtT~NSfJ>UC3v)>lEpV}<+rIR_{{yMcG_L>v
 
 diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
-index aa991fceae6e464c320a107e4b337daf48c0d7ab..f20ff05012d8b474d9b263c2b93cfda410488a45 100644
+index aa991fceae6e464c320a107e4b337daf48c0d7ab..1af9e0930b89b3294ea6a195f0808aafd36fafe8 100644
 --- a/gradle/wrapper/gradle-wrapper.properties
 +++ b/gradle/wrapper/gradle-wrapper.properties
 @@ -1,5 +1,7 @@
  distributionBase=GRADLE_USER_HOME
  distributionPath=wrapper/dists
 -distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-bin.zip
-+distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-rc-4-bin.zip
++distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
 +networkTimeout=10000
 +validateDistributionUrl=true
  zipStoreBase=GRADLE_USER_HOME
