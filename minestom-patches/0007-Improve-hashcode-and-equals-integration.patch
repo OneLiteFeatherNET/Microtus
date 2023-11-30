@@ -1,7 +1,7 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: theEvilReaper <steffenwx@gmail.com>
-Date: Mon, 17 Jul 2023 20:35:27 +0200
-Subject: [PATCH] Implement equals and hashcode
+From: Phillipp Glanz <p.glanz@madfix.me>
+Date: Thu, 30 Nov 2023 12:49:37 +0100
+Subject: [PATCH] Improve hashcode and equals integration
 
 
 diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
@@ -56,6 +56,27 @@ index b7c5affa63ebe29d30996718c3402d8348137f7d..d6dd0549db22ee58c4057012fcc46a3a
      /**
       * Gets the instance {@link WorldBorder};
       *
+diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
+index 35b34bfe35067d28eef3c66539d9fd4f0fa68c3f..e68ff90079bea1debfa543b14f6df39396359234 100644
+--- a/src/main/java/net/minestom/server/utils/NamespaceID.java
++++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
+@@ -67,12 +67,14 @@ public final class NamespaceID implements CharSequence, Key {
+     public boolean equals(Object o) {
+         if (this == o) return true;
+         if (!(o instanceof final Key that)) return false;
+-        return Objects.equals(this.full, that.asString());
++        return Objects.equals(this.domain, that.namespace()) && Objects.equals(this.path, that.value()); // Microtus - Fix namespace hashcode and equals
+     }
+ 
+     @Override
+     public int hashCode() {
+-        return full.hashCode();
++        int result = this.domain.hashCode(); // Microtus start - Fix namespace hashcode and equals
++        result = (31 * result) + this.path.hashCode();
++        return result; // Microtus end - Fix namespace hashcode and equals
+     }
+ 
+     @Override
 diff --git a/src/test/java/net/minestom/server/entity/EntityEqualsTest.java b/src/test/java/net/minestom/server/entity/EntityEqualsTest.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..e11088a617e6da7b058b6c6a8a8ffb311ceebe48
@@ -97,3 +118,24 @@ index 0000000000000000000000000000000000000000..305be82a87d514f18510d13364f0574f
 +        assertNotEquals(env.createFlatInstance(), env.createFlatInstance());
 +    }
 +}
+diff --git a/src/test/java/net/minestom/server/utils/NamespaceIDTest.java b/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
+index 2a41bf2cd11d1eb766850ef32b909c94d2a68597..5bae45cd92299a01210869345899018fa4c646af 100644
+--- a/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
++++ b/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
+@@ -27,6 +27,16 @@ public class NamespaceIDTest {
+         assertNotEquals(namespace, NamespaceID.from("minecraft:any2"));
+         assertEquals(namespace, Key.key("minecraft:any"));
+     }
++    // Microtus start - Fix namespace hashcode and equals
++    @Test
++    public void hashCodeConsistentWithEquals() {
++        var namespace = NamespaceID.from("minecraft:any");
++        var key = Key.key("minecraft:any");
++
++        assertEquals(namespace, key);
++        assertEquals(namespace.hashCode(), key.hashCode());
++    }
++    // Microtus end - Fix namespace hashcode and equals
+ 
+     @Test
+     public void atMostOneColon() {
