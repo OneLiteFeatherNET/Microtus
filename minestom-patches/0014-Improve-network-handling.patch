@@ -1,9 +1,25 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: theEvilReaper <steffenwx@gmail.com>
-Date: Sat, 25 Nov 2023 22:41:48 +0100
-Subject: [PATCH] Update nbt data sending and reading
+From: Phillipp Glanz <p.glanz@madfix.me>
+Date: Thu, 30 Nov 2023 13:00:31 +0100
+Subject: [PATCH] Improve network handling
 
 
+diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
+index 8e7ad8420da6168ea2444dae90e5bc68bb32c176..3241e9577c38e301096cebf96cb72816d52bdcff 100644
+--- a/src/main/java/net/minestom/server/entity/Entity.java
++++ b/src/main/java/net/minestom/server/entity/Entity.java
+@@ -1340,7 +1340,10 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
+                     lastSyncedPosition, onGround), this);
+         } else if (viewChange) {
+             PacketUtils.prepareViewablePacket(chunk, new EntityHeadLookPacket(getEntityId(), position.yaw()), this);
+-            PacketUtils.prepareViewablePacket(chunk, new EntityRotationPacket(getEntityId(), position.yaw(), position.pitch(), onGround), this);
++            // Microtus start - position sync fix
++            PacketUtils.prepareViewablePacket(chunk, EntityPositionAndRotationPacket.getPacket(getEntityId(), position,
++                    lastSyncedPosition, isOnGround()), this);
++            // Microtus end - position sync fix
+         }
+         this.lastSyncedPosition = position;
+     }
 diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 index 8f7b9c9c47bf3eedc0143ca2cfc824e9dbc8104a..2aee4d35ace0efca03fc254f9885b2bdc538dea2 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
