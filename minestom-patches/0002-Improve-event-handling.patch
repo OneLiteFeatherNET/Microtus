@@ -1,14 +1,22 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: TheMeinerLP <p.glanz@madfix.me>
-Date: Tue, 13 Jun 2023 23:17:53 +0200
-Subject: [PATCH] Add player gamemode change event
+From: Phillipp Glanz <p.glanz@madfix.me>
+Date: Thu, 30 Nov 2023 12:38:07 +0100
+Subject: [PATCH] Improve event handling
 
 
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 33f4fe1d6b1af922d294924d58acfa1eeb3036d1..37f80b3199bde6f9edb470deaaa98620fbb7e41a 100644
+index 33f4fe1d6b1af922d294924d58acfa1eeb3036d1..60cd81d8e7354b0813188b60b923bcf61aea142a 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
-@@ -1305,13 +1305,22 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -30,6 +30,7 @@ import net.minestom.server.entity.fakeplayer.FakePlayer;
+ import net.minestom.server.entity.metadata.PlayerMeta;
+ import net.minestom.server.entity.vehicle.PlayerVehicleInformation;
+ import net.minestom.server.event.EventDispatcher;
++import net.minestom.server.event.inventory.InventoryCloseEvent;
+ import net.minestom.server.event.inventory.InventoryOpenEvent;
+ import net.minestom.server.event.item.ItemDropEvent;
+ import net.minestom.server.event.item.ItemUpdateStateEvent;
+@@ -1305,13 +1306,22 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          return gameMode;
      }
  
@@ -34,7 +42,7 @@ index 33f4fe1d6b1af922d294924d58acfa1eeb3036d1..37f80b3199bde6f9edb470deaaa98620
          // Condition to prevent sending the packets before spawning the player
          if (isActive()) {
              sendPacket(new ChangeGameStatePacket(ChangeGameStatePacket.Reason.CHANGE_GAMEMODE, gameMode.id()));
-@@ -1342,8 +1351,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1342,8 +1352,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          if (isActive()) {
              refreshAbilities();
          }
@@ -45,6 +53,17 @@ index 33f4fe1d6b1af922d294924d58acfa1eeb3036d1..37f80b3199bde6f9edb470deaaa98620
      /**
       * Gets if this player is in creative. Used for code readability.
       *
+@@ -1500,6 +1512,10 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         }
+ 
+         if (openInventory == getOpenInventory()) {
++            // Microtus start - 1.19.3 trigger inventory close
++            InventoryCloseEvent closeEvent = new InventoryCloseEvent(openInventory, this);
++            EventDispatcher.call(closeEvent);
++            // Microtus end - 1.19.3 trigger inventory close
+             CloseWindowPacket closeWindowPacket;
+             if (openInventory == null) {
+                 closeWindowPacket = new CloseWindowPacket((byte) 0);
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerGameModeChangeEvent.java b/src/main/java/net/minestom/server/event/player/PlayerGameModeChangeEvent.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..8ced8497feac0a3aa2b625ab7606567d671055c2

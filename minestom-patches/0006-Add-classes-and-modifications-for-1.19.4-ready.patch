@@ -2006,10 +2006,10 @@ index 9ba6129d1fe4c4f344d2511503d1e09928d91af5..eede72d501c31b9d6ccc7c67c6635484
          //EMPTY_VALUES.set(TYPE_PARTICLE -> throw new UnsupportedOperationException();
          EMPTY_VALUES.set(TYPE_VILLAGERDATA, VillagerData(0, 0, 0));
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index db3c6f748130f73c9e577d8d888bfce93842af4c..133b925eedd1b29d5a5a90307020ae3bd6a529fc 100644
+index f29c79638a20264ef500c4d8c7d94ab265a6639c..2886dc65a8f79cab946434b093ae3161bf5c2cb1 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
-@@ -251,7 +251,9 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -252,7 +252,9 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          NBTCompound nbt = NBT.Compound(Map.of(
                  "minecraft:chat_type", Messenger.chatRegistry(),
                  "minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT(),
@@ -2020,7 +2020,7 @@ index db3c6f748130f73c9e577d8d888bfce93842af4c..133b925eedd1b29d5a5a90307020ae3b
  
          final JoinGamePacket joinGamePacket = new JoinGamePacket(getEntityId(), false, gameMode, null,
                  List.of(dimensionType.getName().asString()), nbt, dimensionType.toString(), dimensionType.getName().asString(),
-@@ -823,7 +825,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -824,7 +826,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
      @Override
      public boolean isImmune(@NotNull DamageType type) {
          if (!getGameMode().canTakeDamage()) {
@@ -2029,7 +2029,7 @@ index db3c6f748130f73c9e577d8d888bfce93842af4c..133b925eedd1b29d5a5a90307020ae3b
          }
          return super.isImmune(type);
      }
-@@ -1581,7 +1583,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -1586,7 +1588,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
      @ApiStatus.Internal
      protected void synchronizePosition(boolean includeSelf) {
          if (includeSelf) {
