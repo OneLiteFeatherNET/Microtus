@@ -65,7 +65,7 @@ index b63a95323b4e20af1c36f29f24c623d978016696..acc49b1f22ccd61d4a2e57c38adba9dd
  }
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..c60fd26d22b37bab68d98aaef5798d02eeef440e 100644
+index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..097af51e388c023e51d3424312210c97c45f4f59 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,13 +1,40 @@
@@ -82,7 +82,7 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..c60fd26d22b37bab68d98aaef5798d02
 +    signing
 +}
 +
-+var baseVersion by extra("1.2.1")
++var baseVersion by extra("1.1.2")
 +var versionExtension by extra("")
 +var snapshot by extra("")
 +
