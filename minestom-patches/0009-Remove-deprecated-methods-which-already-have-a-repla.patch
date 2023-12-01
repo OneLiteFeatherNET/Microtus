@@ -232,7 +232,7 @@ index 27de8eee60012568cfd85e612f9a7377085f9033..3d6960753812ef9d01047ec3c5f91a36
          return hand;
      }
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index b7c5affa63ebe29d30996718c3402d8348137f7d..05e5f9d0e7713804d551b73828d2089688a7513c 100644
+index d6dd0549db22ee58c4057012fcc46a3aba8f087b..7c6160c9d629da080f3d870e429559af435cebf5 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
 @@ -61,6 +61,7 @@ import java.util.stream.Collectors;
@@ -646,7 +646,7 @@ index 7127b875ce50b8637ea63921519b780ea6b6bc4a..35cc1584d9e319264cb385d63958b7c9
      }
  }
 diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
-index 35b34bfe35067d28eef3c66539d9fd4f0fa68c3f..3dff7d06972dfb2aeab589cb1032e5eee5cc1fb1 100644
+index e68ff90079bea1debfa543b14f6df39396359234..bb973301f713733a3fb4b7eb0b522a4728d66c92 100644
 --- a/src/main/java/net/minestom/server/utils/NamespaceID.java
 +++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
 @@ -12,6 +12,7 @@ import java.util.Objects;
@@ -657,7 +657,7 @@ index 35b34bfe35067d28eef3c66539d9fd4f0fa68c3f..3dff7d06972dfb2aeab589cb1032e5ee
  public final class NamespaceID implements CharSequence, Key {
      private static final String legalLetters = "[0123456789abcdefghijklmnopqrstuvwxyz_-]+";
      private static final String legalPathLetters = "[0123456789abcdefghijklmnopqrstuvwxyz./_-]+";
-@@ -110,14 +111,4 @@ public final class NamespaceID implements CharSequence, Key {
+@@ -112,14 +113,4 @@ public final class NamespaceID implements CharSequence, Key {
      public @NotNull String asString() {
          return this.full;
      }
