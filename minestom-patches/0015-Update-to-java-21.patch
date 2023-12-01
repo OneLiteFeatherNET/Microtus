@@ -5,22 +5,21 @@ Subject: [PATCH] Update to java 21
 
 
 diff --git a/build-logic/build.gradle.kts b/build-logic/build.gradle.kts
-index 7187de227dbb03f8caca514897537dc64d37d40e..3a0c1601dec65a93ba254ecc7ed643275c5df7cc 100644
+index 1ee73c65139fd730df4f868d8a443320b6be307b..26bb5009e0340347f45900ee3935434fb913d3ec 100644
 --- a/build-logic/build.gradle.kts
 +++ b/build-logic/build.gradle.kts
-@@ -8,10 +8,10 @@ repositories {
- }
+@@ -9,10 +9,10 @@ repositories {
  
  dependencies {
--    val indraVersion = "3.1.2"
+     val indraVersion = "3.1.3"
 -    implementation("org.jetbrains.kotlin", "kotlin-gradle-plugin", "1.6.10")
-+    val indraVersion = "3.1.3"
 +    implementation("org.jetbrains.kotlin", "kotlin-gradle-plugin", "1.9.20")
      implementation("net.kyori", "indra-common", indraVersion)
      implementation("net.kyori", "indra-common", indraVersion)
      implementation("net.kyori", "indra-publishing-sonatype", indraVersion)
 -    implementation("org.graalvm.buildtools", "native-gradle-plugin", "0.9.9")
 +    implementation("org.graalvm.buildtools", "native-gradle-plugin", "0.9.28")
+     implementation("io.github.gradle-nexus", "publish-plugin", "2.0.0-rc-1")
  }
 \ No newline at end of file
 diff --git a/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts
@@ -53,10 +52,10 @@ index 4065014d4c051dccac13b21722a1eccd91f21c04..b8ecd460f5131bb74d8df6a7d0d86419
 \ No newline at end of file
 +}
 diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-index 3024e94f0a6c9821b021a3f7fa67f8501db9bf06..e681e03603cd50e360135aa4e5039c81994bd5a1 100644
+index d9af25dd00549449f429e79af70a431fefb86b8e..305dd158be3325000a668159a39f05e79f4f00d9 100644
 --- a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
 +++ b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-@@ -6,8 +6,8 @@ plugins {
+@@ -7,8 +7,8 @@ plugins {
  
  indra {
      javaVersions {
@@ -68,36 +67,20 @@ index 3024e94f0a6c9821b021a3f7fa67f8501db9bf06..e681e03603cd50e360135aa4e5039c81
  
      github("OneLiteFeatherNET", "Microtus") {
 diff --git a/build.gradle.kts b/build.gradle.kts
-index d73027f741cd0f432671434e701b2f10d438a5ec..89d7646525797562adf1081aef4bb7f580dd0047 100644
+index 8e55ea66f10564621549e96018c3575873597f94..5660519f5214a69734c9e493da7e741fbd7aff1e 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -7,9 +7,9 @@ plugins {
+@@ -5,6 +5,9 @@ plugins {
+     id("minestom.publishing-conventions")
      id("minestom.native-conventions")
      alias(libs.plugins.blossom)
-     // publishing
--    id("org.ajoberstar.grgit") version "5.2.0"
++    // publishing
 +    alias(libs.plugins.grgit)
 +    alias(libs.plugins.dependencycheck)
      signing
--    id("org.owasp.dependencycheck") version "8.4.3"
  }
  
- var baseVersion by extra("1.2.0")
-@@ -24,10 +24,10 @@ ext {
-         dir = File("$rootDir/.git")
-     }
-     val revision = git.head().abbreviatedId
--    if (snapshot.isNotEmpty()) {
--        versionExtension = "%s+%s".format(Locale.ROOT, snapshot, revision)
-+    versionExtension = if (snapshot.isNotEmpty()) {
-+        "%s+%s".format(Locale.ROOT, snapshot, revision)
-     } else {
--        versionExtension = ""
-+        ""
-     }
- }
- 
-@@ -65,7 +65,7 @@ java {
+@@ -48,7 +51,7 @@ java {
  }
  
  tasks {
@@ -106,7 +89,7 @@ index d73027f741cd0f432671434e701b2f10d438a5ec..89d7646525797562adf1081aef4bb7f5
          (options as? StandardJavadocDocletOptions)?.apply {
              encoding = "UTF-8"
  
-@@ -80,48 +80,35 @@ tasks {
+@@ -63,48 +66,35 @@ tasks {
      withType<Zip> {
          duplicatesStrategy = DuplicatesStrategy.EXCLUDE
      }
@@ -2187,191 +2170,56 @@ index 1b6c787337ffb79f0e3cf8b1e9f00f680a959de1..1aa94a4269074199e6ed2c37e8db3e08
  #
  # With -n1 it outputs one arg per line, with the quotes and backslashes removed.
 diff --git a/gradlew.bat b/gradlew.bat
-index 107acd32c4e687021ef32db511e8a206129b88ec..6689b85beecde676054c39c2408085f41e6be6dc 100644
+index 107acd32c4e687021ef32db511e8a206129b88ec..93e3f59f135dd2dd498de4beb5c64338cc33beeb 100644
 --- a/gradlew.bat
 +++ b/gradlew.bat
-@@ -1,89 +1,92 @@
--@rem
--@rem Copyright 2015 the original author or authors.
--@rem
--@rem Licensed under the Apache License, Version 2.0 (the "License");
--@rem you may not use this file except in compliance with the License.
--@rem You may obtain a copy of the License at
--@rem
--@rem      https://www.apache.org/licenses/LICENSE-2.0
--@rem
--@rem Unless required by applicable law or agreed to in writing, software
--@rem distributed under the License is distributed on an "AS IS" BASIS,
--@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
--@rem See the License for the specific language governing permissions and
--@rem limitations under the License.
--@rem
--
+@@ -14,7 +14,7 @@
+ @rem limitations under the License.
+ @rem
+ 
 -@if "%DEBUG%" == "" @echo off
--@rem ##########################################################################
--@rem
--@rem  Gradle startup script for Windows
--@rem
--@rem ##########################################################################
--
--@rem Set local scope for the variables with windows NT shell
--if "%OS%"=="Windows_NT" setlocal
--
--set DIRNAME=%~dp0
--if "%DIRNAME%" == "" set DIRNAME=.
--set APP_BASE_NAME=%~n0
--set APP_HOME=%DIRNAME%
--
--@rem Resolve any "." and ".." in APP_HOME to make it shorter.
--for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
--
--@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
--set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
--
--@rem Find java.exe
--if defined JAVA_HOME goto findJavaFromJavaHome
--
--set JAVA_EXE=java.exe
--%JAVA_EXE% -version >NUL 2>&1
--if "%ERRORLEVEL%" == "0" goto execute
--
--echo.
--echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
--echo.
--echo Please set the JAVA_HOME variable in your environment to match the
--echo location of your Java installation.
--
--goto fail
--
--:findJavaFromJavaHome
--set JAVA_HOME=%JAVA_HOME:"=%
--set JAVA_EXE=%JAVA_HOME%/bin/java.exe
--
--if exist "%JAVA_EXE%" goto execute
--
--echo.
--echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
--echo.
--echo Please set the JAVA_HOME variable in your environment to match the
--echo location of your Java installation.
--
--goto fail
--
--:execute
--@rem Setup the command line
--
--set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
--
--
--@rem Execute Gradle
--"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
--
--:end
--@rem End local scope for the variables with windows NT shell
--if "%ERRORLEVEL%"=="0" goto mainEnd
--
--:fail
--rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
--rem the _cmd.exe /c_ return code!
--if  not "" == "%GRADLE_EXIT_CONSOLE%" exit 1
--exit /b 1
--
--:mainEnd
--if "%OS%"=="Windows_NT" endlocal
--
--:omega
-+@rem
-+@rem Copyright 2015 the original author or authors.
-+@rem
-+@rem Licensed under the Apache License, Version 2.0 (the "License");
-+@rem you may not use this file except in compliance with the License.
-+@rem You may obtain a copy of the License at
-+@rem
-+@rem      https://www.apache.org/licenses/LICENSE-2.0
-+@rem
-+@rem Unless required by applicable law or agreed to in writing, software
-+@rem distributed under the License is distributed on an "AS IS" BASIS,
-+@rem WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-+@rem See the License for the specific language governing permissions and
-+@rem limitations under the License.
-+@rem
-+
 +@if "%DEBUG%"=="" @echo off
-+@rem ##########################################################################
-+@rem
-+@rem  Gradle startup script for Windows
-+@rem
-+@rem ##########################################################################
-+
-+@rem Set local scope for the variables with windows NT shell
-+if "%OS%"=="Windows_NT" setlocal
-+
-+set DIRNAME=%~dp0
+ @rem ##########################################################################
+ @rem
+ @rem  Gradle startup script for Windows
+@@ -25,7 +25,8 @@
+ if "%OS%"=="Windows_NT" setlocal
+ 
+ set DIRNAME=%~dp0
+-if "%DIRNAME%" == "" set DIRNAME=.
 +if "%DIRNAME%"=="" set DIRNAME=.
 +@rem This is normally unused
-+set APP_BASE_NAME=%~n0
-+set APP_HOME=%DIRNAME%
-+
-+@rem Resolve any "." and ".." in APP_HOME to make it shorter.
-+for %%i in ("%APP_HOME%") do set APP_HOME=%%~fi
-+
-+@rem Add default JVM options here. You can also use JAVA_OPTS and GRADLE_OPTS to pass JVM options to this script.
-+set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
-+
-+@rem Find java.exe
-+if defined JAVA_HOME goto findJavaFromJavaHome
-+
-+set JAVA_EXE=java.exe
-+%JAVA_EXE% -version >NUL 2>&1
+ set APP_BASE_NAME=%~n0
+ set APP_HOME=%DIRNAME%
+ 
+@@ -40,7 +41,7 @@ if defined JAVA_HOME goto findJavaFromJavaHome
+ 
+ set JAVA_EXE=java.exe
+ %JAVA_EXE% -version >NUL 2>&1
+-if "%ERRORLEVEL%" == "0" goto execute
 +if %ERRORLEVEL% equ 0 goto execute
-+
-+echo.
-+echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
-+echo.
-+echo Please set the JAVA_HOME variable in your environment to match the
-+echo location of your Java installation.
-+
-+goto fail
-+
-+:findJavaFromJavaHome
-+set JAVA_HOME=%JAVA_HOME:"=%
-+set JAVA_EXE=%JAVA_HOME%/bin/java.exe
-+
-+if exist "%JAVA_EXE%" goto execute
-+
-+echo.
-+echo ERROR: JAVA_HOME is set to an invalid directory: %JAVA_HOME%
-+echo.
-+echo Please set the JAVA_HOME variable in your environment to match the
-+echo location of your Java installation.
-+
-+goto fail
-+
-+:execute
-+@rem Setup the command line
-+
-+set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
-+
-+
-+@rem Execute Gradle
-+"%JAVA_EXE%" %DEFAULT_JVM_OPTS% %JAVA_OPTS% %GRADLE_OPTS% "-Dorg.gradle.appname=%APP_BASE_NAME%" -classpath "%CLASSPATH%" org.gradle.wrapper.GradleWrapperMain %*
-+
-+:end
-+@rem End local scope for the variables with windows NT shell
+ 
+ echo.
+ echo ERROR: JAVA_HOME is not set and no 'java' command could be found in your PATH.
+@@ -75,13 +76,15 @@ set CLASSPATH=%APP_HOME%\gradle\wrapper\gradle-wrapper.jar
+ 
+ :end
+ @rem End local scope for the variables with windows NT shell
+-if "%ERRORLEVEL%"=="0" goto mainEnd
 +if %ERRORLEVEL% equ 0 goto mainEnd
-+
-+:fail
-+rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
-+rem the _cmd.exe /c_ return code!
+ 
+ :fail
+ rem Set variable GRADLE_EXIT_CONSOLE if you need the _script_ return code instead of
+ rem the _cmd.exe /c_ return code!
+-if  not "" == "%GRADLE_EXIT_CONSOLE%" exit 1
+-exit /b 1
 +set EXIT_CODE=%ERRORLEVEL%
 +if %EXIT_CODE% equ 0 set EXIT_CODE=1
 +if not ""=="%GRADLE_EXIT_CONSOLE%" exit %EXIT_CODE%
 +exit /b %EXIT_CODE%
-+
-+:mainEnd
-+if "%OS%"=="Windows_NT" endlocal
-+
-+:omega
+ 
+ :mainEnd
+ if "%OS%"=="Windows_NT" endlocal
 diff --git a/jmh-benchmarks/build.gradle.kts b/jmh-benchmarks/build.gradle.kts
 index 589b3fbbb813fa09f0d7c522f07244fa4b847b2c..ec1b676b8216c4bf651ef0be949b31f1f2ecc177 100644
 --- a/jmh-benchmarks/build.gradle.kts
@@ -2507,7 +2355,7 @@ index 3fb63e467ef2d6fe82c96f53718e5b8292c36ad4..3132b76599b16ff0466e986d55a2dfd4
 +    }
 +}
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index f107f7f66278199183793dcdb1e311270ba4f1b6..cb089f96d025e38110047bc088564782938d88e5 100644
+index c9c68b0066296e89eb59324373fd50125c5c2f9f..8a80d6d01b8023caac54c4af5f21d8020f3f016d 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
 @@ -30,8 +30,8 @@ tasks.getByName<Test>("test") {
@@ -2520,4 +2368,4 @@ index f107f7f66278199183793dcdb1e311270ba4f1b6..cb089f96d025e38110047bc088564782
 +        testWith(21)
      }
  
-     publishAllTo("github", "https://maven.pkg.github.com/OneLiteFeatherNET/Microtus")
+     github("OneLiteFeatherNET", "Microtus") {
