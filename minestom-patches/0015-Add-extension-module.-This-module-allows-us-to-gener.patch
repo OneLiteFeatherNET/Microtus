@@ -38,19 +38,18 @@ index 5f8acd515579c6356296929cbe512ed14049741e..731101eb87c45f02ce7f569d7e8cc02e
 \ No newline at end of file
 diff --git a/extension/build.gradle.kts b/extension/build.gradle.kts
 new file mode 100644
-index 0000000000000000000000000000000000000000..a6a1426e31d719e01438f42c0cf799b3751b65a0
+index 0000000000000000000000000000000000000000..e040bfda6de5ff567b62dd2b58cb8a4d2b33fe96
 --- /dev/null
 +++ b/extension/build.gradle.kts
-@@ -0,0 +1,35 @@
+@@ -0,0 +1,34 @@
 +plugins {
 +    `java-gradle-plugin`
 +    `kotlin-dsl`
-+    id("com.gradle.plugin-publish") version "1.2.1"
++    id("com.gradle.plugin-publish") version "1.2.0"
 +    id("org.cadixdev.licenser") version "0.6.1"
 +}
 +
 +group = "net.onelitefeather.microtus"
-+version = "0.0.1"
 +
 +repositories {
 +    mavenCentral()
@@ -73,7 +72,7 @@ index 0000000000000000000000000000000000000000..a6a1426e31d719e01438f42c0cf799b3
 +            displayName = "Extension (Minestom)"
 +            description = "Generate extension.json for Minestom extensions based on the Gradle project"
 +            implementationClass = "net.onelitefeather.microtus.ExtensionPlugin"
-+            tags.set(listOf("minestom", "microtus", "extension"))
++            tags.set(listOf("minestom", "gradle", "microtus"))
 +        }
 +    }
 +}
