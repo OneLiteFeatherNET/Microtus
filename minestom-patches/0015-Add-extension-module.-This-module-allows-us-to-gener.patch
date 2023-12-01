@@ -7,13 +7,13 @@ Subject: [PATCH] Add extension module. This module allows us to generate the
 
 
 diff --git a/demo/build.gradle.kts b/demo/build.gradle.kts
-index 97f211b6509ee687978c78cf58480b8b214f9e0f..1b5c1815a31ca2164f3c8da3b48a4b1803b0acf5 100644
+index 5f8acd515579c6356296929cbe512ed14049741e..731101eb87c45f02ce7f569d7e8cc02e6f030c7a 100644
 --- a/demo/build.gradle.kts
 +++ b/demo/build.gradle.kts
 @@ -5,6 +5,7 @@ plugins {
      id("minestom.common-conventions")
      id("minestom.native-conventions")
-     id("com.github.johnrengelman.shadow") version ("8.1.1")
+     id("com.github.johnrengelman.shadow") version ("7.1.2")
 +    id("net.onelitefeather.microtus.extension")
  }
  
