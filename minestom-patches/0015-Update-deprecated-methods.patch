@@ -5,7 +5,7 @@ Subject: [PATCH] Update deprecated methods
 
 
 diff --git a/src/main/java/net/minestom/server/advancements/notifications/Notification.java b/src/main/java/net/minestom/server/advancements/notifications/Notification.java
-index 90660466e837326cb98d26032dd04b4f19247295..47ce9808f9d3c5352578ab39001e556673698d46 100644
+index 90660466e837326cb98d26032dd04b4f19247295..71833253964adf25b531d71166e22a9f6e2e1f20 100644
 --- a/src/main/java/net/minestom/server/advancements/notifications/Notification.java
 +++ b/src/main/java/net/minestom/server/advancements/notifications/Notification.java
 @@ -14,12 +14,12 @@ public record Notification(@NotNull Component title, @NotNull FrameType frameTyp
@@ -13,18 +13,18 @@ index 90660466e837326cb98d26032dd04b4f19247295..47ce9808f9d3c5352578ab39001e5566
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public @NotNull Component getTitle() {
          return title;
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public @NotNull FrameType getFrameType() {
          return frameType;
      }
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 04244d43a556e33b5ce9cb4cf727433f976af35b..2bbda0a546cd24e02b1b9d90a612f079acbd123d 100644
+index 04244d43a556e33b5ce9cb4cf727433f976af35b..aa3cbd8410f8514e7aac2c0d9d1d25c9c0471c0e 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 @@ -10,7 +10,6 @@ import net.kyori.adventure.text.Component;
@@ -40,12 +40,12 @@ index 04244d43a556e33b5ce9cb4cf727433f976af35b..2bbda0a546cd24e02b1b9d90a612f079
       * @deprecated Use {@link #createSoundPacket(Sound, Sound.Emitter)}
       */
 -    @Deprecated(forRemoval = true)
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public static ServerPacket createEntitySoundPacket(@NotNull Sound sound, @NotNull Entity entity) {
          return createSoundPacket(sound, entity);
      }
 diff --git a/src/main/java/net/minestom/server/color/Color.java b/src/main/java/net/minestom/server/color/Color.java
-index 9fdaf30d8553660a75555228cbe63fcf99445fa6..514eac11f99bd4be2530ed8002b0e6a67bbfb47d 100644
+index 9fdaf30d8553660a75555228cbe63fcf99445fa6..1022f6e71fe25200e573222e7f64d78809df75be 100644
 --- a/src/main/java/net/minestom/server/color/Color.java
 +++ b/src/main/java/net/minestom/server/color/Color.java
 @@ -103,17 +103,17 @@ public record Color(int red, int green, int blue) implements RGBLike {
@@ -53,24 +53,24 @@ index 9fdaf30d8553660a75555228cbe63fcf99445fa6..514eac11f99bd4be2530ed8002b0e6a6
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public int getRed() {
          return this.red;
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public int getGreen() {
          return this.green;
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public int getBlue() {
          return this.blue;
      }
 diff --git a/src/main/java/net/minestom/server/entity/PlayerSkin.java b/src/main/java/net/minestom/server/entity/PlayerSkin.java
-index fe85cf8ad30097aaef147977d8b59b163fc75760..ef511bb12dfece8f4d72fc0dd0b28f08d87af7aa 100644
+index fe85cf8ad30097aaef147977d8b59b163fc75760..bc687765ad1a3ecd33800db9f90aa2c61da68f86 100644
 --- a/src/main/java/net/minestom/server/entity/PlayerSkin.java
 +++ b/src/main/java/net/minestom/server/entity/PlayerSkin.java
 @@ -64,7 +64,7 @@ public record PlayerSkin(String textures, String signature) {
@@ -78,7 +78,7 @@ index fe85cf8ad30097aaef147977d8b59b163fc75760..ef511bb12dfece8f4d72fc0dd0b28f08
       * @deprecated use {@link #textures()}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public String getTextures() {
          return textures;
      }
@@ -87,12 +87,12 @@ index fe85cf8ad30097aaef147977d8b59b163fc75760..ef511bb12dfece8f4d72fc0dd0b28f08
       * @deprecated use {@link #signature()}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public String getSignature() {
          return signature;
      }
 diff --git a/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java b/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
-index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..e889281f3af287a8f2f333486e01bb411cd4beb2 100644
+index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..fbe37bbf0fc4399161764dd7cf224009efb3a8a8 100644
 --- a/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
 +++ b/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
 @@ -25,7 +25,7 @@ public class ClosestEntityTarget extends TargetSelector {
@@ -100,12 +100,12 @@ index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..e889281f3af287a8f2f333486e01bb41
       */
      @SafeVarargs
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public ClosestEntityTarget(@NotNull EntityCreature entityCreature, float range,
                                 @NotNull Class<? extends LivingEntity>... entitiesTarget) {
          this(entityCreature, range, ent -> {
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
-index b45665fb719606ade2bc83318ba25866487a6dc4..bdb7ca143c8a21b85767c659fc16dc29883783eb 100644
+index b45665fb719606ade2bc83318ba25866487a6dc4..09d7a596c27332aeab4e438023608653b49d17c7 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
 +++ b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
 @@ -27,7 +27,7 @@ public class PlayerEatEvent implements ItemEvent, PlayerInstanceEvent {
@@ -113,12 +113,12 @@ index b45665fb719606ade2bc83318ba25866487a6dc4..bdb7ca143c8a21b85767c659fc16dc29
       * @deprecated use getItemStack() for the eaten item
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public @NotNull ItemStack getFoodItem() {
          return foodItem;
      }
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
-index 27de8eee60012568cfd85e612f9a7377085f9033..45a936ddafffdf66213f27f0a9237b34ba9c1f30 100644
+index 27de8eee60012568cfd85e612f9a7377085f9033..5afa757b0866dc4a4448eee650f1a8276bfc5b1b 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
 +++ b/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
 @@ -34,7 +34,7 @@ public class PlayerPreEatEvent implements ItemEvent, PlayerInstanceEvent, Cancel
@@ -126,12 +126,12 @@ index 27de8eee60012568cfd85e612f9a7377085f9033..45a936ddafffdf66213f27f0a9237b34
       * @deprecated use getItemStack() for the eaten item
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public @NotNull ItemStack getFoodItem() {
          return foodItem;
      }
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
-index 6108c4283fc1128fddd208914095cd7739524f0f..ca9c58b913cf002801937446e2e9bcb216ab9306 100644
+index 6108c4283fc1128fddd208914095cd7739524f0f..82d66174489837f3a8c59e8aa0e3797cfd2a3edc 100644
 --- a/src/main/java/net/minestom/server/inventory/InventoryType.java
 +++ b/src/main/java/net/minestom/server/inventory/InventoryType.java
 @@ -47,7 +47,7 @@ public enum InventoryType {
@@ -139,12 +139,12 @@ index 6108c4283fc1128fddd208914095cd7739524f0f..ca9c58b913cf002801937446e2e9bcb2
       * @deprecated use {@link #getSize()}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public int getAdditionalSlot() {
          return size;
      }
 diff --git a/src/main/java/net/minestom/server/item/ItemStack.java b/src/main/java/net/minestom/server/item/ItemStack.java
-index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..81d11840b871eeda21d33bea11e6dae62ca99447 100644
+index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..b9130c2e4ba1a4d125194e9666444ce05752dbd5 100644
 --- a/src/main/java/net/minestom/server/item/ItemStack.java
 +++ b/src/main/java/net/minestom/server/item/ItemStack.java
 @@ -181,19 +181,19 @@ public sealed interface ItemStack extends TagReadable, HoverEventSource<HoverEve
@@ -152,26 +152,26 @@ index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..81d11840b871eeda21d33bea11e6dae6
  
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      @Contract(pure = true)
      default @NotNull Material getMaterial() {
          return material();
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      @Contract(pure = true)
      default int getAmount() {
          return amount();
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      @Contract(pure = true)
      default @NotNull ItemMeta getMeta() {
          return meta();
 diff --git a/src/main/java/net/minestom/server/ping/ResponseData.java b/src/main/java/net/minestom/server/ping/ResponseData.java
-index 706d9a7579f7da51ff0de98829c69d8b0534cd89..221747c36bf4b1a8199f38422ea9d59588e1cf0f 100644
+index 706d9a7579f7da51ff0de98829c69d8b0534cd89..48364acb478a7e6ca01355180c519ed9521b5389 100644
 --- a/src/main/java/net/minestom/server/ping/ResponseData.java
 +++ b/src/main/java/net/minestom/server/ping/ResponseData.java
 @@ -50,7 +50,7 @@ public class ResponseData {
@@ -179,7 +179,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..221747c36bf4b1a8199f38422ea9d595
       * @deprecated This is named incorrectly, use {@link #setVersion(String)} instead
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public void setName(String name) {
          this.setVersion(name);
      }
@@ -188,7 +188,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..221747c36bf4b1a8199f38422ea9d595
       * @deprecated Use {@link #addEntries(Collection)}}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public void addPlayer(Iterable<Player> players) {
          for (Player player : players) {
              this.addPlayer(player);
@@ -197,7 +197,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..221747c36bf4b1a8199f38422ea9d595
       * @deprecated Use {@link #addEntry(NamedAndIdentified)}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public void addPlayer(Player player) {
          this.addEntry(player);
      }
@@ -206,7 +206,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..221747c36bf4b1a8199f38422ea9d595
       * @deprecated Use {@link #addEntry(NamedAndIdentified)} with {@link NamedAndIdentified#of(String, UUID)}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public void addPlayer(String name, UUID uuid) {
          this.addEntry(NamedAndIdentified.of(name, uuid));
      }
@@ -215,7 +215,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..221747c36bf4b1a8199f38422ea9d595
       * @deprecated Use {@link #addEntry(NamedAndIdentified)} with {@link NamedAndIdentified#named(String)}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public void addPlayer(String name) {
          this.addEntry(NamedAndIdentified.named(name));
      }
@@ -224,7 +224,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..221747c36bf4b1a8199f38422ea9d595
       * @deprecated Use {@link #clearEntries()}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public void clearPlayers() {
          this.clearEntries();
      }
@@ -233,12 +233,12 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..221747c36bf4b1a8199f38422ea9d595
       * @deprecated Use {@link #setDescription(Component)}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public void setDescription(String description) {
          this.description = LegacyComponentSerializer.legacySection().deserialize(description);
      }
 diff --git a/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java b/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
-index b5817c96772fd399320bc61cafecf2101a55e867..44dadf816359401645c5beb286003ca6bd162b32 100644
+index b5817c96772fd399320bc61cafecf2101a55e867..8067181d5badf0c158bdba65f93058eb573b2f1d 100644
 --- a/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
 +++ b/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
 @@ -32,7 +32,7 @@ public class BelowNameTag implements Scoreboard {
@@ -246,12 +246,12 @@ index b5817c96772fd399320bc61cafecf2101a55e867..44dadf816359401645c5beb286003ca6
       * @deprecated Use {@link #BelowNameTag(String, Component)}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public BelowNameTag(String name, String value) {
          this(name, Component.text(value));
      }
 diff --git a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
-index b14aebca46465331160051e55ceaab6439999ce4..1c066180d6fe557099f67fe8449899d74b08c492 100644
+index b14aebca46465331160051e55ceaab6439999ce4..2e5a74cbd1f12331b9513181e517e90ef9c6398c 100644
 --- a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
 +++ b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
 @@ -24,7 +24,7 @@ public interface Scoreboard extends Viewable, PacketGroupingAudience {
@@ -259,12 +259,12 @@ index b14aebca46465331160051e55ceaab6439999ce4..1c066180d6fe557099f67fe8449899d7
       * @deprecated Use {@link #getCreationObjectivePacket(Component, ScoreboardObjectivePacket.Type)}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      @NotNull
      default ScoreboardObjectivePacket getCreationObjectivePacket(String value, ScoreboardObjectivePacket.Type type) {
          return this.getCreationObjectivePacket(Component.text(value), type);
 diff --git a/src/main/java/net/minestom/server/scoreboard/Sidebar.java b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
-index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..0e01a95f212161fe30b7939e1f410a9716cbeaad 100644
+index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..b320adefc3e37cb3dc4d424badf41f3c61e129ea 100644
 --- a/src/main/java/net/minestom/server/scoreboard/Sidebar.java
 +++ b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
 @@ -58,7 +58,7 @@ public class Sidebar implements Scoreboard {
@@ -272,7 +272,7 @@ index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..0e01a95f212161fe30b7939e1f410a97
       * @deprecated Use {@link #Sidebar(Component)}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public Sidebar(@NotNull String title) {
          this(Component.text(title));
      }
@@ -281,12 +281,12 @@ index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..0e01a95f212161fe30b7939e1f410a97
       * @deprecated Use {@link #setTitle(Component)}
       */
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public void setTitle(@NotNull String title) {
          this.setTitle(Component.text(title));
      }
 diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
-index e68ff90079bea1debfa543b14f6df39396359234..9200eae99d363e92e8d2cb6026c9b545dd2985d4 100644
+index e68ff90079bea1debfa543b14f6df39396359234..c45343beb2c62a532785133c912d67017d04b39f 100644
 --- a/src/main/java/net/minestom/server/utils/NamespaceID.java
 +++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
 @@ -113,12 +113,12 @@ public final class NamespaceID implements CharSequence, Key {
@@ -294,13 +294,13 @@ index e68ff90079bea1debfa543b14f6df39396359234..9200eae99d363e92e8d2cb6026c9b545
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public String getDomain() {
          return domain();
      }
  
 -    @Deprecated
-+    @Deprecated(forRemoval = true, since = "1.1.2")
++    @Deprecated(forRemoval = true, since = "1.1.3")
      public String getPath() {
          return path();
      }
