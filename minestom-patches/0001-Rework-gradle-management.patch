@@ -172,7 +172,7 @@ index 60b18683dd01e7f349f7f22465db2bde969c9690..5f8acd515579c6356296929cbe512ed1
  
  dependencies {
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index b3da234609fcb6f3ab1866a2fc806719b29f97f2..7fec678ea6cae07244872a434bcf4b4f3ab5a0f4 100644
+index b3da234609fcb6f3ab1866a2fc806719b29f97f2..ee10d7fcc65d173e38797257ecbeca972b1dafcf 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -3,29 +3,29 @@ metadata.format.version = "1.1"
@@ -186,7 +186,7 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..7fec678ea6cae07244872a434bcf4b4f
  hydrazine = "1.7.2"
  dependencyGetter = "v1.0.1"
 -minestomData = "ddde11056e"
-+data = "1.20-rv2" # Microtous - 1.20 temp change to ce version
++data = "1.20-rv2"
  hephaistos = "2.6.1"
 -jetbrainsAnnotations = "23.0.0"
 +jetbrainsAnnotations = "24.0.1"
@@ -239,7 +239,7 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..7fec678ea6cae07244872a434bcf4b4f
  hydrazine = { group = "com.github.MadMartian", name = "hydrazine-path-finding", version.ref = "hydrazine" }
  dependencyGetter = { group = "com.github.Minestom", name = "DependencyGetter", version.ref = "dependencyGetter" }
 -minestomData = { group = "com.github.Minestom", name = "MinestomDataGenerator", version.ref = "minestomData" }
-+minestomData = { group = "dev.hollowcube", name = "minestom-ce-data", version.ref = "data" } # Microtous - 1.20 temp change to ce version
++minestomData = { group = "net.minestom", name = "data", version.ref = "data" }
  jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
  
  # Logging
