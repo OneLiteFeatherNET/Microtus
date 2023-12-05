@@ -5,20 +5,20 @@ Subject: [PATCH] Update java keyword usage
 
 
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 04244d43a556e33b5ce9cb4cf727433f976af35b..f95e46f468b17bf2b6d20e8cab866b5a787ceb7e 100644
+index 04244d43a556e33b5ce9cb4cf727433f976af35b..4c8de4b9f8f48d59555c7118b46dcc0206466f3d 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 @@ -46,6 +46,8 @@ public class AdventurePacketConvertor {
          NAMED_TEXT_COLOR_ID_MAP.put(NamedTextColor.WHITE, 15);
      }
  
-+    private AdventurePacketConvertor() { }
++    private AdventurePacketConvertor() { } //Microtus - update java keyword usage
 +
      /**
       * Gets the int value of a boss bar overlay.
       *
 diff --git a/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java b/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
-index 3ac12d8d67644ef8fdbfe7fb0fbbd442907c04db..a104ebbe4934e4c3427e6f0588f856bc5bc416b5 100644
+index 3ac12d8d67644ef8fdbfe7fb0fbbd442907c04db..a4e0a096160198af918559875a55a31b8a6afcf7 100644
 --- a/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
 +++ b/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
 @@ -11,7 +11,7 @@ import java.util.function.UnaryOperator;
@@ -26,7 +26,7 @@ index 3ac12d8d67644ef8fdbfe7fb0fbbd442907c04db..a104ebbe4934e4c3427e6f0588f856bc
  public class ArgumentEnum<E extends Enum> extends Argument<E> {
  
 -    public final static int NOT_ENUM_VALUE_ERROR = 1;
-+    public static final int NOT_ENUM_VALUE_ERROR = 1;
++    public static final int NOT_ENUM_VALUE_ERROR = 1; //Microtus - update java keyword usage
  
      private final Class<E> enumClass;
      private final E[] values;
@@ -44,20 +44,23 @@ index cd15c02a785b35c3ef4f387958fd6cd80aea2e43..aaf19016451bf8ae361c7eded9f608b0
          this.min = min;
          this.max = max;
 diff --git a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
-index 83570542f3bce400238b45d067aad19444669b36..0f163c4448cef8116b6d7dc307e0b59b9cc9f262 100644
+index 83570542f3bce400238b45d067aad19444669b36..7c776a72a551667f6945b73e11256ac161a5a665 100644
 --- a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
 +++ b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
-@@ -8,7 +8,7 @@ public abstract class ArgumentRegistry<T> extends Argument<T> {
+@@ -8,9 +8,9 @@ public abstract class ArgumentRegistry<T> extends Argument<T> {
  
      public static final int INVALID_NAME = -2;
  
 -    public ArgumentRegistry(String id) {
 +    ArgumentRegistry(String id) {
          super(id);
-     }
+-    }
++    } //Microtus - update java keyword usage
+ 
+     public abstract T getRegistry(@NotNull String value);
  
 diff --git a/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java b/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
-index 66400d55272e182692398aec8d509ce51f782744..d0814278cbc31332e529ba44ad42baa2a48fa901 100644
+index 66400d55272e182692398aec8d509ce51f782744..f891222f28b6bd2a13d16706030164126ff725f5 100644
 --- a/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
 +++ b/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
 @@ -27,7 +27,7 @@ abstract class ArgumentRelativeVec extends Argument<RelativeVec> {
@@ -65,12 +68,12 @@ index 66400d55272e182692398aec8d509ce51f782744..d0814278cbc31332e529ba44ad42baa2
      private final int numberCount;
  
 -    public ArgumentRelativeVec(@NotNull String id, int numberCount) {
-+    ArgumentRelativeVec(@NotNull String id, int numberCount) {
++    ArgumentRelativeVec(@NotNull String id, int numberCount) { //Microtus - update java keyword usage
          super(id, true);
          this.numberCount = numberCount;
      }
 diff --git a/src/main/java/net/minestom/server/entity/EntityProjectile.java b/src/main/java/net/minestom/server/entity/EntityProjectile.java
-index 82685ae08e5806f749995e293b63e7ac7f7223b7..e3080b8fc56ab8db6f0f5f36166ad62f8f1e67f0 100644
+index 82685ae08e5806f749995e293b63e7ac7f7223b7..37e645005bcef8dd8f663eeb709c73da0722ed31 100644
 --- a/src/main/java/net/minestom/server/entity/EntityProjectile.java
 +++ b/src/main/java/net/minestom/server/entity/EntityProjectile.java
 @@ -157,8 +157,8 @@ public class EntityProjectile extends Entity {
@@ -79,29 +82,37 @@ index 82685ae08e5806f749995e293b63e7ac7f7223b7..e3080b8fc56ab8db6f0f5f36166ad62f
                          .stream()
 -                        .filter(entity -> entity instanceof LivingEntity)
 -                        .map(entity -> (LivingEntity) entity)
-+                        .filter(LivingEntity.class::isInstance)
-+                        .map(LivingEntity.class::cast)
++                        .filter(LivingEntity.class::isInstance) //Microtus - update java keyword usage
++                        .map(LivingEntity.class::cast) //Microtus - update java keyword usage
                          .collect(Collectors.toSet());
              }
              final Point currentPos = pos;
 diff --git a/src/main/java/net/minestom/server/entity/ai/GoalSelector.java b/src/main/java/net/minestom/server/entity/ai/GoalSelector.java
-index e89698ad47e1e9255754832857d3e0b2cb0aa88b..5c1720fd51d7bdf2acdf6674c40dc7cff2a7b80e 100644
+index e89698ad47e1e9255754832857d3e0b2cb0aa88b..3c3e48fc33e68542fb237f3edb47eb927868cd1a 100644
 --- a/src/main/java/net/minestom/server/entity/ai/GoalSelector.java
 +++ b/src/main/java/net/minestom/server/entity/ai/GoalSelector.java
-@@ -12,7 +12,7 @@ public abstract class GoalSelector {
+@@ -2,6 +2,7 @@ package net.minestom.server.entity.ai;
+ 
+ import net.minestom.server.entity.Entity;
+ import net.minestom.server.entity.EntityCreature;
++import net.minestom.server.entity.LivingEntity;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ 
+@@ -12,7 +13,7 @@ public abstract class GoalSelector {
      private WeakReference<EntityAIGroup> aiGroupWeakReference;
      protected EntityCreature entityCreature;
  
 -    public GoalSelector(@NotNull EntityCreature entityCreature) {
-+    protected GoalSelector(@NotNull EntityCreature entityCreature) {
++    protected GoalSelector(@NotNull EntityCreature entityCreature) { //Microtus - update java keyword usage
          this.entityCreature = entityCreature;
      }
  
 diff --git a/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java
-index 449b16bbbc863703e293606d3253d2b7c4f64078..c7f382df4b3826f68362170b0f4b8069a76b2f03 100644
+index 449b16bbbc863703e293606d3253d2b7c4f64078..c1a4ae454e23bb8a58596089c1cb532880484a1d 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java
-@@ -13,13 +13,13 @@ public class EntityMeta {
+@@ -13,13 +13,15 @@ public class EntityMeta {
      public static final byte OFFSET = 0;
      public static final byte MAX_OFFSET = OFFSET + 8;
  
@@ -112,6 +123,7 @@ index 449b16bbbc863703e293606d3253d2b7c4f64078..c7f382df4b3826f68362170b0f4b8069
 -    private final static byte INVISIBLE_BIT = 0x20;
 -    private final static byte HAS_GLOWING_EFFECT_BIT = 0x40;
 -    private final static byte FLYING_WITH_ELYTRA_BIT = (byte) 0x80;
++    //Microtus start - update java keyword usage
 +    private static final byte ON_FIRE_BIT = 0x01;
 +    private static final byte CROUCHING_BIT = 0x02;
 +    private static final byte SPRINTING_BIT = 0x08;
@@ -119,48 +131,53 @@ index 449b16bbbc863703e293606d3253d2b7c4f64078..c7f382df4b3826f68362170b0f4b8069
 +    private static final byte INVISIBLE_BIT = 0x20;
 +    private static final byte HAS_GLOWING_EFFECT_BIT = 0x40;
 +    private static final byte FLYING_WITH_ELYTRA_BIT = (byte) 0x80;
++    //Microtus end - update java keyword usage
  
      private final WeakReference<Entity> entityRef;
      protected final Metadata metadata;
 diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-index 60d7102b205bc04a60678fecc2da0009ce56437a..692d0fa76b810258089c9462663ef4a431847759 100644
+index 60d7102b205bc04a60678fecc2da0009ce56437a..1640a25fa4f17b0f49e20621f858d74436c9ea5e 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-@@ -11,9 +11,9 @@ public class LivingEntityMeta extends EntityMeta {
+@@ -11,9 +11,11 @@ public class LivingEntityMeta extends EntityMeta {
      public static final byte OFFSET = EntityMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 7;
  
 -    private final static byte IS_HAND_ACTIVE_BIT = 0x01;
 -    private final static byte ACTIVE_HAND_BIT = 0x02;
 -    private final static byte IS_IN_SPIN_ATTACK_BIT = 0x04;
++    //Microtus start - update java keyword usage
 +    private static final byte IS_HAND_ACTIVE_BIT = 0x01;
 +    private static final byte ACTIVE_HAND_BIT = 0x02;
 +    private static final byte IS_IN_SPIN_ATTACK_BIT = 0x04;
++    //Microtus end - update java keyword usage
  
      protected LivingEntityMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/MobMeta.java b/src/main/java/net/minestom/server/entity/metadata/MobMeta.java
-index 98703d3d9ff9e7e5865dfe92341b9a38e9801e7d..877c4d668f429a9f1eaeb5d48a761dcd1505b485 100644
+index 98703d3d9ff9e7e5865dfe92341b9a38e9801e7d..bb823ab1ad03f4af5f3295ca323db4f0dd012b1b 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/MobMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/MobMeta.java
-@@ -8,9 +8,9 @@ public class MobMeta extends LivingEntityMeta {
+@@ -8,9 +8,11 @@ public class MobMeta extends LivingEntityMeta {
      public static final byte OFFSET = LivingEntityMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 1;
  
 -    private final static byte NO_AI_BIT = 0x01;
 -    private final static byte IS_LEFT_HANDED_BIT = 0x02;
 -    private final static byte IS_AGGRESSIVE_BIT = 0x04;
++    //Microtus start - update java keyword usage
 +    private static final byte NO_AI_BIT = 0x01;
 +    private static final byte IS_LEFT_HANDED_BIT = 0x02;
 +    private static final byte IS_AGGRESSIVE_BIT = 0x04;
++    //Microtus end - update java keyword usage
  
      protected MobMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/PlayerMeta.java b/src/main/java/net/minestom/server/entity/metadata/PlayerMeta.java
-index a0f7342bd6d7e50494ecc8a8a74281726ba99593..07de0b06e8ea685398006ab015e6d8be79835dab 100644
+index a0f7342bd6d7e50494ecc8a8a74281726ba99593..9a4c3e8303ad7369e9f4cc53b28add7516438885 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/PlayerMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/PlayerMeta.java
-@@ -12,13 +12,13 @@ public class PlayerMeta extends LivingEntityMeta {
+@@ -12,13 +12,15 @@ public class PlayerMeta extends LivingEntityMeta {
      public static final byte OFFSET = LivingEntityMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 1;
  
@@ -171,6 +188,7 @@ index a0f7342bd6d7e50494ecc8a8a74281726ba99593..07de0b06e8ea685398006ab015e6d8be
 -    private final static byte LEFT_LEG_BIT = 0x10;
 -    private final static byte RIGHT_LEG_BIT = 0x20;
 -    private final static byte HAT_BIT = 0x40;
++    //Microtus start - update java keyword usage
 +    private static final byte CAPE_BIT = 0x01;
 +    private static final byte JACKET_BIT = 0x02;
 +    private static final byte LEFT_SLEEVE_BIT = 0x04;
@@ -178,11 +196,12 @@ index a0f7342bd6d7e50494ecc8a8a74281726ba99593..07de0b06e8ea685398006ab015e6d8be
 +    private static final byte LEFT_LEG_BIT = 0x10;
 +    private static final byte RIGHT_LEG_BIT = 0x20;
 +    private static final byte HAT_BIT = 0x40;
++    //Microtus end - update java keyword usage
  
      public PlayerMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/ambient/BatMeta.java b/src/main/java/net/minestom/server/entity/metadata/ambient/BatMeta.java
-index badb44eb42716e011af4005841e4728f43f43ab0..0d56365f755f2f311854d3280e46731b4096759b 100644
+index badb44eb42716e011af4005841e4728f43f43ab0..e722b13e9900206bef438cf31f46ee9738019113 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/ambient/BatMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/ambient/BatMeta.java
 @@ -8,7 +8,7 @@ public class BatMeta extends AmbientCreatureMeta {
@@ -190,15 +209,15 @@ index badb44eb42716e011af4005841e4728f43f43ab0..0d56365f755f2f311854d3280e46731b
      public static final byte MAX_OFFSET = OFFSET + 0;
  
 -    private final static byte IS_HANGING_BIT = 0x01;
-+    private static final byte IS_HANGING_BIT = 0x01;
++    private static final byte IS_HANGING_BIT = 0x01; //Microtus - update java keyword usage
  
      public BatMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
-index 4524ce8517ce4e28a75c7044cc9b956fbb6ef6a1..a63ee619de5a24838fdea0e6d81b3d11216cd4e2 100644
+index 4524ce8517ce4e28a75c7044cc9b956fbb6ef6a1..bc2b06fb6652b8de3e9357bec939d62082319998 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
-@@ -10,12 +10,12 @@ public class AbstractHorseMeta extends AnimalMeta {
+@@ -10,12 +10,14 @@ public class AbstractHorseMeta extends AnimalMeta {
      public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 1; // Microtus - 1.19.4 update
  
@@ -208,16 +227,18 @@ index 4524ce8517ce4e28a75c7044cc9b956fbb6ef6a1..a63ee619de5a24838fdea0e6d81b3d11
 -    private final static byte EATING_BIT = 0x10;
 -    private final static byte REARING_BIT = 0x20;
 -    private final static byte MOUTH_OPEN_BIT = 0x40;
++    //Microtus start - update java keyword usage
 +    private static final byte TAMED_BIT = 0x02;
 +    private static final byte SADDLED_BIT = 0x04;
 +    private static final byte HAS_BRED_BIT = 0x08;
 +    private static final byte EATING_BIT = 0x10;
 +    private static final byte REARING_BIT = 0x20;
 +    private static final byte MOUTH_OPEN_BIT = 0x40;
++    //Microtus end - update java keyword usage
  
      protected AbstractHorseMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
-@@ -68,13 +68,5 @@ public class AbstractHorseMeta extends AnimalMeta {
+@@ -68,13 +70,5 @@ public class AbstractHorseMeta extends AnimalMeta {
      public void setMouthOpen(boolean value) {
          setMaskBit(OFFSET, MOUTH_OPEN_BIT, value);
      }
@@ -232,27 +253,29 @@ index 4524ce8517ce4e28a75c7044cc9b956fbb6ef6a1..a63ee619de5a24838fdea0e6d81b3d11
 -    */
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java
-index ff56fa14539db30131f595d12cdce19b0dad7515..e6fc1c21d674e0e852cb4cdce4f90bbcf9c1085a 100644
+index ff56fa14539db30131f595d12cdce19b0dad7515..957f5dd479b8b13f21c24d7045dcde8078cb23b8 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java
-@@ -8,9 +8,9 @@ public class BeeMeta extends AnimalMeta {
+@@ -8,9 +8,11 @@ public class BeeMeta extends AnimalMeta {
      public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 2;
  
 -    private final static byte ANGRY_BIT = 0x02;
 -    private final static byte HAS_STUNG_BIT = 0x04;
 -    private final static byte HAS_NECTAR_BIT = 0x08;
++    //Microtus start - update java keyword usage
 +    private static final byte ANGRY_BIT = 0x02;
 +    private static final byte HAS_STUNG_BIT = 0x04;
 +    private static final byte HAS_NECTAR_BIT = 0x08;
++    //Microtus end - update java keyword usage
  
      public BeeMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
-index 56e78d07664c0f7c49fda12a0de5ab2250863e72..c95c2cbcc15a11c1d6ed27baa974de345ba892de 100644
+index 56e78d07664c0f7c49fda12a0de5ab2250863e72..8f58b2e370a042eb0d082d42b20ecb432516e10b 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
-@@ -11,13 +11,13 @@ public class FoxMeta extends AnimalMeta {
+@@ -11,13 +11,15 @@ public class FoxMeta extends AnimalMeta {
      public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 4;
  
@@ -263,6 +286,7 @@ index 56e78d07664c0f7c49fda12a0de5ab2250863e72..c95c2cbcc15a11c1d6ed27baa974de34
 -    private final static byte SLEEPING_BIT = 0x20;
 -    private final static byte FACEPLANTED_BIT = 0x40;
 -    private final static byte DEFENDING_BIT = (byte) 0x80;
++    //Microtus start - update java keyword usage
 +    private static final byte SITTING_BIT = 0x01;
 +    private static final byte CROUCHING_BIT = 0x04;
 +    private static final byte INTERESTED_BIT = 0x08;
@@ -270,10 +294,11 @@ index 56e78d07664c0f7c49fda12a0de5ab2250863e72..c95c2cbcc15a11c1d6ed27baa974de34
 +    private static final byte SLEEPING_BIT = 0x20;
 +    private static final byte FACEPLANTED_BIT = 0x40;
 +    private static final byte DEFENDING_BIT = (byte) 0x80;
++    //Microtus end - update java keyword usage
  
      public FoxMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
-@@ -110,7 +110,7 @@ public class FoxMeta extends AnimalMeta {
+@@ -110,7 +112,7 @@ public class FoxMeta extends AnimalMeta {
          RED,
          SNOW;
  
@@ -283,7 +308,7 @@ index 56e78d07664c0f7c49fda12a0de5ab2250863e72..c95c2cbcc15a11c1d6ed27baa974de34
  
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/HorseMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/HorseMeta.java
-index b228164c4089328587b54e8d243c5585804fd2ec..940b77543aad8e73aeeb0727941fa57fbc0a39b4 100644
+index b228164c4089328587b54e8d243c5585804fd2ec..12d816e5e24f2479582ab87fb05bf4e3dd4ea6a6 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/HorseMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/HorseMeta.java
 @@ -68,7 +68,7 @@ public class HorseMeta extends AbstractHorseMeta {
@@ -291,37 +316,37 @@ index b228164c4089328587b54e8d243c5585804fd2ec..940b77543aad8e73aeeb0727941fa57f
          BLACK_DOTS;
  
 -        private final static Marking[] VALUES = values();
-+        private static final Marking[] VALUES = values();
++        private static final Marking[] VALUES = values(); //Microtus - update java keyword usage
      }
  
      public enum Color {
-@@ -80,7 +80,7 @@ public class HorseMeta extends AbstractHorseMeta {
+@@ -80,7 +80,6 @@ public class HorseMeta extends AbstractHorseMeta {
          GRAY,
          DARK_BROWN;
  
 -        private final static Color[] VALUES = values();
-+        private static final Color[] VALUES = values();
++        private static final Color[] VALUES = values(); //Microtus - update java keyword usage
      }
- 
+-
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/LlamaMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/LlamaMeta.java
-index dd9a4dba47357d3877a22489e3ecfca8c2cf2ca7..a9b74a5b87d094847bed5d69cb604a7224a0079b 100644
+index dd9a4dba47357d3877a22489e3ecfca8c2cf2ca7..e506582b0c62d405310c8961fd3d66ea2da24984 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/LlamaMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/LlamaMeta.java
-@@ -42,7 +42,7 @@ public class LlamaMeta extends ChestedHorseMeta {
+@@ -42,7 +42,6 @@ public class LlamaMeta extends ChestedHorseMeta {
          BROWN,
          GRAY;
  
 -        private final static Variant[] VALUES = values();
-+        private static final Variant[] VALUES = values();
++        private static final Variant[] VALUES = values(); //Microtus - update java keyword usage
      }
- 
+-
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java
-index ae5641d210b87217d2bdf84ebfc0381cf7fc0f2c..7d7d4abeb9db2a137f5d7f4f8e85a688e7d1e8ad 100644
+index ae5641d210b87217d2bdf84ebfc0381cf7fc0f2c..f18666a67d03b967dc3c7afc25f2e5a4ac13d182 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java
-@@ -8,10 +8,10 @@ public class PandaMeta extends AnimalMeta {
+@@ -8,10 +8,12 @@ public class PandaMeta extends AnimalMeta {
      public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 6;
  
@@ -329,45 +354,51 @@ index ae5641d210b87217d2bdf84ebfc0381cf7fc0f2c..7d7d4abeb9db2a137f5d7f4f8e85a688
 -    private final static byte ROLLING_BIT = 0x04;
 -    private final static byte SITTING_BIT = 0x08;
 -    private final static byte ON_BACK_BIT = 0x10;
++    //Microtus start - update java keyword usage
 +    private static final byte SNEEZING_BIT = 0x02;
 +    private static final byte ROLLING_BIT = 0x04;
 +    private static final byte SITTING_BIT = 0x08;
 +    private static final byte ON_BACK_BIT = 0x10;
++    //Microtus end - update java keyword usage
  
      public PandaMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/SheepMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/SheepMeta.java
-index f256a3a44b189299b4608fe4c447290203f55b68..12e927a90d09ad0e741eb1a47ab5889844cfd128 100644
+index f256a3a44b189299b4608fe4c447290203f55b68..bc6bd54c017665e52a63b87ed30c1ca9b1097fd1 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/SheepMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/SheepMeta.java
-@@ -8,8 +8,8 @@ public class SheepMeta extends AnimalMeta {
+@@ -8,8 +8,10 @@ public class SheepMeta extends AnimalMeta {
      public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 1;
  
 -    private final static byte COLOR_BITS = 0x0F;
 -    private final static byte SHEARED_BIT = 0x10;
++    //Microtus start - update java keyword usage
 +    private static final byte COLOR_BITS = 0x0F;
 +    private static final byte SHEARED_BIT = 0x10;
++    //Microtus end - update java keyword usage
  
      public SheepMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java b/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
-index d2115dfb2371d79fe16e907a5a2e19ed7b27d73b..a114f62f6ee88e399ebbbfe95191c63b31cab89f 100644
+index d2115dfb2371d79fe16e907a5a2e19ed7b27d73b..28571c9e1ad982e0baa8b13f18f778ccfc43aa79 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
-@@ -9,8 +9,8 @@ public class AbstractArrowMeta extends EntityMeta {
+@@ -9,8 +9,10 @@ public class AbstractArrowMeta extends EntityMeta {
      public static final byte OFFSET = EntityMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 2;
  
 -    private final static byte CRITICAL_BIT = 0x01;
 -    private final static byte NO_CLIP_BIT = 0x02;
++    //Microtus start - update java keyword usage
 +    private static final byte CRITICAL_BIT = 0x01;
 +    private static final byte NO_CLIP_BIT = 0x02;
++    //Microtus end - update java keyword usage
  
      protected AbstractArrowMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java b/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
-index fce02b850183964a964b9e342ae5ab0acf4648b0..76747449e0d1e410b35e30bb364310a46f0c0710 100644
+index fce02b850183964a964b9e342ae5ab0acf4648b0..f04a986b304ec2f38816103d1b516278279cdbf1 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
 @@ -137,7 +137,6 @@ public class AbstractDisplayMeta extends EntityMeta {
@@ -375,25 +406,26 @@ index fce02b850183964a964b9e342ae5ab0acf4648b0..76747449e0d1e410b35e30bb364310a4
          CENTER;
  
 -        private final static BillboardConstraints[] VALUES = values();
-+        private static final BillboardConstraints[] VALUES = values();
++        private static final BillboardConstraints[] VALUES = values(); //Microtus - update java keyword usage
      }
 -
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java b/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
-index f574b37d77df167e5dfebc4eb479ce49dfd049c2..9528acea84ce6c19ae5715185f8c62e436a2e987 100644
+index f574b37d77df167e5dfebc4eb479ce49dfd049c2..3ba49692a4369eae00749ab2cae146eff14ad686 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
-@@ -42,7 +42,7 @@ public class ItemDisplayMeta extends AbstractDisplayMeta {
+@@ -42,8 +42,7 @@ public class ItemDisplayMeta extends AbstractDisplayMeta {
          GROUND,
          FIXED;
  
 -        private final static DisplayContext[] VALUES = values();
-+        private static final DisplayContext[] VALUES = values();
++        private static final DisplayContext[] VALUES = values(); //Microtus - update java keyword usage
  
      }
- 
+-
+ }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java b/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
-index 9bbab19dceff737cac3c69738125e5b9d604057c..6e90878166490f01f81e1e178136faff79288da6 100644
+index 9bbab19dceff737cac3c69738125e5b9d604057c..a6c82357089ed26e6fac40833dfd0912859f2b7c 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
 @@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
@@ -402,12 +434,12 @@ index 9bbab19dceff737cac3c69738125e5b9d604057c..6e90878166490f01f81e1e178136faff
      public static final byte MAX_OFFSET = OFFSET + 1;
 -
 -    private final static byte PLAYER_CREATED_BIT = 0x01;
-+    private static final byte PLAYER_CREATED_BIT = 0x01;
++    private static final byte PLAYER_CREATED_BIT = 0x01; //Microtus - update java keyword usage
  
      public IronGolemMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/BlazeMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/BlazeMeta.java
-index 3b01f13546ad1bf042aec0d0a6d951a30f2a443d..65bc392399bef70a5244235169b78064afa7add8 100644
+index 3b01f13546ad1bf042aec0d0a6d951a30f2a443d..32cb10b6810ac16a75d1b670c021c01d7ed2711f 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/monster/BlazeMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/monster/BlazeMeta.java
 @@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
@@ -416,41 +448,43 @@ index 3b01f13546ad1bf042aec0d0a6d951a30f2a443d..65bc392399bef70a5244235169b78064
      public static final byte MAX_OFFSET = OFFSET + 1;
 -
 -    private final static byte ON_FIRE_BIT = 0x01;
-+    private static final byte ON_FIRE_BIT = 0x01;
++    private static final byte ON_FIRE_BIT = 0x01; //Microtus - update java keyword usage
  
      public BlazeMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/SpiderMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/SpiderMeta.java
-index cc8c1828bb169f9f7118e69c1cb97a779482d88c..6b0a180322c9354e8ca04f4876b507ba96f419ed 100644
+index cc8c1828bb169f9f7118e69c1cb97a779482d88c..1b46fb30da57e90036b5006c3a303e629976284b 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/monster/SpiderMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/monster/SpiderMeta.java
-@@ -8,7 +8,7 @@ public class SpiderMeta extends MonsterMeta {
+@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
+ public class SpiderMeta extends MonsterMeta {
      public static final byte OFFSET = MonsterMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 1;
- 
+-
 -    private final static byte CLIMBING_BIT = 0x01;
-+    private static final byte CLIMBING_BIT = 0x01;
++    private static final byte CLIMBING_BIT = 0x01; //Microtus - update java keyword usage
  
      public SpiderMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/VexMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/VexMeta.java
-index d5c5d0469486d076acae5ccd46893f3eaea45bf8..3ee2ed091fda12915eee08079617a36db602ddec 100644
+index d5c5d0469486d076acae5ccd46893f3eaea45bf8..f566c2369576fb102554aef166d16aa3de21d329 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/monster/VexMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/monster/VexMeta.java
-@@ -8,7 +8,7 @@ public class VexMeta extends MonsterMeta {
+@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
+ public class VexMeta extends MonsterMeta {
      public static final byte OFFSET = MonsterMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 1;
- 
+-
 -    private final static byte ATTACKING_BIT = 0x01;
-+    private static final byte ATTACKING_BIT = 0x01;
++    private static final byte ATTACKING_BIT = 0x01;  //Microtus - update java keyword usage
  
      public VexMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/other/ArmorStandMeta.java b/src/main/java/net/minestom/server/entity/metadata/other/ArmorStandMeta.java
-index 3203cdc0c07ffd9338a798ac26efd64b6eadf28a..292b2c0e20e4eddb11679f529460420bfe06ff6f 100644
+index 3203cdc0c07ffd9338a798ac26efd64b6eadf28a..a6c860cf6623417ae4e7d9ee0982e9caec0c34d7 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/other/ArmorStandMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/other/ArmorStandMeta.java
-@@ -10,10 +10,10 @@ public class ArmorStandMeta extends LivingEntityMeta {
+@@ -10,10 +10,12 @@ public class ArmorStandMeta extends LivingEntityMeta {
      public static final byte OFFSET = LivingEntityMeta.MAX_OFFSET;
      public static final byte MAX_OFFSET = OFFSET + 7;
  
@@ -458,28 +492,30 @@ index 3203cdc0c07ffd9338a798ac26efd64b6eadf28a..292b2c0e20e4eddb11679f529460420b
 -    private final static byte HAS_ARMS_BIT = 0x04;
 -    private final static byte HAS_NO_BASE_PLATE_BIT = 0x08;
 -    private final static byte IS_MARKER_BIT = 0x10;
++    //Microtus start - update java keyword usage
 +    private static final byte IS_SMALL_BIT = 0x01;
 +    private static final byte HAS_ARMS_BIT = 0x04;
 +    private static final byte HAS_NO_BASE_PLATE_BIT = 0x08;
 +    private static final byte IS_MARKER_BIT = 0x10;
++    //Microtus end - update java keyword usage
  
      public ArmorStandMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/other/EnderDragonMeta.java b/src/main/java/net/minestom/server/entity/metadata/other/EnderDragonMeta.java
-index 7a9e49231bfe9b8f576e46f56ba22897a5e9a433..383fd9a0af6de3397097566eb8a1486f7b8ce658 100644
+index 7a9e49231bfe9b8f576e46f56ba22897a5e9a433..8e6603ef87d58e556f2f1ce508b77b8b75215c3e 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/other/EnderDragonMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/other/EnderDragonMeta.java
-@@ -35,7 +35,7 @@ public class EnderDragonMeta extends MobMeta {
+@@ -35,7 +35,6 @@ public class EnderDragonMeta extends MobMeta {
          FLYING_TO_THE_PORTAL_TO_DIE,
          HOVERING_WITHOUT_AI;
  
 -        private final static Phase[] VALUES = values();
-+        private static final Phase[] VALUES = values();
++        private static final Phase[] VALUES = values();  //Microtus - update java keyword usage
      }
- 
+-
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java b/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java
-index f162eb7de22edc949b17a89fcff4477bf1c3c0cf..af421c0aa1fddc76155af9ee92a7823f9967c7de 100644
+index f162eb7de22edc949b17a89fcff4477bf1c3c0cf..83539dd8658c79a7734b4fdbd917d08fda2c8feb 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java
 @@ -44,6 +44,6 @@ public class AxolotlMeta extends AnimalMeta {
@@ -487,16 +523,18 @@ index f162eb7de22edc949b17a89fcff4477bf1c3c0cf..af421c0aa1fddc76155af9ee92a7823f
          BLUE;
  
 -        private final static AxolotlMeta.Variant[] VALUES = values();
-+        private static final AxolotlMeta.Variant[] VALUES = values();
++        private static final AxolotlMeta.Variant[] VALUES = values();  //Microtus - update java keyword usage
      }
  }
 diff --git a/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java b/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
-index 1239990db6444176ad3fd83365e1ad010d367890..a68e8b3b2b4c5ac4608c84fa8865a5c2ffab50b7 100644
+index 1239990db6444176ad3fd83365e1ad010d367890..ec416c6c80e07ad8b89c97b180e5942f2b2f4ba6 100644
 --- a/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
 +++ b/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
-@@ -59,12 +59,12 @@ public final class DiscoveredExtension {
+@@ -58,13 +58,15 @@ public final class DiscoveredExtension {
+     /** The load status of this extension -- LOAD_SUCCESS is the only good one. */
      transient LoadStatus loadStatus = LoadStatus.LOAD_SUCCESS;
  
++    //Microtus start - update java keyword usage
      /** The original jar this is from. */
 -    transient private File originalJar;
 +    private transient File originalJar;
@@ -507,27 +545,31 @@ index 1239990db6444176ad3fd83365e1ad010d367890..a68e8b3b2b4c5ac4608c84fa8865a5c2
      /** The class loader that powers it. */
 -    transient private ExtensionClassLoader classLoader;
 +    private transient ExtensionClassLoader classLoader;
++    //Microtus end - update java keyword usage
  
      @NotNull
      public String getName() {
 diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-index d664544c89eda8f4d4051dceeb7d8ee002ad33ac..667ed1f44fc8e2abf28fca492e87cb9b3292aa51 100644
+index d664544c89eda8f4d4051dceeb7d8ee002ad33ac..5d33898b0d7d1666fa6cc93fec0fbfe6014427df 100644
 --- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 +++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-@@ -24,12 +24,10 @@ import java.util.zip.ZipFile;
+@@ -23,13 +23,12 @@ import java.util.zip.ZipEntry;
+ import java.util.zip.ZipFile;
  
  public class ExtensionManager {
- 
+-
 -    public final static Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
 -
 -    public final static String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
 -    public final static String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
 -    private final static Gson GSON = new Gson();
 -
++    //Microtus start - update java keyword usage
 +    public static final Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
 +    public static final String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
 +    public static final String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
 +    private static final Gson GSON = new Gson();
++    //Microtus end - update java keyword usage
      private final ServerProcess serverProcess;
  
      // LinkedHashMaps are HashMaps that preserve order
@@ -544,7 +586,7 @@ index 82884558daa9497aa4eafd429e053c43867667df..cb3f1333df0b6ef53c1cf0f7563c811b
  import org.jetbrains.annotations.Nullable;
  
 diff --git a/src/main/java/net/minestom/server/instance/Explosion.java b/src/main/java/net/minestom/server/instance/Explosion.java
-index 186be7a1da3202d2c25422e723b153baf3acf3f9..cf13e4a2851fb31c2cb76ba253f33de16a124ba6 100644
+index 186be7a1da3202d2c25422e723b153baf3acf3f9..c96f8c45a0becc4b1c89358bc5a70658b2061914 100644
 --- a/src/main/java/net/minestom/server/instance/Explosion.java
 +++ b/src/main/java/net/minestom/server/instance/Explosion.java
 @@ -19,7 +19,7 @@ public abstract class Explosion {
@@ -552,12 +594,12 @@ index 186be7a1da3202d2c25422e723b153baf3acf3f9..cf13e4a2851fb31c2cb76ba253f33de1
      private final float strength;
  
 -    public Explosion(float centerX, float centerY, float centerZ, float strength) {
-+    protected Explosion(float centerX, float centerY, float centerZ, float strength) {
++    protected Explosion(float centerX, float centerY, float centerZ, float strength) {  //Microtus - update java keyword usage
          this.centerX = centerX;
          this.centerY = centerY;
          this.centerZ = centerZ;
 diff --git a/src/main/java/net/minestom/server/instance/block/BlockManager.java b/src/main/java/net/minestom/server/instance/block/BlockManager.java
-index fd0243002b94167e1ba18c2c13a9705149933754..46d1baf7c462d98be25f18170c63b5edeebdea59 100644
+index fd0243002b94167e1ba18c2c13a9705149933754..d19f1c5043208e841be40d1b4cffdcbe13a79dd5 100644
 --- a/src/main/java/net/minestom/server/instance/block/BlockManager.java
 +++ b/src/main/java/net/minestom/server/instance/block/BlockManager.java
 @@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
@@ -565,36 +607,41 @@ index fd0243002b94167e1ba18c2c13a9705149933754..46d1baf7c462d98be25f18170c63b5ed
  
  public final class BlockManager {
 -    private final static Logger LOGGER = LoggerFactory.getLogger(BlockManager.class);
-+    private static final Logger LOGGER = LoggerFactory.getLogger(BlockManager.class);
++    private static final Logger LOGGER = LoggerFactory.getLogger(BlockManager.class);  //Microtus - update java keyword usage
      // Namespace -> handler supplier
      private final Map<String, Supplier<BlockHandler>> blockHandlerMap = new ConcurrentHashMap<>();
      // block id -> block placement rule
 diff --git a/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java b/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
-index cb354931affb1364983728eb0946124fd390277c..c72d346c22dfa342e7700788c7ac5fb7ebbe5bda 100644
+index cb354931affb1364983728eb0946124fd390277c..e33450545966402c40a935962e2c7d0bb1ee5e98 100644
 --- a/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
 +++ b/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
-@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
+@@ -11,9 +11,9 @@ import org.jetbrains.annotations.Nullable;
  public abstract class BlockPlacementRule {
      private final Block block;
  
 -    public BlockPlacementRule(@NotNull Block block) {
 +    BlockPlacementRule(@NotNull Block block) {
          this.block = block;
-     }
+-    }
++    }  //Microtus - update java keyword usage
  
+     /**
+      * Called when the block state id can be updated (for instance if a neighbour block changed).
 diff --git a/src/main/java/net/minestom/server/inventory/AbstractInventory.java b/src/main/java/net/minestom/server/inventory/AbstractInventory.java
-index 99cfc2fb0d8d7c6da959a93dfe21ce28405956a7..21d13deaf3b4aa93725579394a82ddc3e1483e23 100644
+index 99cfc2fb0d8d7c6da959a93dfe21ce28405956a7..1d239416120bebb1bc30b5901289616aa9f56fbd 100644
 --- a/src/main/java/net/minestom/server/inventory/AbstractInventory.java
 +++ b/src/main/java/net/minestom/server/inventory/AbstractInventory.java
-@@ -23,7 +23,7 @@ import java.util.function.UnaryOperator;
+@@ -23,8 +23,8 @@ import java.util.function.UnaryOperator;
  /**
   * Represents an inventory where items can be modified/retrieved.
   */
 -public sealed abstract class AbstractInventory implements InventoryClickHandler, Taggable
+-        permits Inventory, PlayerInventory {
 +public abstract sealed class AbstractInventory implements InventoryClickHandler, Taggable
-         permits Inventory, PlayerInventory {
++        permits Inventory, PlayerInventory {  //Microtus - update java keyword usage
  
      private static final VarHandle ITEM_UPDATER = MethodHandles.arrayElementVarHandle(ItemStack[].class);
+ 
 diff --git a/src/main/java/net/minestom/server/listener/AdvancementTabListener.java b/src/main/java/net/minestom/server/listener/AdvancementTabListener.java
 index 3a8edbd121b8da1ee970ecdc106955d76508f514..a27c3f10dbd60190260e66012242f1c09b6c16d5 100644
 --- a/src/main/java/net/minestom/server/listener/AdvancementTabListener.java
@@ -622,7 +669,7 @@ index 42e249c73869e7c819a177f3144869c10bbe820a..11186e9470d129fefed2fb5f47dc736d
          final Player.Hand hand = packet.hand();
          final ItemStack itemStack = player.getItemInHand(hand);
 diff --git a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java b/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
-index 84c502629a38bc45f60dbf650eaf1b094d1d0df0..09970b507b49f85185b693ad8efe19e50491038c 100644
+index 84c502629a38bc45f60dbf650eaf1b094d1d0df0..50053284b349355092b9cc3f431ea08eb005751f 100644
 --- a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
 +++ b/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
 @@ -34,7 +34,7 @@ import static net.minestom.server.MinecraftServer.THREAD_NAME_TICK_SCHEDULER;
@@ -630,12 +677,12 @@ index 84c502629a38bc45f60dbf650eaf1b094d1d0df0..09970b507b49f85185b693ad8efe19e5
   */
  public final class BenchmarkManager {
 -    private final static Logger LOGGER = LoggerFactory.getLogger(BenchmarkManager.class);
-+    private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkManager.class);
++    private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkManager.class);  //Microtus - update java keyword usage
      private static final ThreadMXBean THREAD_MX_BEAN = ManagementFactory.getThreadMXBean();
      private static final List<String> THREADS = new ArrayList<>();
  
 diff --git a/src/main/java/net/minestom/server/thread/Acquirable.java b/src/main/java/net/minestom/server/thread/Acquirable.java
-index 4730006416bd9c4a7f1ff291feddb83c9ffedd6d..48336a9e3f5190431dd4e4b392fc83cf668b69d7 100644
+index 4730006416bd9c4a7f1ff291feddb83c9ffedd6d..00764c03932ecef0e5ac7f68762e4d1270573ed6 100644
 --- a/src/main/java/net/minestom/server/thread/Acquirable.java
 +++ b/src/main/java/net/minestom/server/thread/Acquirable.java
 @@ -26,8 +26,8 @@ public sealed interface Acquirable<T> permits AcquirableImpl {
@@ -644,8 +691,8 @@ index 4730006416bd9c4a7f1ff291feddb83c9ffedd6d..48336a9e3f5190431dd4e4b392fc83cf
                      .flatMap(partitionEntry -> partitionEntry.elements().stream())
 -                    .filter(tickable -> tickable instanceof Entity)
 -                    .map(tickable -> (Entity) tickable);
-+                    .filter(Entity.class::isInstance)
-+                    .map(Entity.class::cast);
++                    .filter(Entity.class::isInstance)  //Microtus - update java keyword usage
++                    .map(Entity.class::cast);  //Microtus - update java keyword usage
          }
          return Stream.empty();
      }
