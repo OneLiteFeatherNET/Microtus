@@ -4,6 +4,304 @@ Date: Tue, 5 Dec 2023 13:06:18 +0100
 Subject: [PATCH] Update java keyword usage
 
 
+diff --git a/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java
+index 449b16bbbc863703e293606d3253d2b7c4f64078..c7f382df4b3826f68362170b0f4b8069a76b2f03 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java
+@@ -13,13 +13,13 @@ public class EntityMeta {
+     public static final byte OFFSET = 0;
+     public static final byte MAX_OFFSET = OFFSET + 8;
+ 
+-    private final static byte ON_FIRE_BIT = 0x01;
+-    private final static byte CROUCHING_BIT = 0x02;
+-    private final static byte SPRINTING_BIT = 0x08;
+-    private final static byte SWIMMING_BIT = 0x10;
+-    private final static byte INVISIBLE_BIT = 0x20;
+-    private final static byte HAS_GLOWING_EFFECT_BIT = 0x40;
+-    private final static byte FLYING_WITH_ELYTRA_BIT = (byte) 0x80;
++    private static final byte ON_FIRE_BIT = 0x01;
++    private static final byte CROUCHING_BIT = 0x02;
++    private static final byte SPRINTING_BIT = 0x08;
++    private static final byte SWIMMING_BIT = 0x10;
++    private static final byte INVISIBLE_BIT = 0x20;
++    private static final byte HAS_GLOWING_EFFECT_BIT = 0x40;
++    private static final byte FLYING_WITH_ELYTRA_BIT = (byte) 0x80;
+ 
+     private final WeakReference<Entity> entityRef;
+     protected final Metadata metadata;
+diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
+index 60d7102b205bc04a60678fecc2da0009ce56437a..692d0fa76b810258089c9462663ef4a431847759 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
+@@ -11,9 +11,9 @@ public class LivingEntityMeta extends EntityMeta {
+     public static final byte OFFSET = EntityMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 7;
+ 
+-    private final static byte IS_HAND_ACTIVE_BIT = 0x01;
+-    private final static byte ACTIVE_HAND_BIT = 0x02;
+-    private final static byte IS_IN_SPIN_ATTACK_BIT = 0x04;
++    private static final byte IS_HAND_ACTIVE_BIT = 0x01;
++    private static final byte ACTIVE_HAND_BIT = 0x02;
++    private static final byte IS_IN_SPIN_ATTACK_BIT = 0x04;
+ 
+     protected LivingEntityMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/MobMeta.java b/src/main/java/net/minestom/server/entity/metadata/MobMeta.java
+index 98703d3d9ff9e7e5865dfe92341b9a38e9801e7d..877c4d668f429a9f1eaeb5d48a761dcd1505b485 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/MobMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/MobMeta.java
+@@ -8,9 +8,9 @@ public class MobMeta extends LivingEntityMeta {
+     public static final byte OFFSET = LivingEntityMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1;
+ 
+-    private final static byte NO_AI_BIT = 0x01;
+-    private final static byte IS_LEFT_HANDED_BIT = 0x02;
+-    private final static byte IS_AGGRESSIVE_BIT = 0x04;
++    private static final byte NO_AI_BIT = 0x01;
++    private static final byte IS_LEFT_HANDED_BIT = 0x02;
++    private static final byte IS_AGGRESSIVE_BIT = 0x04;
+ 
+     protected MobMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/PlayerMeta.java b/src/main/java/net/minestom/server/entity/metadata/PlayerMeta.java
+index a0f7342bd6d7e50494ecc8a8a74281726ba99593..07de0b06e8ea685398006ab015e6d8be79835dab 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/PlayerMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/PlayerMeta.java
+@@ -12,13 +12,13 @@ public class PlayerMeta extends LivingEntityMeta {
+     public static final byte OFFSET = LivingEntityMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1;
+ 
+-    private final static byte CAPE_BIT = 0x01;
+-    private final static byte JACKET_BIT = 0x02;
+-    private final static byte LEFT_SLEEVE_BIT = 0x04;
+-    private final static byte RIGHT_SLEEVE_BIT = 0x08;
+-    private final static byte LEFT_LEG_BIT = 0x10;
+-    private final static byte RIGHT_LEG_BIT = 0x20;
+-    private final static byte HAT_BIT = 0x40;
++    private static final byte CAPE_BIT = 0x01;
++    private static final byte JACKET_BIT = 0x02;
++    private static final byte LEFT_SLEEVE_BIT = 0x04;
++    private static final byte RIGHT_SLEEVE_BIT = 0x08;
++    private static final byte LEFT_LEG_BIT = 0x10;
++    private static final byte RIGHT_LEG_BIT = 0x20;
++    private static final byte HAT_BIT = 0x40;
+ 
+     public PlayerMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/ambient/BatMeta.java b/src/main/java/net/minestom/server/entity/metadata/ambient/BatMeta.java
+index badb44eb42716e011af4005841e4728f43f43ab0..0d56365f755f2f311854d3280e46731b4096759b 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/ambient/BatMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/ambient/BatMeta.java
+@@ -8,7 +8,7 @@ public class BatMeta extends AmbientCreatureMeta {
+     public static final byte OFFSET = AmbientCreatureMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 0;
+ 
+-    private final static byte IS_HANGING_BIT = 0x01;
++    private static final byte IS_HANGING_BIT = 0x01;
+ 
+     public BatMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
+index 4524ce8517ce4e28a75c7044cc9b956fbb6ef6a1..a63ee619de5a24838fdea0e6d81b3d11216cd4e2 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
+@@ -10,12 +10,12 @@ public class AbstractHorseMeta extends AnimalMeta {
+     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1; // Microtus - 1.19.4 update
+ 
+-    private final static byte TAMED_BIT = 0x02;
+-    private final static byte SADDLED_BIT = 0x04;
+-    private final static byte HAS_BRED_BIT = 0x08;
+-    private final static byte EATING_BIT = 0x10;
+-    private final static byte REARING_BIT = 0x20;
+-    private final static byte MOUTH_OPEN_BIT = 0x40;
++    private static final byte TAMED_BIT = 0x02;
++    private static final byte SADDLED_BIT = 0x04;
++    private static final byte HAS_BRED_BIT = 0x08;
++    private static final byte EATING_BIT = 0x10;
++    private static final byte REARING_BIT = 0x20;
++    private static final byte MOUTH_OPEN_BIT = 0x40;
+ 
+     protected AbstractHorseMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+@@ -68,13 +68,5 @@ public class AbstractHorseMeta extends AnimalMeta {
+     public void setMouthOpen(boolean value) {
+         setMaskBit(OFFSET, MOUTH_OPEN_BIT, value);
+     }
+-    /* Microtus - 1.19.4 update
+-    public UUID getOwner() {
+-        return super.metadata.getIndex(OFFSET + 1, null);
+-    }
+ 
+-    public void setOwner(UUID value) {
+-        super.metadata.setIndex(OFFSET + 1, Metadata.OptUUID(value));
+-    }
+-    */
+ }
+diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java
+index ff56fa14539db30131f595d12cdce19b0dad7515..e6fc1c21d674e0e852cb4cdce4f90bbcf9c1085a 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java
+@@ -8,9 +8,9 @@ public class BeeMeta extends AnimalMeta {
+     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 2;
+ 
+-    private final static byte ANGRY_BIT = 0x02;
+-    private final static byte HAS_STUNG_BIT = 0x04;
+-    private final static byte HAS_NECTAR_BIT = 0x08;
++    private static final byte ANGRY_BIT = 0x02;
++    private static final byte HAS_STUNG_BIT = 0x04;
++    private static final byte HAS_NECTAR_BIT = 0x08;
+ 
+     public BeeMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
+index 56e78d07664c0f7c49fda12a0de5ab2250863e72..fded09d40b9d99f459b413385d940f72775d27db 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
+@@ -11,13 +11,13 @@ public class FoxMeta extends AnimalMeta {
+     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 4;
+ 
+-    private final static byte SITTING_BIT = 0x01;
+-    private final static byte CROUCHING_BIT = 0x04;
+-    private final static byte INTERESTED_BIT = 0x08;
+-    private final static byte POUNCING_BIT = 0x10;
+-    private final static byte SLEEPING_BIT = 0x20;
+-    private final static byte FACEPLANTED_BIT = 0x40;
+-    private final static byte DEFENDING_BIT = (byte) 0x80;
++    private static final byte SITTING_BIT = 0x01;
++    private static final byte CROUCHING_BIT = 0x04;
++    private static final byte INTERESTED_BIT = 0x08;
++    private static final byte POUNCING_BIT = 0x10;
++    private static final byte SLEEPING_BIT = 0x20;
++    private static final byte FACEPLANTED_BIT = 0x40;
++    private static final byte DEFENDING_BIT = (byte) 0x80;
+ 
+     public FoxMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java
+index ae5641d210b87217d2bdf84ebfc0381cf7fc0f2c..7d7d4abeb9db2a137f5d7f4f8e85a688e7d1e8ad 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java
+@@ -8,10 +8,10 @@ public class PandaMeta extends AnimalMeta {
+     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 6;
+ 
+-    private final static byte SNEEZING_BIT = 0x02;
+-    private final static byte ROLLING_BIT = 0x04;
+-    private final static byte SITTING_BIT = 0x08;
+-    private final static byte ON_BACK_BIT = 0x10;
++    private static final byte SNEEZING_BIT = 0x02;
++    private static final byte ROLLING_BIT = 0x04;
++    private static final byte SITTING_BIT = 0x08;
++    private static final byte ON_BACK_BIT = 0x10;
+ 
+     public PandaMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/SheepMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/SheepMeta.java
+index f256a3a44b189299b4608fe4c447290203f55b68..12e927a90d09ad0e741eb1a47ab5889844cfd128 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/animal/SheepMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/animal/SheepMeta.java
+@@ -8,8 +8,8 @@ public class SheepMeta extends AnimalMeta {
+     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1;
+ 
+-    private final static byte COLOR_BITS = 0x0F;
+-    private final static byte SHEARED_BIT = 0x10;
++    private static final byte COLOR_BITS = 0x0F;
++    private static final byte SHEARED_BIT = 0x10;
+ 
+     public SheepMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java b/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
+index d2115dfb2371d79fe16e907a5a2e19ed7b27d73b..a114f62f6ee88e399ebbbfe95191c63b31cab89f 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
+@@ -9,8 +9,8 @@ public class AbstractArrowMeta extends EntityMeta {
+     public static final byte OFFSET = EntityMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 2;
+ 
+-    private final static byte CRITICAL_BIT = 0x01;
+-    private final static byte NO_CLIP_BIT = 0x02;
++    private static final byte CRITICAL_BIT = 0x01;
++    private static final byte NO_CLIP_BIT = 0x02;
+ 
+     protected AbstractArrowMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java b/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
+index 9bbab19dceff737cac3c69738125e5b9d604057c..6e90878166490f01f81e1e178136faff79288da6 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
+@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
+ public class IronGolemMeta extends AbstractGolemMeta {
+     public static final byte OFFSET = AbstractGolemMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1;
+-
+-    private final static byte PLAYER_CREATED_BIT = 0x01;
++    private static final byte PLAYER_CREATED_BIT = 0x01;
+ 
+     public IronGolemMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/BlazeMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/BlazeMeta.java
+index 3b01f13546ad1bf042aec0d0a6d951a30f2a443d..65bc392399bef70a5244235169b78064afa7add8 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/monster/BlazeMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/monster/BlazeMeta.java
+@@ -7,8 +7,7 @@ import org.jetbrains.annotations.NotNull;
+ public class BlazeMeta extends MonsterMeta {
+     public static final byte OFFSET = MonsterMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1;
+-
+-    private final static byte ON_FIRE_BIT = 0x01;
++    private static final byte ON_FIRE_BIT = 0x01;
+ 
+     public BlazeMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/SpiderMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/SpiderMeta.java
+index cc8c1828bb169f9f7118e69c1cb97a779482d88c..6b0a180322c9354e8ca04f4876b507ba96f419ed 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/monster/SpiderMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/monster/SpiderMeta.java
+@@ -8,7 +8,7 @@ public class SpiderMeta extends MonsterMeta {
+     public static final byte OFFSET = MonsterMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1;
+ 
+-    private final static byte CLIMBING_BIT = 0x01;
++    private static final byte CLIMBING_BIT = 0x01;
+ 
+     public SpiderMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/VexMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/VexMeta.java
+index d5c5d0469486d076acae5ccd46893f3eaea45bf8..3ee2ed091fda12915eee08079617a36db602ddec 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/monster/VexMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/monster/VexMeta.java
+@@ -8,7 +8,7 @@ public class VexMeta extends MonsterMeta {
+     public static final byte OFFSET = MonsterMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1;
+ 
+-    private final static byte ATTACKING_BIT = 0x01;
++    private static final byte ATTACKING_BIT = 0x01;
+ 
+     public VexMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/other/ArmorStandMeta.java b/src/main/java/net/minestom/server/entity/metadata/other/ArmorStandMeta.java
+index 3203cdc0c07ffd9338a798ac26efd64b6eadf28a..292b2c0e20e4eddb11679f529460420bfe06ff6f 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/other/ArmorStandMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/other/ArmorStandMeta.java
+@@ -10,10 +10,10 @@ public class ArmorStandMeta extends LivingEntityMeta {
+     public static final byte OFFSET = LivingEntityMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 7;
+ 
+-    private final static byte IS_SMALL_BIT = 0x01;
+-    private final static byte HAS_ARMS_BIT = 0x04;
+-    private final static byte HAS_NO_BASE_PLATE_BIT = 0x08;
+-    private final static byte IS_MARKER_BIT = 0x10;
++    private static final byte IS_SMALL_BIT = 0x01;
++    private static final byte HAS_ARMS_BIT = 0x04;
++    private static final byte HAS_NO_BASE_PLATE_BIT = 0x08;
++    private static final byte IS_MARKER_BIT = 0x10;
+ 
+     public ArmorStandMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
 diff --git a/src/test/java/net/minestom/server/InsideTest.java b/src/test/java/net/minestom/server/InsideTest.java
 index 4fd8bc46ba32abc852398872bf8b63a30617408e..33c65cc23c0982d2e37eb12e40d844562bf85380 100644
 --- a/src/test/java/net/minestom/server/InsideTest.java
