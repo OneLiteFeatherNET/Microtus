@@ -4,6 +4,99 @@ Date: Tue, 5 Dec 2023 13:06:18 +0100
 Subject: [PATCH] Update java keyword usage
 
 
+diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
+index 04244d43a556e33b5ce9cb4cf727433f976af35b..f95e46f468b17bf2b6d20e8cab866b5a787ceb7e 100644
+--- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
++++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
+@@ -46,6 +46,8 @@ public class AdventurePacketConvertor {
+         NAMED_TEXT_COLOR_ID_MAP.put(NamedTextColor.WHITE, 15);
+     }
+ 
++    private AdventurePacketConvertor() { }
++
+     /**
+      * Gets the int value of a boss bar overlay.
+      *
+diff --git a/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java b/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
+index 3ac12d8d67644ef8fdbfe7fb0fbbd442907c04db..a104ebbe4934e4c3427e6f0588f856bc5bc416b5 100644
+--- a/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
++++ b/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
+@@ -11,7 +11,7 @@ import java.util.function.UnaryOperator;
+ @SuppressWarnings("rawtypes")
+ public class ArgumentEnum<E extends Enum> extends Argument<E> {
+ 
+-    public final static int NOT_ENUM_VALUE_ERROR = 1;
++    public static final int NOT_ENUM_VALUE_ERROR = 1;
+ 
+     private final Class<E> enumClass;
+     private final E[] values;
+diff --git a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/ArgumentRange.java b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/ArgumentRange.java
+index cd15c02a785b35c3ef4f387958fd6cd80aea2e43..aaf19016451bf8ae361c7eded9f608b00e1fb229 100644
+--- a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/ArgumentRange.java
++++ b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/ArgumentRange.java
+@@ -22,7 +22,7 @@ public abstract class ArgumentRange<T extends Range<N>, N extends Number> extend
+     private final Function<String, N> parser;
+     private final BiFunction<N, N, T> rangeConstructor;
+ 
+-    public ArgumentRange(@NotNull String id, N min, N max, Function<String, N> parser, BiFunction<N, N, T> rangeConstructor) {
++    ArgumentRange(@NotNull String id, N min, N max, Function<String, N> parser, BiFunction<N, N, T> rangeConstructor) {
+         super(id);
+         this.min = min;
+         this.max = max;
+diff --git a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
+index 83570542f3bce400238b45d067aad19444669b36..0f163c4448cef8116b6d7dc307e0b59b9cc9f262 100644
+--- a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
++++ b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
+@@ -8,7 +8,7 @@ public abstract class ArgumentRegistry<T> extends Argument<T> {
+ 
+     public static final int INVALID_NAME = -2;
+ 
+-    public ArgumentRegistry(String id) {
++    ArgumentRegistry(String id) {
+         super(id);
+     }
+ 
+diff --git a/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java b/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
+index 66400d55272e182692398aec8d509ce51f782744..d0814278cbc31332e529ba44ad42baa2a48fa901 100644
+--- a/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
++++ b/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
+@@ -27,7 +27,7 @@ abstract class ArgumentRelativeVec extends Argument<RelativeVec> {
+ 
+     private final int numberCount;
+ 
+-    public ArgumentRelativeVec(@NotNull String id, int numberCount) {
++    ArgumentRelativeVec(@NotNull String id, int numberCount) {
+         super(id, true);
+         this.numberCount = numberCount;
+     }
+diff --git a/src/main/java/net/minestom/server/entity/EntityProjectile.java b/src/main/java/net/minestom/server/entity/EntityProjectile.java
+index 82685ae08e5806f749995e293b63e7ac7f7223b7..e3080b8fc56ab8db6f0f5f36166ad62f8f1e67f0 100644
+--- a/src/main/java/net/minestom/server/entity/EntityProjectile.java
++++ b/src/main/java/net/minestom/server/entity/EntityProjectile.java
+@@ -157,8 +157,8 @@ public class EntityProjectile extends Entity {
+                 chunk = currentChunk;
+                 entities = instance.getChunkEntities(chunk)
+                         .stream()
+-                        .filter(entity -> entity instanceof LivingEntity)
+-                        .map(entity -> (LivingEntity) entity)
++                        .filter(LivingEntity.class::isInstance)
++                        .map(LivingEntity.class::cast)
+                         .collect(Collectors.toSet());
+             }
+             final Point currentPos = pos;
+diff --git a/src/main/java/net/minestom/server/entity/ai/GoalSelector.java b/src/main/java/net/minestom/server/entity/ai/GoalSelector.java
+index e89698ad47e1e9255754832857d3e0b2cb0aa88b..5c1720fd51d7bdf2acdf6674c40dc7cff2a7b80e 100644
+--- a/src/main/java/net/minestom/server/entity/ai/GoalSelector.java
++++ b/src/main/java/net/minestom/server/entity/ai/GoalSelector.java
+@@ -12,7 +12,7 @@ public abstract class GoalSelector {
+     private WeakReference<EntityAIGroup> aiGroupWeakReference;
+     protected EntityCreature entityCreature;
+ 
+-    public GoalSelector(@NotNull EntityCreature entityCreature) {
++    protected GoalSelector(@NotNull EntityCreature entityCreature) {
+         this.entityCreature = entityCreature;
+     }
+ 
 diff --git a/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java
 index 449b16bbbc863703e293606d3253d2b7c4f64078..c7f382df4b3826f68362170b0f4b8069a76b2f03 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/EntityMeta.java
@@ -156,7 +249,7 @@ index ff56fa14539db30131f595d12cdce19b0dad7515..e6fc1c21d674e0e852cb4cdce4f90bbc
      public BeeMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
-index 56e78d07664c0f7c49fda12a0de5ab2250863e72..fded09d40b9d99f459b413385d940f72775d27db 100644
+index 56e78d07664c0f7c49fda12a0de5ab2250863e72..c95c2cbcc15a11c1d6ed27baa974de345ba892de 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/FoxMeta.java
 @@ -11,13 +11,13 @@ public class FoxMeta extends AnimalMeta {
@@ -180,6 +273,50 @@ index 56e78d07664c0f7c49fda12a0de5ab2250863e72..fded09d40b9d99f459b413385d940f72
  
      public FoxMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
+@@ -110,7 +110,7 @@ public class FoxMeta extends AnimalMeta {
+         RED,
+         SNOW;
+ 
+-        private final static Type[] VALUES = values();
++        private static final Type[] VALUES = values();
+     }
+ 
+ }
+diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/HorseMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/HorseMeta.java
+index b228164c4089328587b54e8d243c5585804fd2ec..940b77543aad8e73aeeb0727941fa57fbc0a39b4 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/animal/HorseMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/animal/HorseMeta.java
+@@ -68,7 +68,7 @@ public class HorseMeta extends AbstractHorseMeta {
+         WHITE_DOTS,
+         BLACK_DOTS;
+ 
+-        private final static Marking[] VALUES = values();
++        private static final Marking[] VALUES = values();
+     }
+ 
+     public enum Color {
+@@ -80,7 +80,7 @@ public class HorseMeta extends AbstractHorseMeta {
+         GRAY,
+         DARK_BROWN;
+ 
+-        private final static Color[] VALUES = values();
++        private static final Color[] VALUES = values();
+     }
+ 
+ }
+diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/LlamaMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/LlamaMeta.java
+index dd9a4dba47357d3877a22489e3ecfca8c2cf2ca7..a9b74a5b87d094847bed5d69cb604a7224a0079b 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/animal/LlamaMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/animal/LlamaMeta.java
+@@ -42,7 +42,7 @@ public class LlamaMeta extends ChestedHorseMeta {
+         BROWN,
+         GRAY;
+ 
+-        private final static Variant[] VALUES = values();
++        private static final Variant[] VALUES = values();
+     }
+ 
+ }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java
 index ae5641d210b87217d2bdf84ebfc0381cf7fc0f2c..7d7d4abeb9db2a137f5d7f4f8e85a688e7d1e8ad 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/PandaMeta.java
@@ -229,6 +366,32 @@ index d2115dfb2371d79fe16e907a5a2e19ed7b27d73b..a114f62f6ee88e399ebbbfe95191c63b
  
      protected AbstractArrowMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java b/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
+index fce02b850183964a964b9e342ae5ab0acf4648b0..76747449e0d1e410b35e30bb364310a46f0c0710 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
+@@ -137,7 +137,6 @@ public class AbstractDisplayMeta extends EntityMeta {
+         HORIZONTAL,
+         CENTER;
+ 
+-        private final static BillboardConstraints[] VALUES = values();
++        private static final BillboardConstraints[] VALUES = values();
+     }
+-
+ }
+diff --git a/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java b/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
+index f574b37d77df167e5dfebc4eb479ce49dfd049c2..9528acea84ce6c19ae5715185f8c62e436a2e987 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
+@@ -42,7 +42,7 @@ public class ItemDisplayMeta extends AbstractDisplayMeta {
+         GROUND,
+         FIXED;
+ 
+-        private final static DisplayContext[] VALUES = values();
++        private static final DisplayContext[] VALUES = values();
+ 
+     }
+ 
 diff --git a/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java b/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
 index 9bbab19dceff737cac3c69738125e5b9d604057c..6e90878166490f01f81e1e178136faff79288da6 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
@@ -302,6 +465,190 @@ index 3203cdc0c07ffd9338a798ac26efd64b6eadf28a..292b2c0e20e4eddb11679f529460420b
  
      public ArmorStandMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
+diff --git a/src/main/java/net/minestom/server/entity/metadata/other/EnderDragonMeta.java b/src/main/java/net/minestom/server/entity/metadata/other/EnderDragonMeta.java
+index 7a9e49231bfe9b8f576e46f56ba22897a5e9a433..383fd9a0af6de3397097566eb8a1486f7b8ce658 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/other/EnderDragonMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/other/EnderDragonMeta.java
+@@ -35,7 +35,7 @@ public class EnderDragonMeta extends MobMeta {
+         FLYING_TO_THE_PORTAL_TO_DIE,
+         HOVERING_WITHOUT_AI;
+ 
+-        private final static Phase[] VALUES = values();
++        private static final Phase[] VALUES = values();
+     }
+ 
+ }
+diff --git a/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java b/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java
+index f162eb7de22edc949b17a89fcff4477bf1c3c0cf..af421c0aa1fddc76155af9ee92a7823f9967c7de 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java
+@@ -44,6 +44,6 @@ public class AxolotlMeta extends AnimalMeta {
+         CYAN,
+         BLUE;
+ 
+-        private final static AxolotlMeta.Variant[] VALUES = values();
++        private static final AxolotlMeta.Variant[] VALUES = values();
+     }
+ }
+diff --git a/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java b/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
+index 1239990db6444176ad3fd83365e1ad010d367890..a68e8b3b2b4c5ac4608c84fa8865a5c2ffab50b7 100644
+--- a/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
++++ b/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
+@@ -59,12 +59,12 @@ public final class DiscoveredExtension {
+     transient LoadStatus loadStatus = LoadStatus.LOAD_SUCCESS;
+ 
+     /** The original jar this is from. */
+-    transient private File originalJar;
++    private transient File originalJar;
+ 
+-    transient private Path dataDirectory;
++    private transient Path dataDirectory;
+ 
+     /** The class loader that powers it. */
+-    transient private ExtensionClassLoader classLoader;
++    private transient ExtensionClassLoader classLoader;
+ 
+     @NotNull
+     public String getName() {
+diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
+index d664544c89eda8f4d4051dceeb7d8ee002ad33ac..667ed1f44fc8e2abf28fca492e87cb9b3292aa51 100644
+--- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
++++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
+@@ -24,12 +24,10 @@ import java.util.zip.ZipFile;
+ 
+ public class ExtensionManager {
+ 
+-    public final static Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
+-
+-    public final static String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
+-    public final static String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
+-    private final static Gson GSON = new Gson();
+-
++    public static final Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
++    public static final String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
++    public static final String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
++    private static final Gson GSON = new Gson();
+     private final ServerProcess serverProcess;
+ 
+     // LinkedHashMaps are HashMaps that preserve order
+diff --git a/src/main/java/net/minestom/server/extras/bungee/BungeeCordProxy.java b/src/main/java/net/minestom/server/extras/bungee/BungeeCordProxy.java
+index 82884558daa9497aa4eafd429e053c43867667df..cb3f1333df0b6ef53c1cf0f7563c811beda17ff2 100644
+--- a/src/main/java/net/minestom/server/extras/bungee/BungeeCordProxy.java
++++ b/src/main/java/net/minestom/server/extras/bungee/BungeeCordProxy.java
+@@ -1,7 +1,5 @@
+ package net.minestom.server.extras.bungee;
+ 
+-import net.kyori.adventure.text.Component;
+-import net.kyori.adventure.text.format.NamedTextColor;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ 
+diff --git a/src/main/java/net/minestom/server/instance/Explosion.java b/src/main/java/net/minestom/server/instance/Explosion.java
+index 186be7a1da3202d2c25422e723b153baf3acf3f9..cf13e4a2851fb31c2cb76ba253f33de16a124ba6 100644
+--- a/src/main/java/net/minestom/server/instance/Explosion.java
++++ b/src/main/java/net/minestom/server/instance/Explosion.java
+@@ -19,7 +19,7 @@ public abstract class Explosion {
+     private final float centerZ;
+     private final float strength;
+ 
+-    public Explosion(float centerX, float centerY, float centerZ, float strength) {
++    protected Explosion(float centerX, float centerY, float centerZ, float strength) {
+         this.centerX = centerX;
+         this.centerY = centerY;
+         this.centerZ = centerZ;
+diff --git a/src/main/java/net/minestom/server/instance/block/BlockManager.java b/src/main/java/net/minestom/server/instance/block/BlockManager.java
+index fd0243002b94167e1ba18c2c13a9705149933754..46d1baf7c462d98be25f18170c63b5edeebdea59 100644
+--- a/src/main/java/net/minestom/server/instance/block/BlockManager.java
++++ b/src/main/java/net/minestom/server/instance/block/BlockManager.java
+@@ -17,7 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
+ import java.util.function.Supplier;
+ 
+ public final class BlockManager {
+-    private final static Logger LOGGER = LoggerFactory.getLogger(BlockManager.class);
++    private static final Logger LOGGER = LoggerFactory.getLogger(BlockManager.class);
+     // Namespace -> handler supplier
+     private final Map<String, Supplier<BlockHandler>> blockHandlerMap = new ConcurrentHashMap<>();
+     // block id -> block placement rule
+diff --git a/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java b/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
+index cb354931affb1364983728eb0946124fd390277c..c72d346c22dfa342e7700788c7ac5fb7ebbe5bda 100644
+--- a/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
++++ b/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
+@@ -11,7 +11,7 @@ import org.jetbrains.annotations.Nullable;
+ public abstract class BlockPlacementRule {
+     private final Block block;
+ 
+-    public BlockPlacementRule(@NotNull Block block) {
++    BlockPlacementRule(@NotNull Block block) {
+         this.block = block;
+     }
+ 
+diff --git a/src/main/java/net/minestom/server/inventory/AbstractInventory.java b/src/main/java/net/minestom/server/inventory/AbstractInventory.java
+index 99cfc2fb0d8d7c6da959a93dfe21ce28405956a7..21d13deaf3b4aa93725579394a82ddc3e1483e23 100644
+--- a/src/main/java/net/minestom/server/inventory/AbstractInventory.java
++++ b/src/main/java/net/minestom/server/inventory/AbstractInventory.java
+@@ -23,7 +23,7 @@ import java.util.function.UnaryOperator;
+ /**
+  * Represents an inventory where items can be modified/retrieved.
+  */
+-public sealed abstract class AbstractInventory implements InventoryClickHandler, Taggable
++public abstract sealed class AbstractInventory implements InventoryClickHandler, Taggable
+         permits Inventory, PlayerInventory {
+ 
+     private static final VarHandle ITEM_UPDATER = MethodHandles.arrayElementVarHandle(ItemStack[].class);
+diff --git a/src/main/java/net/minestom/server/listener/AdvancementTabListener.java b/src/main/java/net/minestom/server/listener/AdvancementTabListener.java
+index 3a8edbd121b8da1ee970ecdc106955d76508f514..a27c3f10dbd60190260e66012242f1c09b6c16d5 100644
+--- a/src/main/java/net/minestom/server/listener/AdvancementTabListener.java
++++ b/src/main/java/net/minestom/server/listener/AdvancementTabListener.java
+@@ -7,6 +7,8 @@ import net.minestom.server.network.packet.client.play.ClientAdvancementTabPacket
+ 
+ public class AdvancementTabListener {
+ 
++    private AdvancementTabListener() {}
++
+     public static void listener(ClientAdvancementTabPacket packet, Player player) {
+         final String tabIdentifier = packet.tabIdentifier();
+         if (tabIdentifier != null) {
+diff --git a/src/main/java/net/minestom/server/listener/AnimationListener.java b/src/main/java/net/minestom/server/listener/AnimationListener.java
+index 42e249c73869e7c819a177f3144869c10bbe820a..11186e9470d129fefed2fb5f47dc736d180e6321 100644
+--- a/src/main/java/net/minestom/server/listener/AnimationListener.java
++++ b/src/main/java/net/minestom/server/listener/AnimationListener.java
+@@ -8,6 +8,8 @@ import net.minestom.server.network.packet.client.play.ClientAnimationPacket;
+ 
+ public class AnimationListener {
+ 
++    private AnimationListener() { }
++
+     public static void animationListener(ClientAnimationPacket packet, Player player) {
+         final Player.Hand hand = packet.hand();
+         final ItemStack itemStack = player.getItemInHand(hand);
+diff --git a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java b/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
+index 84c502629a38bc45f60dbf650eaf1b094d1d0df0..09970b507b49f85185b693ad8efe19e50491038c 100644
+--- a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
++++ b/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
+@@ -34,7 +34,7 @@ import static net.minestom.server.MinecraftServer.THREAD_NAME_TICK_SCHEDULER;
+  * Be aware that this is not the most accurate method, you should use a proper java profiler depending on your needs.
+  */
+ public final class BenchmarkManager {
+-    private final static Logger LOGGER = LoggerFactory.getLogger(BenchmarkManager.class);
++    private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkManager.class);
+     private static final ThreadMXBean THREAD_MX_BEAN = ManagementFactory.getThreadMXBean();
+     private static final List<String> THREADS = new ArrayList<>();
+ 
+diff --git a/src/main/java/net/minestom/server/thread/Acquirable.java b/src/main/java/net/minestom/server/thread/Acquirable.java
+index 4730006416bd9c4a7f1ff291feddb83c9ffedd6d..48336a9e3f5190431dd4e4b392fc83cf668b69d7 100644
+--- a/src/main/java/net/minestom/server/thread/Acquirable.java
++++ b/src/main/java/net/minestom/server/thread/Acquirable.java
+@@ -26,8 +26,8 @@ public sealed interface Acquirable<T> permits AcquirableImpl {
+         if (currentThread instanceof TickThread) {
+             return ((TickThread) currentThread).entries().stream()
+                     .flatMap(partitionEntry -> partitionEntry.elements().stream())
+-                    .filter(tickable -> tickable instanceof Entity)
+-                    .map(tickable -> (Entity) tickable);
++                    .filter(Entity.class::isInstance)
++                    .map(Entity.class::cast);
+         }
+         return Stream.empty();
+     }
 diff --git a/src/test/java/net/minestom/server/InsideTest.java b/src/test/java/net/minestom/server/InsideTest.java
 index 4fd8bc46ba32abc852398872bf8b63a30617408e..33c65cc23c0982d2e37eb12e40d844562bf85380 100644
 --- a/src/test/java/net/minestom/server/InsideTest.java
@@ -1446,7 +1793,7 @@ index e65c400d089c91d3bdb36a7555da35480b07e529..f224f1128b5667433a1de0fae4cec962
  
          assertArg(arg, "word1", "word1");
 diff --git a/src/test/java/net/minestom/server/command/CommandConditionTest.java b/src/test/java/net/minestom/server/command/CommandConditionTest.java
-index f7450b020c91807984e83b004774c916621d152f..362761f1da55b0a50e79959add8cb2f4cbd4dd5f 100644
+index f7450b020c91807984e83b004774c916621d152f..f76f113a161c315badfdec9ef5932dbf4a461e40 100644
 --- a/src/test/java/net/minestom/server/command/CommandConditionTest.java
 +++ b/src/test/java/net/minestom/server/command/CommandConditionTest.java
 @@ -13,10 +13,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
@@ -1459,6 +1806,24 @@ index f7450b020c91807984e83b004774c916621d152f..362761f1da55b0a50e79959add8cb2f4
      @Test
 -    public void mainCondition() {
 +    void mainCondition() {
+         var dispatcher = new CommandDispatcher();
+         assertNull(dispatcher.findCommand("name"));
+         var sender = new Sender();
+@@ -39,7 +39,7 @@ public class CommandConditionTest {
+     }
+ 
+     @Test
+-    public void subCondition() {
++    void subCondition() {
+         var dispatcher = new CommandDispatcher();
+         assertNull(dispatcher.findCommand("name"));
+         var sender = new Sender();
+@@ -83,7 +83,7 @@ public class CommandConditionTest {
+     }
+ 
+     @Test
+-    public void subConditionOverride() {
++    void subConditionOverride() {
          var dispatcher = new CommandDispatcher();
          assertNull(dispatcher.findCommand("name"));
          var sender = new Sender();
@@ -3065,10 +3430,10 @@ index 40038cf6f257e058e79ffb8eacdcf96ca1e61685..6074de4b7fc26017f615bf08503dd010
          var p1 = env.createPlayer(instance, new Pos(0, 42, 0));
          var p2 = env.createPlayer(instance, new Pos(0, 42, 0));
 diff --git a/src/test/java/net/minestom/server/entity/GameModeTest.java b/src/test/java/net/minestom/server/entity/GameModeTest.java
-index 2d7ea85dd0764cf052efa3ced47bab698c6c3aa4..4f00aa0e8ccdfd8a46152a6cb06b2cfb4f5729a7 100644
+index 2d7ea85dd0764cf052efa3ced47bab698c6c3aa4..f249cac8065fe61c163c03573b1ad2430bd4c262 100644
 --- a/src/test/java/net/minestom/server/entity/GameModeTest.java
 +++ b/src/test/java/net/minestom/server/entity/GameModeTest.java
-@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
+@@ -4,18 +4,18 @@ import org.junit.jupiter.api.Test;
  
  import static org.junit.jupiter.api.Assertions.assertEquals;
  
@@ -3077,11 +3442,15 @@ index 2d7ea85dd0764cf052efa3ced47bab698c6c3aa4..4f00aa0e8ccdfd8a46152a6cb06b2cfb
  
      @Test
 -    public void toId() {
+-        assertEquals(GameMode.SURVIVAL.id(), 0);
+-        assertEquals(GameMode.CREATIVE.id(), 1);
+-        assertEquals(GameMode.ADVENTURE.id(), 2);
+-        assertEquals(GameMode.SPECTATOR.id(), 3);
 +    void toId() {
-         assertEquals(GameMode.SURVIVAL.id(), 0);
-         assertEquals(GameMode.CREATIVE.id(), 1);
-         assertEquals(GameMode.ADVENTURE.id(), 2);
-@@ -15,7 +15,7 @@ public class GameModeTest {
++        assertEquals(0, GameMode.SURVIVAL.id());
++        assertEquals(1, GameMode.CREATIVE.id());
++        assertEquals(2, GameMode.ADVENTURE.id());
++        assertEquals(3, GameMode.SPECTATOR.id());
      }
  
      @Test
