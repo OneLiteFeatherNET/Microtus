@@ -252,7 +252,7 @@ index ab8725e049dfdb830496e824377b10dc6802cb4e..828a5f2c1473da8523c02d2a87dae49e
   * Called if the instance {@link IChunkLoader} hasn't been able to load the chunk.
   * @deprecated Replaced by {@link net.minestom.server.instance.generator.Generator}
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index d6dd0549db22ee58c4057012fcc46a3aba8f087b..7c6160c9d629da080f3d870e429559af435cebf5 100644
+index d6dd0549db22ee58c4057012fcc46a3aba8f087b..bd148a1609f549d5e5522cb1ac332d8d3a3a48bc 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
 @@ -61,6 +61,7 @@ import java.util.stream.Collectors;
@@ -263,23 +263,33 @@ index d6dd0549db22ee58c4057012fcc46a3aba8f087b..7c6160c9d629da080f3d870e429559af
  public abstract class Instance implements Block.Getter, Block.Setter,
          Tickable, Schedulable, Snapshotable, EventHandler<InstanceEvent>, Taggable, PacketGroupingAudience {
  
-@@ -267,17 +268,6 @@ public abstract class Instance implements Block.Getter, Block.Setter,
+@@ -267,6 +268,13 @@ public abstract class Instance implements Block.Getter, Block.Setter,
       */
      public abstract @NotNull CompletableFuture<Void> saveChunksToStorage();
  
++    /**
++     * Gets the generator associated with the instance
++     *
++     * @return the generator if any
++     */
++    public abstract @Nullable Generator generator();
++
+     /**
+      * Changes the instance {@link ChunkGenerator}.
+      *
+@@ -278,13 +286,6 @@ public abstract class Instance implements Block.Getter, Block.Setter,
+         setGenerator(chunkGenerator != null ? new ChunkGeneratorCompatibilityLayer(chunkGenerator) : null);
+     }
+ 
 -    /**
--     * Changes the instance {@link ChunkGenerator}.
+-     * Gets the generator associated with the instance
 -     *
--     * @param chunkGenerator the new {@link ChunkGenerator} of the instance
--     * @deprecated Use {@link #setGenerator(Generator)}
+-     * @return the generator if any
 -     */
--    @Deprecated
--    public void setChunkGenerator(@Nullable ChunkGenerator chunkGenerator) {
--        setGenerator(chunkGenerator != null ? new ChunkGeneratorCompatibilityLayer(chunkGenerator) : null);
--    }
+-    public abstract @Nullable Generator generator();
 -
      /**
-      * Gets the generator associated with the instance
+      * Changes the generator of the instance
       *
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
 index 6108c4283fc1128fddd208914095cd7739524f0f..d467975f66e85606eb551b845cc0415773a2d517 100644
