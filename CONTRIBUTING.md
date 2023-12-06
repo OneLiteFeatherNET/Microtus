@@ -45,6 +45,20 @@ Lets set up the project on your local machine
 3. Type `git submodule update --init` to initialize the submodule
 4. Run `./gradlew applyPatches` in the main directory from Microtus to apply all patches
 
+## Update branches
+
+It can happen that a new patch is added to the main branch of the repository.
+To avoid problems, the patch must be merged into the branch and applied accordingly.
+But how do you do that?
+
+1. Ensure that you have the latest changes from the main repository (use `git fetch` and `git pull`)
+2. Ensure that you are in the root directory from Microtus
+3. Checkout the feature branch you want to update (e.g. `git checkout feature/xyz`)
+4. Rebase your `feature branch` with master (`git rebase master`)
+5. Run `./gradlew applyPatches` to apply the changes
+6. Run `./gradlew rebuildPatches` to rebuild the patches
+7. Now force push your changes using `git push -force`
+
 ## Adding Patches
 
 Adding new patches to the project is very simple and doesn't require any high effort.
