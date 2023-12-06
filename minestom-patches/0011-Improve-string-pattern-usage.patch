@@ -5,14 +5,14 @@ Subject: [PATCH] Improve string pattern usage
 
 
 diff --git a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-index e8922654e4f71aa447bf71af42c86ec2760de3ed..bd06b7f3a8013f18dc7dc872d8e4f5b81e022a87 100644
+index e8922654e4f71aa447bf71af42c86ec2760de3ed..bb7a4e54d85b0909cd7b4a4a633af3eb6fbc9095 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
 @@ -15,6 +15,7 @@ import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
  import net.minestom.server.network.player.GameProfile;
  import net.minestom.server.network.player.PlayerConnection;
  import net.minestom.server.network.player.PlayerSocketConnection;
-+import net.minestom.server.utils.UniqueIdUtils;
++import net.minestom.server.utils.UniqueIdUtils; // Microtus - improve string pattern usage + add private constructor
  import org.jetbrains.annotations.NotNull;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
@@ -20,7 +20,7 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..bd06b7f3a8013f18dc7dc872d8e4f5b8
  import java.util.ArrayList;
  import java.util.List;
  import java.util.UUID;
-+import java.util.regex.Pattern;
++import java.util.regex.Pattern; // Microtus - improve string pattern usage + add private constructor
  
  import static net.minestom.server.network.NetworkBuffer.*;
  
@@ -54,14 +54,14 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..bd06b7f3a8013f18dc7dc872d8e4f5b8
                  List<GameProfile.Property> properties = new ArrayList<>();
                  if (hasProperties) {
 diff --git a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
-index c327a3b5c10fa2d3c31f672044431c76031a111c..85b003ad1ccca3d4c2333211b04e3ad25693235e 100644
+index c327a3b5c10fa2d3c31f672044431c76031a111c..7f918209bee6fc679e36edad333703abc94f32f8 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
 @@ -12,6 +12,7 @@ import net.minestom.server.network.packet.client.ClientPreplayPacket;
  import net.minestom.server.network.player.GameProfile; // Microtus - Fix gameprofile auth
  import net.minestom.server.network.player.PlayerConnection;
  import net.minestom.server.network.player.PlayerSocketConnection;
-+import net.minestom.server.utils.UniqueIdUtils;
++import net.minestom.server.utils.UniqueIdUtils; // Microtus - improve string pattern usage + add private constructor
  import net.minestom.server.utils.async.AsyncUtils;
  import org.jetbrains.annotations.NotNull;
  
@@ -69,7 +69,7 @@ index c327a3b5c10fa2d3c31f672044431c76031a111c..85b003ad1ccca3d4c2333211b04e3ad2
  import java.util.Arrays;
  import java.util.List; // Microtus - Fix gameprofile auth
  import java.util.UUID;
-+import java.util.regex.Pattern; // Microtus start - improve string pattern usage + add private constructor
++import java.util.regex.Pattern; // Microtus - improve string pattern usage + add private constructor
  
  import static net.minestom.server.network.NetworkBuffer.BYTE_ARRAY;
  
