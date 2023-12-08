@@ -249,7 +249,7 @@ index 5511e29017aa54958b62f2e6f1fcfc53a3757a92..3d6960753812ef9d01047ec3c5f91a36
          return hand;
      }
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index d6dd0549db22ee58c4057012fcc46a3aba8f087b..7c6160c9d629da080f3d870e429559af435cebf5 100644
+index d6dd0549db22ee58c4057012fcc46a3aba8f087b..b93d4b722d088ec3de4a3fd4874ff94b6bb22364 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
 @@ -61,6 +61,7 @@ import java.util.stream.Collectors;
@@ -260,24 +260,6 @@ index d6dd0549db22ee58c4057012fcc46a3aba8f087b..7c6160c9d629da080f3d870e429559af
  public abstract class Instance implements Block.Getter, Block.Setter,
          Tickable, Schedulable, Snapshotable, EventHandler<InstanceEvent>, Taggable, PacketGroupingAudience {
  
-@@ -267,17 +268,6 @@ public abstract class Instance implements Block.Getter, Block.Setter,
-      */
-     public abstract @NotNull CompletableFuture<Void> saveChunksToStorage();
- 
--    /**
--     * Changes the instance {@link ChunkGenerator}.
--     *
--     * @param chunkGenerator the new {@link ChunkGenerator} of the instance
--     * @deprecated Use {@link #setGenerator(Generator)}
--     */
--    @Deprecated
--    public void setChunkGenerator(@Nullable ChunkGenerator chunkGenerator) {
--        setGenerator(chunkGenerator != null ? new ChunkGeneratorCompatibilityLayer(chunkGenerator) : null);
--    }
--
-     /**
-      * Gets the generator associated with the instance
-      *
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
 index 4667b7c3a3fe0a49c3b4e00210c103155d85ea39..d467975f66e85606eb551b845cc0415773a2d517 100644
 --- a/src/main/java/net/minestom/server/inventory/InventoryType.java
