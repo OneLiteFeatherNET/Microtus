@@ -612,15 +612,12 @@ index fd0243002b94167e1ba18c2c13a9705149933754..d19f1c5043208e841be40d1b4cffdcbe
      private final Map<String, Supplier<BlockHandler>> blockHandlerMap = new ConcurrentHashMap<>();
      // block id -> block placement rule
 diff --git a/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java b/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
-index cb354931affb1364983728eb0946124fd390277c..e33450545966402c40a935962e2c7d0bb1ee5e98 100644
+index cb354931affb1364983728eb0946124fd390277c..b4a96fd127ff3ed819768c8a52e3f9cd217665ed 100644
 --- a/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
 +++ b/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
-@@ -11,9 +11,9 @@ import org.jetbrains.annotations.Nullable;
- public abstract class BlockPlacementRule {
-     private final Block block;
+@@ -13,7 +13,7 @@ public abstract class BlockPlacementRule {
  
--    public BlockPlacementRule(@NotNull Block block) {
-+    BlockPlacementRule(@NotNull Block block) {
+     public BlockPlacementRule(@NotNull Block block) {
          this.block = block;
 -    }
 +    }  //Microtus - update java keyword usage
