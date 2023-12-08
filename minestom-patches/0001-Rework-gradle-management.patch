@@ -254,6 +254,15 @@ index dc62cdcae7dc1e23bc9d72303673edf77f607422..b2fda1d37d23c05dc422df00f8db3930
      id("minestom.common-conventions")
  }
  
+diff --git a/jitpack.yml b/jitpack.yml
+deleted file mode 100644
+index 1e41e00b7d128df8b59dd63ee059d93146567c14..0000000000000000000000000000000000000000
+--- a/jitpack.yml
++++ /dev/null
+@@ -1,2 +0,0 @@
+-jdk:
+-  - openjdk17
+\ No newline at end of file
 diff --git a/settings.gradle.kts b/settings.gradle.kts
 index 2230bb02892d10d6756722105337ae6434cc8a35..3fb63e467ef2d6fe82c96f53718e5b8292c36ad4 100644
 --- a/settings.gradle.kts
