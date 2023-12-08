@@ -1,14 +1,14 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
 From: theEvilReaper <steffenwx@gmail.com>
-Date: Tue, 20 Jun 2023 21:59:52 +0200
+Date: Fri, 8 Dec 2023 13:09:07 +0100
 Subject: [PATCH] Remove deprecated methods which already have a replacement
 
 
 diff --git a/src/main/java/net/minestom/server/advancements/notifications/Notification.java b/src/main/java/net/minestom/server/advancements/notifications/Notification.java
-index 90660466e837326cb98d26032dd04b4f19247295..15fee4d25369b8b3e76cfae3eccaa2e634e14821 100644
+index 7b6b1169b4b65dd02d4b1f66900517995622f681..15fee4d25369b8b3e76cfae3eccaa2e634e14821 100644
 --- a/src/main/java/net/minestom/server/advancements/notifications/Notification.java
 +++ b/src/main/java/net/minestom/server/advancements/notifications/Notification.java
-@@ -9,18 +9,9 @@ import org.jetbrains.annotations.NotNull;
+@@ -9,28 +9,9 @@ import org.jetbrains.annotations.NotNull;
  /**
   * Represents a message which can be sent using the {@link NotificationCenter}.
   */
@@ -18,29 +18,31 @@ index 90660466e837326cb98d26032dd04b4f19247295..15fee4d25369b8b3e76cfae3eccaa2e6
          this(title, frameType, ItemStack.of(icon));
      }
 -
--    @Deprecated
+-    /**
+-     * Returns the given title as {@link Component} of the notification.
+-     * @deprecated use the {@link #icon()} method instead.
+-     * @return the icon of the notification
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public @NotNull Component getTitle() {
 -        return title;
 -    }
 -
--    @Deprecated
+-    /**
+-     * Returns the given {@link FrameType} of the notification.
+-     * @deprecated use the {@link #icon()} method instead.
+-     * @return the icon of the notification
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public @NotNull FrameType getFrameType() {
 -        return frameType;
 -    }
  }
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 04244d43a556e33b5ce9cb4cf727433f976af35b..ded5231b0ac28efbebd5ff86e8a0f03a1eee5f7f 100644
+index 2d9fe8a7a8ebb0d6ef5af7ece430d769c158c164..ded5231b0ac28efbebd5ff86e8a0f03a1eee5f7f 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-@@ -10,7 +10,6 @@ import net.kyori.adventure.text.Component;
- import net.kyori.adventure.text.format.NamedTextColor;
- import net.kyori.adventure.title.Title;
- import net.kyori.adventure.title.TitlePart;
--import net.minestom.server.coordinate.Pos;
- import net.minestom.server.coordinate.Vec;
- import net.minestom.server.entity.Entity;
- import net.minestom.server.network.packet.server.ServerPacket;
-@@ -24,6 +23,7 @@ import java.util.Collection;
+@@ -23,6 +23,7 @@ import java.util.Collection;
  /**
   * Utility methods to convert adventure enums to their packet values.
   */
@@ -48,7 +50,7 @@ index 04244d43a556e33b5ce9cb4cf727433f976af35b..ded5231b0ac28efbebd5ff86e8a0f03a
  public class AdventurePacketConvertor {
      private static final Object2IntMap<NamedTextColor> NAMED_TEXT_COLOR_ID_MAP = new Object2IntArrayMap<>(16);
  
-@@ -142,19 +142,6 @@ public class AdventurePacketConvertor {
+@@ -141,19 +142,6 @@ public class AdventurePacketConvertor {
          }
      }
  
@@ -60,7 +62,7 @@ index 04244d43a556e33b5ce9cb4cf727433f976af35b..ded5231b0ac28efbebd5ff86e8a0f03a
 -     * @return the packet
 -     * @deprecated Use {@link #createSoundPacket(Sound, Sound.Emitter)}
 -     */
--    @Deprecated(forRemoval = true)
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public static ServerPacket createEntitySoundPacket(@NotNull Sound sound, @NotNull Entity entity) {
 -        return createSoundPacket(sound, entity);
 -    }
@@ -69,7 +71,7 @@ index 04244d43a556e33b5ce9cb4cf727433f976af35b..ded5231b0ac28efbebd5ff86e8a0f03a
       * Creates a sound stop packet from a sound stop.
       *
 diff --git a/src/main/java/net/minestom/server/color/Color.java b/src/main/java/net/minestom/server/color/Color.java
-index 9fdaf30d8553660a75555228cbe63fcf99445fa6..2418b648c18f95bdea57ce56a3247234b4ac9620 100644
+index 9733f0b72d33b2866bf8ccf3782a5547840b420a..2418b648c18f95bdea57ce56a3247234b4ac9620 100644
 --- a/src/main/java/net/minestom/server/color/Color.java
 +++ b/src/main/java/net/minestom/server/color/Color.java
 @@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
@@ -80,28 +82,43 @@ index 9fdaf30d8553660a75555228cbe63fcf99445fa6..2418b648c18f95bdea57ce56a3247234
  public record Color(int red, int green, int blue) implements RGBLike {
      private static final int BIT_MASK = 0xff;
  
-@@ -102,19 +103,4 @@ public record Color(int red, int green, int blue) implements RGBLike {
+@@ -102,34 +103,4 @@ public record Color(int red, int green, int blue) implements RGBLike {
          b = Math.round(averageBlue * gainFactor);
          return new Color(r, g, b);
      }
 -
--    @Deprecated
+-    /**
+-     * Returns the red component of the color.
+-     * @deprecated use {@link #red()} method instead.
+-     * @return the red component of this color
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public int getRed() {
 -        return this.red;
 -    }
 -
--    @Deprecated
+-    /**
+-     * Returns the green component of the color.
+-     * @deprecated use the {@link #green()} method instead.
+-     * @return the green component of this color
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public int getGreen() {
 -        return this.green;
 -    }
 -
--    @Deprecated
+-    /**
+-     * Returns the blue component of the color.
+-     * @deprecated use the {@link #blue()} method instead.
+-     * @return the blue component of this color
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public int getBlue() {
 -        return this.blue;
 -    }
  }
 diff --git a/src/main/java/net/minestom/server/entity/PlayerSkin.java b/src/main/java/net/minestom/server/entity/PlayerSkin.java
-index fe85cf8ad30097aaef147977d8b59b163fc75760..7230c9b2d052493b08e6df99b738c6ede5d112f5 100644
+index 72798e5ec55531a26217a15fa82b18af072408e7..7230c9b2d052493b08e6df99b738c6ede5d112f5 100644
 --- a/src/main/java/net/minestom/server/entity/PlayerSkin.java
 +++ b/src/main/java/net/minestom/server/entity/PlayerSkin.java
 @@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
@@ -120,7 +137,7 @@ index fe85cf8ad30097aaef147977d8b59b163fc75760..7230c9b2d052493b08e6df99b738c6ed
 -    /**
 -     * @deprecated use {@link #textures()}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public String getTextures() {
 -        return textures;
 -    }
@@ -128,13 +145,13 @@ index fe85cf8ad30097aaef147977d8b59b163fc75760..7230c9b2d052493b08e6df99b738c6ed
 -    /**
 -     * @deprecated use {@link #signature()}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public String getSignature() {
 -        return signature;
 -    }
  }
 diff --git a/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java b/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
-index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..1b05107e945189da3e963917f01fc028515f2f4b 100644
+index c451537f5638b47f9a55212ad51aeda8764205ec..1b05107e945189da3e963917f01fc028515f2f4b 100644
 --- a/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
 +++ b/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
 @@ -13,32 +13,12 @@ import java.util.function.Predicate;
@@ -154,7 +171,7 @@ index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..1b05107e945189da3e963917f01fc028
 -     * @deprecated Use {@link #ClosestEntityTarget(EntityCreature, double, Predicate)}
 -     */
 -    @SafeVarargs
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public ClosestEntityTarget(@NotNull EntityCreature entityCreature, float range,
 -                               @NotNull Class<? extends LivingEntity>... entitiesTarget) {
 -        this(entityCreature, range, ent -> {
@@ -172,7 +189,7 @@ index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..1b05107e945189da3e963917f01fc028
       * @param entityCreature  the entity (self)
       * @param range           the maximum range the entity can target others within
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
-index b45665fb719606ade2bc83318ba25866487a6dc4..df17858bfe3dbff2b21554d14ab5fcf8efc898b5 100644
+index 54fd191ee02827e82946e2cf82533ee93ab94f59..df17858bfe3dbff2b21554d14ab5fcf8efc898b5 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
 +++ b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
 @@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
@@ -193,7 +210,7 @@ index b45665fb719606ade2bc83318ba25866487a6dc4..df17858bfe3dbff2b21554d14ab5fcf8
 -     * @return the food item
 -     * @deprecated use getItemStack() for the eaten item
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public @NotNull ItemStack getFoodItem() {
 -        return foodItem;
 -    }
@@ -202,7 +219,7 @@ index b45665fb719606ade2bc83318ba25866487a6dc4..df17858bfe3dbff2b21554d14ab5fcf8
          return hand;
      }
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
-index 27de8eee60012568cfd85e612f9a7377085f9033..3d6960753812ef9d01047ec3c5f91a3623542e99 100644
+index 5511e29017aa54958b62f2e6f1fcfc53a3757a92..3d6960753812ef9d01047ec3c5f91a3623542e99 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
 +++ b/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
 @@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
@@ -223,7 +240,7 @@ index 27de8eee60012568cfd85e612f9a7377085f9033..3d6960753812ef9d01047ec3c5f91a36
 -     * @return the food item
 -     * @deprecated use getItemStack() for the eaten item
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public @NotNull ItemStack getFoodItem() {
 -        return foodItem;
 -    }
@@ -232,7 +249,7 @@ index 27de8eee60012568cfd85e612f9a7377085f9033..3d6960753812ef9d01047ec3c5f91a36
          return hand;
      }
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index b7c5affa63ebe29d30996718c3402d8348137f7d..05e5f9d0e7713804d551b73828d2089688a7513c 100644
+index d6dd0549db22ee58c4057012fcc46a3aba8f087b..7c6160c9d629da080f3d870e429559af435cebf5 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
 @@ -61,6 +61,7 @@ import java.util.stream.Collectors;
@@ -262,7 +279,7 @@ index b7c5affa63ebe29d30996718c3402d8348137f7d..05e5f9d0e7713804d551b73828d20896
       * Gets the generator associated with the instance
       *
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
-index 6108c4283fc1128fddd208914095cd7739524f0f..d467975f66e85606eb551b845cc0415773a2d517 100644
+index 4667b7c3a3fe0a49c3b4e00210c103155d85ea39..d467975f66e85606eb551b845cc0415773a2d517 100644
 --- a/src/main/java/net/minestom/server/inventory/InventoryType.java
 +++ b/src/main/java/net/minestom/server/inventory/InventoryType.java
 @@ -3,6 +3,7 @@ package net.minestom.server.inventory;
@@ -281,14 +298,14 @@ index 6108c4283fc1128fddd208914095cd7739524f0f..d467975f66e85606eb551b845cc04157
 -    /**
 -     * @deprecated use {@link #getSize()}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public int getAdditionalSlot() {
 -        return size;
 -    }
 -
  }
 diff --git a/src/main/java/net/minestom/server/item/ItemStack.java b/src/main/java/net/minestom/server/item/ItemStack.java
-index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..ce210a60496d042456f5dcf7342d6d1d48956c35 100644
+index 0e3f2a48d1a1c75368fc0c33905cc5b07cb27251..ce210a60496d042456f5dcf7342d6d1d48956c35 100644
 --- a/src/main/java/net/minestom/server/item/ItemStack.java
 +++ b/src/main/java/net/minestom/server/item/ItemStack.java
 @@ -24,6 +24,7 @@ import java.util.function.UnaryOperator;
@@ -304,19 +321,19 @@ index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..ce210a60496d042456f5dcf7342d6d1d
      @NotNull NBTCompound toItemNBT();
  
 -
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    @Contract(pure = true)
 -    default @NotNull Material getMaterial() {
 -        return material();
 -    }
 -
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    @Contract(pure = true)
 -    default int getAmount() {
 -        return amount();
 -    }
 -
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    @Contract(pure = true)
 -    default @NotNull ItemMeta getMeta() {
 -        return meta();
@@ -326,7 +343,7 @@ index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..ce210a60496d042456f5dcf7342d6d1d
              permits ItemStackImpl.Builder {
          @Contract(value = "_ -> this")
 diff --git a/src/main/java/net/minestom/server/ping/ResponseData.java b/src/main/java/net/minestom/server/ping/ResponseData.java
-index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f35af9c9b 100644
+index 693edb9b906f347c81bda3d769ac2f17ed9db072..35856fe0e16e47b252c4693ebca9057f35af9c9b 100644
 --- a/src/main/java/net/minestom/server/ping/ResponseData.java
 +++ b/src/main/java/net/minestom/server/ping/ResponseData.java
 @@ -1,11 +1,7 @@
@@ -359,7 +376,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f
 -     * @param name The name for the response data.
 -     * @deprecated This is named incorrectly, use {@link #setVersion(String)} instead
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public void setName(String name) {
 -        this.setVersion(name);
 -    }
@@ -377,7 +394,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f
 -     * @param players the players
 -     * @deprecated Use {@link #addEntries(Collection)}}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public void addPlayer(Iterable<Player> players) {
 -        for (Player player : players) {
 -            this.addPlayer(player);
@@ -390,7 +407,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f
 -     * @param player the player
 -     * @deprecated Use {@link #addEntry(NamedAndIdentified)}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public void addPlayer(Player player) {
 -        this.addEntry(player);
 -    }
@@ -402,7 +419,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f
 -     * @param uuid The unique identifier of the player.
 -     * @deprecated Use {@link #addEntry(NamedAndIdentified)} with {@link NamedAndIdentified#of(String, UUID)}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public void addPlayer(String name, UUID uuid) {
 -        this.addEntry(NamedAndIdentified.of(name, uuid));
 -    }
@@ -415,7 +432,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f
 -     * @param name The name of the player.
 -     * @deprecated Use {@link #addEntry(NamedAndIdentified)} with {@link NamedAndIdentified#named(String)}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public void addPlayer(String name) {
 -        this.addEntry(NamedAndIdentified.named(name));
 -    }
@@ -426,7 +443,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f
 -     *
 -     * @deprecated Use {@link #clearEntries()}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public void clearPlayers() {
 -        this.clearEntries();
 -    }
@@ -449,7 +466,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f
 -     * @param description The description for the response data.
 -     * @deprecated Use {@link #setDescription(Component)}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public void setDescription(String description) {
 -        this.description = LegacyComponentSerializer.legacySection().deserialize(description);
 -    }
@@ -502,7 +519,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f
 -    }
  }
 diff --git a/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java b/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
-index b5817c96772fd399320bc61cafecf2101a55e867..efc4545df49796557446f2edca16ad52775f0809 100644
+index b5c67427644748d5199ac42757c7360e5cb82d21..efc4545df49796557446f2edca16ad52775f0809 100644
 --- a/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
 +++ b/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
 @@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
@@ -524,7 +541,7 @@ index b5817c96772fd399320bc61cafecf2101a55e867..efc4545df49796557446f2edca16ad52
 -     * @param value The value of the scoreboard
 -     * @deprecated Use {@link #BelowNameTag(String, Component)}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public BelowNameTag(String name, String value) {
 -        this(name, Component.text(value));
 -    }
@@ -533,7 +550,7 @@ index b5817c96772fd399320bc61cafecf2101a55e867..efc4545df49796557446f2edca16ad52
       * Creates a new below name scoreboard.
       *
 diff --git a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
-index b14aebca46465331160051e55ceaab6439999ce4..ac1def5cf1771ae79f83f2603192d822b2741fdb 100644
+index 9a1ad120480b8cf11106915185ef63cf8d445a3b..ac1def5cf1771ae79f83f2603192d822b2741fdb 100644
 --- a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
 +++ b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
 @@ -14,22 +14,9 @@ import java.util.Collection;
@@ -551,7 +568,7 @@ index b14aebca46465331160051e55ceaab6439999ce4..ac1def5cf1771ae79f83f2603192d822
 -     * @return the creation objective packet
 -     * @deprecated Use {@link #getCreationObjectivePacket(Component, ScoreboardObjectivePacket.Type)}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    @NotNull
 -    default ScoreboardObjectivePacket getCreationObjectivePacket(String value, ScoreboardObjectivePacket.Type type) {
 -        return this.getCreationObjectivePacket(Component.text(value), type);
@@ -561,7 +578,7 @@ index b14aebca46465331160051e55ceaab6439999ce4..ac1def5cf1771ae79f83f2603192d822
       * Creates a creation objective packet.
       *
 diff --git a/src/main/java/net/minestom/server/scoreboard/Sidebar.java b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
-index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..f7f1749dd151728337bd4b8d67765c6ad93ceac4 100644
+index efc5627faddcc6b688437df7febb6e2593348e93..f7f1749dd151728337bd4b8d67765c6ad93ceac4 100644
 --- a/src/main/java/net/minestom/server/scoreboard/Sidebar.java
 +++ b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
 @@ -21,13 +21,14 @@ import java.util.concurrent.atomic.AtomicInteger;
@@ -590,7 +607,7 @@ index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..f7f1749dd151728337bd4b8d67765c6a
 -     * @param title The title of the sidebar
 -     * @deprecated Use {@link #Sidebar(Component)}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public Sidebar(@NotNull String title) {
 -        this(Component.text(title));
 -    }
@@ -608,7 +625,7 @@ index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..f7f1749dd151728337bd4b8d67765c6a
 -     * @param title The new sidebar title
 -     * @deprecated Use {@link #setTitle(Component)}
 -     */
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public void setTitle(@NotNull String title) {
 -        this.setTitle(Component.text(title));
 -    }
@@ -646,7 +663,7 @@ index 7127b875ce50b8637ea63921519b780ea6b6bc4a..35cc1584d9e319264cb385d63958b7c9
      }
  }
 diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
-index 35b34bfe35067d28eef3c66539d9fd4f0fa68c3f..3dff7d06972dfb2aeab589cb1032e5eee5cc1fb1 100644
+index 988eb3f876c4720243876bdbea45e4ff5e4a6629..3dff7d06972dfb2aeab589cb1032e5eee5cc1fb1 100644
 --- a/src/main/java/net/minestom/server/utils/NamespaceID.java
 +++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
 @@ -12,6 +12,7 @@ import java.util.Objects;
@@ -657,17 +674,34 @@ index 35b34bfe35067d28eef3c66539d9fd4f0fa68c3f..3dff7d06972dfb2aeab589cb1032e5ee
  public final class NamespaceID implements CharSequence, Key {
      private static final String legalLetters = "[0123456789abcdefghijklmnopqrstuvwxyz_-]+";
      private static final String legalPathLetters = "[0123456789abcdefghijklmnopqrstuvwxyz./_-]+";
-@@ -110,14 +111,4 @@ public final class NamespaceID implements CharSequence, Key {
+@@ -67,14 +68,12 @@ public final class NamespaceID implements CharSequence, Key {
+     public boolean equals(Object o) {
+         if (this == o) return true;
+         if (!(o instanceof final Key that)) return false;
+-        return Objects.equals(this.domain, that.namespace()) && Objects.equals(this.path, that.value()); // Microtus - Fix namespace hashcode and equals
++        return Objects.equals(this.full, that.asString());
+     }
+ 
+     @Override
+     public int hashCode() {
+-        int result = this.domain.hashCode(); // Microtus start - Fix namespace hashcode and equals
+-        result = (31 * result) + this.path.hashCode();
+-        return result; // Microtus end - Fix namespace hashcode and equals
++        return full.hashCode();
+     }
+ 
+     @Override
+@@ -112,14 +111,4 @@ public final class NamespaceID implements CharSequence, Key {
      public @NotNull String asString() {
          return this.full;
      }
 -
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public String getDomain() {
 -        return domain();
 -    }
 -
--    @Deprecated
+-    @Deprecated(forRemoval = true, since = "1.1.3") //Microtus - Update deprecation status
 -    public String getPath() {
 -        return path();
 -    }
