@@ -171,39 +171,6 @@ index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..1b05107e945189da3e963917f01fc028
      /**
       * @param entityCreature  the entity (self)
       * @param range           the maximum range the entity can target others within
-diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-index 60d7102b205bc04a60678fecc2da0009ce56437a..1157351dd9c3db6965389c2e29124b22ae8c33a5 100644
---- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-+++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-@@ -76,28 +76,6 @@ public class LivingEntityMeta extends EntityMeta {
-         super.metadata.setIndex(OFFSET + 4, Metadata.VarInt(value));
-     }
- 
--    /**
--     * @deprecated
--     * This returns the bee stinger count, not the absorption heart count
--     * Use {@link #getBeeStingerCount()} instead
--     * @return The number of bee stingers in this entity
--     */
--    @Deprecated
--    public int getHealthAddedByAbsorption() {
--        return super.metadata.getIndex(OFFSET + 5, 0);
--    }
--
--    /**
--     * @deprecated
--     * This sets the bee stinger count, not the absorption heart count
--     * Use {@link #setBeeStingerCount(int)} instead
--     * @param value The number of bee stingers for this entity to have
--     */
--    @Deprecated
--    public void setHealthAddedByAbsorption(int value) {
--        super.metadata.setIndex(OFFSET + 5, Metadata.VarInt(value));
--    }
--
-     /**
-      * Gets the amount of bee stingers in this entity
-      * @return The amount of bee stingers
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
 index b45665fb719606ade2bc83318ba25866487a6dc4..df17858bfe3dbff2b21554d14ab5fcf8efc898b5 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
@@ -264,28 +231,8 @@ index 27de8eee60012568cfd85e612f9a7377085f9033..3d6960753812ef9d01047ec3c5f91a36
      public @NotNull Player.Hand getHand() {
          return hand;
      }
-diff --git a/src/main/java/net/minestom/server/instance/ChunkGenerator.java b/src/main/java/net/minestom/server/instance/ChunkGenerator.java
-index ab8725e049dfdb830496e824377b10dc6802cb4e..828a5f2c1473da8523c02d2a87dae49e5457f578 100644
---- a/src/main/java/net/minestom/server/instance/ChunkGenerator.java
-+++ b/src/main/java/net/minestom/server/instance/ChunkGenerator.java
-@@ -2,13 +2,14 @@ package net.minestom.server.instance;
- 
- import net.minestom.server.instance.batch.ChunkBatch;
- import net.minestom.server.instance.block.Block;
-+import net.minestom.server.instance.generator.Generator;
- import org.jetbrains.annotations.NotNull;
- import org.jetbrains.annotations.Nullable;
- 
- import java.util.List;
- 
- /**
-- * Responsible for the {@link Chunk} generation, can be set using {@link Instance#setChunkGenerator(ChunkGenerator)}.
-+ * Responsible for the {@link Chunk} generation, can be set using {@link Instance#setGenerator(Generator)}.
-  * <p>
-  * Called if the instance {@link IChunkLoader} hasn't been able to load the chunk.
-  * @deprecated Replaced by {@link net.minestom.server.instance.generator.Generator}
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index d6dd0549db22ee58c4057012fcc46a3aba8f087b..bd148a1609f549d5e5522cb1ac332d8d3a3a48bc 100644
+index b7c5affa63ebe29d30996718c3402d8348137f7d..05e5f9d0e7713804d551b73828d2089688a7513c 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
 @@ -61,6 +61,7 @@ import java.util.stream.Collectors;
@@ -296,33 +243,23 @@ index d6dd0549db22ee58c4057012fcc46a3aba8f087b..bd148a1609f549d5e5522cb1ac332d8d
  public abstract class Instance implements Block.Getter, Block.Setter,
          Tickable, Schedulable, Snapshotable, EventHandler<InstanceEvent>, Taggable, PacketGroupingAudience {
  
-@@ -267,6 +268,13 @@ public abstract class Instance implements Block.Getter, Block.Setter,
+@@ -267,17 +268,6 @@ public abstract class Instance implements Block.Getter, Block.Setter,
       */
      public abstract @NotNull CompletableFuture<Void> saveChunksToStorage();
  
-+    /**
-+     * Gets the generator associated with the instance
-+     *
-+     * @return the generator if any
-+     */
-+    public abstract @Nullable Generator generator();
-+
-     /**
-      * Changes the instance {@link ChunkGenerator}.
-      *
-@@ -278,13 +286,6 @@ public abstract class Instance implements Block.Getter, Block.Setter,
-         setGenerator(chunkGenerator != null ? new ChunkGeneratorCompatibilityLayer(chunkGenerator) : null);
-     }
- 
 -    /**
--     * Gets the generator associated with the instance
+-     * Changes the instance {@link ChunkGenerator}.
 -     *
--     * @return the generator if any
+-     * @param chunkGenerator the new {@link ChunkGenerator} of the instance
+-     * @deprecated Use {@link #setGenerator(Generator)}
 -     */
--    public abstract @Nullable Generator generator();
+-    @Deprecated
+-    public void setChunkGenerator(@Nullable ChunkGenerator chunkGenerator) {
+-        setGenerator(chunkGenerator != null ? new ChunkGeneratorCompatibilityLayer(chunkGenerator) : null);
+-    }
 -
      /**
-      * Changes the generator of the instance
+      * Gets the generator associated with the instance
       *
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
 index 6108c4283fc1128fddd208914095cd7739524f0f..d467975f66e85606eb551b845cc0415773a2d517 100644
@@ -709,7 +646,7 @@ index 7127b875ce50b8637ea63921519b780ea6b6bc4a..35cc1584d9e319264cb385d63958b7c9
      }
  }
 diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
-index e68ff90079bea1debfa543b14f6df39396359234..bb973301f713733a3fb4b7eb0b522a4728d66c92 100644
+index 35b34bfe35067d28eef3c66539d9fd4f0fa68c3f..3dff7d06972dfb2aeab589cb1032e5eee5cc1fb1 100644
 --- a/src/main/java/net/minestom/server/utils/NamespaceID.java
 +++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
 @@ -12,6 +12,7 @@ import java.util.Objects;
@@ -720,7 +657,7 @@ index e68ff90079bea1debfa543b14f6df39396359234..bb973301f713733a3fb4b7eb0b522a47
  public final class NamespaceID implements CharSequence, Key {
      private static final String legalLetters = "[0123456789abcdefghijklmnopqrstuvwxyz_-]+";
      private static final String legalPathLetters = "[0123456789abcdefghijklmnopqrstuvwxyz./_-]+";
-@@ -112,14 +113,4 @@ public final class NamespaceID implements CharSequence, Key {
+@@ -110,14 +111,4 @@ public final class NamespaceID implements CharSequence, Key {
      public @NotNull String asString() {
          return this.full;
      }
@@ -735,19 +672,3 @@ index e68ff90079bea1debfa543b14f6df39396359234..bb973301f713733a3fb4b7eb0b522a47
 -        return path();
 -    }
  }
-diff --git a/src/main/java/net/minestom/server/utils/time/TimeUnit.java b/src/main/java/net/minestom/server/utils/time/TimeUnit.java
-index 7e181a47c91f8f925b20eb9f4705dabdb24a0c2f..43e25a3f283ea6af40d32deb142c274117e0d91c 100644
---- a/src/main/java/net/minestom/server/utils/time/TimeUnit.java
-+++ b/src/main/java/net/minestom/server/utils/time/TimeUnit.java
-@@ -11,11 +11,6 @@ public final class TimeUnit {
-     public static final TemporalUnit MILLISECOND = ChronoUnit.MILLIS;
-     public static final TemporalUnit SERVER_TICK = Tick.SERVER_TICKS;
-     public static final TemporalUnit CLIENT_TICK = Tick.CLIENT_TICKS;
--    /**
--     * @deprecated Please use either {@link #SERVER_TICK} or {@link #CLIENT_TICK}
--     */
--    @Deprecated(forRemoval = true)
--    public static final TemporalUnit TICK = CLIENT_TICK;
- 
-     private TimeUnit() {
-     }
