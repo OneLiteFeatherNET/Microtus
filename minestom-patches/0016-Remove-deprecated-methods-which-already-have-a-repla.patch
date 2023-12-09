@@ -117,6 +117,105 @@ index 9733f0b72d33b2866bf8ccf3782a5547840b420a..2418b648c18f95bdea57ce56a3247234
 -        return this.blue;
 -    }
  }
+diff --git a/src/main/java/net/minestom/server/command/CommandSender.java b/src/main/java/net/minestom/server/command/CommandSender.java
+index 5f09d7bc52fae017f8f10f6731e1f7818f14fbce..a0c10efbbc2e53d3ea2815faf6f8840cb144e73f 100644
+--- a/src/main/java/net/minestom/server/command/CommandSender.java
++++ b/src/main/java/net/minestom/server/command/CommandSender.java
+@@ -34,52 +34,4 @@ public interface CommandSender extends PermissionHandler, Audience, Taggable, Id
+             sendMessage(message);
+         }
+     }
+-
+-    /**
+-     * Gets if the sender is a {@link Player}.
+-     * <p>
+-     * Consider using {@code instanceof} instead.
+-     *
+-     * @return true if 'this' is a player, false otherwise
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3")
+-    default boolean isPlayer() {
+-        return false;
+-    }
+-
+-    /**
+-     * Gets if the sender is a {@link ConsoleSender}.
+-     * <p>
+-     * Consider using {@code instanceof} instead.
+-     *
+-     * @return true if 'this' is the console, false otherwise
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3")
+-    default boolean isConsole() {
+-        return false;
+-    }
+-
+-    /**
+-     * Casts this object to a {@link Player}.
+-     * No checks are performed, {@link ClassCastException} can very much happen.
+-     *
+-     * @throws ClassCastException if 'this' is not a player
+-     * @see #isPlayer()
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3")
+-    default Player asPlayer() {
+-        throw new ClassCastException("CommandSender is not a Player");
+-    }
+-
+-    /**
+-     * Casts this object to a {@link ConsoleSender}.
+-     * No checks are performed, {@link ClassCastException} can very much happen.
+-     *
+-     * @throws ClassCastException if 'this' is not a console sender
+-     * @see #isConsole()
+-     */
+-    @Deprecated(forRemoval = true, since = "1.1.3")
+-    default ConsoleSender asConsole() {
+-        throw new ClassCastException("CommandSender is not the ConsoleSender");
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/command/ConsoleSender.java b/src/main/java/net/minestom/server/command/ConsoleSender.java
+index d97bc82ae1cd4f52268d16b394274d6a31b31656..c8f7392ec3fc95af089be33ff676182215637f68 100644
+--- a/src/main/java/net/minestom/server/command/ConsoleSender.java
++++ b/src/main/java/net/minestom/server/command/ConsoleSender.java
+@@ -45,16 +45,6 @@ public class ConsoleSender implements CommandSender {
+         return permissions;
+     }
+ 
+-    @Override
+-    public boolean isConsole() {
+-        return true;
+-    }
+-
+-    @Override
+-    public ConsoleSender asConsole() {
+-        return this;
+-    }
+-
+     @Override
+     public @NotNull TagHandler tagHandler() {
+         return tagHandler;
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index 2b810253fc8992c659d306de2848df739cca432f..49bdbbfe174381fb8a7e468b8a24a1910b687e4b 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -2115,16 +2115,6 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         this.identity = Identity.identity(uuid);
+     }
+ 
+-    @Override
+-    public boolean isPlayer() {
+-        return true;
+-    }
+-
+-    @Override
+-    public Player asPlayer() {
+-        return this;
+-    }
+-
+     protected void sendChunkUpdates(Chunk newChunk) {
+         if (chunkUpdateLimitChecker.addToHistory(newChunk)) {
+             final int newX = newChunk.getChunkX();
 diff --git a/src/main/java/net/minestom/server/entity/PlayerSkin.java b/src/main/java/net/minestom/server/entity/PlayerSkin.java
 index 72798e5ec55531a26217a15fa82b18af072408e7..7230c9b2d052493b08e6df99b738c6ede5d112f5 100644
 --- a/src/main/java/net/minestom/server/entity/PlayerSkin.java
