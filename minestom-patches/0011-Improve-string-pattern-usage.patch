@@ -5,14 +5,22 @@ Subject: [PATCH] Improve string pattern usage
 
 
 diff --git a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-index e8922654e4f71aa447bf71af42c86ec2760de3ed..a2e7120e992d52c7e9bbb8246e1ed9e442181d34 100644
+index e8922654e4f71aa447bf71af42c86ec2760de3ed..bb7a4e54d85b0909cd7b4a4a633af3eb6fbc9095 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-@@ -23,14 +23,19 @@ import java.net.SocketAddress;
+@@ -15,6 +15,7 @@ import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
+ import net.minestom.server.network.player.GameProfile;
+ import net.minestom.server.network.player.PlayerConnection;
+ import net.minestom.server.network.player.PlayerSocketConnection;
++import net.minestom.server.utils.UniqueIdUtils; // Microtus - improve string pattern usage + add private constructor
+ import org.jetbrains.annotations.NotNull;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -23,14 +24,19 @@ import java.net.SocketAddress;
  import java.util.ArrayList;
  import java.util.List;
  import java.util.UUID;
-+import java.util.regex.Pattern;
++import java.util.regex.Pattern; // Microtus - improve string pattern usage + add private constructor
  
  import static net.minestom.server.network.NetworkBuffer.*;
  
@@ -29,7 +37,7 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..a2e7120e992d52c7e9bbb8246e1ed9e4
      /**
       * Text sent if a player tries to connect with an invalid version of the client
       */
-@@ -84,12 +89,11 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
+@@ -84,12 +90,11 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
                          ((java.net.InetSocketAddress) connection.getRemoteAddress()).getPort());
                  socketConnection.setRemoteAddress(socketAddress);
  
@@ -39,14 +47,64 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..a2e7120e992d52c7e9bbb8246e1ed9e4
 -                                .replaceFirst(
 -                                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"
 -                                )
-+                        UUID_REPLACEMENT.matcher(split[2]).replaceAll("$1-$2-$3-$4-$5")
++                        UUID_REPLACEMENT.matcher(split[2]).replaceAll(UniqueIdUtils.UUID_GROUP_REPLACEMENT)
                  );
 +                // Microtus end - improve string pattern usage + add private constructor
  
                  List<GameProfile.Property> properties = new ArrayList<>();
                  if (hasProperties) {
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
+index c327a3b5c10fa2d3c31f672044431c76031a111c..7f918209bee6fc679e36edad333703abc94f32f8 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
+@@ -12,6 +12,7 @@ import net.minestom.server.network.packet.client.ClientPreplayPacket;
+ import net.minestom.server.network.player.GameProfile; // Microtus - Fix gameprofile auth
+ import net.minestom.server.network.player.PlayerConnection;
+ import net.minestom.server.network.player.PlayerSocketConnection;
++import net.minestom.server.utils.UniqueIdUtils; // Microtus - improve string pattern usage + add private constructor
+ import net.minestom.server.utils.async.AsyncUtils;
+ import org.jetbrains.annotations.NotNull;
+ 
+@@ -27,12 +28,14 @@ import java.util.ArrayList; // Microtus - Fix gameprofile auth
+ import java.util.Arrays;
+ import java.util.List; // Microtus - Fix gameprofile auth
+ import java.util.UUID;
++import java.util.regex.Pattern; // Microtus - improve string pattern usage + add private constructor
+ 
+ import static net.minestom.server.network.NetworkBuffer.BYTE_ARRAY;
+ 
+ public record EncryptionResponsePacket(byte[] sharedSecret,
+                                        byte[] encryptedVerifyToken) implements ClientPreplayPacket {
+     private static final Gson GSON = new Gson();
++    private static final Pattern UUID_REPLACE_PATTERN = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
+ 
+     public EncryptionResponsePacket(@NotNull NetworkBuffer reader) {
+         this(reader.read(BYTE_ARRAY), reader.read(BYTE_ARRAY));
+@@ -96,8 +99,11 @@ public record EncryptionResponsePacket(byte[] sharedSecret,
+                         return;
+                     }
+                     socketConnection.setEncryptionKey(getSecretKey());
+-                    UUID profileUUID = java.util.UUID.fromString(gameProfile.get("id").getAsString()
+-                            .replaceFirst("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})", "$1-$2-$3-$4-$5"));
++                    // Microtus start - improve string pattern usage + add private constructor
++                    UUID profileUUID = java.util.UUID.fromString(
++                            UUID_REPLACE_PATTERN.matcher(gameProfile.get("id").getAsString()).replaceFirst(UniqueIdUtils.UUID_GROUP_REPLACEMENT)
++                    );
++                    // Microtus end - improve string pattern usage + add private constructor
+                     final String profileName = gameProfile.get("name").getAsString();
+ 
+                     MinecraftServer.LOGGER.info("UUID of player {} is {}", loginUsername, profileUUID);
+@@ -121,7 +127,7 @@ public record EncryptionResponsePacket(byte[] sharedSecret,
+         writer.write(BYTE_ARRAY, encryptedVerifyToken);
+     }
+ 
+-    private SecretKey getSecretKey() {
++    private @NotNull SecretKey getSecretKey() {
+         return MojangCrypt.decryptByteToSecretKey(MojangAuth.getKeyPair().getPrivate(), sharedSecret);
+     }
+ }
 diff --git a/src/main/java/net/minestom/server/utils/UniqueIdUtils.java b/src/main/java/net/minestom/server/utils/UniqueIdUtils.java
-index 242a6a1b55102507c15ffa37ff26abcac38f6823..f894c867452c9bd1849d9d01c98a71880c1e450b 100644
+index 242a6a1b55102507c15ffa37ff26abcac38f6823..da8ccaef50e884d84da264bf2f7e9224cf8034cd 100644
 --- a/src/main/java/net/minestom/server/utils/UniqueIdUtils.java
 +++ b/src/main/java/net/minestom/server/utils/UniqueIdUtils.java
 @@ -1,6 +1,7 @@
@@ -57,8 +115,12 @@ index 242a6a1b55102507c15ffa37ff26abcac38f6823..f894c867452c9bd1849d9d01c98a7188
  
  import java.util.UUID;
  import java.util.regex.Pattern;
-@@ -12,13 +13,16 @@ import java.util.regex.Pattern;
+@@ -10,15 +11,20 @@ import java.util.regex.Pattern;
+  */
+ @ApiStatus.Internal
  public final class UniqueIdUtils {
++
++    public static final String UUID_GROUP_REPLACEMENT = "$1-$2-$3-$4-$5"; // Microtus - improve string pattern usage
      public static final Pattern UNIQUE_ID_PATTERN = Pattern.compile("\\b[0-9a-f]{8}\\b-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-\\b[0-9a-f]{12}\\b");
  
 +    // Microtus - improve string pattern usage + add private constructor
