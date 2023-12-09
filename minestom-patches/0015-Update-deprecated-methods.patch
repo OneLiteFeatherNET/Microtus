@@ -195,6 +195,29 @@ index 27de8eee60012568cfd85e612f9a7377085f9033..5511e29017aa54958b62f2e6f1fcfc53
      public @NotNull ItemStack getFoodItem() {
          return foodItem;
      }
+diff --git a/src/main/java/net/minestom/server/inventory/Inventory.java b/src/main/java/net/minestom/server/inventory/Inventory.java
+index 9d80f6331c1320603680411d1eff3d710c38e6c3..ab57e8814738acb22cd9bfc8565a449038f1c4d8 100644
+--- a/src/main/java/net/minestom/server/inventory/Inventory.java
++++ b/src/main/java/net/minestom/server/inventory/Inventory.java
+@@ -53,9 +53,18 @@ public non-sealed class Inventory extends AbstractInventory implements Viewable
+         this.offset = getSize();
+     }
+ 
++    //Microtus start - Update deprecation status
++    /**
++     * Creates a new Inventory reference with a given size and title.
++     * The method is deprecated please use {@link Inventory#Inventory(InventoryType, Component)} instead.
++     * @param inventoryType the inventory type
++     * @param title the inventory title
++     */
++    @Deprecated(forRemoval = true, since = "1.1.3")
+     public Inventory(@NotNull InventoryType inventoryType, @NotNull String title) {
+         this(inventoryType, Component.text(title));
+     }
++    //Microtus end - Update deprecation status
+ 
+     private static byte generateId() {
+         return (byte) ID_COUNTER.updateAndGet(i -> i + 1 >= 128 ? 1 : i + 1);
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
 index 6108c4283fc1128fddd208914095cd7739524f0f..4667b7c3a3fe0a49c3b4e00210c103155d85ea39 100644
 --- a/src/main/java/net/minestom/server/inventory/InventoryType.java
@@ -208,6 +231,147 @@ index 6108c4283fc1128fddd208914095cd7739524f0f..4667b7c3a3fe0a49c3b4e00210c10315
      public int getAdditionalSlot() {
          return size;
      }
+diff --git a/src/main/java/net/minestom/server/inventory/type/AnvilInventory.java b/src/main/java/net/minestom/server/inventory/type/AnvilInventory.java
+index 8a7c9f2c154e22d3df90c8ee20856bb0b2f3d4de..abed7520439b9eecdd7e32eae7dac41e0c4de750 100644
+--- a/src/main/java/net/minestom/server/inventory/type/AnvilInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/AnvilInventory.java
+@@ -14,9 +14,19 @@ public class AnvilInventory extends Inventory {
+         super(InventoryType.ANVIL, title);
+     }
+ 
++    //Microtus start - Update deprecation status
++
++    /**
++     * Creates a new {@link AnvilInventory} reference with a given size and title.
++     * Since the constructor is deprecated please use the constructor with the Component parameter instead.
++     *
++     * @param title the inventory title
++     */
++    @Deprecated(forRemoval = true, since = "1.1.3")
+     public AnvilInventory(@NotNull String title) {
+         super(InventoryType.ANVIL, title);
+     }
++    //Microtus end - Update deprecation status
+ 
+     /**
+      * Gets the anvil repair cost.
+diff --git a/src/main/java/net/minestom/server/inventory/type/BeaconInventory.java b/src/main/java/net/minestom/server/inventory/type/BeaconInventory.java
+index 30551dae67cde1d869a4bd6b8645d0db317cf1a4..74cb05b2d31f5867bb43c0987cb72be3e4c35733 100644
+--- a/src/main/java/net/minestom/server/inventory/type/BeaconInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/BeaconInventory.java
+@@ -17,9 +17,19 @@ public class BeaconInventory extends Inventory {
+         super(InventoryType.BEACON, title);
+     }
+ 
++    //Microtus start - Update deprecation status
++
++    /**
++     * Creates a new {@link BeaconInventory} reference with a given size and title.
++     * Since the constructor is deprecated please use the constructor with the Component parameter instead.
++     *
++     * @param title the inventory title
++     */
++    @Deprecated(forRemoval = true, since = "1.1.3")
+     public BeaconInventory(@NotNull String title) {
+         super(InventoryType.BEACON, title);
+     }
++    //Microtus end - Update deprecation status
+ 
+     /**
+      * Gets the beacon power level.
+diff --git a/src/main/java/net/minestom/server/inventory/type/BrewingStandInventory.java b/src/main/java/net/minestom/server/inventory/type/BrewingStandInventory.java
+index ed0bc7d783d17dcae72343138ffc3d36fad5b4d9..85edd69996e6645967ee0ee98dc8d38336191089 100644
+--- a/src/main/java/net/minestom/server/inventory/type/BrewingStandInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/BrewingStandInventory.java
+@@ -15,9 +15,17 @@ public class BrewingStandInventory extends Inventory {
+         super(InventoryType.BREWING_STAND, title);
+     }
+ 
++    //Microtus start - Update deprecation status
++    /**
++     * Creates a new {@link BrewingStandInventory} reference with a given size and title.
++     * Since the constructor is deprecated please use the constructor with the Component parameter instead.
++     * @param title the inventory title
++     */
++    @Deprecated(forRemoval = true, since = "1.1.3")
+     public BrewingStandInventory(@NotNull String title) {
+         super(InventoryType.BREWING_STAND, title);
+     }
++    //Microtus end - Update deprecation status
+ 
+     /**
+      * Gets the brewing stand brew time.
+diff --git a/src/main/java/net/minestom/server/inventory/type/EnchantmentTableInventory.java b/src/main/java/net/minestom/server/inventory/type/EnchantmentTableInventory.java
+index bd855c32a5171683627bf2729ab13ef0acebd934..ed4245d468d05c06c58d74731391daefbcc5807a 100644
+--- a/src/main/java/net/minestom/server/inventory/type/EnchantmentTableInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/EnchantmentTableInventory.java
+@@ -18,9 +18,18 @@ public class EnchantmentTableInventory extends Inventory {
+         super(InventoryType.ENCHANTMENT, title);
+     }
+ 
++    //Microtus start - Update deprecation status
++    /**
++     * Creates a new {@link EnchantmentTableInventory} reference with a given size and title.
++     * Since the constructor is deprecated please use the constructor with the Component parameter instead.
++     *
++     * @param title the inventory title
++     */
++    @Deprecated(forRemoval = true, since = "1.1.3")
+     public EnchantmentTableInventory(@NotNull String title) {
+         super(InventoryType.ENCHANTMENT, title);
+     }
++    //Microtus end - Update deprecation status
+ 
+     /**
+      * Gets the level requirement in a slot.
+diff --git a/src/main/java/net/minestom/server/inventory/type/FurnaceInventory.java b/src/main/java/net/minestom/server/inventory/type/FurnaceInventory.java
+index 9e357da9936b8eb3df5aa9e5d07ef6a39297a792..21b76f1fc17f6bd3ac5aa9425731998d48b9010d 100644
+--- a/src/main/java/net/minestom/server/inventory/type/FurnaceInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/FurnaceInventory.java
+@@ -17,9 +17,19 @@ public class FurnaceInventory extends Inventory {
+         super(InventoryType.FURNACE, title);
+     }
+ 
++    //Microtus start - Update deprecation status
++
++    /**
++     * Creates a new {@link FurnaceInventory} reference with a given size and title.
++     * Since the constructor is deprecated please use the constructor with the Component parameter instead.
++     *
++     * @param title the inventory title
++     */
++    @Deprecated(forRemoval = true, since = "1.1.3")
+     public FurnaceInventory(@NotNull String title) {
+         super(InventoryType.FURNACE, title);
+     }
++    //Microtus end - Update deprecation status
+ 
+     /**
+      * Represents the amount of tick until the fire icon come empty.
+diff --git a/src/main/java/net/minestom/server/inventory/type/VillagerInventory.java b/src/main/java/net/minestom/server/inventory/type/VillagerInventory.java
+index 048fa58139363ac64588da40c50f25ebaa46eb0e..2f1770281480f25a786bd15d216fe2457b228c1b 100644
+--- a/src/main/java/net/minestom/server/inventory/type/VillagerInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/VillagerInventory.java
+@@ -24,9 +24,19 @@ public class VillagerInventory extends Inventory {
+         super(InventoryType.MERCHANT, title);
+     }
+ 
++    //Microtus start - Update deprecation status
++
++    /**
++     * Creates a new {@link VillagerInventory} reference with a given size and title.
++     * Since the constructor is deprecated please use the constructor with the Component parameter instead.
++     *
++     * @param title the inventory title
++     */
++    @Deprecated(forRemoval = true, since = "1.1.3")
+     public VillagerInventory(@NotNull String title) {
+         super(InventoryType.MERCHANT, title);
+     }
++    //Microtus end - Update deprecation status
+ 
+     public List<TradeListPacket.Trade> getTrades() {
+         return Collections.unmodifiableList(trades);
 diff --git a/src/main/java/net/minestom/server/item/ItemStack.java b/src/main/java/net/minestom/server/item/ItemStack.java
 index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..0e3f2a48d1a1c75368fc0c33905cc5b07cb27251 100644
 --- a/src/main/java/net/minestom/server/item/ItemStack.java
