@@ -287,6 +287,45 @@ index c451537f5638b47f9a55212ad51aeda8764205ec..1b05107e945189da3e963917f01fc028
      /**
       * @param entityCreature  the entity (self)
       * @param range           the maximum range the entity can target others within
+diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
+index 60d7102b205bc04a60678fecc2da0009ce56437a..de4ff6d92dc8965fc6f0c7f77994623adacba55e 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
+@@ -76,28 +76,6 @@ public class LivingEntityMeta extends EntityMeta {
+         super.metadata.setIndex(OFFSET + 4, Metadata.VarInt(value));
+     }
+ 
+-    /**
+-     * @deprecated
+-     * This returns the bee stinger count, not the absorption heart count
+-     * Use {@link #getBeeStingerCount()} instead
+-     * @return The number of bee stingers in this entity
+-     */
+-    @Deprecated
+-    public int getHealthAddedByAbsorption() {
+-        return super.metadata.getIndex(OFFSET + 5, 0);
+-    }
+-
+-    /**
+-     * @deprecated
+-     * This sets the bee stinger count, not the absorption heart count
+-     * Use {@link #setBeeStingerCount(int)} instead
+-     * @param value The number of bee stingers for this entity to have
+-     */
+-    @Deprecated
+-    public void setHealthAddedByAbsorption(int value) {
+-        super.metadata.setIndex(OFFSET + 5, Metadata.VarInt(value));
+-    }
+-
+     /**
+      * Gets the amount of bee stingers in this entity
+      * @return The amount of bee stingers
+@@ -122,5 +100,4 @@ public class LivingEntityMeta extends EntityMeta {
+     public void setBedInWhichSleepingPosition(@Nullable Point value) {
+         super.metadata.setIndex(OFFSET + 6, Metadata.OptPosition(value));
+     }
+-
+ }
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
 index 54fd191ee02827e82946e2cf82533ee93ab94f59..df17858bfe3dbff2b21554d14ab5fcf8efc898b5 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
@@ -787,3 +826,19 @@ index 988eb3f876c4720243876bdbea45e4ff5e4a6629..3dff7d06972dfb2aeab589cb1032e5ee
 -        return path();
 -    }
  }
+diff --git a/src/main/java/net/minestom/server/utils/time/TimeUnit.java b/src/main/java/net/minestom/server/utils/time/TimeUnit.java
+index 7e181a47c91f8f925b20eb9f4705dabdb24a0c2f..43e25a3f283ea6af40d32deb142c274117e0d91c 100644
+--- a/src/main/java/net/minestom/server/utils/time/TimeUnit.java
++++ b/src/main/java/net/minestom/server/utils/time/TimeUnit.java
+@@ -11,11 +11,6 @@ public final class TimeUnit {
+     public static final TemporalUnit MILLISECOND = ChronoUnit.MILLIS;
+     public static final TemporalUnit SERVER_TICK = Tick.SERVER_TICKS;
+     public static final TemporalUnit CLIENT_TICK = Tick.CLIENT_TICKS;
+-    /**
+-     * @deprecated Please use either {@link #SERVER_TICK} or {@link #CLIENT_TICK}
+-     */
+-    @Deprecated(forRemoval = true)
+-    public static final TemporalUnit TICK = CLIENT_TICK;
+ 
+     private TimeUnit() {
+     }
