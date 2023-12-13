@@ -6,10 +6,10 @@ Subject: [PATCH] Integrate world spawn position to the instance
 
 diff --git a/src/main/java/net/minestom/server/event/instance/InstanceWorldPositionChangeEvent.java b/src/main/java/net/minestom/server/event/instance/InstanceWorldPositionChangeEvent.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..a2622652e77439199da40229edf97dea978cbd1e
+index 0000000000000000000000000000000000000000..d7ef61eaed4232bc5303a5879a2d98590737ed36
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/event/instance/InstanceWorldPositionChangeEvent.java
-@@ -0,0 +1,59 @@
+@@ -0,0 +1,60 @@
 +package net.minestom.server.event.instance;
 +
 +import net.minestom.server.coordinate.Pos;
@@ -19,7 +19,8 @@ index 0000000000000000000000000000000000000000..a2622652e77439199da40229edf97dea
 +
 +//Microtus start - integrate world spawn position
 +/**
-+ *
++ * The event is triggered by the server when an instance successfully changes its world spawn position.
++ * By implementing a listener for this event, developers can track changes to a world's spawn position initiated by instances during runtime.
 + * @author theEvilReaper
 + * @version 1.0.0
 + * @since 1.1.3
