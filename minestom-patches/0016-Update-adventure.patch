@@ -1,0 +1,117 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: theEvilReaper <steffenwx@gmail.com>
+Date: Tue, 19 Dec 2023 16:01:51 +0100
+Subject: [PATCH] Update adventure
+
+
+diff --git a/src/main/java/net/minestom/server/adventure/provider/MinestomLegacyComponentSerializerProvider.java b/src/main/java/net/minestom/server/adventure/provider/MinestomLegacyComponentSerializerProvider.java
+index 89d514b9e3e6cb7ce06c185d609aace965350c93..2b601036e7eb135c5d699ee9164faef0d63a22ca 100644
+--- a/src/main/java/net/minestom/server/adventure/provider/MinestomLegacyComponentSerializerProvider.java
++++ b/src/main/java/net/minestom/server/adventure/provider/MinestomLegacyComponentSerializerProvider.java
+@@ -7,21 +7,28 @@ import org.jetbrains.annotations.NotNull;
+ 
+ @SuppressWarnings("UnstableApiUsage") // we are permitted to provide this
+ public final class MinestomLegacyComponentSerializerProvider implements LegacyComponentSerializer.Provider {
++
++    // Microtus start - Update adventure
+     @Override
+     public @NotNull LegacyComponentSerializer legacyAmpersand() {
+         return LegacyComponentSerializer.builder()
+-                .character(LegacyComponentSerializer.AMPERSAND_CHAR)
+                 .flattener(MinestomFlattenerProvider.INSTANCE)
++                .character(LegacyComponentSerializer.AMPERSAND_CHAR)
++                .hexColors()
++                .useUnusualXRepeatedCharacterHexFormat()
+                 .build();
+     }
+ 
+     @Override
+     public @NotNull LegacyComponentSerializer legacySection() {
+         return LegacyComponentSerializer.builder()
+-                .character(LegacyComponentSerializer.SECTION_CHAR)
+                 .flattener(MinestomFlattenerProvider.INSTANCE)
++                .character(LegacyComponentSerializer.SECTION_CHAR)
++                .hexColors()
++                .useUnusualXRepeatedCharacterHexFormat()
+                 .build();
+     }
++    // Microtus end - Update adventure
+ 
+     @Override
+     public @NotNull Consumer<LegacyComponentSerializer.Builder> legacy() {
+diff --git a/src/main/java/net/minestom/server/adventure/provider/NBTLegacyHoverEventSerializer.java b/src/main/java/net/minestom/server/adventure/provider/NBTLegacyHoverEventSerializer.java
+index b8c3c730e6a09da7c17dad92768443eb45e8691b..e3b877d2865b3b0f552b8d282af996e910ea93b3 100644
+--- a/src/main/java/net/minestom/server/adventure/provider/NBTLegacyHoverEventSerializer.java
++++ b/src/main/java/net/minestom/server/adventure/provider/NBTLegacyHoverEventSerializer.java
+@@ -4,10 +4,11 @@ import net.kyori.adventure.key.Key;
+ import net.kyori.adventure.nbt.api.BinaryTagHolder;
+ import net.kyori.adventure.text.Component;
+ import net.kyori.adventure.text.event.HoverEvent;
+-import net.kyori.adventure.text.serializer.gson.LegacyHoverEventSerializer;
++import net.kyori.adventure.text.serializer.json.LegacyHoverEventSerializer;
+ import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+ import net.kyori.adventure.util.Codec;
+ import net.minestom.server.adventure.MinestomAdventure;
++import org.intellij.lang.annotations.Subst;
+ import org.jetbrains.annotations.NotNull;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+@@ -19,13 +20,18 @@ import java.util.UUID;
+ import java.util.concurrent.atomic.AtomicReference;
+ 
+ final class NBTLegacyHoverEventSerializer implements LegacyHoverEventSerializer {
+-    static final NBTLegacyHoverEventSerializer INSTANCE = new NBTLegacyHoverEventSerializer();
++    static final NBTLegacyHoverEventSerializer INSTANCE = new NBTLegacyHoverEventSerializer(); // Microtus - Adventure update
+ 
+-    private static final String ITEM_TYPE = "id", ITEM_COUNT = "Count", ITEM_TAG = "tag";
+-    private static final String ENTITY_TYPE = "type", ENTITY_NAME = "name", ENTITY_ID = "id";
++    // Microtus start - Update adventure
++    static final String ITEM_TYPE = "id";
++    static final String ITEM_COUNT = "Count";
++    static final String ITEM_TAG = "tag";
++    static final String ENTITY_TYPE = "type";
++    static final String ENTITY_NAME = "name";
++    static final String ENTITY_ID = "id";
++    // Microtus end - Update adventure
+ 
+-    private NBTLegacyHoverEventSerializer() {
+-    }
++    private NBTLegacyHoverEventSerializer() { }
+ 
+     @Override
+     public HoverEvent.@NotNull ShowItem deserializeShowItem(@NotNull Component input) throws IOException {
+@@ -36,12 +42,15 @@ final class NBTLegacyHoverEventSerializer implements LegacyHoverEventSerializer
+             if (!(nbt instanceof NBTCompound contents)) throw new IOException("contents were not a compound");
+             final NBTCompound tag = contents.getCompound(ITEM_TAG);
+ 
++            // Microtus start - Adventure update
+             // create the event
+-            return HoverEvent.ShowItem.of(
+-                    Key.key(Objects.requireNonNullElse(contents.getString(ITEM_TYPE), "")),
++            @Subst("key") final String key = Objects.requireNonNullElse(contents.getString(ITEM_TYPE), "");
++            return HoverEvent.ShowItem.showItem(
++                    Key.key(key),
+                     Objects.requireNonNullElse(contents.getByte(ITEM_COUNT), (byte) 1),
+                     tag == null ? null : BinaryTagHolder.encode(tag, MinestomAdventure.NBT_CODEC)
+             );
++            // Microtus end - Adventure update
+         } catch (final NBTException e) {
+             throw new IOException(e);
+         }
+@@ -54,11 +63,14 @@ final class NBTLegacyHoverEventSerializer implements LegacyHoverEventSerializer
+             final NBT nbt = MinestomAdventure.NBT_CODEC.decode(raw);
+             if (!(nbt instanceof NBTCompound contents)) throw new IOException("contents were not a compound");
+ 
+-            return HoverEvent.ShowEntity.of(
+-                    Key.key(Objects.requireNonNullElse(contents.getString(ENTITY_TYPE), "")),
++            // Microtus start - Adventure update
++            @Subst("key") final String entityType = Objects.requireNonNullElse(contents.getString(ENTITY_TYPE), "");
++            return HoverEvent.ShowEntity.showEntity(
++                    Key.key(entityType),
+                     UUID.fromString(Objects.requireNonNullElse(contents.getString(ENTITY_ID), "")),
+                     componentDecoder.decode(Objects.requireNonNullElse(contents.getString(ENTITY_NAME), ""))
+             );
++            // Microtus end - Adventure update
+         } catch (NBTException e) {
+             throw new IOException(e);
+         }
