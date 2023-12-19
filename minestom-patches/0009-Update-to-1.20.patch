@@ -2439,6 +2439,39 @@ index 027b182c84d68b8395c405270ea521c76c597e30..98114c492f5832e802694b7741def403
                  skyMask, blockMask,
                  emptySkyMask, emptyBlockMask,
                  skyLights, blockLights);
+diff --git a/src/main/java/net/minestom/server/network/NetworkBuffer.java b/src/main/java/net/minestom/server/network/NetworkBuffer.java
+index e8508e0c00fdd8536d0b5a87bfe8697d52369b47..eed55c022b77b1976b4e0cac4876877b2265268e 100644
+--- a/src/main/java/net/minestom/server/network/NetworkBuffer.java
++++ b/src/main/java/net/minestom/server/network/NetworkBuffer.java
+@@ -49,6 +49,7 @@ public final class NetworkBuffer {
+     public static final Type<NBT> NBT = NetworkBufferTypes.NBT;
+     public static final Type<Point> BLOCK_POSITION = NetworkBufferTypes.BLOCK_POSITION;
+     public static final Type<Component> COMPONENT = NetworkBufferTypes.COMPONENT;
++    public static final Type<Component> JSON_COMPONENT = NetworkBufferTypes.JSON_COMPONENT;
+     public static final Type<UUID> UUID = NetworkBufferTypes.UUID;
+     public static final Type<ItemStack> ITEM = NetworkBufferTypes.ITEM;
+ 
+diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
+index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..60f83f5f48055b6c4754910d69c94ed4f83f0685 100644
+--- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
++++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
+@@ -293,6 +293,16 @@ final class NetworkBufferTypes {
+                 final String json = buffer.read(STRING);
+                 return GsonComponentSerializer.gson().deserialize(json);
+             });
++    static final TypeImpl<Component> JSON_COMPONENT = new TypeImpl<>(Component.class,
++            (buffer, value) -> {
++                final String json = GsonComponentSerializer.gson().serialize(value);
++                buffer.write(STRING, json);
++                return -1;
++            },
++            buffer -> {
++                final String json = buffer.read(STRING);
++                return GsonComponentSerializer.gson().deserialize(json);
++            });
+     static final TypeImpl<UUID> UUID = new TypeImpl<>(UUID.class,
+             (buffer, value) -> {
+                 buffer.write(LONG, value.getMostSignificantBits());
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
 index 2c7aaec2ee5ed3e47ef123c4ea2cd0dcdc3e6144..034870c0ca3f9cf98d95b6b12adb02cf924e241b 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
