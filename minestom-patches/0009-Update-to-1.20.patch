@@ -2439,6 +2439,17 @@ index 027b182c84d68b8395c405270ea521c76c597e30..98114c492f5832e802694b7741def403
                  skyMask, blockMask,
                  emptySkyMask, emptyBlockMask,
                  skyLights, blockLights);
+diff --git a/src/main/java/net/minestom/server/network/ConnectionState.java b/src/main/java/net/minestom/server/network/ConnectionState.java
+index a729c464ec84378a707c3dcf946f9112ec489648..bdc8d49b606affa5e905ce59b824cae1430665d6 100644
+--- a/src/main/java/net/minestom/server/network/ConnectionState.java
++++ b/src/main/java/net/minestom/server/network/ConnectionState.java
+@@ -4,5 +4,5 @@ package net.minestom.server.network;
+  * Represents the current connection state of a {@link net.minestom.server.network.player.PlayerConnection}.
+  */
+ public enum ConnectionState {
+-    UNKNOWN, STATUS, LOGIN, PLAY
++    UNKNOWN, STATUS, LOGIN, CONFIGURATION, PLAY
+ }
 diff --git a/src/main/java/net/minestom/server/network/NetworkBuffer.java b/src/main/java/net/minestom/server/network/NetworkBuffer.java
 index e8508e0c00fdd8536d0b5a87bfe8697d52369b47..eed55c022b77b1976b4e0cac4876877b2265268e 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBuffer.java
@@ -2510,6 +2521,19 @@ index 2c7aaec2ee5ed3e47ef123c4ea2cd0dcdc3e6144..034870c0ca3f9cf98d95b6b12adb02cf
          writer.write(STRING, lines.get(0));
          writer.write(STRING, lines.get(1));
          writer.write(STRING, lines.get(2));
+diff --git a/src/main/java/net/minestom/server/network/packet/server/ConfigureServerPacket.java b/src/main/java/net/minestom/server/network/packet/server/ConfigureServerPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..dabfa0b46a5f4e1702a515a1177f6b684123d664
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/server/ConfigureServerPacket.java
+@@ -0,0 +1,7 @@
++package net.minestom.server.network.packet.server;
++
++public interface ConfigureServerPacket {
++
++    int getConfigurePacketId();
++
++}
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/DeathCombatEventPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/DeathCombatEventPacket.java
 index 534c3592d382fa2bf417e8e11c8bf6d40ac983db..f505c76b402da5b25d4579f138afe41ff3c121e1 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/DeathCombatEventPacket.java
@@ -2755,6 +2779,96 @@ index 7ca1b4a594aba0e7acae67730f0d3dd95858709f..0892bf47a6c1f46ebe01400bf0a11f96
          writer.write(LONG_ARRAY, skyMask.toLongArray());
          writer.write(LONG_ARRAY, blockMask.toLongArray());
  
+diff --git a/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java b/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
+index cc335a6f6903542e8ac139d5a4deeed2252d9cae..92a4172ba88e2231ae04450a40eea60336e96979 100644
+--- a/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
++++ b/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
+@@ -362,14 +362,15 @@ public class PlayerSocketConnection extends PlayerConnection {
+ 
+     private void writeServerPacketSync(ServerPacket serverPacket, boolean compressed) {
+         final Player player = getPlayer();
+-        if (player != null) {
+-            if (MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION && serverPacket instanceof ComponentHoldingServerPacket) {
+-                serverPacket = ((ComponentHoldingServerPacket) serverPacket).copyWithOperator(component ->
+-                        GlobalTranslator.render(component, Objects.requireNonNullElseGet(player.getLocale(), MinestomAdventure::getDefaultLocale)));
+-            }
++        if (player != null && MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION && serverPacket instanceof ComponentHoldingServerPacket holdingPacket) {
++            serverPacket = holdingPacket.copyWithOperator(component ->
++                    GlobalTranslator.render(component, Objects.requireNonNullElseGet(player.getLocale(), MinestomAdventure::getDefaultLocale)));
+         }
+         try (var hold = ObjectPool.PACKET_POOL.hold()) {
+-            var buffer = PacketUtils.createFramedPacket(hold.get(), serverPacket, compressed);
++            ByteBuffer buffer = switch (getConnectionState()) {
++                case CONFIGURATION -> PacketUtils.createFramedPacket(hold.get(), serverPacket, ((ConfigureServerPacket)serverPacket).getConfigurePacketId(), compressed);
++                default -> PacketUtils.createFramedPacket(hold.get(), serverPacket, serverPacket.getId(), compressed);
++            };
+             writeBufferSync(buffer, 0, buffer.limit());
+         }
+     }
+diff --git a/src/main/java/net/minestom/server/utils/PacketUtils.java b/src/main/java/net/minestom/server/utils/PacketUtils.java
+index f4fb64ee7d6d14c9e276f4de64db459b75c834d7..0b6da098b8376478e7875bea9f5158b18365fa23 100644
+--- a/src/main/java/net/minestom/server/utils/PacketUtils.java
++++ b/src/main/java/net/minestom/server/utils/PacketUtils.java
+@@ -170,7 +170,7 @@ public final class PacketUtils {
+         }
+         final Player exception = entity instanceof Player ? (Player) entity : null;
+         ViewableStorage storage = VIEWABLE_STORAGE_MAP.get(viewable, (unused) -> new ViewableStorage());
+-        storage.append(viewable, serverPacket, exception);
++        storage.append(viewable, serverPacket, exception, serverPacket.getId());
+     }
+ 
+     @ApiStatus.Experimental
+@@ -244,9 +244,10 @@ public final class PacketUtils {
+     }
+ 
+     public static void writeFramedPacket(@NotNull ByteBuffer buffer,
++                                         int packetId,
+                                          @NotNull ServerPacket packet,
+                                          boolean compression) {
+-        writeFramedPacket(buffer, packet.getId(), packet,
++        writeFramedPacket(buffer, packetId, packet,
+                 compression ? MinecraftServer.getCompressionThreshold() : 0);
+     }
+ 
+@@ -295,20 +296,20 @@ public final class PacketUtils {
+     }
+ 
+     @ApiStatus.Internal
+-    public static ByteBuffer createFramedPacket(@NotNull ByteBuffer buffer, @NotNull ServerPacket packet, boolean compression) {
+-        writeFramedPacket(buffer, packet, compression);
++    public static ByteBuffer createFramedPacket(@NotNull ByteBuffer buffer, @NotNull ServerPacket packet, int packetId, boolean compression) {
++        writeFramedPacket(buffer, packetId, packet, compression);
+         return buffer.flip();
+     }
+ 
+     @ApiStatus.Internal
+-    public static ByteBuffer createFramedPacket(@NotNull ByteBuffer buffer, @NotNull ServerPacket packet) {
+-        return createFramedPacket(buffer, packet, MinecraftServer.getCompressionThreshold() > 0);
++    public static ByteBuffer createFramedPacket(@NotNull ByteBuffer buffer, @NotNull ServerPacket packet, int packetId) {
++        return createFramedPacket(buffer, packet, packetId,MinecraftServer.getCompressionThreshold() > 0);
+     }
+ 
+     @ApiStatus.Internal
+-    public static FramedPacket allocateTrimmedPacket(@NotNull ServerPacket packet) {
++    public static FramedPacket allocateTrimmedPacket(@NotNull ServerPacket packet, int packetId) {
+         try (var hold = ObjectPool.PACKET_POOL.hold()) {
+-            final ByteBuffer temp = PacketUtils.createFramedPacket(hold.get(), packet);
++            final ByteBuffer temp = PacketUtils.createFramedPacket(hold.get(), packet, packetId);
+             final int size = temp.remaining();
+             final ByteBuffer buffer = ByteBuffer.allocateDirect(size).put(0, temp, 0, size);
+             return new FramedPacket(packet, buffer);
+@@ -320,9 +321,9 @@ public final class PacketUtils {
+         private final Int2ObjectMap<LongArrayList> entityIdMap = new Int2ObjectOpenHashMap<>();
+         private final BinaryBuffer buffer = ObjectPool.BUFFER_POOL.getAndRegister(this);
+ 
+-        private synchronized void append(Viewable viewable, ServerPacket serverPacket, Player player) {
++        private synchronized void append(Viewable viewable, ServerPacket serverPacket, Player player, int packetId) {
+             try (var hold = ObjectPool.PACKET_POOL.hold()) {
+-                final ByteBuffer framedPacket = createFramedPacket(hold.get(), serverPacket);
++                final ByteBuffer framedPacket = createFramedPacket(hold.get(), serverPacket, packetId);
+                 final int packetSize = framedPacket.limit();
+                 if (packetSize >= buffer.capacity()) {
+                     process(viewable);
 diff --git a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
 index f23020126745417521cc687d2eac2bc1539549c8..3e424c24f5c7064992c469439a0049f040ef038c 100644
 --- a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
@@ -2777,3 +2891,56 @@ index f23020126745417521cc687d2eac2bc1539549c8..3e424c24f5c7064992c469439a0049f0
          SERVER_PACKETS.add(new EnterCombatEventPacket());
          SERVER_PACKETS.add(new EntityAnimationPacket(5, EntityAnimationPacket.Animation.TAKE_DAMAGE));
          SERVER_PACKETS.add(new EntityEquipmentPacket(6, Map.of(EquipmentSlot.MAIN_HAND, ItemStack.of(Material.DIAMOND_SWORD))));
+diff --git a/src/test/java/net/minestom/server/network/SocketWriteTest.java b/src/test/java/net/minestom/server/network/SocketWriteTest.java
+index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..35f3799ca1aabf40af3fa75ac344886f09e01975 100644
+--- a/src/test/java/net/minestom/server/network/SocketWriteTest.java
++++ b/src/test/java/net/minestom/server/network/SocketWriteTest.java
+@@ -45,7 +45,7 @@ public class SocketWriteTest {
+         var packet = new IntPacket(5);
+ 
+         var buffer = ObjectPool.PACKET_POOL.get();
+-        PacketUtils.writeFramedPacket(buffer, packet, false);
++        PacketUtils.writeFramedPacket(buffer, packet.getId(), packet, false);
+ 
+         // 3 bytes length [var-int] + 1 byte packet id [var-int] + 4 bytes int
+         // The 3 bytes var-int length is hardcoded for performance purpose, could change in the future
+@@ -57,8 +57,8 @@ public class SocketWriteTest {
+         var packet = new IntPacket(5);
+ 
+         var buffer = ObjectPool.PACKET_POOL.get();
+-        PacketUtils.writeFramedPacket(buffer, packet, false);
+-        PacketUtils.writeFramedPacket(buffer, packet, false);
++        PacketUtils.writeFramedPacket(buffer, packet.getId(), packet, false);
++        PacketUtils.writeFramedPacket(buffer, packet.getId(), packet, false);
+ 
+         // 3 bytes length [var-int] + 1 byte packet id [var-int] + 4 bytes int
+         // The 3 bytes var-int length is hardcoded for performance purpose, could change in the future
+@@ -74,7 +74,7 @@ public class SocketWriteTest {
+         var packet = new CompressiblePacket(string);
+ 
+         var buffer = ObjectPool.PACKET_POOL.get();
+-        PacketUtils.writeFramedPacket(buffer, packet, true);
++        PacketUtils.writeFramedPacket(buffer, packet.getId(), packet, true);
+ 
+         // 3 bytes packet length [var-int] + 3 bytes data length [var-int] + 1 byte packet id [var-int] + payload
+         // The 3 bytes var-int length is hardcoded for performance purpose, could change in the future
+@@ -86,7 +86,7 @@ public class SocketWriteTest {
+         var packet = new IntPacket(5);
+ 
+         var buffer = ObjectPool.PACKET_POOL.get();
+-        PacketUtils.writeFramedPacket(buffer, packet, true);
++        PacketUtils.writeFramedPacket(buffer, packet.getId(), packet, true);
+ 
+         // 3 bytes packet length [var-int] + 3 bytes data length [var-int] + 1 byte packet id [var-int] + 4 bytes int
+         // The 3 bytes var-int length is hardcoded for performance purpose, could change in the future
+@@ -98,8 +98,8 @@ public class SocketWriteTest {
+         var packet = new IntPacket(5);
+ 
+         var buffer = ObjectPool.PACKET_POOL.get();
+-        PacketUtils.writeFramedPacket(buffer, packet, true);
+-        PacketUtils.writeFramedPacket(buffer, packet, true);
++        PacketUtils.writeFramedPacket(buffer, packet.getId(), packet, true);
++        PacketUtils.writeFramedPacket(buffer, packet.getId(), packet, true);
+ 
+         // 3 bytes packet length [var-int] + 3 bytes data length [var-int] + 1 byte packet id [var-int] + 4 bytes int
+         // The 3 bytes var-int length is hardcoded for performance purpose, could change in the future
