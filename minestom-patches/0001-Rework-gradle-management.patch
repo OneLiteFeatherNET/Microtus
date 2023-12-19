@@ -186,7 +186,7 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4f251d7f29d10a95ce145a97664dd6fa
  hydrazine = "1.7.2"
  dependencyGetter = "v1.0.1"
 -minestomData = "ddde11056e"
-+data = "1.20-rv1" # Microtus - Use original data generator from minestom
++data = "1.20.4-rv1" # Microtus - Update data generator to 1.20.4-rv1
  hephaistos = "2.6.1"
 -jetbrainsAnnotations = "23.0.0"
 +jetbrainsAnnotations = "24.1.0"
