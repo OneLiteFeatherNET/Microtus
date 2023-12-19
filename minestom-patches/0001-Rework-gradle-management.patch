@@ -172,7 +172,7 @@ index 60b18683dd01e7f349f7f22465db2bde969c9690..5f8acd515579c6356296929cbe512ed1
  
  dependencies {
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index b3da234609fcb6f3ab1866a2fc806719b29f97f2..db110e6b3d40f9a03a8dd5e6f4b4d7a48bd02606 100644
+index b3da234609fcb6f3ab1866a2fc806719b29f97f2..43f2ca8fa1c7a2c518afa69274dde75d827295ee 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -3,29 +3,29 @@ metadata.format.version = "1.1"
@@ -181,7 +181,7 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..db110e6b3d40f9a03a8dd5e6f4b4d7a4
  # Important dependencies
 -adventure = "4.12.0"
 -kotlin = "1.7.22"
-+adventure = "4.14.0"
++adventure = "4.15.0"
 +kotlin = "1.9.20"
  hydrazine = "1.7.2"
  dependencyGetter = "v1.0.1"
