@@ -21,7 +21,7 @@ index 8e7ad8420da6168ea2444dae90e5bc68bb32c176..3241e9577c38e301096cebf96cb72816
          this.lastSyncedPosition = position;
      }
 diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-index 8f7b9c9c47bf3eedc0143ca2cfc824e9dbc8104a..2aee4d35ace0efca03fc254f9885b2bdc538dea2 100644
+index 10d00f747f8f9247c0120d9952f89250662f3d15..8044908bb1e5109eb9437bba2ce109889358400d 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 +++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 @@ -237,7 +237,13 @@ final class NetworkBufferTypes {
@@ -39,7 +39,7 @@ index 8f7b9c9c47bf3eedc0143ca2cfc824e9dbc8104a..2aee4d35ace0efca03fc254f9885b2bd
                  } catch (IOException e) {
                      throw new RuntimeException(e);
                  }
-@@ -313,7 +319,11 @@ final class NetworkBufferTypes {
+@@ -323,7 +329,11 @@ final class NetworkBufferTypes {
                  buffer.write(BOOLEAN, true);
                  buffer.write(VAR_INT, value.material().id());
                  buffer.write(BYTE, (byte) value.amount());
