@@ -2359,6 +2359,27 @@ index 9f4cfa4a898ca348d60883ec140a874c2b9cd8fa..45db42b49012a49901ca25fba753d9ab
          );
      }
  }
+diff --git a/src/main/java/net/minestom/server/entity/LivingEntity.java b/src/main/java/net/minestom/server/entity/LivingEntity.java
+index 0db3dcae55c313e3ccb0707ca996783fd0b7b0f3..86902fd0db6ed3d4c8c801f18de8bfbc7c7b9363 100644
+--- a/src/main/java/net/minestom/server/entity/LivingEntity.java
++++ b/src/main/java/net/minestom/server/entity/LivingEntity.java
+@@ -19,6 +19,7 @@ import net.minestom.server.instance.EntityTracker;
+ import net.minestom.server.inventory.EquipmentHandler;
+ import net.minestom.server.item.ItemStack;
+ import net.minestom.server.network.ConnectionState;
++import net.minestom.server.network.packet.server.play.HurtAnimationPacket;
+ import net.minestom.server.network.packet.server.LazyPacket;
+ import net.minestom.server.network.packet.server.play.CollectItemPacket;
+ import net.minestom.server.network.packet.server.play.EntityAnimationPacket;
+@@ -356,7 +357,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+             float remainingDamage = entityDamageEvent.getDamage().getAmount(); // Microtus - 1.19.4 update
+ 
+             if (entityDamageEvent.shouldAnimate()) {
+-                sendPacketToViewersAndSelf(new EntityAnimationPacket(getEntityId(), EntityAnimationPacket.Animation.TAKE_DAMAGE));
++                sendPacketToViewersAndSelf(new HurtAnimationPacket(getEntityId(), getPosition().yaw())); // Microtus - 1.20.4 update
+             }
+ 
+             // Additional hearts support
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
 index 2886dc65a8f79cab946434b093ae3161bf5c2cb1..2b810253fc8992c659d306de2848df739cca432f 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
@@ -2623,6 +2644,78 @@ index 0f385b01511efc95932934e36bc0562ec74e53f1..043992dee86036a7cc19c9902f1c0c48
      }
  
      @Override
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/EntityAnimationPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/EntityAnimationPacket.java
+index b555e003de3494f18e8e42640825d7b831e035ec..52d5c70aa3084b2923c07d8926343221ab3f8b8f 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/EntityAnimationPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/EntityAnimationPacket.java
+@@ -16,7 +16,7 @@ public record EntityAnimationPacket(int entityId, @NotNull Animation animation)
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+         writer.write(VAR_INT, entityId);
+-        writer.write(BYTE, (byte) animation.ordinal());
++        writer.write(BYTE, animation.getId());
+     }
+ 
+     @Override
+@@ -25,11 +25,20 @@ public record EntityAnimationPacket(int entityId, @NotNull Animation animation)
+     }
+ 
+     public enum Animation {
+-        SWING_MAIN_ARM,
+-        TAKE_DAMAGE,
+-        LEAVE_BED,
+-        SWING_OFF_HAND,
+-        CRITICAL_EFFECT,
+-        MAGICAL_CRITICAL_EFFECT
++        SWING_MAIN_ARM((byte) 0),
++        LEAVE_BED((byte) 2),
++        SWING_OFF_HAND((byte) 3),
++        CRITICAL_EFFECT((byte) 4),
++        MAGICAL_CRITICAL_EFFECT((byte) 5);
++
++        private final byte id;
++
++        Animation(byte id) {
++            this.id = id;
++        }
++
++        public byte getId() {
++            return id;
++        }
+     }
+ }
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/HurtAnimationPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/HurtAnimationPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..ce84c8e25590ca0e8713e1629b56199cc96e9ed7
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/server/play/HurtAnimationPacket.java
+@@ -0,0 +1,26 @@
++package net.minestom.server.network.packet.server.play;
++
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.server.ServerPacket;
++import org.jetbrains.annotations.NotNull;
++
++import static net.minestom.server.network.NetworkBuffer.FLOAT;
++import static net.minestom.server.network.NetworkBuffer.VAR_INT;
++
++public record HurtAnimationPacket(int entityId, float yaw) implements ServerPacket {
++
++    public HurtAnimationPacket(@NotNull NetworkBuffer reader) {
++        this(reader.read(VAR_INT), reader.read(FLOAT));
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.VAR_INT, entityId);
++        writer.write(NetworkBuffer.FLOAT, yaw);
++    }
++
++    @Override
++    public int getId() {
++        return 0x22; //TODO: Update the id usage later
++    }
++}
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java b/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java
 index 074a34510e28197f7e409b3ae36e51081be48f60..9ebaebbdef9e1b1924a8cc2c84fb6bb45ab2a7d2 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java
