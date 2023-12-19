@@ -2483,6 +2483,19 @@ index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..60f83f5f48055b6c4754910d69c94ed4
      static final TypeImpl<UUID> UUID = new TypeImpl<>(UUID.class,
              (buffer, value) -> {
                  buffer.write(LONG, value.getMostSignificantBits());
+diff --git a/src/main/java/net/minestom/server/network/PacketProcessor.java b/src/main/java/net/minestom/server/network/PacketProcessor.java
+index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..10b37ce1251d5989a54878d8d4ab440d189604f5 100644
+--- a/src/main/java/net/minestom/server/network/PacketProcessor.java
++++ b/src/main/java/net/minestom/server/network/PacketProcessor.java
+@@ -29,6 +29,8 @@ public record PacketProcessor(@NotNull ClientPacketsHandler statusHandler,
+     public @NotNull ClientPacket create(@NotNull ConnectionState connectionState, int packetId, ByteBuffer body) {
+         NetworkBuffer buffer = new NetworkBuffer(body);
+         final ClientPacket clientPacket = switch (connectionState) {
++            case CONFIGURATION -> //TODO: Implement configuration phase
++                    null;
+             case PLAY -> playHandler.create(packetId, buffer);
+             case LOGIN -> loginHandler.create(packetId, buffer);
+             case STATUS -> statusHandler.create(packetId, buffer);
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
 index 2c7aaec2ee5ed3e47ef123c4ea2cd0dcdc3e6144..034870c0ca3f9cf98d95b6b12adb02cf924e241b 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
@@ -2521,6 +2534,20 @@ index 2c7aaec2ee5ed3e47ef123c4ea2cd0dcdc3e6144..034870c0ca3f9cf98d95b6b12adb02cf
          writer.write(STRING, lines.get(0));
          writer.write(STRING, lines.get(1));
          writer.write(STRING, lines.get(2));
+diff --git a/src/main/java/net/minestom/server/network/packet/server/CachedPacket.java b/src/main/java/net/minestom/server/network/packet/server/CachedPacket.java
+index 3b4672b7d4241f7629d1a281b6e1006743725cd1..7dc83e22055610547c2eae3fbe6afc285db43f0b 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/CachedPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/CachedPacket.java
+@@ -49,7 +49,8 @@ public final class CachedPacket implements SendablePacket {
+         SoftReference<FramedPacket> ref = packet;
+         FramedPacket cache;
+         if (ref == null || (cache = ref.get()) == null) {
+-            cache = PacketUtils.allocateTrimmedPacket(packetSupplier.get());
++            final ServerPacket serverPacket = packetSupplier.get();
++            cache = PacketUtils.allocateTrimmedPacket(serverPacket, serverPacket.getId());
+             this.packet = new SoftReference<>(cache);
+         }
+         return cache;
 diff --git a/src/main/java/net/minestom/server/network/packet/server/ConfigureServerPacket.java b/src/main/java/net/minestom/server/network/packet/server/ConfigureServerPacket.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..dabfa0b46a5f4e1702a515a1177f6b684123d664
