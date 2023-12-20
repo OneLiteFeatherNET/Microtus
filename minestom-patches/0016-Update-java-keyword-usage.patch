@@ -5,10 +5,10 @@ Subject: [PATCH] Update java keyword usage
 
 
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 04244d43a556e33b5ce9cb4cf727433f976af35b..4c8de4b9f8f48d59555c7118b46dcc0206466f3d 100644
+index 2d9fe8a7a8ebb0d6ef5af7ece430d769c158c164..26af86e8b53e2af54c6cee272d2f7aad17be0912 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-@@ -46,6 +46,8 @@ public class AdventurePacketConvertor {
+@@ -45,6 +45,8 @@ public class AdventurePacketConvertor {
          NAMED_TEXT_COLOR_ID_MAP.put(NamedTextColor.WHITE, 15);
      }
  
