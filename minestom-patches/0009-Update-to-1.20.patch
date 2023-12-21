@@ -2542,10 +2542,15 @@ index 2886dc65a8f79cab946434b093ae3161bf5c2cb1..4fb28d877c1088cc2dedc800e9ef94bd
      }
  
 diff --git a/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerController.java b/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerController.java
-index 841e274ae10f56f58511f8e4c7d32c87e2d202bb..de62ebd0e925d6bff11626c98c20116357a5ecb9 100644
+index 841e274ae10f56f58511f8e4c7d32c87e2d202bb..0d779bfc9d624c8359b9234ae4775727b0e289a1 100644
 --- a/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerController.java
 +++ b/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerController.java
-@@ -12,7 +12,7 @@ import net.minestom.server.network.packet.client.ClientPacket;
+@@ -9,10 +9,12 @@ import net.minestom.server.inventory.Inventory;
+ import net.minestom.server.inventory.PlayerInventory;
+ import net.minestom.server.item.ItemStack;
+ import net.minestom.server.network.packet.client.ClientPacket;
++import net.minestom.server.network.packet.client.common.ClientKeepAlivePacket;
++import net.minestom.server.network.packet.client.common.ClientPluginMessagePacket;
  import net.minestom.server.network.packet.client.play.*;
  import net.minestom.server.network.packet.server.SendablePacket;
  import net.minestom.server.network.packet.server.ServerPacket;
@@ -2554,6 +2559,23 @@ index 841e274ae10f56f58511f8e4c7d32c87e2d202bb..de62ebd0e925d6bff11626c98c201163
  import net.minestom.server.network.packet.server.play.PlayerPositionAndLookPacket;
  import net.minestom.server.network.player.PlayerConnection;
  import net.minestom.server.utils.MathUtils;
+diff --git a/src/main/java/net/minestom/server/event/player/PlayerPluginMessageEvent.java b/src/main/java/net/minestom/server/event/player/PlayerPluginMessageEvent.java
+index cb00028e219bed6a9b5351f26489545b6838c917..aee14e3d886edb8e227f4244b91ab47f1b65bbba 100644
+--- a/src/main/java/net/minestom/server/event/player/PlayerPluginMessageEvent.java
++++ b/src/main/java/net/minestom/server/event/player/PlayerPluginMessageEvent.java
+@@ -2,10 +2,11 @@ package net.minestom.server.event.player;
+ 
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.event.trait.PlayerInstanceEvent;
++import net.minestom.server.network.packet.client.common.ClientPluginMessagePacket;
+ import org.jetbrains.annotations.NotNull;
+ 
+ /**
+- * Called when a player send {@link net.minestom.server.network.packet.client.play.ClientPluginMessagePacket}.
++ * Called when a player send {@link ClientPluginMessagePacket}.
+  */
+ public class PlayerPluginMessageEvent implements PlayerInstanceEvent {
+ 
 diff --git a/src/main/java/net/minestom/server/instance/Chunk.java b/src/main/java/net/minestom/server/instance/Chunk.java
 index 0db0745249f1cf1e3cc6bba9822fbd333e4de5b3..605de3bb37037dd147326b9e811c6f2dd32297fd 100644
 --- a/src/main/java/net/minestom/server/instance/Chunk.java
@@ -2611,32 +2633,109 @@ index 6108c4283fc1128fddd208914095cd7739524f0f..6cd0180e872df8d0ddfd96f5afbb9863
      WINDOW_3X3(9),
      ANVIL(3),
      BEACON(1),
+diff --git a/src/main/java/net/minestom/server/listener/KeepAliveListener.java b/src/main/java/net/minestom/server/listener/KeepAliveListener.java
+index a456aad0565984ff5f5e916a610f4034f98b2d22..bf8546cc0d4582b48a6d47e63b11909d8d4bfcee 100644
+--- a/src/main/java/net/minestom/server/listener/KeepAliveListener.java
++++ b/src/main/java/net/minestom/server/listener/KeepAliveListener.java
+@@ -3,7 +3,7 @@ package net.minestom.server.listener;
+ import net.kyori.adventure.text.Component;
+ import net.kyori.adventure.text.format.NamedTextColor;
+ import net.minestom.server.entity.Player;
+-import net.minestom.server.network.packet.client.play.ClientKeepAlivePacket;
++import net.minestom.server.network.packet.client.common.ClientKeepAlivePacket;
+ 
+ public final class KeepAliveListener {
+     private static final Component KICK_MESSAGE = Component.text("Bad Keep Alive packet", NamedTextColor.RED);
+diff --git a/src/main/java/net/minestom/server/listener/PluginMessageListener.java b/src/main/java/net/minestom/server/listener/PluginMessageListener.java
+index 2e85b2f17040c9085d9a70cfef758ac6125986d3..3de672cec62f80515dccdec23b81dbb24ea5b6bb 100644
+--- a/src/main/java/net/minestom/server/listener/PluginMessageListener.java
++++ b/src/main/java/net/minestom/server/listener/PluginMessageListener.java
+@@ -3,7 +3,7 @@ package net.minestom.server.listener;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.event.EventDispatcher;
+ import net.minestom.server.event.player.PlayerPluginMessageEvent;
+-import net.minestom.server.network.packet.client.play.ClientPluginMessagePacket;
++import net.minestom.server.network.packet.client.common.ClientPluginMessagePacket;
+ 
+ public class PluginMessageListener {
+ 
+diff --git a/src/main/java/net/minestom/server/listener/ResourcePackListener.java b/src/main/java/net/minestom/server/listener/ResourcePackListener.java
+index a88db1cb8797bed1c93a67e9d58b697fbab10db8..997d560d0635119b3f057a665a374b0707dc85b5 100644
+--- a/src/main/java/net/minestom/server/listener/ResourcePackListener.java
++++ b/src/main/java/net/minestom/server/listener/ResourcePackListener.java
+@@ -3,7 +3,7 @@ package net.minestom.server.listener;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.event.EventDispatcher;
+ import net.minestom.server.event.player.PlayerResourcePackStatusEvent;
+-import net.minestom.server.network.packet.client.play.ClientResourcePackStatusPacket;
++import net.minestom.server.network.packet.client.common.ClientResourcePackStatusPacket;
+ 
+ public class ResourcePackListener {
+ 
+diff --git a/src/main/java/net/minestom/server/listener/SettingsListener.java b/src/main/java/net/minestom/server/listener/SettingsListener.java
+index 92fe6ce94343dd378f22104a2c0bef7ea0edf20b..cbf05a209e1c256f438e06dc45de12aa7b0fbde9 100644
+--- a/src/main/java/net/minestom/server/listener/SettingsListener.java
++++ b/src/main/java/net/minestom/server/listener/SettingsListener.java
+@@ -3,7 +3,7 @@ package net.minestom.server.listener;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.event.EventDispatcher;
+ import net.minestom.server.event.player.PlayerSettingsChangeEvent;
+-import net.minestom.server.network.packet.client.play.ClientSettingsPacket;
++import net.minestom.server.network.packet.client.common.ClientSettingsPacket;
+ 
+ public final class SettingsListener {
+     public static void listener(ClientSettingsPacket packet, Player player) {
 diff --git a/src/main/java/net/minestom/server/listener/WindowListener.java b/src/main/java/net/minestom/server/listener/WindowListener.java
-index beb392fac7d6816a465601d0c009901e02bb3eb1..d0b536425f1a073f7059ef66f1c68b0aa7239a6a 100644
+index beb392fac7d6816a465601d0c009901e02bb3eb1..976937183550dd3b5738ca8eaebc8276716f522b 100644
 --- a/src/main/java/net/minestom/server/listener/WindowListener.java
 +++ b/src/main/java/net/minestom/server/listener/WindowListener.java
-@@ -10,7 +10,7 @@ import net.minestom.server.item.ItemStack;
+@@ -9,8 +9,8 @@ import net.minestom.server.inventory.PlayerInventory;
+ import net.minestom.server.item.ItemStack;
  import net.minestom.server.network.packet.client.play.ClientClickWindowPacket;
  import net.minestom.server.network.packet.client.play.ClientCloseWindowPacket;
- import net.minestom.server.network.packet.client.play.ClientPongPacket;
+-import net.minestom.server.network.packet.client.play.ClientPongPacket;
 -import net.minestom.server.network.packet.server.play.PingPacket;
++import net.minestom.server.network.packet.client.common.ClientPongPacket;
 +import net.minestom.server.network.packet.server.common.PingPacket;
  import net.minestom.server.network.packet.server.play.SetSlotPacket;
  
  public class WindowListener {
+diff --git a/src/main/java/net/minestom/server/listener/manager/PacketListenerManager.java b/src/main/java/net/minestom/server/listener/manager/PacketListenerManager.java
+index 863a86eb9b5d3b4dcea7ea64e6b47378158b0936..d65e8c8553a3518af676a99dd73ea1b009dfa351 100644
+--- a/src/main/java/net/minestom/server/listener/manager/PacketListenerManager.java
++++ b/src/main/java/net/minestom/server/listener/manager/PacketListenerManager.java
+@@ -7,6 +7,7 @@ import net.minestom.server.event.EventDispatcher;
+ import net.minestom.server.event.player.PlayerPacketEvent;
+ import net.minestom.server.listener.*;
+ import net.minestom.server.network.packet.client.ClientPacket;
++import net.minestom.server.network.packet.client.common.*;
+ import net.minestom.server.network.packet.client.play.*;
+ import org.jetbrains.annotations.NotNull;
+ import org.slf4j.Logger;
 diff --git a/src/main/java/net/minestom/server/network/ConnectionManager.java b/src/main/java/net/minestom/server/network/ConnectionManager.java
-index b080de14ec2509b15108f171694653d3dc62cd93..753ad72663c41f002291747aba5a604bbbe970af 100644
+index b080de14ec2509b15108f171694653d3dc62cd93..588f62935a3aaccd812c30e76e5cfc7fef535590 100644
 --- a/src/main/java/net/minestom/server/network/ConnectionManager.java
 +++ b/src/main/java/net/minestom/server/network/ConnectionManager.java
-@@ -9,7 +9,7 @@ import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
+@@ -8,8 +8,9 @@ import net.minestom.server.event.EventDispatcher;
+ import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
  import net.minestom.server.event.player.PlayerLoginEvent;
  import net.minestom.server.instance.Instance;
++import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
  import net.minestom.server.network.packet.server.login.LoginSuccessPacket;
 -import net.minestom.server.network.packet.server.play.KeepAlivePacket;
 +import net.minestom.server.network.packet.server.common.KeepAlivePacket;
  import net.minestom.server.network.player.PlayerConnection;
  import net.minestom.server.network.player.PlayerSocketConnection;
  import net.minestom.server.utils.StringUtils;
+@@ -135,7 +136,7 @@ public final class ConnectionManager {
+ 
+     /**
+      * Computes the UUID of the specified connection.
+-     * Used in {@link net.minestom.server.network.packet.client.login.LoginStartPacket} in order
++     * Used in {@link ClientLoginStartPacket} in order
+      * to give the player the right {@link UUID}.
+      *
+      * @param playerConnection the player connection
 diff --git a/src/main/java/net/minestom/server/network/ConnectionState.java b/src/main/java/net/minestom/server/network/ConnectionState.java
 index a729c464ec84378a707c3dcf946f9112ec489648..bdc8d49b606affa5e905ce59b824cae1430665d6 100644
 --- a/src/main/java/net/minestom/server/network/ConnectionState.java
@@ -2694,6 +2793,380 @@ index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..10b37ce1251d5989a54878d8d4ab440d
              case PLAY -> playHandler.create(packetId, buffer);
              case LOGIN -> loginHandler.create(packetId, buffer);
              case STATUS -> statusHandler.create(packetId, buffer);
+diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
+index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..90e4ed6399b94bfe53b4959fd39939d470c3f1c7 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
++++ b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
+@@ -1,9 +1,10 @@
+ package net.minestom.server.network.packet.client;
+ 
+ import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.common.*;
+ import net.minestom.server.network.packet.client.login.EncryptionResponsePacket;
+ import net.minestom.server.network.packet.client.login.LoginPluginResponsePacket;
+-import net.minestom.server.network.packet.client.login.LoginStartPacket;
++import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
+ import net.minestom.server.network.packet.client.play.*;
+ import net.minestom.server.network.packet.client.status.PingPacket;
+ import net.minestom.server.network.packet.client.status.StatusRequestPacket;
+@@ -44,7 +45,7 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
+ 
+     public static final class Login extends ClientPacketsHandler {
+         public Login() {
+-            register(0x00, LoginStartPacket::new);
++            register(0x00, ClientLoginStartPacket::new);
+             register(0x01, EncryptionResponsePacket::new);
+             register(0x02, LoginPluginResponsePacket::new);
+         }
+diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientStatePacket.java b/src/main/java/net/minestom/server/network/packet/client/ClientStatePacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..68e7cd055092673afc7052e25426ef20397563ef
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/client/ClientStatePacket.java
+@@ -0,0 +1,16 @@
++package net.minestom.server.network.packet.client;
++
++import net.minestom.server.network.ConnectionState;
++import org.jetbrains.annotations.Nullable;
++
++/**
++ * @author theEvilReaper
++ * @version 1.0.0
++ * @since 1.2.0
++ **/
++public interface ClientStatePacket extends ClientPacket {
++
++    default @Nullable ConnectionState nextState() {
++        return null;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientKeepAlivePacket.java b/src/main/java/net/minestom/server/network/packet/client/common/ClientKeepAlivePacket.java
+similarity index 89%
+rename from src/main/java/net/minestom/server/network/packet/client/play/ClientKeepAlivePacket.java
+rename to src/main/java/net/minestom/server/network/packet/client/common/ClientKeepAlivePacket.java
+index 60e659678efb9e636615c35c4b752c71f0ed6d07..01db1c1d5449a4455d0628e94481cfc896301a42 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/play/ClientKeepAlivePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/common/ClientKeepAlivePacket.java
+@@ -1,4 +1,4 @@
+-package net.minestom.server.network.packet.client.play;
++package net.minestom.server.network.packet.client.common;
+ 
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.client.ClientPacket;
+diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientPluginMessagePacket.java b/src/main/java/net/minestom/server/network/packet/client/common/ClientPluginMessagePacket.java
+similarity index 93%
+rename from src/main/java/net/minestom/server/network/packet/client/play/ClientPluginMessagePacket.java
+rename to src/main/java/net/minestom/server/network/packet/client/common/ClientPluginMessagePacket.java
+index 16ac11275974f7e4d782758a4bbfda15baede00b..d67034c3239c47bfc025ba77326ce3339c4badec 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/play/ClientPluginMessagePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/common/ClientPluginMessagePacket.java
+@@ -1,4 +1,4 @@
+-package net.minestom.server.network.packet.client.play;
++package net.minestom.server.network.packet.client.common;
+ 
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.client.ClientPacket;
+diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientPongPacket.java b/src/main/java/net/minestom/server/network/packet/client/common/ClientPongPacket.java
+similarity index 89%
+rename from src/main/java/net/minestom/server/network/packet/client/play/ClientPongPacket.java
+rename to src/main/java/net/minestom/server/network/packet/client/common/ClientPongPacket.java
+index d3ef187e4aff8d988c7abf09e0b303a9decc17f8..a7ab7dac6cbf7080e1f9534f5da97b0f925bb960 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/play/ClientPongPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/common/ClientPongPacket.java
+@@ -1,4 +1,4 @@
+-package net.minestom.server.network.packet.client.play;
++package net.minestom.server.network.packet.client.common;
+ 
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.client.ClientPacket;
+diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientResourcePackStatusPacket.java b/src/main/java/net/minestom/server/network/packet/client/common/ClientResourcePackStatusPacket.java
+similarity index 54%
+rename from src/main/java/net/minestom/server/network/packet/client/play/ClientResourcePackStatusPacket.java
+rename to src/main/java/net/minestom/server/network/packet/client/common/ClientResourcePackStatusPacket.java
+index f998c3a182180814c84bdc9c82acf9e9f889db47..a28b9dd72d78f016bbf566b5d17f105179aca77c 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/play/ClientResourcePackStatusPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/common/ClientResourcePackStatusPacket.java
+@@ -1,17 +1,23 @@
+-package net.minestom.server.network.packet.client.play;
++package net.minestom.server.network.packet.client.common;
+ 
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.client.ClientPacket;
+ import net.minestom.server.resourcepack.ResourcePackStatus;
+ import org.jetbrains.annotations.NotNull;
+ 
+-public record ClientResourcePackStatusPacket(@NotNull ResourcePackStatus status) implements ClientPacket {
++import java.util.UUID;
++
++public record ClientResourcePackStatusPacket(
++        @NotNull UUID id,
++        @NotNull ResourcePackStatus status
++) implements ClientPacket {
+     public ClientResourcePackStatusPacket(@NotNull NetworkBuffer reader) {
+-        this(reader.readEnum(ResourcePackStatus.class));
++        this(reader.read(NetworkBuffer.UUID), reader.readEnum(ResourcePackStatus.class));
+     }
+ 
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.UUID, id);
+         writer.writeEnum(ResourcePackStatus.class, status);
+     }
+ }
+diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientSettingsPacket.java b/src/main/java/net/minestom/server/network/packet/client/common/ClientSettingsPacket.java
+similarity index 74%
+rename from src/main/java/net/minestom/server/network/packet/client/play/ClientSettingsPacket.java
+rename to src/main/java/net/minestom/server/network/packet/client/common/ClientSettingsPacket.java
+index f02b383cae469bfec285346d79d3f2aee31d7eac..e26e3b6b330c37b16c26df50eed84485d196300e 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/play/ClientSettingsPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/common/ClientSettingsPacket.java
+@@ -1,4 +1,4 @@
+-package net.minestom.server.network.packet.client.play;
++package net.minestom.server.network.packet.client.common;
+ 
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.message.ChatMessageType;
+@@ -8,10 +8,16 @@ import org.jetbrains.annotations.NotNull;
+ 
+ import static net.minestom.server.network.NetworkBuffer.*;
+ 
+-public record ClientSettingsPacket(@NotNull String locale, byte viewDistance,
+-                                   @NotNull ChatMessageType chatMessageType, boolean chatColors,
+-                                   byte displayedSkinParts, @NotNull Player.MainHand mainHand,
+-                                   boolean enableTextFiltering, boolean allowsListing) implements ClientPacket {
++public record ClientSettingsPacket(
++        @NotNull String locale,
++        byte viewDistance,
++        @NotNull ChatMessageType chatMessageType,
++        boolean chatColors,
++        byte displayedSkinParts,
++        @NotNull Player.MainHand mainHand,
++        boolean enableTextFiltering,
++        boolean allowsListing
++) implements ClientPacket {
+     public ClientSettingsPacket {
+         if (locale.length() > 128)
+             throw new IllegalArgumentException("Locale cannot be longer than 128 characters.");
+diff --git a/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java b/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..17953aa2e6303053984a098f2f7be7081fa48099
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java
+@@ -0,0 +1,24 @@
++package net.minestom.server.network.packet.client.configuration;
++
++import net.minestom.server.network.ConnectionState;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.ClientPacket;
++import net.minestom.server.network.packet.client.ClientStatePacket;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++public record ClientFinishConfigurationPacket() implements ClientStatePacket {
++
++    public ClientFinishConfigurationPacket(@NotNull NetworkBuffer buffer) {
++        this();
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++    }
++
++    @Override
++    public @Nullable ConnectionState nextState() {
++        return ConnectionState.PLAY;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginAcknowledgedPacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginAcknowledgedPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..9b2b0482f6202fdc405ab6e959963b44ba9b4f2f
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginAcknowledgedPacket.java
+@@ -0,0 +1,18 @@
++package net.minestom.server.network.packet.client.login;
++
++import net.minestom.server.network.ConnectionState;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.ClientStatePacket;
++import org.jetbrains.annotations.NotNull;
++
++public record ClientLoginAcknowledgedPacket() implements ClientStatePacket {
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++
++    }
++
++    @Override
++    public @NotNull ConnectionState nextState() {
++        return ConnectionState.CONFIGURATION;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginPluginResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginPluginResponsePacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..d811d47455ffa545d12ee1681002d55e01dd35e2
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginPluginResponsePacket.java
+@@ -0,0 +1,22 @@
++package net.minestom.server.network.packet.client.login;
++
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.ClientPacket;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++import static net.minestom.server.network.NetworkBuffer.RAW_BYTES;
++import static net.minestom.server.network.NetworkBuffer.VAR_INT;
++
++public record ClientLoginPluginResponsePacket(int messageId, byte @Nullable [] data) implements ClientPacket {
++
++    public ClientLoginPluginResponsePacket(@NotNull NetworkBuffer reader) {
++        this(reader.read(VAR_INT), reader.readOptional(RAW_BYTES));
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(VAR_INT, messageId);
++        writer.writeOptional(RAW_BYTES, data);
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginStartPacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginStartPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..80ca3c348fa5f90d9ebca1f7446e76ab6cbb544d
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginStartPacket.java
+@@ -0,0 +1,27 @@
++package net.minestom.server.network.packet.client.login;
++
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.ClientPacket;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.UUID;
++
++import static net.minestom.server.network.NetworkBuffer.STRING;
++import static net.minestom.server.network.NetworkBuffer.UUID;
++
++public record ClientLoginStartPacket(
++        @NotNull String username,
++        @NotNull UUID profileId
++) implements ClientPacket {
++    public ClientLoginStartPacket(@NotNull NetworkBuffer reader) {
++        this(reader.read(STRING), reader.read(UUID));
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        if (username.length() > 16)
++            throw new IllegalArgumentException("Username is not allowed to be longer than 16 characters");
++        writer.write(STRING, username);
++        writer.write(UUID, profileId);
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/LoginStartPacket.java b/src/main/java/net/minestom/server/network/packet/client/login/LoginStartPacket.java
+deleted file mode 100644
+index 239b6836796aadba449c530cfcdaeecfb31212cd..0000000000000000000000000000000000000000
+--- a/src/main/java/net/minestom/server/network/packet/client/login/LoginStartPacket.java
++++ /dev/null
+@@ -1,82 +0,0 @@
+-package net.minestom.server.network.packet.client.login;
+-
+-import net.kyori.adventure.text.Component;
+-import net.kyori.adventure.text.format.NamedTextColor;
+-import net.minestom.server.extras.MojangAuth;
+-import net.minestom.server.extras.bungee.BungeeCordProxy;
+-import net.minestom.server.extras.velocity.VelocityProxy;
+-import net.minestom.server.network.ConnectionState;
+-import net.minestom.server.network.NetworkBuffer;
+-import net.minestom.server.network.packet.client.ClientPreplayPacket;
+-import net.minestom.server.network.packet.server.login.EncryptionRequestPacket;
+-import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
+-import net.minestom.server.network.packet.server.login.LoginPluginRequestPacket;
+-import net.minestom.server.network.player.PlayerConnection;
+-import net.minestom.server.network.player.PlayerSocketConnection;
+-import org.jetbrains.annotations.NotNull;
+-import org.jetbrains.annotations.Nullable;
+-
+-import java.util.UUID;
+-import java.util.concurrent.ThreadLocalRandom;
+-
+-import static net.minestom.server.network.NetworkBuffer.STRING;
+-import static net.minestom.server.network.NetworkBuffer.UUID;
+-
+-public record LoginStartPacket(@NotNull String username,
+-                               @Nullable UUID profileId) implements ClientPreplayPacket {
+-    private static final Component ALREADY_CONNECTED = Component.text("You are already on this server", NamedTextColor.RED);
+-
+-    public LoginStartPacket(@NotNull NetworkBuffer reader) {
+-        this(reader.read(STRING), reader.readOptional(UUID));
+-    }
+-
+-    @Override
+-    public void process(@NotNull PlayerConnection connection) {
+-        final boolean isSocketConnection = connection instanceof PlayerSocketConnection;
+-        // Proxy support (only for socket clients) and cache the login username
+-        if (isSocketConnection) {
+-            PlayerSocketConnection socketConnection = (PlayerSocketConnection) connection;
+-            socketConnection.UNSAFE_setLoginUsername(username);
+-            // Velocity support
+-            if (VelocityProxy.isEnabled()) {
+-                final int messageId = ThreadLocalRandom.current().nextInt();
+-                final String channel = VelocityProxy.PLAYER_INFO_CHANNEL;
+-                // Important in order to retrieve the channel in the response packet
+-                socketConnection.addPluginRequestEntry(messageId, channel);
+-                connection.sendPacket(new LoginPluginRequestPacket(messageId, channel, null));
+-                return;
+-            }
+-        }
+-
+-        if (MojangAuth.isEnabled() && isSocketConnection) {
+-            // Mojang auth
+-            if (CONNECTION_MANAGER.getPlayer(username) != null) {
+-                connection.sendPacket(new LoginDisconnectPacket(ALREADY_CONNECTED));
+-                connection.disconnect();
+-                return;
+-            }
+-            final PlayerSocketConnection socketConnection = (PlayerSocketConnection) connection;
+-            socketConnection.setConnectionState(ConnectionState.LOGIN);
+-
+-            final byte[] publicKey = MojangAuth.getKeyPair().getPublic().getEncoded();
+-            byte[] nonce = new byte[4];
+-            ThreadLocalRandom.current().nextBytes(nonce);
+-            socketConnection.setNonce(nonce);
+-            socketConnection.sendPacket(new EncryptionRequestPacket("", publicKey, nonce));
+-        } else {
+-            final boolean bungee = BungeeCordProxy.isEnabled();
+-            // Offline
+-            final UUID playerUuid = bungee && isSocketConnection ?
+-                    ((PlayerSocketConnection) connection).gameProfile().uuid() :
+-                    CONNECTION_MANAGER.getPlayerConnectionUuid(connection, username);
+-            CONNECTION_MANAGER.startPlayState(connection, playerUuid, username, true);
+-        }
+-    }
+-
+-    @Override
+-    public void write(@NotNull NetworkBuffer writer) {
+-        if (username.length() > 16)
+-            throw new IllegalArgumentException("Username is not allowed to be longer than 16 characters");
+-        writer.write(STRING, username);
+-    }
+-}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientAdvancementTabPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientAdvancementTabPacket.java
+index fec3c5c7f36e11ee815cc639af50942f27a09744..bf7eccb78fd753f9292bf575f50af113fbdb2209 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/play/ClientAdvancementTabPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/play/ClientAdvancementTabPacket.java
+@@ -8,8 +8,10 @@ import org.jetbrains.annotations.Nullable;
+ 
+ import static net.minestom.server.network.NetworkBuffer.STRING;
+ 
+-public record ClientAdvancementTabPacket(@NotNull AdvancementAction action,
+-                                         @Nullable String tabIdentifier) implements ClientPacket {
++public record ClientAdvancementTabPacket(
++        @NotNull AdvancementAction action,
++        @Nullable String tabIdentifier
++) implements ClientPacket {
+     public ClientAdvancementTabPacket {
+         if (tabIdentifier != null && tabIdentifier.length() > 256) {
+             throw new IllegalArgumentException("Tab identifier too long: " + tabIdentifier.length());
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
 index 2c7aaec2ee5ed3e47ef123c4ea2cd0dcdc3e6144..034870c0ca3f9cf98d95b6b12adb02cf924e241b 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
@@ -2732,6 +3205,117 @@ index 2c7aaec2ee5ed3e47ef123c4ea2cd0dcdc3e6144..034870c0ca3f9cf98d95b6b12adb02cf
          writer.write(STRING, lines.get(0));
          writer.write(STRING, lines.get(1));
          writer.write(STRING, lines.get(2));
+diff --git a/src/main/java/net/minestom/server/network/packet/client/status/LegacyServerListPingPacket.java b/src/main/java/net/minestom/server/network/packet/client/status/LegacyServerListPingPacket.java
+index 9fc42ade7044fdecfc8c0f449e52741c775953f6..8e3e31af14b8f4dff647d43a9e246e64465eacf3 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/status/LegacyServerListPingPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/status/LegacyServerListPingPacket.java
+@@ -1,22 +1,16 @@
+ package net.minestom.server.network.packet.client.status;
+ 
+ import net.minestom.server.network.NetworkBuffer;
+-import net.minestom.server.network.packet.client.ClientPreplayPacket;
+-import net.minestom.server.network.player.PlayerConnection;
++import net.minestom.server.network.packet.client.ClientPacket;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import static net.minestom.server.network.NetworkBuffer.BYTE;
+ 
+-public record LegacyServerListPingPacket(byte payload) implements ClientPreplayPacket {
++public record LegacyServerListPingPacket(byte payload) implements ClientPacket {
+     public LegacyServerListPingPacket(@NotNull NetworkBuffer reader) {
+         this(reader.read(BYTE));
+     }
+ 
+-    @Override
+-    public void process(@NotNull PlayerConnection connection) {
+-
+-    }
+-
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+         writer.write(BYTE, payload);
+diff --git a/src/main/java/net/minestom/server/network/packet/client/status/PingPacket.java b/src/main/java/net/minestom/server/network/packet/client/status/PingPacket.java
+index 56c11029cc90311b7cee69195fb0f90adcf351df..c84b62850c13ddec92ceeedda5c7622e78cc15cc 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/status/PingPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/status/PingPacket.java
+@@ -1,41 +1,16 @@
+ package net.minestom.server.network.packet.client.status;
+ 
+-import net.minestom.server.MinecraftServer;
+-import net.minestom.server.event.EventDispatcher;
+-import net.minestom.server.event.server.ClientPingServerEvent;
+ import net.minestom.server.network.NetworkBuffer;
+-import net.minestom.server.network.packet.client.ClientPreplayPacket;
+-import net.minestom.server.network.packet.server.status.PongPacket;
+-import net.minestom.server.network.player.PlayerConnection;
++import net.minestom.server.network.packet.client.ClientPacket;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import static net.minestom.server.network.NetworkBuffer.LONG;
+ 
+-public record PingPacket(long number) implements ClientPreplayPacket {
++public record PingPacket(long number) implements ClientPacket {
+     public PingPacket(@NotNull NetworkBuffer reader) {
+         this(reader.read(LONG));
+     }
+ 
+-    @Override
+-    public void process(@NotNull PlayerConnection connection) {
+-        final ClientPingServerEvent clientPingEvent = new ClientPingServerEvent(connection, number);
+-        EventDispatcher.call(clientPingEvent);
+-
+-        if (clientPingEvent.isCancelled()) {
+-            connection.disconnect();
+-        } else {
+-            if (clientPingEvent.getDelay().isZero()) {
+-                connection.sendPacket(new PongPacket(clientPingEvent.getPayload()));
+-                connection.disconnect();
+-            } else {
+-                MinecraftServer.getSchedulerManager().buildTask(() -> {
+-                    connection.sendPacket(new PongPacket(clientPingEvent.getPayload()));
+-                    connection.disconnect();
+-                }).delay(clientPingEvent.getDelay()).schedule();
+-            }
+-        }
+-    }
+-
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+         writer.write(LONG, number);
+diff --git a/src/main/java/net/minestom/server/network/packet/client/status/StatusRequestPacket.java b/src/main/java/net/minestom/server/network/packet/client/status/StatusRequestPacket.java
+index e24411a9a343c05d0ae8105bc73e0b356c951bfb..72fcb2a518ab6435dab6a757068cc646b994c4c7 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/status/StatusRequestPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/status/StatusRequestPacket.java
+@@ -1,27 +1,14 @@
+ package net.minestom.server.network.packet.client.status;
+ 
+-import net.minestom.server.event.EventDispatcher;
+-import net.minestom.server.event.server.ServerListPingEvent;
+ import net.minestom.server.network.NetworkBuffer;
+-import net.minestom.server.network.packet.client.ClientPreplayPacket;
+-import net.minestom.server.network.packet.server.handshake.ResponsePacket;
+-import net.minestom.server.network.player.PlayerConnection;
+-import net.minestom.server.ping.ServerListPingType;
++import net.minestom.server.network.packet.client.ClientPacket;
+ import org.jetbrains.annotations.NotNull;
+ 
+-public record StatusRequestPacket() implements ClientPreplayPacket {
++public record StatusRequestPacket() implements ClientPacket {
+     public StatusRequestPacket(@NotNull NetworkBuffer reader) {
+         this();
+     }
+ 
+-    @Override
+-    public void process(@NotNull PlayerConnection connection) {
+-        final ServerListPingType pingVersion = ServerListPingType.fromModernProtocolVersion(connection.getProtocolVersion());
+-        final ServerListPingEvent statusRequestEvent = new ServerListPingEvent(connection, pingVersion);
+-        EventDispatcher.callCancellable(statusRequestEvent, () ->
+-                connection.sendPacket(new ResponsePacket(pingVersion.getPingResponse(statusRequestEvent.getResponseData()))));
+-    }
+-
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+         // Empty
 diff --git a/src/main/java/net/minestom/server/network/packet/server/CachedPacket.java b/src/main/java/net/minestom/server/network/packet/server/CachedPacket.java
 index 3b4672b7d4241f7629d1a281b6e1006743725cd1..7dc83e22055610547c2eae3fbe6afc285db43f0b 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/CachedPacket.java
@@ -3816,6 +4400,19 @@ index 42cfa09255a0fb576f5db0edde46233252916f11..7a627a040eef54d025678321a0a8a4a7
              context2.setArg("enchant", Enchantment.EFFICIENCY, "minecraft:efficiency");
  
              var input = context1.getInput() + " " + context2.getInput();
+diff --git a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
+index b36bec3de3026ca3e1b8f7217c05407da073dfe7..e45da56efa86de6342b5959ff3f402dd7392ae99 100644
+--- a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
++++ b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
+@@ -2,7 +2,7 @@ package net.minestom.server.entity.player;
+ 
+ import net.minestom.server.entity.damage.DamageType;
+ import net.minestom.server.message.ChatMessageType;
+-import net.minestom.server.network.packet.client.play.ClientSettingsPacket;
++import net.minestom.server.network.packet.client.common.ClientSettingsPacket;
+ import net.minestom.testing.Collector;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
 diff --git a/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
 index 30e9977964d9d0e9732f3b6216cf1c839f7bc63c..68e67fb596e8007ba5ab5e2fc2bb4125fbada7c5 100644
 --- a/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
@@ -3999,6 +4596,19 @@ index e1f05206055e80600e5fc3dcfb45599c081ab337..d5b20c96147adbd5f6079f870bf640ab
          var cachedBuffer = cached.body();
          assertEquals(buffer.body(), cachedBuffer);
          // May fail in the very unlikely case where soft references are cleared
+diff --git a/src/test/java/net/minestom/server/network/SocketReadTest.java b/src/test/java/net/minestom/server/network/SocketReadTest.java
+index 0f168ab61b905901d8aaca71d16526bcd8473d42..4c8db0970221df2535cbde87e8b3848c318f1cb3 100644
+--- a/src/test/java/net/minestom/server/network/SocketReadTest.java
++++ b/src/test/java/net/minestom/server/network/SocketReadTest.java
+@@ -1,7 +1,7 @@
+ package net.minestom.server.network;
+ 
+ import it.unimi.dsi.fastutil.Pair;
+-import net.minestom.server.network.packet.client.play.ClientPluginMessagePacket;
++import net.minestom.server.network.packet.client.common.ClientPluginMessagePacket;
+ import net.minestom.server.utils.ObjectPool;
+ import net.minestom.server.utils.PacketUtils;
+ import net.minestom.server.utils.Utils;
 diff --git a/src/test/java/net/minestom/server/network/SocketWriteTest.java b/src/test/java/net/minestom/server/network/SocketWriteTest.java
 index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..35f3799ca1aabf40af3fa75ac344886f09e01975 100644
 --- a/src/test/java/net/minestom/server/network/SocketWriteTest.java
