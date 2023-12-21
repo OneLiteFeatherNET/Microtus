@@ -2568,6 +2568,27 @@ index 027b182c84d68b8395c405270ea521c76c597e30..98114c492f5832e802694b7741def403
                  skyMask, blockMask,
                  emptySkyMask, emptyBlockMask,
                  skyLights, blockLights);
+diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
+index 6108c4283fc1128fddd208914095cd7739524f0f..6cd0180e872df8d0ddfd96f5afbb9863675a8f4e 100644
+--- a/src/main/java/net/minestom/server/inventory/InventoryType.java
++++ b/src/main/java/net/minestom/server/inventory/InventoryType.java
+@@ -1,5 +1,7 @@
+ package net.minestom.server.inventory;
+ 
++import org.jetbrains.annotations.ApiStatus;
++
+ /**
+  * Represents a type of {@link Inventory}
+  */
+@@ -11,6 +13,8 @@ public enum InventoryType {
+     CHEST_4_ROW(36),
+     CHEST_5_ROW(45),
+     CHEST_6_ROW(54),
++    @ApiStatus.Experimental
++    CRAFTER_3X3(9),
+     WINDOW_3X3(9),
+     ANVIL(3),
+     BEACON(1),
 diff --git a/src/main/java/net/minestom/server/listener/WindowListener.java b/src/main/java/net/minestom/server/listener/WindowListener.java
 index beb392fac7d6816a465601d0c009901e02bb3eb1..d0b536425f1a073f7059ef66f1c68b0aa7239a6a 100644
 --- a/src/main/java/net/minestom/server/listener/WindowListener.java

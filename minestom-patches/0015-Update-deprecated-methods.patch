@@ -219,10 +219,10 @@ index 9d80f6331c1320603680411d1eff3d710c38e6c3..ab57e8814738acb22cd9bfc8565a4490
      private static byte generateId() {
          return (byte) ID_COUNTER.updateAndGet(i -> i + 1 >= 128 ? 1 : i + 1);
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
-index 6108c4283fc1128fddd208914095cd7739524f0f..4667b7c3a3fe0a49c3b4e00210c103155d85ea39 100644
+index 6cd0180e872df8d0ddfd96f5afbb9863675a8f4e..4542d645eb8c526aa6fbe6cdc9c72d1f78962873 100644
 --- a/src/main/java/net/minestom/server/inventory/InventoryType.java
 +++ b/src/main/java/net/minestom/server/inventory/InventoryType.java
-@@ -47,7 +47,7 @@ public enum InventoryType {
+@@ -51,7 +51,7 @@ public enum InventoryType {
      /**
       * @deprecated use {@link #getSize()}
       */
