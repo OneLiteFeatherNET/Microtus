@@ -2554,10 +2554,32 @@ index 841e274ae10f56f58511f8e4c7d32c87e2d202bb..de62ebd0e925d6bff11626c98c201163
  import net.minestom.server.network.packet.server.play.PlayerPositionAndLookPacket;
  import net.minestom.server.network.player.PlayerConnection;
  import net.minestom.server.utils.MathUtils;
+diff --git a/src/main/java/net/minestom/server/instance/Chunk.java b/src/main/java/net/minestom/server/instance/Chunk.java
+index 0db0745249f1cf1e3cc6bba9822fbd333e4de5b3..605de3bb37037dd147326b9e811c6f2dd32297fd 100644
+--- a/src/main/java/net/minestom/server/instance/Chunk.java
++++ b/src/main/java/net/minestom/server/instance/Chunk.java
+@@ -7,7 +7,7 @@ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.entity.pathfinding.PFColumnarSpace;
+ import net.minestom.server.instance.block.Block;
+-import net.minestom.server.network.packet.server.play.ChunkDataPacket;
++import net.minestom.server.network.packet.server.play.chunk.ChunkDataPacket;
+ import net.minestom.server.snapshot.Snapshotable;
+ import net.minestom.server.tag.TagHandler;
+ import net.minestom.server.tag.Taggable;
 diff --git a/src/main/java/net/minestom/server/instance/DynamicChunk.java b/src/main/java/net/minestom/server/instance/DynamicChunk.java
-index 027b182c84d68b8395c405270ea521c76c597e30..98114c492f5832e802694b7741def403787e8e99 100644
+index 027b182c84d68b8395c405270ea521c76c597e30..e0ba4eededc20c5552b5464b63ef6d67d199a3d7 100644
 --- a/src/main/java/net/minestom/server/instance/DynamicChunk.java
 +++ b/src/main/java/net/minestom/server/instance/DynamicChunk.java
+@@ -11,7 +11,7 @@ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.instance.block.BlockHandler;
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.server.CachedPacket;
+-import net.minestom.server.network.packet.server.play.ChunkDataPacket;
++import net.minestom.server.network.packet.server.play.chunk.ChunkDataPacket;
+ import net.minestom.server.network.packet.server.play.UpdateLightPacket;
+ import net.minestom.server.network.packet.server.play.data.ChunkData;
+ import net.minestom.server.network.packet.server.play.data.LightData;
 @@ -242,7 +242,8 @@ public class DynamicChunk extends Chunk {
                  emptyBlockMask.set(index);
              }
@@ -3442,6 +3464,76 @@ index ddaeb7782d2bf43013d88ec23c083fd39199c749..00000000000000000000000000000000
 -        return ServerPacketIdentifier.SPAWN_PLAYER;
 -    }
 -}
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkBatchFinishPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkBatchFinishPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..b6ddf30bd23aacdaa79781013081604411f3f631
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkBatchFinishPacket.java
+@@ -0,0 +1,23 @@
++package net.minestom.server.network.packet.server.play.chunk;
++
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.server.ServerPacket;
++import org.jetbrains.annotations.NotNull;
++
++public record ChunkBatchFinishPacket(int batchSize) implements ServerPacket {
++
++    public ChunkBatchFinishPacket(@NotNull NetworkBuffer buffer) {
++        this(buffer.read(NetworkBuffer.VAR_INT));
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.VAR_INT, batchSize);
++    }
++
++    @Override
++    public int getId() {
++        //TODO: Implement later
++        return 0;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkBatchStartPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkBatchStartPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..0e288d60ef949510a217dc117694ed259bb99a64
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkBatchStartPacket.java
+@@ -0,0 +1,22 @@
++package net.minestom.server.network.packet.server.play.chunk;
++
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.server.ServerPacket;
++import org.jetbrains.annotations.NotNull;
++
++public record ChunkBatchStartPacket() implements ServerPacket {
++
++    public ChunkBatchStartPacket(@NotNull NetworkBuffer buffer) {
++        this();
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++
++    }
++
++    @Override
++    public int getId() {
++        return 0;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/ChunkDataPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkDataPacket.java
+similarity index 94%
+rename from src/main/java/net/minestom/server/network/packet/server/play/ChunkDataPacket.java
+rename to src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkDataPacket.java
+index 1e5ccecba280ea97fe62aa12bfbfab5acf292f90..fceef3270f38e5982d81157141da93be100e903f 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/ChunkDataPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/chunk/ChunkDataPacket.java
+@@ -1,4 +1,4 @@
+-package net.minestom.server.network.packet.server.play;
++package net.minestom.server.network.packet.server.play.chunk;
+ 
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.server.ServerPacket;
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/data/LightData.java b/src/main/java/net/minestom/server/network/packet/server/play/data/LightData.java
 index 7ca1b4a594aba0e7acae67730f0d3dd95858709f..0892bf47a6c1f46ebe01400bf0a11f964acb4837 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/data/LightData.java
@@ -3668,6 +3760,32 @@ index 42cfa09255a0fb576f5db0edde46233252916f11..7a627a040eef54d025678321a0a8a4a7
              context2.setArg("enchant", Enchantment.EFFICIENCY, "minecraft:efficiency");
  
              var input = context1.getInput() + " " + context2.getInput();
+diff --git a/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
+index 30e9977964d9d0e9732f3b6216cf1c839f7bc63c..68e67fb596e8007ba5ab5e2fc2bb4125fbada7c5 100644
+--- a/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
++++ b/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
+@@ -12,7 +12,7 @@ import net.minestom.server.instance.Chunk;
+ import net.minestom.server.instance.Instance;
+ import net.minestom.server.network.packet.client.play.ClientPlayerPositionPacket;
+ import net.minestom.server.network.packet.client.play.ClientTeleportConfirmPacket;
+-import net.minestom.server.network.packet.server.play.ChunkDataPacket;
++import net.minestom.server.network.packet.server.play.chunk.ChunkDataPacket;
+ import net.minestom.server.network.packet.server.play.EntityPositionPacket;
+ import net.minestom.server.utils.MathUtils;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+diff --git a/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
+index 1dac5752d654cf22dc83d02c396dcb2c9be904e7..e781dac8105ca4253d8b95c55f0657c2b9183ab2 100644
+--- a/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
++++ b/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
+@@ -4,7 +4,7 @@ import net.minestom.server.MinecraftServer;
+ import net.minestom.server.coordinate.Pos;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.network.packet.client.play.ClientStatusPacket;
+-import net.minestom.server.network.packet.server.play.ChunkDataPacket;
++import net.minestom.server.network.packet.server.play.chunk.ChunkDataPacket;
+ import net.minestom.server.network.packet.server.play.UnloadChunkPacket;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+ import net.minestom.testing.Env;
 diff --git a/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java b/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
 index 837eda9fe513972169ed8d0e528cbcdc387e5401..400271ef5d61a29cb34b1e191d3570d2ff2d4d09 100644
 --- a/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
@@ -3681,6 +3799,19 @@ index 837eda9fe513972169ed8d0e528cbcdc387e5401..400271ef5d61a29cb34b1e191d3570d2
          assertEquals(NBTCompound.EMPTY, BlockUtils.extractClientNbt(Block.CHEST));
  
          var nbt = NBT.Compound(Map.of("test", NBT.String("test")));
+diff --git a/src/test/java/net/minestom/server/instance/ChunkViewerIntegrationTest.java b/src/test/java/net/minestom/server/instance/ChunkViewerIntegrationTest.java
+index 429a26a0a498574bff8109bbaa8d14c9a4b477d2..920c9ff5a6f89c205b2e90f597032181965fd21c 100644
+--- a/src/test/java/net/minestom/server/instance/ChunkViewerIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/ChunkViewerIntegrationTest.java
+@@ -2,7 +2,7 @@ package net.minestom.server.instance;
+ 
+ import net.minestom.server.MinecraftServer;
+ import net.minestom.server.coordinate.Pos;
+-import net.minestom.server.network.packet.server.play.ChunkDataPacket;
++import net.minestom.server.network.packet.server.play.chunk.ChunkDataPacket;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
 diff --git a/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java b/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
 index d4a50690b4a443799941034fd6124078a9336565..5df0c70b1c6b11fa20181184fe71a6f0e51add70 100644
 --- a/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
