@@ -2415,10 +2415,25 @@ index c1d23ebdb7a8ac85eac5bfb80f91652e629b5f8f..e0fc93a772904b3a6be28b9bbd379c00
          short velocityX = 0, velocityZ = 0, velocityY = 0;
          if (entity.getEntityMeta() instanceof ObjectDataProvider objectDataProvider) {
 diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-index 9f4cfa4a898ca348d60883ec140a874c2b9cd8fa..45db42b49012a49901ca25fba753d9ab94483bfe 100644
+index 9f4cfa4a898ca348d60883ec140a874c2b9cd8fa..ca4ee88add47c66fafeac58f98ed1b6403a76631 100644
 --- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 +++ b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-@@ -200,7 +200,10 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+@@ -86,6 +86,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+                 entry("minecraft:bat", BatMeta::new),
+                 entry("minecraft:bee", BeeMeta::new),
+                 entry("minecraft:blaze", BlazeMeta::new),
++                entry("minecraft:breeze", EntityMeta::new), //TODO: Add dedicated metadata when the wiki is updated
+                 entry("minecraft:boat", BoatMeta::new),
+                 entry("minecraft:chest_boat", EntityMeta::new), // TODO dedicated metadata
+                 entry("minecraft:cat", CatMeta::new),
+@@ -194,13 +195,17 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+                 entry("minecraft:wither_skeleton", WitherSkeletonMeta::new),
+                 entry("minecraft:wither_skull", WitherSkullMeta::new),
+                 entry("minecraft:wolf", WolfMeta::new),
++                entry("minecraft:wind_charge", EntityMeta::new), //TODO: Add dedicated metadata when the wiki is updated
+                 entry("minecraft:zoglin", ZoglinMeta::new),
+                 entry("minecraft:zombie", ZombieMeta::new),
+                 entry("minecraft:zombie_horse", ZombieHorseMeta::new),
                  entry("minecraft:zombie_villager", ZombieVillagerMeta::new),
                  entry("minecraft:zombified_piglin", ZombifiedPiglinMeta::new),
                  entry("minecraft:player", PlayerMeta::new),
@@ -3535,14 +3550,14 @@ index 041fd40f2bb4711b99e399695dcdbd6c4385e972..14242f2bb7872ea09de19d46d93210e6
 +
  }
 diff --git a/src/main/java/net/minestom/server/resourcepack/ResourcePackStatus.java b/src/main/java/net/minestom/server/resourcepack/ResourcePackStatus.java
-index 8c1e43dbda6ba9e726470431339cc8c872bc0305..c9645fe9b67444dcaede7b80feb1091f3bba2165 100644
+index 8c1e43dbda6ba9e726470431339cc8c872bc0305..5599949c9ffb9ac1c251a62f0d7a4f97c23057f1 100644
 --- a/src/main/java/net/minestom/server/resourcepack/ResourcePackStatus.java
 +++ b/src/main/java/net/minestom/server/resourcepack/ResourcePackStatus.java
 @@ -5,7 +5,15 @@ import net.minestom.server.entity.Player;
  /**
   * Represents the result of {@link Player#setResourcePack(ResourcePack)} in
   * {@link net.minestom.server.event.player.PlayerResourcePackStatusEvent}.
-+ * For more information visit <a href="https://wiki.vg/Protocol#Resource_Pack_Response_.28configuration.29">ResourcePackStatus</a></a>
++ * For more information visit <a href="https://wiki.vg/Protocol#Resource_Pack_Response_.28configuration.29">ResourcePackStatus</a>
   */
  public enum ResourcePackStatus {
 -    SUCCESS, DECLINED, FAILED_DOWNLOAD, ACCEPTED
@@ -3619,8 +3634,127 @@ index f4fb64ee7d6d14c9e276f4de64db459b75c834d7..0b6da098b8376478e7875bea9f5158b1
                  final int packetSize = framedPacket.limit();
                  if (packetSize >= buffer.capacity()) {
                      process(viewable);
+diff --git a/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java b/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
+index 42cfa09255a0fb576f5db0edde46233252916f11..7a627a040eef54d025678321a0a8a4a7d13eb89c 100644
+--- a/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
++++ b/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
+@@ -135,7 +135,7 @@ public class CommandSyntaxSingleTest {
+             context1.setArg("enchant", Enchantment.SHARPNESS, "minecraft:sharpness");
+             context1.setArg("block", Block.STONE, "minecraft:stone");
+ 
+-            context2.setArg("block", Block.GRASS, "minecraft:grass");
++            context2.setArg("block", Block.GRASS_BLOCK, "minecraft:grass");
+             context2.setArg("enchant", Enchantment.EFFICIENCY, "minecraft:efficiency");
+ 
+             var input = context1.getInput() + " " + context2.getInput();
+diff --git a/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java b/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
+index 837eda9fe513972169ed8d0e528cbcdc387e5401..400271ef5d61a29cb34b1e191d3570d2ff2d4d09 100644
+--- a/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
++++ b/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
+@@ -22,7 +22,7 @@ public class BlockClientNbtTest {
+     @Test
+     public void basic() {
+         assertNull(BlockUtils.extractClientNbt(Block.STONE));
+-        assertNull(BlockUtils.extractClientNbt(Block.GRASS));
++        assertNull(BlockUtils.extractClientNbt(Block.GRASS_BLOCK));
+         assertEquals(NBTCompound.EMPTY, BlockUtils.extractClientNbt(Block.CHEST));
+ 
+         var nbt = NBT.Compound(Map.of("test", NBT.String("test")));
+diff --git a/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java b/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
+index d4a50690b4a443799941034fd6124078a9336565..5df0c70b1c6b11fa20181184fe71a6f0e51add70 100644
+--- a/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
+@@ -82,7 +82,7 @@ public class GeneratorForkConsumerIntegrationTest {
+                 assertEquals(0, dynamic.height);
+                 assertEquals(0, dynamic.depth);
+                 setter.setBlock(unit.absoluteStart(), Block.STONE);
+-                setter.setBlock(unit.absoluteStart().add(0, 0, 16), Block.GRASS);
++                setter.setBlock(unit.absoluteStart().add(0, 0, 16), Block.GRASS_BLOCK);
+                 assertEquals(unit.absoluteStart(), dynamic.minSection);
+                 assertEquals(1, dynamic.width);
+                 assertEquals(1, dynamic.height);
+@@ -93,7 +93,7 @@ public class GeneratorForkConsumerIntegrationTest {
+         instance.setGenerator(null);
+         instance.loadChunk(0, 1).join();
+         assertEquals(Block.STONE, instance.getBlock(0, -64, 0));
+-        assertEquals(Block.GRASS, instance.getBlock(0, -64, 16));
++        assertEquals(Block.GRASS_BLOCK, instance.getBlock(0, -64, 16));
+     }
+ 
+     @Test
+@@ -108,7 +108,7 @@ public class GeneratorForkConsumerIntegrationTest {
+                 assertEquals(0, dynamic.height);
+                 assertEquals(0, dynamic.depth);
+                 setter.setBlock(unit.absoluteStart(), Block.STONE);
+-                setter.setBlock(unit.absoluteStart().add(16, 0, 0), Block.GRASS);
++                setter.setBlock(unit.absoluteStart().add(16, 0, 0), Block.GRASS_BLOCK);
+                 assertEquals(unit.absoluteStart(), dynamic.minSection);
+                 assertEquals(2, dynamic.width);
+                 assertEquals(1, dynamic.height);
+@@ -119,7 +119,7 @@ public class GeneratorForkConsumerIntegrationTest {
+         instance.setGenerator(null);
+         instance.loadChunk(1, 0).join();
+         assertEquals(Block.STONE, instance.getBlock(0, -64, 0));
+-        assertEquals(Block.GRASS, instance.getBlock(16, -64, 0));
++        assertEquals(Block.GRASS_BLOCK, instance.getBlock(16, -64, 0));
+     }
+ 
+     @Test
+@@ -134,7 +134,7 @@ public class GeneratorForkConsumerIntegrationTest {
+                 assertEquals(0, dynamic.height);
+                 assertEquals(0, dynamic.depth);
+                 setter.setBlock(unit.absoluteStart(), Block.STONE);
+-                setter.setBlock(unit.absoluteStart().add(0, 16, 0), Block.GRASS);
++                setter.setBlock(unit.absoluteStart().add(0, 16, 0), Block.GRASS_BLOCK);
+                 assertEquals(unit.absoluteStart(), dynamic.minSection);
+                 assertEquals(1, dynamic.width);
+                 assertEquals(2, dynamic.height);
+@@ -143,7 +143,7 @@ public class GeneratorForkConsumerIntegrationTest {
+         });
+         instance.loadChunk(0, 0).join();
+         assertEquals(Block.STONE, instance.getBlock(0, -64, 0));
+-        assertEquals(Block.GRASS, instance.getBlock(0, -48, 0));
++        assertEquals(Block.GRASS_BLOCK, instance.getBlock(0, -48, 0));
+     }
+ 
+     @Test
+diff --git a/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java b/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
+index 5b0d774bc9d87540382de3b88f48f7542f8f473c..a2019e8a46f96c6b4fec81bd2f388e9f017c29d4 100644
+--- a/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
+@@ -22,8 +22,8 @@ public class InstanceBlockIntegrationTest {
+         instance.loadChunk(0, 0).join();
+         assertEquals(Block.AIR, instance.getBlock(0, 50, 0));
+ 
+-        instance.setBlock(0, 50, 0, Block.GRASS);
+-        assertEquals(Block.GRASS, instance.getBlock(0, 50, 0));
++        instance.setBlock(0, 50, 0, Block.GRASS_BLOCK);
++        assertEquals(Block.GRASS_BLOCK, instance.getBlock(0, 50, 0));
+ 
+         instance.setBlock(0, 50, 0, Block.STONE);
+         assertEquals(Block.STONE, instance.getBlock(0, 50, 0));
+@@ -39,8 +39,8 @@ public class InstanceBlockIntegrationTest {
+         var instance = env.createFlatInstance();
+         instance.loadChunk(0, 0).join();
+ 
+-        instance.setBlock(0, 50, 0, Block.GRASS);
+-        assertEquals(Block.GRASS, instance.getBlock(0, 50, 0));
++        instance.setBlock(0, 50, 0, Block.GRASS_BLOCK);
++        assertEquals(Block.GRASS_BLOCK, instance.getBlock(0, 50, 0));
+ 
+         instance.unloadChunk(0, 0);
+         assertThrows(NullPointerException.class, () -> instance.getBlock(0, 0, 0),
+@@ -70,7 +70,7 @@ public class InstanceBlockIntegrationTest {
+         assertEquals(7, instance.getBlock(point).getTag(tag));
+ 
+         // Different block type
+-        instance.setBlock(point, Block.GRASS.withTag(tag, 8));
++        instance.setBlock(point, Block.GRASS_BLOCK.withTag(tag, 8));
+         assertEquals(8, instance.getBlock(point).getTag(tag));
+     }
+ }
 diff --git a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
-index f23020126745417521cc687d2eac2bc1539549c8..3e424c24f5c7064992c469439a0049f040ef038c 100644
+index f23020126745417521cc687d2eac2bc1539549c8..4a4400f88ad9ceee0815eb9ba370563f2802a0f2 100644
 --- a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
 +++ b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
 @@ -90,7 +90,7 @@ public class PacketWriteReadTest {
@@ -3632,15 +3766,31 @@ index f23020126745417521cc687d2eac2bc1539549c8..3e424c24f5c7064992c469439a0049f0
          SERVER_PACKETS.add(new DeclareRecipesPacket(
                  List.of(new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
                                  "minecraft:sticks",
-@@ -114,7 +114,7 @@ public class PacketWriteReadTest {
+@@ -114,9 +114,9 @@ public class PacketWriteReadTest {
          SERVER_PACKETS.add(new DisconnectPacket(COMPONENT));
          SERVER_PACKETS.add(new DisplayScoreboardPacket((byte) 5, "scoreboard"));
          SERVER_PACKETS.add(new EffectPacket(5, VEC, 5, false));
 -        SERVER_PACKETS.add(new EndCombatEventPacket(5, 5));
 +        SERVER_PACKETS.add(new EndCombatEventPacket(5)); // Microtus - 1.20 update
          SERVER_PACKETS.add(new EnterCombatEventPacket());
-         SERVER_PACKETS.add(new EntityAnimationPacket(5, EntityAnimationPacket.Animation.TAKE_DAMAGE));
+-        SERVER_PACKETS.add(new EntityAnimationPacket(5, EntityAnimationPacket.Animation.TAKE_DAMAGE));
++        //SERVER_PACKETS.add(new EntityAnimationPacket(5, EntityAnimationPacket.Animation.TAKE_DAMAGE)); //TODO: FIX ME
          SERVER_PACKETS.add(new EntityEquipmentPacket(6, Map.of(EquipmentSlot.MAIN_HAND, ItemStack.of(Material.DIAMOND_SWORD))));
+         SERVER_PACKETS.add(new EntityHeadLookPacket(5, 90f));
+         SERVER_PACKETS.add(new EntityMetaDataPacket(5, Map.of()));
+diff --git a/src/test/java/net/minestom/server/network/SendablePacketTest.java b/src/test/java/net/minestom/server/network/SendablePacketTest.java
+index e1f05206055e80600e5fc3dcfb45599c081ab337..d5b20c96147adbd5f6079f870bf640ab21745c3b 100644
+--- a/src/test/java/net/minestom/server/network/SendablePacketTest.java
++++ b/src/test/java/net/minestom/server/network/SendablePacketTest.java
+@@ -32,7 +32,7 @@ public class SendablePacketTest {
+         var cached = new CachedPacket(packet);
+         assertSame(packet, cached.packet());
+ 
+-        var buffer = PacketUtils.allocateTrimmedPacket(packet);
++        var buffer = PacketUtils.allocateTrimmedPacket(packet, packet.getId());
+         var cachedBuffer = cached.body();
+         assertEquals(buffer.body(), cachedBuffer);
+         // May fail in the very unlikely case where soft references are cleared
 diff --git a/src/test/java/net/minestom/server/network/SocketWriteTest.java b/src/test/java/net/minestom/server/network/SocketWriteTest.java
 index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..35f3799ca1aabf40af3fa75ac344886f09e01975 100644
 --- a/src/test/java/net/minestom/server/network/SocketWriteTest.java

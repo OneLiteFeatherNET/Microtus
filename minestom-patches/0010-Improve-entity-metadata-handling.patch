@@ -17,7 +17,7 @@ index ff0b45ffe8ac3ce607de0c4312b11451014a11a5..8e7ad8420da6168ea2444dae90e5bc68
          SNIFFING,
          EMERGING,
 diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-index 45db42b49012a49901ca25fba753d9ab94483bfe..1bad471ee2fda90766e11ba3ab1f8ee9445bcbeb 100644
+index ca4ee88add47c66fafeac58f98ed1b6403a76631..6f64dcec23b3e90ff09f74250c44e73b197274c5 100644
 --- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 +++ b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 @@ -33,10 +33,7 @@ import net.minestom.server.entity.metadata.water.AxolotlMeta;
@@ -32,16 +32,16 @@ index 45db42b49012a49901ca25fba753d9ab94483bfe..1bad471ee2fda90766e11ba3ab1f8ee9
  import net.minestom.server.registry.Registry;
  import org.jetbrains.annotations.NotNull;
  
-@@ -87,7 +84,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
-                 entry("minecraft:bee", BeeMeta::new),
+@@ -88,7 +85,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
                  entry("minecraft:blaze", BlazeMeta::new),
+                 entry("minecraft:breeze", EntityMeta::new), //TODO: Add dedicated metadata when the wiki is updated
                  entry("minecraft:boat", BoatMeta::new),
 -                entry("minecraft:chest_boat", EntityMeta::new), // TODO dedicated metadata
 +                entry("minecraft:chest_boat", BoatMeta::new), // Microtus - entity meta update
                  entry("minecraft:cat", CatMeta::new),
                  entry("minecraft:block_display", BlockDisplayMeta::new), // Microtus - 1.19.4 update
                  entry("minecraft:cave_spider", CaveSpiderMeta::new),
-@@ -175,7 +172,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+@@ -176,7 +173,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
                  entry("minecraft:squid", SquidMeta::new),
                  entry("minecraft:stray", StrayMeta::new),
                  entry("minecraft:strider", StriderMeta::new),
@@ -50,7 +50,7 @@ index 45db42b49012a49901ca25fba753d9ab94483bfe..1bad471ee2fda90766e11ba3ab1f8ee9
                  entry("minecraft:egg", ThrownEggMeta::new),
                  entry("minecraft:ender_pearl", ThrownEnderPearlMeta::new),
                  entry("minecraft:experience_bottle", ThrownExperienceBottleMeta::new),
-@@ -188,7 +185,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+@@ -189,7 +186,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
                  entry("minecraft:villager", VillagerMeta::new),
                  entry("minecraft:vindicator", VindicatorMeta::new),
                  entry("minecraft:wandering_trader", WanderingTraderMeta::new),
@@ -59,7 +59,7 @@ index 45db42b49012a49901ca25fba753d9ab94483bfe..1bad471ee2fda90766e11ba3ab1f8ee9
                  entry("minecraft:witch", WitchMeta::new),
                  entry("minecraft:wither", WitherMeta::new),
                  entry("minecraft:wither_skeleton", WitherSkeletonMeta::new),
-@@ -202,7 +199,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+@@ -204,7 +201,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
                  entry("minecraft:player", PlayerMeta::new),
                  entry("minecraft:fishing_bobber", FishingHookMeta::new),
                  // Microtus start - 1.20 update
