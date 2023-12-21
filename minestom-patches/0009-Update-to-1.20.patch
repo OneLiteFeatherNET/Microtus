@@ -3569,6 +3569,62 @@ index 7ca1b4a594aba0e7acae67730f0d3dd95858709f..0892bf47a6c1f46ebe01400bf0a11f96
          writer.write(LONG_ARRAY, skyMask.toLongArray());
          writer.write(LONG_ARRAY, blockMask.toLongArray());
  
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/tick/SetTickingStatePacket.java b/src/main/java/net/minestom/server/network/packet/server/play/tick/SetTickingStatePacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..94d01cfa4d01a2c001f99baa6bcc74b0493333ea
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/server/play/tick/SetTickingStatePacket.java
+@@ -0,0 +1,22 @@
++package net.minestom.server.network.packet.server.play.tick;
++
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.server.ServerPacket;
++import org.jetbrains.annotations.NotNull;
++
++public record SetTickingStatePacket(float tickRate, boolean frozen) implements ServerPacket {
++
++    public SetTickingStatePacket(@NotNull NetworkBuffer buffer) {
++        this(buffer.read(NetworkBuffer.FLOAT), buffer.read(NetworkBuffer.BOOLEAN));
++    }
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.FLOAT, tickRate);
++        writer.write(NetworkBuffer.BOOLEAN, frozen);
++    }
++
++    @Override
++    public int getId() {
++        return 0;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/tick/StepTickPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/tick/StepTickPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..89888dbf4cba7dfbaea7ad3fd55c93a80151cd7e
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/server/play/tick/StepTickPacket.java
+@@ -0,0 +1,22 @@
++package net.minestom.server.network.packet.server.play.tick;
++
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.server.ServerPacket;
++import org.jetbrains.annotations.NotNull;
++
++public record StepTickPacket(int tickSteps) implements ServerPacket {
++
++    public StepTickPacket(@NotNull NetworkBuffer buffer) {
++        this(buffer.read(NetworkBuffer.VAR_INT));
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.VAR_INT, tickSteps);
++    }
++
++    @Override
++    public int getId() {
++        return 0;
++    }
++}
 diff --git a/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java b/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
 index cc335a6f6903542e8ac139d5a4deeed2252d9cae..92a4172ba88e2231ae04450a40eea60336e96979 100644
 --- a/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
