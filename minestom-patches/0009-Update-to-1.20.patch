@@ -3534,6 +3534,27 @@ index 041fd40f2bb4711b99e399695dcdbd6c4385e972..14242f2bb7872ea09de19d46d93210e6
      }
 +
  }
+diff --git a/src/main/java/net/minestom/server/resourcepack/ResourcePackStatus.java b/src/main/java/net/minestom/server/resourcepack/ResourcePackStatus.java
+index 8c1e43dbda6ba9e726470431339cc8c872bc0305..c9645fe9b67444dcaede7b80feb1091f3bba2165 100644
+--- a/src/main/java/net/minestom/server/resourcepack/ResourcePackStatus.java
++++ b/src/main/java/net/minestom/server/resourcepack/ResourcePackStatus.java
+@@ -5,7 +5,15 @@ import net.minestom.server.entity.Player;
+ /**
+  * Represents the result of {@link Player#setResourcePack(ResourcePack)} in
+  * {@link net.minestom.server.event.player.PlayerResourcePackStatusEvent}.
++ * For more information visit <a href="https://wiki.vg/Protocol#Resource_Pack_Response_.28configuration.29">ResourcePackStatus</a></a>
+  */
+ public enum ResourcePackStatus {
+-    SUCCESS, DECLINED, FAILED_DOWNLOAD, ACCEPTED
++   SUCCESSFULLY_DOWNLOAD,
++    DECLINED,
++    FAILED_TO_DOWNLOAD,
++    ACCEPTED,
++    DOWNLOADED,
++    INVALID_URL,
++    FAILED_TO_RELOAD,
++    DISCARDED
+ }
 diff --git a/src/main/java/net/minestom/server/utils/PacketUtils.java b/src/main/java/net/minestom/server/utils/PacketUtils.java
 index f4fb64ee7d6d14c9e276f4de64db459b75c834d7..0b6da098b8376478e7875bea9f5158b18365fa23 100644
 --- a/src/main/java/net/minestom/server/utils/PacketUtils.java
