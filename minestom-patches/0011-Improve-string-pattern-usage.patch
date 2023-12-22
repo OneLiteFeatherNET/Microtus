@@ -5,10 +5,10 @@ Subject: [PATCH] Improve string pattern usage
 
 
 diff --git a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-index e8922654e4f71aa447bf71af42c86ec2760de3ed..bb7a4e54d85b0909cd7b4a4a633af3eb6fbc9095 100644
+index dbc2a51b94bc07bf4e04d6f6f2af91307fc4c323..1fe7c7ed47b7cc269ab6ccf40d57d83319d0da3b 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-@@ -15,6 +15,7 @@ import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
+@@ -16,6 +16,7 @@ import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
  import net.minestom.server.network.player.GameProfile;
  import net.minestom.server.network.player.PlayerConnection;
  import net.minestom.server.network.player.PlayerSocketConnection;
@@ -16,7 +16,7 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..bb7a4e54d85b0909cd7b4a4a633af3eb
  import org.jetbrains.annotations.NotNull;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
-@@ -23,14 +24,19 @@ import java.net.SocketAddress;
+@@ -24,6 +25,7 @@ import java.net.SocketAddress;
  import java.util.ArrayList;
  import java.util.List;
  import java.util.UUID;
@@ -24,8 +24,9 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..bb7a4e54d85b0909cd7b4a4a633af3eb
  
  import static net.minestom.server.network.NetworkBuffer.*;
  
+@@ -31,8 +33,12 @@ import static net.minestom.server.network.NetworkBuffer.*;
  public record HandshakePacket(int protocolVersion, @NotNull String serverAddress,
-                               int serverPort, int nextState) implements ClientPreplayPacket {
+                               int serverPort, int indent) implements ClientPreplayPacket {
  
 -    private final static Logger LOGGER = LoggerFactory.getLogger(HandshakePacket.class);
 +    // Microtus start - improve string pattern usage + add private constructor
@@ -37,7 +38,7 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..bb7a4e54d85b0909cd7b4a4a633af3eb
      /**
       * Text sent if a player tries to connect with an invalid version of the client
       */
-@@ -84,12 +90,11 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
+@@ -86,12 +92,11 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
                          ((java.net.InetSocketAddress) connection.getRemoteAddress()).getPort());
                  socketConnection.setRemoteAddress(socketAddress);
  
