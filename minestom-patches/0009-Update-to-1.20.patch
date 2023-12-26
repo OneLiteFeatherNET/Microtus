@@ -3822,6 +3822,183 @@ index 0000000000000000000000000000000000000000..d4222f9ad9233a13043ad745721fbddd
 +    @ApiStatus.Internal
 +    void transitionPlayToConfig(@NotNull Player player);
 +}
+diff --git a/src/main/java/net/minestom/server/network/packet/builder/PacketResponsible.java b/src/main/java/net/minestom/server/network/packet/builder/PacketResponsible.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..f92d4aff5074209df26640e3cf7af179cd0ce21b
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/builder/PacketResponsible.java
+@@ -0,0 +1,85 @@
++package net.minestom.server.network.packet.builder;
++
++import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.ClientPacket;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.Contract;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.UnknownNullability;
++
++import java.util.function.Function;
++
++/**
++ * The idea behind this interface is to reduce the amount of code to build a structure which holds packet references
++ * with specific ids.
++ * @version 1.0.0
++ * @since 1.2.0
++ */
++@ApiStatus.Experimental
++@ApiStatus.Internal
++public sealed interface PacketResponsible permits PacketResponsibleImpl {
++
++    /**
++     * Creates a new reference from the {@link Builder}.
++     * @return the created reference
++     */
++    @Contract(pure = true)
++    static @NotNull PacketResponsible.Builder builder() {
++        return new PacketResponsibleBuilderImpl();
++    }
++
++    /**
++     * Returns the data structure which holds the registered packets for the responsible reference.
++     * @return the underlying data structure
++     */
++    @NotNull Int2ObjectArrayMap<Function<NetworkBuffer, ClientPacket>> packetMap();
++
++    /**
++     * Creates a new {@link ClientPacket} instance from a given packet id.
++     * @param packetId the id from the packet which should be created
++     * @param reader the {@link NetworkBuffer} which holds the packet data
++     * @return the created packet
++     * @throws IllegalStateException if the packet id isn't registered
++     */
++    default @UnknownNullability ClientPacket create(int packetId, @NotNull NetworkBuffer reader) {
++        final Function<NetworkBuffer, ClientPacket> supplier = packetMap().get(packetId);
++        if (supplier == null) {
++            String idHexString = Integer.toHexString(packetId);
++            if (idHexString.length() == 1) {
++                idHexString = "0" + idHexString;
++            }
++            throw new IllegalStateException("Packet id 0x" + idHexString + " isn't registered!");
++
++        }
++        return supplier.apply(reader);
++    }
++
++    /**
++     * The interface defines the method for the {@link Builder}.
++     * An implementation of this interface contains the logic to register packets or skip specific ids
++     * @version 1.0.0
++     * @since 1.2.0
++     */
++    sealed interface Builder permits PacketResponsibleBuilderImpl {
++
++        /**
++         * Can be used to register a new packet.
++         * @param packetSupplier the supplier which holds the information about the packet
++         * @return the current {@link Builder} instance
++         */
++        @NotNull PacketResponsible.Builder packet(@NotNull Function<NetworkBuffer, ClientPacket> packetSupplier);
++
++        /**
++         * Skips the next packet id.
++         * @return the current {@link Builder} instance
++         */
++        @NotNull PacketResponsible.Builder skip();
++
++        /**
++         * Returns a new {@link PacketResponsible} instance from the registered packets.
++         * @return the created {@link PacketResponsible} instance
++         */
++        @NotNull PacketResponsible build();
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/builder/PacketResponsibleBuilderImpl.java b/src/main/java/net/minestom/server/network/packet/builder/PacketResponsibleBuilderImpl.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..35c7876b02f2abde619bc196865fc871ef10dedc
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/builder/PacketResponsibleBuilderImpl.java
+@@ -0,0 +1,59 @@
++package net.minestom.server.network.packet.builder;
++
++import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.ClientPacket;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.function.Function;
++
++/**
++ * The class is the implementation of the {@link PacketResponsible.Builder} interface.
++ * @version 1.0.0
++ * @since 1.2.0
++ */
++public final class PacketResponsibleBuilderImpl implements PacketResponsible.Builder {
++
++    private final Int2ObjectArrayMap<Function<NetworkBuffer, ClientPacket>> packetMap;
++    private int packetId;
++
++    /**
++     * Creates a new instance from the {@link PacketResponsibleBuilderImpl} class.
++     */
++    public PacketResponsibleBuilderImpl() {
++        this.packetMap = new Int2ObjectArrayMap<>();
++        this.packetId = 0;
++    }
++
++    /**
++     * Registers a new packet with the builder instance, assigning a unique packet id.
++     * It is important to ensure correct packet ordering to match ids with the Minecraft protocol.
++     *
++     * @param packetSupplier a supplier that holds information about the packet.
++     * @return the current builder instance.
++     */
++    @Override
++    public PacketResponsible.@NotNull Builder packet(@NotNull Function<NetworkBuffer, ClientPacket> packetSupplier) {
++        this.packetMap.put(packetId++, packetSupplier);
++        return this;
++    }
++
++    /**
++     * Skips the current id without adding a packet to the underlying data structure.
++     * @return the current builder instance
++     */
++    @Override
++    public PacketResponsible.@NotNull Builder skip() {
++        this.packetId++;
++        return this;
++    }
++
++    /**
++     * Builds the {@link PacketResponsible} instance.
++     * @return the created instance
++     */
++    @Override
++    public @NotNull PacketResponsible build() {
++        return new PacketResponsibleImpl(packetMap);
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/builder/PacketResponsibleImpl.java b/src/main/java/net/minestom/server/network/packet/builder/PacketResponsibleImpl.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..1475b944ca327685877305e89a79bd151b315498
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/builder/PacketResponsibleImpl.java
+@@ -0,0 +1,15 @@
++package net.minestom.server.network.packet.builder;
++
++import it.unimi.dsi.fastutil.ints.Int2ObjectArrayMap;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.ClientPacket;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.function.Function;
++
++/**
++ * The class is the implementation of the {@link PacketResponsible.Builder} interface.
++ * @version 1.0.0
++ * @since 1.2.0
++ */
++public record PacketResponsibleImpl(@NotNull Int2ObjectArrayMap<Function<NetworkBuffer, ClientPacket>> packetMap) implements PacketResponsible { }
 diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientConnectionStatePacket.java b/src/main/java/net/minestom/server/network/packet/client/ClientConnectionStatePacket.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..f65a1b41fda7720d96eaa5c6956355dd96ef89cd
@@ -6251,6 +6428,70 @@ index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..35f3799ca1aabf40af3fa75ac344886f
  
          // 3 bytes packet length [var-int] + 3 bytes data length [var-int] + 1 byte packet id [var-int] + 4 bytes int
          // The 3 bytes var-int length is hardcoded for performance purpose, could change in the future
+diff --git a/src/test/java/net/minestom/server/network/packet/builder/PacketResponsibleTest.java b/src/test/java/net/minestom/server/network/packet/builder/PacketResponsibleTest.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..4a0b00691e6e36c14fd7294ef2170b8f88f5a52c
+--- /dev/null
++++ b/src/test/java/net/minestom/server/network/packet/builder/PacketResponsibleTest.java
+@@ -0,0 +1,57 @@
++package net.minestom.server.network.packet.builder;
++
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.login.ClientLoginAcknowledgedPacket;
++import net.minestom.server.network.packet.client.login.ClientLoginPluginResponsePacket;
++import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
++import net.minestom.server.network.packet.client.login.EncryptionResponsePacket;
++import org.junit.jupiter.api.Test;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++class PacketResponsibleTest {
++
++    @Test
++    void testUnknownPacket() {
++        PacketResponsible responsible = PacketResponsible.builder().build();
++        int packetId = 10;
++        IllegalStateException exception = assertThrows(
++                IllegalStateException.class, () -> responsible.create(packetId, new NetworkBuffer())
++        );
++
++        assertEquals(IllegalStateException.class, exception.getClass());
++        String expectedMessage = "Packet id 0x0" + Integer.toHexString(packetId) + " isn't registered!";
++        assertEquals(expectedMessage, exception.getMessage());
++    }
++
++    @Test
++    void testPacketRegistration() {
++        var loginPackets = PacketResponsible.builder()
++                .packet(ClientLoginStartPacket::new)
++                .packet(EncryptionResponsePacket::new)
++                .packet(ClientLoginPluginResponsePacket::new)
++                .packet(ClientLoginAcknowledgedPacket::new)
++                .build();
++        assertNotNull(loginPackets);
++        var loginPacket = loginPackets.create(0x00, new NetworkBuffer());
++        assertEquals(ClientLoginStartPacket.class, loginPacket.getClass());
++    }
++
++    @Test
++    void testPacketRegistrationWithSkippedIds() {
++        var loginPackets = PacketResponsible.builder()
++                .packet(ClientLoginStartPacket::new)
++                .skip() // For this test we skip the encryption response packet
++                .packet(ClientLoginPluginResponsePacket::new)
++                .packet(ClientLoginAcknowledgedPacket::new)
++                .build();
++        assertNotNull(loginPackets);
++        IllegalStateException exception = assertThrows(
++                IllegalStateException.class, () -> loginPackets.create(0x01, new NetworkBuffer())
++        );
++        assertEquals(IllegalStateException.class, exception.getClass());
++        String expectedMessage = "Packet id 0x01 isn't registered!";
++        assertEquals(expectedMessage, exception.getMessage());
++    }
++
++}
+\ No newline at end of file
 diff --git a/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java b/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
 index 1836cf2b698dbbc8004a3a168448f1e13f3edd92..3f9ec91fb26c5d4977d0564b7a12a94ded60e318 100644
 --- a/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
