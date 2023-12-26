@@ -3745,20 +3745,32 @@ index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..60f83f5f48055b6c4754910d69c94ed4
              (buffer, value) -> {
                  buffer.write(LONG, value.getMostSignificantBits());
 diff --git a/src/main/java/net/minestom/server/network/PacketProcessor.java b/src/main/java/net/minestom/server/network/PacketProcessor.java
-index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..f170170f5eb64f25103854cc8d0dd7f50ba486a0 100644
+index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..f7a46905d6ed693813c9e7e5141e97f003045219 100644
 --- a/src/main/java/net/minestom/server/network/PacketProcessor.java
 +++ b/src/main/java/net/minestom/server/network/PacketProcessor.java
-@@ -1,6 +1,7 @@
+@@ -1,37 +1,38 @@
  package net.minestom.server.network;
  
  import net.minestom.server.entity.Player;
 +import net.minestom.server.listener.manager.PacketListenerManager;
  import net.minestom.server.network.packet.client.ClientPacket;
- import net.minestom.server.network.packet.client.ClientPacketsHandler;
+-import net.minestom.server.network.packet.client.ClientPacketsHandler;
  import net.minestom.server.network.packet.client.ClientPreplayPacket;
-@@ -17,18 +18,27 @@ import java.nio.ByteBuffer;
+ import net.minestom.server.network.packet.client.handshake.HandshakePacket;
+ import net.minestom.server.network.player.PlayerConnection;
+-import net.minestom.server.utils.binary.BinaryReader;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.nio.ByteBuffer;
+ 
++import static net.minestom.server.network.packet.client.ClientPackets.*;
++
+ /**
+  * Responsible for processing client packets.
+  * <p>
   * You can retrieve the different packet handlers per state (status/login/play)
-  * from the {@link ClientPacketsHandler} classes.
+- * from the {@link ClientPacketsHandler} classes.
++ * from the {@link ClientPacket} classes.
   */
 -public record PacketProcessor(@NotNull ClientPacketsHandler statusHandler,
 -                              @NotNull ClientPacketsHandler loginHandler,
@@ -3769,28 +3781,25 @@ index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..f170170f5eb64f25103854cc8d0dd7f5
 -                new ClientPacketsHandler.Play());
 +public class PacketProcessor {
 +
-+    private final ClientPacketsHandler statusHandler;
-+    private final ClientPacketsHandler loginHandler;
-+    private final ClientPacketsHandler playHandler;
-+    private final ClientPacketsHandler configurationHandler;
 +    private final PacketListenerManager packetListenerManager;
 +
 +    public PacketProcessor(@NotNull PacketListenerManager packetListenerManager) {
-+        this.statusHandler = new ClientPacketsHandler.Status();
-+        this.loginHandler = new ClientPacketsHandler.Login();
-+        this.configurationHandler = new ClientPacketsHandler.Configuration();
-+        this.playHandler = new ClientPacketsHandler.Play();
 +        this.packetListenerManager = packetListenerManager;
      }
  
      public @NotNull ClientPacket create(@NotNull ConnectionState connectionState, int packetId, ByteBuffer body) {
          NetworkBuffer buffer = new NetworkBuffer(body);
          final ClientPacket clientPacket = switch (connectionState) {
-+            case CONFIGURATION -> //TODO: Implement configuration phase
-+                    null;
-             case PLAY -> playHandler.create(packetId, buffer);
-             case LOGIN -> loginHandler.create(packetId, buffer);
-             case STATUS -> statusHandler.create(packetId, buffer);
+-            case PLAY -> playHandler.create(packetId, buffer);
+-            case LOGIN -> loginHandler.create(packetId, buffer);
+-            case STATUS -> statusHandler.create(packetId, buffer);
++            case CONFIGURATION -> getConfigurationPackets().create(packetId, buffer);
++            case PLAY -> getPlayPackets().create(packetId, buffer);
++            case LOGIN -> getLoginPackets().create(packetId, buffer);
++            case STATUS -> getStatusPackets().create(packetId, buffer);
+             case UNKNOWN -> {
+                 assert packetId == 0;
+                 yield new HandshakePacket(buffer);
 diff --git a/src/main/java/net/minestom/server/network/PlayerConfigurationTransistor.java b/src/main/java/net/minestom/server/network/PlayerConfigurationTransistor.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..d4222f9ad9233a13043ad745721fbdddeb18a86b
@@ -4021,8 +4030,136 @@ index 0000000000000000000000000000000000000000..f65a1b41fda7720d96eaa5c6956355dd
 +        return null;
 +    }
 +}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientPackets.java b/src/main/java/net/minestom/server/network/packet/client/ClientPackets.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..051fbee95d73bee52c93c8cb86894f364bbe5204
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/client/ClientPackets.java
+@@ -0,0 +1,122 @@
++package net.minestom.server.network.packet.client;
++
++import net.minestom.server.network.packet.builder.PacketResponsible;
++import net.minestom.server.network.packet.client.common.*;
++import net.minestom.server.network.packet.client.configuration.ClientFinishConfigurationPacket;
++import net.minestom.server.network.packet.client.login.ClientEncryptionResponsePacket;
++import net.minestom.server.network.packet.client.login.ClientLoginAcknowledgedPacket;
++import net.minestom.server.network.packet.client.login.ClientLoginPluginResponsePacket;
++import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
++import net.minestom.server.network.packet.client.status.PingPacket;
++import net.minestom.server.network.packet.client.status.StatusRequestPacket;
++import net.minestom.server.network.packet.client.play.*;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++
++@ApiStatus.Experimental
++@ApiStatus.NonExtendable
++@ApiStatus.Internal
++public final class ClientPackets {
++
++    private static final PacketResponsible STATUS_PACKETS;
++    private static final PacketResponsible LOGIN_PACKETS;
++    private static final PacketResponsible CONFIGURATION_PACKETS;
++    private static final PacketResponsible PLAY_PACKETS;
++
++    static {
++        STATUS_PACKETS = PacketResponsible.builder()
++                .packet(StatusRequestPacket::new)
++                .packet(PingPacket::new)
++                .build();
++        LOGIN_PACKETS = PacketResponsible.builder()
++                .packet(ClientLoginStartPacket::new)
++                .packet(ClientEncryptionResponsePacket::new)
++                .packet(ClientLoginPluginResponsePacket::new)
++                .packet(ClientLoginAcknowledgedPacket::new)
++                .build();
++        CONFIGURATION_PACKETS = PacketResponsible.builder()
++                .packet(ClientSettingsPacket::new)
++                .packet(ClientPluginMessagePacket::new)
++                .packet(ClientFinishConfigurationPacket::new)
++                .packet(ClientKeepAlivePacket::new)
++                .packet(ClientPongPacket::new)
++                .packet(ClientResourcePackStatusPacket::new)
++                .build();
++        PLAY_PACKETS = PacketResponsible.builder()
++                .packet(ClientTeleportConfirmPacket::new)
++                .packet(ClientQueryBlockNbtPacket::new)
++                .skip() // difficulty packet
++                .packet(ClientChatAckPacket::new)
++                .packet(ClientCommandChatPacket::new)
++                .packet(ClientChatMessagePacket::new)
++                .packet(ClientChatSessionUpdatePacket::new)
++                .skip() // chunk batch received
++                .packet(ClientStatusPacket::new)
++                .packet(ClientSettingsPacket::new)
++                .packet(ClientTabCompletePacket::new)
++                .packet(ClientConfigurationAckPacket::new)
++                .packet(ClientClickWindowButtonPacket::new)
++                .packet(ClientClickWindowPacket::new)
++                .packet(ClientCloseWindowPacket::new)
++                .packet(ClientWindowSlotStatePacket::new)
++                .packet(ClientPluginMessagePacket::new)
++                .packet(ClientEditBookPacket::new)
++                .packet(ClientQueryEntityNbtPacket::new)
++                .packet(ClientInteractEntityPacket::new)
++                .packet(ClientGenerateStructurePacket::new)
++                .packet(ClientKeepAlivePacket::new)
++                .skip() // lock difficulty
++                .packet(ClientPlayerPositionPacket::new)
++                .packet(ClientPlayerPositionAndRotationPacket::new)
++                .packet(ClientPlayerRotationPacket::new)
++                .packet(ClientPlayerPacket::new)
++                .packet(ClientVehicleMovePacket::new)
++                .packet(ClientSteerBoatPacket::new)
++                .packet(ClientPickItemPacket::new)
++                .skip() // Ping request
++                .packet(ClientCraftRecipeRequest::new)
++                .packet(ClientPlayerAbilitiesPacket::new)
++                .packet(ClientPlayerDiggingPacket::new)
++                .packet(ClientEntityActionPacket::new)
++                .packet(ClientSteerVehiclePacket::new)
++                .packet(ClientPongPacket::new)
++                .packet(ClientSetRecipeBookStatePacket::new)
++                .packet(ClientSetDisplayedRecipePacket::new)
++                .packet(ClientNameItemPacket::new)
++                .packet(ClientResourcePackStatusPacket::new)
++                .packet(ClientAdvancementTabPacket::new)
++                .packet(ClientSelectTradePacket::new)
++                .packet(ClientSetBeaconEffectPacket::new)
++                .packet(ClientHeldItemChangePacket::new)
++                .packet(ClientUpdateCommandBlockPacket::new)
++                .packet(ClientUpdateCommandBlockMinecartPacket::new)
++                .packet(ClientCreativeInventoryActionPacket::new)
++                .skip() // Update Jigsaw Block
++                .packet(ClientUpdateStructureBlockPacket::new)
++                .packet(ClientUpdateSignPacket::new)
++                .packet(ClientAnimationPacket::new)
++                .packet(ClientSpectatePacket::new)
++                .packet(ClientPlayerBlockPlacementPacket::new)
++                .packet(ClientUseItemPacket::new)
++                .build();
++    }
++
++    private ClientPackets() {
++    }
++
++    public static @NotNull PacketResponsible getConfigurationPackets() {
++        return CONFIGURATION_PACKETS;
++    }
++
++    public static @NotNull PacketResponsible getLoginPackets() {
++        return LOGIN_PACKETS;
++    }
++
++    public static @NotNull PacketResponsible getPlayPackets() {
++        return PLAY_PACKETS;
++    }
++
++    public static @NotNull PacketResponsible getStatusPackets() {
++        return STATUS_PACKETS;
++    }
++}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
-index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..87cd57f08e97d1602f48f72abfaba7a049f51f1f 100644
+index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..5a9e4837b55f9f03e4553d30a52e61e4c6a3465a 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
 @@ -1,9 +1,9 @@
@@ -4061,7 +4198,7 @@ index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..87cd57f08e97d1602f48f72abfaba7a0
 -            register(0x01, EncryptionResponsePacket::new);
 -            register(0x02, LoginPluginResponsePacket::new);
 +            register(nextId(), ClientLoginStartPacket::new);
-+            register(nextId(), EncryptionResponsePacket::new);
++            register(nextId(), ClientEncryptionResponsePacket::new);
 +            register(nextId(), ClientLoginPluginResponsePacket::new);
 +            register(nextId(), ClientLoginAcknowledgedPacket::new);
 +        }
@@ -4388,6 +4525,28 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..dbc2a51b94bc07bf4e04d6f6f2af9130
              case 1 -> connection.setConnectionState(ConnectionState.STATUS);
              case 2 -> {
                  if (protocolVersion == MinecraftServer.PROTOCOL_VERSION) {
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java
+similarity index 96%
+rename from src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
+rename to src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java
+index c327a3b5c10fa2d3c31f672044431c76031a111c..643d8625f9c59e3dc835deb67a9bc11763548956 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java
+@@ -30,11 +30,11 @@ import java.util.UUID;
+ 
+ import static net.minestom.server.network.NetworkBuffer.BYTE_ARRAY;
+ 
+-public record EncryptionResponsePacket(byte[] sharedSecret,
+-                                       byte[] encryptedVerifyToken) implements ClientPreplayPacket {
++public record ClientEncryptionResponsePacket(byte[] sharedSecret,
++                                             byte[] encryptedVerifyToken) implements ClientPreplayPacket {
+     private static final Gson GSON = new Gson();
+ 
+-    public EncryptionResponsePacket(@NotNull NetworkBuffer reader) {
++    public ClientEncryptionResponsePacket(@NotNull NetworkBuffer reader) {
+         this(reader.read(BYTE_ARRAY), reader.read(BYTE_ARRAY));
+     }
+ 
 diff --git a/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginAcknowledgedPacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginAcknowledgedPacket.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..04cad8341585a62eb1532d660126822e83ace8c5
@@ -6431,7 +6590,7 @@ index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..35f3799ca1aabf40af3fa75ac344886f
          // The 3 bytes var-int length is hardcoded for performance purpose, could change in the future
 diff --git a/src/test/java/net/minestom/server/network/packet/builder/PacketResponsibleTest.java b/src/test/java/net/minestom/server/network/packet/builder/PacketResponsibleTest.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4a0b00691e6e36c14fd7294ef2170b8f88f5a52c
+index 0000000000000000000000000000000000000000..ba5905b56347fd96159ad3ed0facd19345399012
 --- /dev/null
 +++ b/src/test/java/net/minestom/server/network/packet/builder/PacketResponsibleTest.java
 @@ -0,0 +1,57 @@
@@ -6441,7 +6600,7 @@ index 0000000000000000000000000000000000000000..4a0b00691e6e36c14fd7294ef2170b8f
 +import net.minestom.server.network.packet.client.login.ClientLoginAcknowledgedPacket;
 +import net.minestom.server.network.packet.client.login.ClientLoginPluginResponsePacket;
 +import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
-+import net.minestom.server.network.packet.client.login.EncryptionResponsePacket;
++import net.minestom.server.network.packet.client.login.ClientEncryptionResponsePacket;
 +import org.junit.jupiter.api.Test;
 +
 +import static org.junit.jupiter.api.Assertions.*;
@@ -6465,7 +6624,7 @@ index 0000000000000000000000000000000000000000..4a0b00691e6e36c14fd7294ef2170b8f
 +    void testPacketRegistration() {
 +        var loginPackets = PacketResponsible.builder()
 +                .packet(ClientLoginStartPacket::new)
-+                .packet(EncryptionResponsePacket::new)
++                .packet(ClientEncryptionResponsePacket::new)
 +                .packet(ClientLoginPluginResponsePacket::new)
 +                .packet(ClientLoginAcknowledgedPacket::new)
 +                .build();

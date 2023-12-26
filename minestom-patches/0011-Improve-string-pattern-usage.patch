@@ -54,10 +54,10 @@ index dbc2a51b94bc07bf4e04d6f6f2af91307fc4c323..1fe7c7ed47b7cc269ab6ccf40d57d833
  
                  List<GameProfile.Property> properties = new ArrayList<>();
                  if (hasProperties) {
-diff --git a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
-index c327a3b5c10fa2d3c31f672044431c76031a111c..7f918209bee6fc679e36edad333703abc94f32f8 100644
---- a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
-+++ b/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java
+index 643d8625f9c59e3dc835deb67a9bc11763548956..8b76a39bcace032d2dc04d6cbc1b8717f7a4d9a0 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java
 @@ -12,6 +12,7 @@ import net.minestom.server.network.packet.client.ClientPreplayPacket;
  import net.minestom.server.network.player.GameProfile; // Microtus - Fix gameprofile auth
  import net.minestom.server.network.player.PlayerConnection;
@@ -74,14 +74,14 @@ index c327a3b5c10fa2d3c31f672044431c76031a111c..7f918209bee6fc679e36edad333703ab
  
  import static net.minestom.server.network.NetworkBuffer.BYTE_ARRAY;
  
- public record EncryptionResponsePacket(byte[] sharedSecret,
-                                        byte[] encryptedVerifyToken) implements ClientPreplayPacket {
+ public record ClientEncryptionResponsePacket(byte[] sharedSecret,
+                                              byte[] encryptedVerifyToken) implements ClientPreplayPacket {
      private static final Gson GSON = new Gson();
 +    private static final Pattern UUID_REPLACE_PATTERN = Pattern.compile("(\\w{8})(\\w{4})(\\w{4})(\\w{4})(\\w{12})");
  
-     public EncryptionResponsePacket(@NotNull NetworkBuffer reader) {
+     public ClientEncryptionResponsePacket(@NotNull NetworkBuffer reader) {
          this(reader.read(BYTE_ARRAY), reader.read(BYTE_ARRAY));
-@@ -96,8 +99,11 @@ public record EncryptionResponsePacket(byte[] sharedSecret,
+@@ -96,8 +99,11 @@ public record ClientEncryptionResponsePacket(byte[] sharedSecret,
                          return;
                      }
                      socketConnection.setEncryptionKey(getSecretKey());
@@ -95,7 +95,7 @@ index c327a3b5c10fa2d3c31f672044431c76031a111c..7f918209bee6fc679e36edad333703ab
                      final String profileName = gameProfile.get("name").getAsString();
  
                      MinecraftServer.LOGGER.info("UUID of player {} is {}", loginUsername, profileUUID);
-@@ -121,7 +127,7 @@ public record EncryptionResponsePacket(byte[] sharedSecret,
+@@ -121,7 +127,7 @@ public record ClientEncryptionResponsePacket(byte[] sharedSecret,
          writer.write(BYTE_ARRAY, encryptedVerifyToken);
      }
  
