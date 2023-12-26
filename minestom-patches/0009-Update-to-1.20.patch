@@ -4022,7 +4022,7 @@ index 0000000000000000000000000000000000000000..f65a1b41fda7720d96eaa5c6956355dd
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
-index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..523336b0c4f50aa19aae982ab6b598caf09a739a 100644
+index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..87cd57f08e97d1602f48f72abfaba7a049f51f1f 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
 @@ -1,9 +1,9 @@
@@ -4038,16 +4038,17 @@ index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..523336b0c4f50aa19aae982ab6b598ca
  import net.minestom.server.network.packet.client.play.*;
  import net.minestom.server.network.packet.client.status.PingPacket;
  import net.minestom.server.network.packet.client.status.StatusRequestPacket;
-@@ -18,7 +18,7 @@ import java.util.function.Function;
+@@ -18,7 +18,8 @@ import java.util.function.Function;
   * <p>
   * Packets are registered using {@link #register(int, Function)} and created using {@link #create(int, NetworkBuffer)}.
   */
 -public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, ClientPacketsHandler.Login, ClientPacketsHandler.Play {
++@Deprecated(forRemoval = true, since = "Use PacketResponsible instead")
 +public sealed class ClientPacketsHandler permits ClientPacketsHandler.Configuration, ClientPacketsHandler.Login, ClientPacketsHandler.Play, ClientPacketsHandler.Status {
      private final ObjectArray<Function<NetworkBuffer, ClientPacket>> suppliers = ObjectArray.singleThread(0x10);
  
      private ClientPacketsHandler() {
-@@ -43,69 +43,97 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
+@@ -43,69 +44,97 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
      }
  
      public static final class Login extends ClientPacketsHandler {
