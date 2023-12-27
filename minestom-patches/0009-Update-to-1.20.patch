@@ -4225,75 +4225,65 @@ index 0000000000000000000000000000000000000000..051fbee95d73bee52c93c8cb86894f36
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
-index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..5a9e4837b55f9f03e4553d30a52e61e4c6a3465a 100644
+deleted file mode 100644
+index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..0000000000000000000000000000000000000000
 --- a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
-+++ b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
-@@ -1,9 +1,9 @@
- package net.minestom.server.network.packet.client;
- 
- import net.minestom.server.network.NetworkBuffer;
++++ /dev/null
+@@ -1,111 +0,0 @@
+-package net.minestom.server.network.packet.client;
+-
+-import net.minestom.server.network.NetworkBuffer;
 -import net.minestom.server.network.packet.client.login.EncryptionResponsePacket;
 -import net.minestom.server.network.packet.client.login.LoginPluginResponsePacket;
 -import net.minestom.server.network.packet.client.login.LoginStartPacket;
-+import net.minestom.server.network.packet.client.common.*;
-+import net.minestom.server.network.packet.client.configuration.ClientFinishConfigurationPacket;
-+import net.minestom.server.network.packet.client.login.*;
- import net.minestom.server.network.packet.client.play.*;
- import net.minestom.server.network.packet.client.status.PingPacket;
- import net.minestom.server.network.packet.client.status.StatusRequestPacket;
-@@ -18,7 +18,8 @@ import java.util.function.Function;
-  * <p>
-  * Packets are registered using {@link #register(int, Function)} and created using {@link #create(int, NetworkBuffer)}.
-  */
+-import net.minestom.server.network.packet.client.play.*;
+-import net.minestom.server.network.packet.client.status.PingPacket;
+-import net.minestom.server.network.packet.client.status.StatusRequestPacket;
+-import net.minestom.server.utils.collection.ObjectArray;
+-import org.jetbrains.annotations.NotNull;
+-import org.jetbrains.annotations.UnknownNullability;
+-
+-import java.util.function.Function;
+-
+-/**
+- * Contains registered packets and a way to instantiate them.
+- * <p>
+- * Packets are registered using {@link #register(int, Function)} and created using {@link #create(int, NetworkBuffer)}.
+- */
 -public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, ClientPacketsHandler.Login, ClientPacketsHandler.Play {
-+@Deprecated(forRemoval = true, since = "Use PacketResponsible instead")
-+public sealed class ClientPacketsHandler permits ClientPacketsHandler.Configuration, ClientPacketsHandler.Login, ClientPacketsHandler.Play, ClientPacketsHandler.Status {
-     private final ObjectArray<Function<NetworkBuffer, ClientPacket>> suppliers = ObjectArray.singleThread(0x10);
- 
-     private ClientPacketsHandler() {
-@@ -43,69 +44,97 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
-     }
- 
-     public static final class Login extends ClientPacketsHandler {
-+        private static int nextId = 0;
-+        private static int nextId() {
-+            return nextId++;
-+        }
-         public Login() {
+-    private final ObjectArray<Function<NetworkBuffer, ClientPacket>> suppliers = ObjectArray.singleThread(0x10);
+-
+-    private ClientPacketsHandler() {
+-    }
+-
+-    public void register(int id, @NotNull Function<@NotNull NetworkBuffer, @NotNull ClientPacket> packetSupplier) {
+-        this.suppliers.set(id, packetSupplier);
+-    }
+-
+-    public @UnknownNullability ClientPacket create(int packetId, @NotNull NetworkBuffer reader) {
+-        final Function<NetworkBuffer, ClientPacket> supplier = suppliers.get(packetId);
+-        if (supplier == null)
+-            throw new IllegalStateException("Packet id 0x" + Integer.toHexString(packetId) + " isn't registered!");
+-        return supplier.apply(reader);
+-    }
+-
+-    public static final class Status extends ClientPacketsHandler {
+-        public Status() {
+-            register(0x00, StatusRequestPacket::new);
+-            register(0x01, PingPacket::new);
+-        }
+-    }
+-
+-    public static final class Login extends ClientPacketsHandler {
+-        public Login() {
 -            register(0x00, LoginStartPacket::new);
 -            register(0x01, EncryptionResponsePacket::new);
 -            register(0x02, LoginPluginResponsePacket::new);
-+            register(nextId(), ClientLoginStartPacket::new);
-+            register(nextId(), ClientEncryptionResponsePacket::new);
-+            register(nextId(), ClientLoginPluginResponsePacket::new);
-+            register(nextId(), ClientLoginAcknowledgedPacket::new);
-+        }
-+    }
-+
-+    public static final class Configuration extends ClientPacketsHandler {
-+        private static int nextId = 0;
-+        private static int nextId() {
-+            return nextId++;
-+        }
-+        public Configuration() {
-+            register(nextId(), ClientSettingsPacket::new);
-+            register(nextId(), ClientPluginMessagePacket::new);
-+            register(nextId(), ClientFinishConfigurationPacket::new);
-+            register(nextId(), ClientKeepAlivePacket::new);
-+            register(nextId(), ClientPongPacket::new);
-+            register(nextId(), ClientResourcePackStatusPacket::new);
-         }
-     }
- 
-     public static final class Play extends ClientPacketsHandler {
-+
-+        private static int nextId = 0;
-+
-+        private static int nextId() {
-+            return nextId++;
-+        }
-+
-         public Play() {
+-        }
+-    }
+-
+-    public static final class Play extends ClientPacketsHandler {
+-        public Play() {
 -            register(0x00, ClientTeleportConfirmPacket::new);
 -            register(0x01, ClientQueryBlockNbtPacket::new);
 -            // 0x02 difficulty packet
@@ -4348,64 +4338,9 @@ index 871e8c575f1e9096a4fcbe61dcb94fe6fa030f8d..5a9e4837b55f9f03e4553d30a52e61e4
 -            register(0x30, ClientSpectatePacket::new);
 -            register(0x31, ClientPlayerBlockPlacementPacket::new);
 -            register(0x32, ClientUseItemPacket::new);
-+            register(nextId(), ClientTeleportConfirmPacket::new);
-+            register(nextId(), ClientQueryBlockNbtPacket::new);
-+            nextId(); // difficulty packet
-+            register(nextId(), ClientChatAckPacket::new);
-+            register(nextId(), ClientCommandChatPacket::new);
-+            register(nextId(), ClientChatMessagePacket::new);
-+            register(nextId(), ClientChatSessionUpdatePacket::new);
-+            nextId(); // chunk batch received
-+            register(nextId(), ClientStatusPacket::new);
-+            register(nextId(), ClientSettingsPacket::new);
-+            register(nextId(), ClientTabCompletePacket::new);
-+            register(nextId(), ClientConfigurationAckPacket::new);
-+            register(nextId(), ClientClickWindowButtonPacket::new);
-+            register(nextId(), ClientClickWindowPacket::new);
-+            register(nextId(), ClientCloseWindowPacket::new);
-+            register(nextId(), ClientWindowSlotStatePacket::new);
-+            register(nextId(), ClientPluginMessagePacket::new);
-+            register(nextId(), ClientEditBookPacket::new);
-+            register(nextId(), ClientQueryEntityNbtPacket::new);
-+            register(nextId(), ClientInteractEntityPacket::new);
-+            register(nextId(), ClientGenerateStructurePacket::new);
-+            register(nextId(), ClientKeepAlivePacket::new);
-+            nextId(); // lock difficulty
-+            register(nextId(), ClientPlayerPositionPacket::new);
-+            register(nextId(), ClientPlayerPositionAndRotationPacket::new);
-+            register(nextId(), ClientPlayerRotationPacket::new);
-+            register(nextId(), ClientPlayerPacket::new);
-+            register(nextId(), ClientVehicleMovePacket::new);
-+            register(nextId(), ClientSteerBoatPacket::new);
-+            register(nextId(), ClientPickItemPacket::new);
-+            nextId(); // Ping request
-+            register(nextId(), ClientCraftRecipeRequest::new);
-+            register(nextId(), ClientPlayerAbilitiesPacket::new);
-+            register(nextId(), ClientPlayerDiggingPacket::new);
-+            register(nextId(), ClientEntityActionPacket::new);
-+            register(nextId(), ClientSteerVehiclePacket::new);
-+            register(nextId(), ClientPongPacket::new);
-+            register(nextId(), ClientSetRecipeBookStatePacket::new);
-+            register(nextId(), ClientSetDisplayedRecipePacket::new);
-+            register(nextId(), ClientNameItemPacket::new);
-+            register(nextId(), ClientResourcePackStatusPacket::new);
-+            register(nextId(), ClientAdvancementTabPacket::new);
-+            register(nextId(), ClientSelectTradePacket::new);
-+            register(nextId(), ClientSetBeaconEffectPacket::new);
-+            register(nextId(), ClientHeldItemChangePacket::new);
-+            register(nextId(), ClientUpdateCommandBlockPacket::new);
-+            register(nextId(), ClientUpdateCommandBlockMinecartPacket::new);
-+            register(nextId(), ClientCreativeInventoryActionPacket::new);
-+            nextId(); // Update Jigsaw Block
-+            register(nextId(), ClientUpdateStructureBlockPacket::new);
-+            register(nextId(), ClientUpdateSignPacket::new);
-+            register(nextId(), ClientAnimationPacket::new);
-+            register(nextId(), ClientSpectatePacket::new);
-+            register(nextId(), ClientPlayerBlockPlacementPacket::new);
-+            register(nextId(), ClientUseItemPacket::new);
-         }
-     }
- }
+-        }
+-    }
+-}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientKeepAlivePacket.java b/src/main/java/net/minestom/server/network/packet/client/common/ClientKeepAlivePacket.java
 similarity index 89%
 rename from src/main/java/net/minestom/server/network/packet/client/play/ClientKeepAlivePacket.java
@@ -4515,10 +4450,10 @@ index f02b383cae469bfec285346d79d3f2aee31d7eac..e26e3b6b330c37b16c26df50eed84485
              throw new IllegalArgumentException("Locale cannot be longer than 128 characters.");
 diff --git a/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java b/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..b7c5946ff1a2d68e0126b719c613e4a820c29f26
+index 0000000000000000000000000000000000000000..da5ba383058f996c4f88e5281bd6e4d8b3e486d9
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,24 @@
 +package net.minestom.server.network.packet.client.configuration;
 +
 +import net.minestom.server.network.ConnectionState;
@@ -4529,16 +4464,17 @@ index 0000000000000000000000000000000000000000..b7c5946ff1a2d68e0126b719c613e4a8
 +
 +public record ClientFinishConfigurationPacket() implements ClientConnectionStatePacket {
 +
-+    public ClientFinishConfigurationPacket(@NotNull NetworkBuffer buffer) {
++    public ClientFinishConfigurationPacket(@NotNull NetworkBuffer ignore) {
 +        this();
 +    }
 +
 +    @Override
 +    public void write(@NotNull NetworkBuffer writer) {
++        // Nothing do to here
 +    }
 +
 +    @Override
-+    public @Nullable ConnectionState nextState() {
++    public @NotNull ConnectionState nextState() {
 +        return ConnectionState.PLAY;
 +    }
 +}
@@ -4703,11 +4639,105 @@ index 0000000000000000000000000000000000000000..80ca3c348fa5f90d9ebca1f7446e76ab
 +        writer.write(UUID, profileId);
 +    }
 +}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/login/LoginPluginResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/LoginPluginResponsePacket.java
+deleted file mode 100644
+index 2fc8fdef31c5d0d0bc36ff2121ed7092ff0bba6c..0000000000000000000000000000000000000000
+--- a/src/main/java/net/minestom/server/network/packet/client/login/LoginPluginResponsePacket.java
++++ /dev/null
+@@ -1,82 +0,0 @@
+-package net.minestom.server.network.packet.client.login;
+-
+-import net.kyori.adventure.text.Component;
+-import net.kyori.adventure.text.format.NamedTextColor;
+-import net.minestom.server.MinecraftServer;
+-import net.minestom.server.extras.velocity.VelocityProxy;
+-import net.minestom.server.network.ConnectionManager;
+-import net.minestom.server.network.NetworkBuffer;
+-import net.minestom.server.network.packet.client.ClientPreplayPacket;
+-import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
+-import net.minestom.server.network.player.GameProfile;
+-import net.minestom.server.network.player.PlayerConnection;
+-import net.minestom.server.network.player.PlayerSocketConnection;
+-import org.jetbrains.annotations.NotNull;
+-import org.jetbrains.annotations.Nullable;
+-
+-import java.net.InetAddress;
+-import java.net.InetSocketAddress;
+-import java.net.SocketAddress;
+-import java.net.UnknownHostException;
+-import java.nio.ByteBuffer;
+-
+-import static net.minestom.server.network.NetworkBuffer.*;
+-
+-public record LoginPluginResponsePacket(int messageId, byte @Nullable [] data) implements ClientPreplayPacket {
+-    private final static ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
+-    public static final Component INVALID_PROXY_RESPONSE = Component.text("Invalid proxy response!", NamedTextColor.RED);
+-
+-    public LoginPluginResponsePacket(@NotNull NetworkBuffer reader) {
+-        this(reader.read(VAR_INT), reader.readOptional(RAW_BYTES));
+-    }
+-
+-    @Override
+-    public void process(@NotNull PlayerConnection connection) {
+-        // Proxy support
+-        if (connection instanceof PlayerSocketConnection socketConnection) {
+-            final String channel = socketConnection.getPluginRequestChannel(messageId);
+-            if (channel != null) {
+-                boolean success = false;
+-
+-                SocketAddress socketAddress = null;
+-                GameProfile gameProfile = null;
+-
+-                // Velocity
+-                if (VelocityProxy.isEnabled() && channel.equals(VelocityProxy.PLAYER_INFO_CHANNEL)) {
+-                    if (data != null && data.length > 0) {
+-                        NetworkBuffer buffer = new NetworkBuffer(ByteBuffer.wrap(data));
+-                        success = VelocityProxy.checkIntegrity(buffer);
+-                        if (success) {
+-                            // Get the real connection address
+-                            final InetAddress address;
+-                            try {
+-                                address = InetAddress.getByName(buffer.read(STRING));
+-                            } catch (UnknownHostException e) {
+-                                MinecraftServer.getExceptionManager().handleException(e);
+-                                return;
+-                            }
+-                            final int port = ((java.net.InetSocketAddress) connection.getRemoteAddress()).getPort();
+-                            socketAddress = new InetSocketAddress(address, port);
+-                            gameProfile = new GameProfile(buffer);
+-                        }
+-                    }
+-                }
+-
+-                if (success) {
+-                    socketConnection.setRemoteAddress(socketAddress);
+-                    socketConnection.UNSAFE_setProfile(gameProfile);
+-                    CONNECTION_MANAGER.startPlayState(connection, gameProfile.uuid(), gameProfile.name(), true);
+-                } else {
+-                    LoginDisconnectPacket disconnectPacket = new LoginDisconnectPacket(INVALID_PROXY_RESPONSE);
+-                    socketConnection.sendPacket(disconnectPacket);
+-                }
+-            }
+-        }
+-    }
+-
+-    @Override
+-    public void write(@NotNull NetworkBuffer writer) {
+-        writer.write(VAR_INT, messageId);
+-        writer.writeOptional(RAW_BYTES, data);
+-    }
+-}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientAdvancementTabPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientAdvancementTabPacket.java
-index fec3c5c7f36e11ee815cc639af50942f27a09744..bf7eccb78fd753f9292bf575f50af113fbdb2209 100644
+index fec3c5c7f36e11ee815cc639af50942f27a09744..6459020de3f7933fcb5801917efc218fd7459596 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/play/ClientAdvancementTabPacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/play/ClientAdvancementTabPacket.java
-@@ -8,8 +8,10 @@ import org.jetbrains.annotations.Nullable;
+@@ -3,13 +3,16 @@ package net.minestom.server.network.packet.client.play;
+ import net.minestom.server.advancements.AdvancementAction;
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.client.ClientPacket;
++import org.jetbrains.annotations.Contract;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
  
  import static net.minestom.server.network.NetworkBuffer.STRING;
  
@@ -4720,9 +4750,23 @@ index fec3c5c7f36e11ee815cc639af50942f27a09744..bf7eccb78fd753f9292bf575f50af113
      public ClientAdvancementTabPacket {
          if (tabIdentifier != null && tabIdentifier.length() > 256) {
              throw new IllegalArgumentException("Tab identifier too long: " + tabIdentifier.length());
+@@ -20,11 +23,11 @@ public record ClientAdvancementTabPacket(@NotNull AdvancementAction action,
+         this(read(reader));
+     }
+ 
+-    private ClientAdvancementTabPacket(ClientAdvancementTabPacket packet) {
++    private ClientAdvancementTabPacket(@NotNull ClientAdvancementTabPacket packet) {
+         this(packet.action, packet.tabIdentifier);
+     }
+ 
+-    private static ClientAdvancementTabPacket read(@NotNull NetworkBuffer reader) {
++    private static @NotNull ClientAdvancementTabPacket read(@NotNull NetworkBuffer reader) {
+         var action = reader.readEnum(AdvancementAction.class);
+         var tabIdentifier = action == AdvancementAction.OPENED_TAB ? reader.read(STRING) : null;
+         return new ClientAdvancementTabPacket(action, tabIdentifier);
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientConfigurationAckPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientConfigurationAckPacket.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4f62b2db0ddfd73c50bb0328b8f1cf243f723e11
+index 0000000000000000000000000000000000000000..d5611b45365406d773d28f5d9385c5102f5fafaa
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/client/play/ClientConfigurationAckPacket.java
 @@ -0,0 +1,23 @@
@@ -4732,20 +4776,20 @@ index 0000000000000000000000000000000000000000..4f62b2db0ddfd73c50bb0328b8f1cf24
 +import net.minestom.server.network.NetworkBuffer;
 +import net.minestom.server.network.packet.client.ClientConnectionStatePacket;
 +import org.jetbrains.annotations.NotNull;
-+import org.jetbrains.annotations.Nullable;
 +
 +public record ClientConfigurationAckPacket() implements ClientConnectionStatePacket {
 +
-+    public ClientConfigurationAckPacket(@NotNull NetworkBuffer buffer) {
++    public ClientConfigurationAckPacket(@NotNull NetworkBuffer ignore) {
 +        this();
 +    }
 +
 +    @Override
 +    public void write(@NotNull NetworkBuffer writer) {
++        // Nothing to write
 +    }
 +
 +    @Override
-+    public @Nullable ConnectionState nextState() {
++    public @NotNull ConnectionState nextState() {
 +        return ConnectionState.CONFIGURATION;
 +    }
 +}
@@ -4899,7 +4943,7 @@ index 56c11029cc90311b7cee69195fb0f90adcf351df..c84b62850c13ddec92ceeedda5c7622e
      public void write(@NotNull NetworkBuffer writer) {
          writer.write(LONG, number);
 diff --git a/src/main/java/net/minestom/server/network/packet/client/status/StatusRequestPacket.java b/src/main/java/net/minestom/server/network/packet/client/status/StatusRequestPacket.java
-index e24411a9a343c05d0ae8105bc73e0b356c951bfb..72fcb2a518ab6435dab6a757068cc646b994c4c7 100644
+index e24411a9a343c05d0ae8105bc73e0b356c951bfb..9627b5024b0aeaca0527f9a050b50f6e4b93402c 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/status/StatusRequestPacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/status/StatusRequestPacket.java
 @@ -1,27 +1,14 @@
@@ -4916,8 +4960,9 @@ index e24411a9a343c05d0ae8105bc73e0b356c951bfb..72fcb2a518ab6435dab6a757068cc646
  import org.jetbrains.annotations.NotNull;
  
 -public record StatusRequestPacket() implements ClientPreplayPacket {
+-    public StatusRequestPacket(@NotNull NetworkBuffer reader) {
 +public record StatusRequestPacket() implements ClientPacket {
-     public StatusRequestPacket(@NotNull NetworkBuffer reader) {
++    public StatusRequestPacket(@NotNull NetworkBuffer ignore) {
          this();
      }
  
