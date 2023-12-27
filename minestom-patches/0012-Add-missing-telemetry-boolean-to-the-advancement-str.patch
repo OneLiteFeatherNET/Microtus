@@ -173,10 +173,10 @@ index c9d38536ecf8e7ec0eebd9cf8b4eddb40596197e..e91776e889b8131cd4684c058ab57264
          final var mapping = new AdvancementsPacket.AdvancementMapping(IDENTIFIER, advancement);
          final var progressMapping = new AdvancementsPacket.ProgressMapping(IDENTIFIER,
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/AdvancementsPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/AdvancementsPacket.java
-index 64ae00571d82181a85a0a482dc91e5dcdcebb7ba..dc0a0d12235944ae7154f5a756a67c3ca1b1a78b 100644
+index d63d9ec3c1e740df5566f3a6118c12ca9ec82ff5..a26c59261a3a4f910e36bbfc20fc6fcac07d86f3 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/AdvancementsPacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/server/play/AdvancementsPacket.java
-@@ -100,7 +100,8 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
+@@ -103,7 +103,8 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
  
      public record Advancement(@Nullable String parentIdentifier, @Nullable DisplayData displayData,
                                @NotNull List<String> criteria,
@@ -186,7 +186,7 @@ index 64ae00571d82181a85a0a482dc91e5dcdcebb7ba..dc0a0d12235944ae7154f5a756a67c3c
          public Advancement {
              criteria = List.copyOf(criteria);
              requirements = List.copyOf(requirements);
-@@ -110,7 +111,9 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
+@@ -113,7 +114,9 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
              this(reader.read(BOOLEAN) ? reader.read(STRING) : null,
                      reader.read(BOOLEAN) ? new DisplayData(reader) : null,
                      reader.readCollection(STRING),
@@ -197,7 +197,7 @@ index 64ae00571d82181a85a0a482dc91e5dcdcebb7ba..dc0a0d12235944ae7154f5a756a67c3c
          }
  
          @Override
-@@ -119,6 +122,7 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
+@@ -122,6 +125,7 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
              writer.writeOptional(displayData);
              writer.writeCollection(STRING, criteria);
              writer.writeCollection(requirements);
@@ -205,7 +205,7 @@ index 64ae00571d82181a85a0a482dc91e5dcdcebb7ba..dc0a0d12235944ae7154f5a756a67c3c
          }
  
          @Override
-@@ -128,7 +132,11 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
+@@ -131,7 +135,11 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
  
          @Override
          public @NotNull Advancement copyWithOperator(@NotNull UnaryOperator<Component> operator) {
