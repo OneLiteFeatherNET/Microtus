@@ -2518,10 +2518,10 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..ae8115900a8ca21f7b8757ef2341be89
  }
 diff --git a/src/main/java/net/minestom/server/TickerImpl.java b/src/main/java/net/minestom/server/TickerImpl.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..3ecdf08aaa86932c47c5fe4deca42073db3b5067
+index 0000000000000000000000000000000000000000..6c656228a1eb0a7dddf54b630eda00a13e0c76a6
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/TickerImpl.java
-@@ -0,0 +1,88 @@
+@@ -0,0 +1,85 @@
 +package net.minestom.server;
 +
 +import net.minestom.server.event.EventDispatcher;
@@ -2572,11 +2572,8 @@ index 0000000000000000000000000000000000000000..3ecdf08aaa86932c47c5fe4deca42073
 +
 +        schedulerManager.processTick();
 +
-+        // Waiting players update (newly connected clients waiting to get into the server)
-+        connectionManager.updateWaitingPlayers();
-+
 +        // Keep Alive Handling
-+        connectionManager.handleKeepAlive(msTime);
++        connectionManager.onTick(msTime);
 +
 +        // Server tick (chunks/entities)
 +        serverTick(msTime);
@@ -4135,7 +4132,7 @@ index 0000000000000000000000000000000000000000..0b7760127548fd8bdb90ab533cd3d01f
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/ConnectionManager.java b/src/main/java/net/minestom/server/network/ConnectionManager.java
-index b080de14ec2509b15108f171694653d3dc62cd93..757288b5e5f31b390db069bee08cdb915f83b9e6 100644
+index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e9db44c2c 100644
 --- a/src/main/java/net/minestom/server/network/ConnectionManager.java
 +++ b/src/main/java/net/minestom/server/network/ConnectionManager.java
 @@ -4,12 +4,19 @@ import net.kyori.adventure.text.Component;
@@ -4201,7 +4198,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..757288b5e5f31b390db069bee08cdb91
       * to give the player the right {@link UUID}.
       *
       * @param playerConnection the player connection
-@@ -182,30 +194,68 @@ public final class ConnectionManager {
+@@ -182,30 +194,81 @@ public final class ConnectionManager {
          final Player player = this.connectionPlayerMap.remove(connection);
          if (player == null) return;
          this.players.remove(player);
@@ -4218,6 +4215,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..757288b5e5f31b390db069bee08cdb91
 +    public synchronized void shutdown() {
 +        this.players.clear();
 +        this.connectionPlayerMap.clear();
++        this.configurationPlayers.clear();
 +    }
 +
 +    /**
@@ -4236,6 +4234,18 @@ index b080de14ec2509b15108f171694653d3dc62cd93..757288b5e5f31b390db069bee08cdb91
 +        });
 +    }
 +
++    public void onTick(long tickStart) {
++        // Let waiting players into their instances
++        updateWaitingPlayers();
++
++        // Send keep alive packets
++        handleKeepAlive(configurationPlayers, tickStart);
++        handleKeepAlive(players, tickStart);
++
++        // Interpret packets for configuration players
++        configurationPlayers.forEach(Player::interpretPacketQueue);
++    }
++
 +    /**
 +     * Updates keep alive by checking the last keep alive packet and send a new one if needed.
       *
@@ -4245,9 +4255,9 @@ index b080de14ec2509b15108f171694653d3dc62cd93..757288b5e5f31b390db069bee08cdb91
       */
 -    public CompletableFuture<Void> startPlayState(@NotNull Player player, boolean register) {
 -        return AsyncUtils.runAsync(() -> {
-+    public void handleKeepAlive(long tickStart) {
++    private void handleKeepAlive(@NotNull Collection<Player> playerGroup, long tickStart) {
 +        final KeepAlivePacket keepAlivePacket = new KeepAlivePacket(tickStart);
-+        for (Player player : getOnlinePlayers()) {
++        for (Player player : playerGroup) {
 +            final long lastKeepAlive = tickStart - player.getLastKeepAlive();
 +            if (lastKeepAlive > KEEP_ALIVE_DELAY && player.didAnswerKeepAlive()) {
 +                player.refreshKeepAlive(tickStart);
@@ -4278,7 +4288,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..757288b5e5f31b390db069bee08cdb91
              // Change UUID/Username based on the event
              {
                  final String eventUsername = asyncPlayerPreLoginEvent.getUsername();
-@@ -217,72 +267,57 @@ public final class ConnectionManager {
+@@ -217,72 +280,57 @@ public final class ConnectionManager {
                      player.setUuid(eventUuid);
                  }
              }
@@ -4437,17 +4447,17 @@ index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..60f83f5f48055b6c4754910d69c94ed4
              (buffer, value) -> {
                  buffer.write(LONG, value.getMostSignificantBits());
 diff --git a/src/main/java/net/minestom/server/network/PacketProcessor.java b/src/main/java/net/minestom/server/network/PacketProcessor.java
-index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..c54fef9b7960639bfc0823b187bf0d6416e57062 100644
+index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..c33dd77f2b76b33a0c30133b79cb382e9f302c40 100644
 --- a/src/main/java/net/minestom/server/network/PacketProcessor.java
 +++ b/src/main/java/net/minestom/server/network/PacketProcessor.java
-@@ -1,38 +1,40 @@
+@@ -1,38 +1,39 @@
  package net.minestom.server.network;
  
  import net.minestom.server.entity.Player;
 +import net.minestom.server.listener.manager.PacketListenerManager;
  import net.minestom.server.network.packet.client.ClientPacket;
 -import net.minestom.server.network.packet.client.ClientPacketsHandler;
- import net.minestom.server.network.packet.client.ClientPreplayPacket;
+-import net.minestom.server.network.packet.client.ClientPreplayPacket;
  import net.minestom.server.network.packet.client.handshake.HandshakePacket;
 +import net.minestom.server.network.packet.server.ServerStateFlow;
  import net.minestom.server.network.player.PlayerConnection;
@@ -4495,7 +4505,7 @@ index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..c54fef9b7960639bfc0823b187bf0d64
                  assert packetId == 0;
                  yield new HandshakePacket(buffer);
              }
-@@ -43,12 +45,26 @@ public record PacketProcessor(@NotNull ClientPacketsHandler statusHandler,
+@@ -43,12 +44,26 @@ public record PacketProcessor(@NotNull ClientPacketsHandler statusHandler,
  
      public ClientPacket process(@NotNull PlayerConnection connection, int packetId, ByteBuffer body) {
          final ClientPacket packet = create(connection.getConnectionState(), packetId, body);
@@ -5946,7 +5956,7 @@ index 0000000000000000000000000000000000000000..6177167056f3ace7b0b5d0809822edd2
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/server/ServerStateValidator.java b/src/main/java/net/minestom/server/network/packet/server/ServerStateValidator.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..999679ce3776053deb7478b8dee946317f6b6513
+index 0000000000000000000000000000000000000000..f69eb3db7af7fc417d15c7d708af62a31faa9755
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/server/ServerStateValidator.java
 @@ -0,0 +1,27 @@
@@ -5969,12 +5979,12 @@ index 0000000000000000000000000000000000000000..999679ce3776053deb7478b8dee94631
 +            return states[0].ordinal() == state.ordinal();
 +        }
 +
-+        boolean hasState = true;
++        boolean hasState = false;
 +
-+        for (int i = 0; i < states.length && hasState; i++) {
++        for (int i = 0; i < states.length && !hasState; i++) {
 +            hasState = states[i].ordinal() == state.ordinal();
 +        }
-+        return false;
++        return hasState;
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/server/common/DisconnectPacket.java b/src/main/java/net/minestom/server/network/packet/server/common/DisconnectPacket.java
