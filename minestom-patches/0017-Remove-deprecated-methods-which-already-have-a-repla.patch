@@ -39,7 +39,7 @@ index 7b6b1169b4b65dd02d4b1f66900517995622f681..15fee4d25369b8b3e76cfae3eccaa2e6
 -    }
  }
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 2d9fe8a7a8ebb0d6ef5af7ece430d769c158c164..ded5231b0ac28efbebd5ff86e8a0f03a1eee5f7f 100644
+index 26af86e8b53e2af54c6cee272d2f7aad17be0912..97c443a077faa9af342a771d2ffe947c8c8661b2 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 @@ -23,6 +23,7 @@ import java.util.Collection;
@@ -50,7 +50,7 @@ index 2d9fe8a7a8ebb0d6ef5af7ece430d769c158c164..ded5231b0ac28efbebd5ff86e8a0f03a
  public class AdventurePacketConvertor {
      private static final Object2IntMap<NamedTextColor> NAMED_TEXT_COLOR_ID_MAP = new Object2IntArrayMap<>(16);
  
-@@ -141,19 +142,6 @@ public class AdventurePacketConvertor {
+@@ -143,19 +144,6 @@ public class AdventurePacketConvertor {
          }
      }
  
@@ -288,10 +288,10 @@ index c451537f5638b47f9a55212ad51aeda8764205ec..1b05107e945189da3e963917f01fc028
       * @param entityCreature  the entity (self)
       * @param range           the maximum range the entity can target others within
 diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-index 60d7102b205bc04a60678fecc2da0009ce56437a..de4ff6d92dc8965fc6f0c7f77994623adacba55e 100644
+index 1640a25fa4f17b0f49e20621f858d74436c9ea5e..39e3b18a96649ebc5ebcdc4329e5624f56291b4a 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-@@ -76,28 +76,6 @@ public class LivingEntityMeta extends EntityMeta {
+@@ -78,28 +78,6 @@ public class LivingEntityMeta extends EntityMeta {
          super.metadata.setIndex(OFFSET + 4, Metadata.VarInt(value));
      }
  
@@ -320,7 +320,7 @@ index 60d7102b205bc04a60678fecc2da0009ce56437a..de4ff6d92dc8965fc6f0c7f77994623a
      /**
       * Gets the amount of bee stingers in this entity
       * @return The amount of bee stingers
-@@ -122,5 +100,4 @@ public class LivingEntityMeta extends EntityMeta {
+@@ -124,5 +102,4 @@ public class LivingEntityMeta extends EntityMeta {
      public void setBedInWhichSleepingPosition(@Nullable Point value) {
          super.metadata.setIndex(OFFSET + 6, Metadata.OptPosition(value));
      }
