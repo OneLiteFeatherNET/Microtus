@@ -47,5 +47,5 @@ body:
         ```java
         [Paste your code here]
         ```
-      validations:
-        required: true
+    validations:
+      required: true
