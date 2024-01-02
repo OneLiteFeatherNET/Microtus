@@ -5,10 +5,10 @@ Subject: [PATCH] Update java keyword usage
 
 
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 2d9fe8a7a8ebb0d6ef5af7ece430d769c158c164..26af86e8b53e2af54c6cee272d2f7aad17be0912 100644
+index ded5231b0ac28efbebd5ff86e8a0f03a1eee5f7f..97c443a077faa9af342a771d2ffe947c8c8661b2 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-@@ -45,6 +45,8 @@ public class AdventurePacketConvertor {
+@@ -46,6 +46,8 @@ public class AdventurePacketConvertor {
          NAMED_TEXT_COLOR_ID_MAP.put(NamedTextColor.WHITE, 15);
      }
  
@@ -136,7 +136,7 @@ index 449b16bbbc863703e293606d3253d2b7c4f64078..c1a4ae454e23bb8a58596089c1cb5328
      private final WeakReference<Entity> entityRef;
      protected final Metadata metadata;
 diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-index 60d7102b205bc04a60678fecc2da0009ce56437a..1640a25fa4f17b0f49e20621f858d74436c9ea5e 100644
+index de4ff6d92dc8965fc6f0c7f77994623adacba55e..39e3b18a96649ebc5ebcdc4329e5624f56291b4a 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
 @@ -11,9 +11,11 @@ public class LivingEntityMeta extends EntityMeta {
