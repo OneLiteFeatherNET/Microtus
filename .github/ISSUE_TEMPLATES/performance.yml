@@ -5,7 +5,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before creating an issue regarding to the performance, please reaching out for support on our [Discord](https://discord.onelitefeather.net/)
+        Before creating an issue regarding to the performance, please reach out for support on our [Discord](https://discord.onelitefeather.net/)
         or in the [Discussions](https://github.com/OneLiteFeatherNET/Microtus/discussions)!
         
         **Please be aware: Performance issues can sometimes depend on your specific implementation and not on Microtus itself. If the situation is clear and it's not a problem with the project, we will close the issue without any comment.**
@@ -35,6 +35,6 @@ body:
       value: |
         Before submitting your issue, please make sure you have done the following:
         
-        1. You are running the latest version of Microtus from [Release page](https://github.com/OneLiteFeatherNET/Microtus/releases).
-        2. You searched for and ensured there isn't already an open issue regarding this.
-        3. Your version of Minecraft is supported by Microtus.
+        1. You are running the latest version of Microtus from [Release page](https://github.com/OneLiteFeatherNET/Microtus/releases)
+        2. You searched for and ensured there isn't already an open issue regarding this
+        3. Your version of Minecraft is supported by Microtus

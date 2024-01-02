@@ -11,9 +11,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Before filling the form fields, please consider the following:
+        Before filling in the form fields, please consider the following:
         - Ensure that you are using the latest version of Microtus.
-        - Search the [issue tracker](https://github.com/OneLiteFeatherNET/Microtus/issues)
+        - Search for existing issues in the [issue tracker](https://github.com/OneLiteFeatherNET/Microtus/issues)
   - type: textarea
     attributes:
       label: Describe the bug
