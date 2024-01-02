@@ -1647,7 +1647,7 @@ index 9f4cfa4a898ca348d60883ec140a874c2b9cd8fa..45db42b49012a49901ca25fba753d9ab
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 2886dc65a8f79cab946434b093ae3161bf5c2cb1..2b810253fc8992c659d306de2848df739cca432f 100644
+index c9dba2f5de90de81512b3f17fa94023b3e2c3334..49bdbbfe174381fb8a7e468b8a24a1910b687e4b 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -205,6 +205,8 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
