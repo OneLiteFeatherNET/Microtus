@@ -5987,57 +5987,60 @@ index 0000000000000000000000000000000000000000..f69eb3db7af7fc417d15c7d708af62a3
 +        return hasState;
 +    }
 +}
-diff --git a/src/main/java/net/minestom/server/network/packet/server/common/DisconnectPacket.java b/src/main/java/net/minestom/server/network/packet/server/common/DisconnectPacket.java
-new file mode 100644
-index 0000000000000000000000000000000000000000..ef9fa321db49a5a1867cc3e82db37f278b29f2a5
---- /dev/null
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/DisconnectPacket.java b/src/main/java/net/minestom/server/network/packet/server/common/DisconnectPacket.java
+similarity index 60%
+rename from src/main/java/net/minestom/server/network/packet/server/play/DisconnectPacket.java
+rename to src/main/java/net/minestom/server/network/packet/server/common/DisconnectPacket.java
+index 036112abbf72441a13fa1f8414afdb7260d08875..76bf0c3bb8c14ce91aca503c11444b4cea2c157d 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/DisconnectPacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/server/common/DisconnectPacket.java
-@@ -0,0 +1,45 @@
+@@ -1,10 +1,9 @@
+-package net.minestom.server.network.packet.server.play;
 +package net.minestom.server.network.packet.server.common;
-+
-+import net.kyori.adventure.text.Component;
+ 
+ import net.kyori.adventure.text.Component;
 +import net.minestom.server.network.ConnectionState;
-+import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.NetworkBuffer;
+-import net.minestom.server.network.packet.server.ComponentHoldingServerPacket;
+-import net.minestom.server.network.packet.server.ServerPacket;
+-import net.minestom.server.network.packet.server.ServerPacketIdentifier;
 +import net.minestom.server.network.packet.server.*;
-+import org.jetbrains.annotations.NotNull;
-+
-+import java.util.Collection;
-+import java.util.List;
-+import java.util.function.UnaryOperator;
-+
-+import static net.minestom.server.network.NetworkBuffer.COMPONENT;
-+
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+@@ -12,15 +11,17 @@ import java.util.List;
+ import java.util.function.UnaryOperator;
+ 
+ import static net.minestom.server.network.NetworkBuffer.COMPONENT;
++import static net.minestom.server.network.NetworkBuffer.JSON_COMPONENT;
+ 
+-public record DisconnectPacket(@NotNull Component message) implements ComponentHoldingServerPacket {
 +@ServerPacketState(states = {ConnectionState.PLAY, ConnectionState.CONFIGURATION})
 +public record DisconnectPacket(@NotNull Component message) implements ComponentHoldingServerPacket, ConfigureServerPacket {
-+    public DisconnectPacket(@NotNull NetworkBuffer reader) {
-+        this(reader.read(COMPONENT));
-+    }
-+
-+    @Override
-+    public void write(@NotNull NetworkBuffer writer) {
-+        writer.write(COMPONENT, message);
-+    }
-+
-+    @Override
-+    public int getId() {
-+        return ServerPacketIdentifier.DISCONNECT;
-+    }
-+
+     public DisconnectPacket(@NotNull NetworkBuffer reader) {
+-        this(reader.read(COMPONENT));
++        this(reader.read(JSON_COMPONENT));
+     }
+ 
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+-        writer.write(COMPONENT, message);
++        writer.write(JSON_COMPONENT, message);
+     }
+ 
+     @Override
+@@ -28,6 +29,11 @@ public record DisconnectPacket(@NotNull Component message) implements ComponentH
+         return ServerPacketIdentifier.DISCONNECT;
+     }
+ 
 +    @Override
 +    public int getConfigurePacketId() {
 +        return ServerPacketIdentifier.CONFIGURATION_DISCONNECT;
 +    }
 +
-+    @Override
-+    public @NotNull Collection<Component> components() {
-+        return List.of(message);
-+    }
-+
-+    @Override
-+    public @NotNull ServerPacket copyWithOperator(@NotNull UnaryOperator<Component> operator) {
-+        return new DisconnectPacket(operator.apply(message));
-+    }
-+}
+     @Override
+     public @NotNull Collection<Component> components() {
+         return List.of(message);
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/KeepAlivePacket.java b/src/main/java/net/minestom/server/network/packet/server/common/KeepAlivePacket.java
 similarity index 52%
 rename from src/main/java/net/minestom/server/network/packet/server/play/KeepAlivePacket.java
@@ -7125,18 +7128,6 @@ index 8c0a4062e629b401179aee1bc79fe43d39bddda5..b4ada5b070816cd09bfc06af35ff1f4f
  public record DestroyEntitiesPacket(@NotNull List<Integer> entityIds) implements ServerPacket {
      public DestroyEntitiesPacket {
          entityIds = List.copyOf(entityIds);
-diff --git a/src/main/java/net/minestom/server/network/packet/server/play/DisconnectPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/DisconnectPacket.java
-index 036112abbf72441a13fa1f8414afdb7260d08875..38dac064909991fd310d4db20ad77f65b278a98b 100644
---- a/src/main/java/net/minestom/server/network/packet/server/play/DisconnectPacket.java
-+++ b/src/main/java/net/minestom/server/network/packet/server/play/DisconnectPacket.java
-@@ -13,6 +13,7 @@ import java.util.function.UnaryOperator;
- 
- import static net.minestom.server.network.NetworkBuffer.COMPONENT;
- 
-+@Deprecated(forRemoval = true, since = "Now allocated in the common package")
- public record DisconnectPacket(@NotNull Component message) implements ComponentHoldingServerPacket {
-     public DisconnectPacket(@NotNull NetworkBuffer reader) {
-         this(reader.read(COMPONENT));
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/DisplayScoreboardPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/DisplayScoreboardPacket.java
 index db83202da9a82dcca358250c614887d1a67b7d9c..c9ee83d87bd5db0a1abd498cdadefd6d810bba8d 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/DisplayScoreboardPacket.java
@@ -9971,10 +9962,43 @@ index 5b0d774bc9d87540382de3b88f48f7542f8f473c..a2019e8a46f96c6b4fec81bd2f388e9f
      }
  }
 diff --git a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
-index f23020126745417521cc687d2eac2bc1539549c8..4a4400f88ad9ceee0815eb9ba370563f2802a0f2 100644
+index f23020126745417521cc687d2eac2bc1539549c8..b38286f56eeb175bb0071762a6b35ffb80f86d11 100644
 --- a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
 +++ b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
-@@ -90,7 +90,7 @@ public class PacketWriteReadTest {
+@@ -2,14 +2,9 @@ package net.minestom.server.network;
+ 
+ import com.google.gson.JsonObject;
+ 
+-import java.io.PrintStream;
+-
+ import net.kyori.adventure.bossbar.BossBar;
+ import net.kyori.adventure.text.Component;
+-import net.minestom.server.MinecraftServer;
+ import net.minestom.server.coordinate.Vec;
+-import net.minestom.server.crypto.ChatSession;
+-import net.minestom.server.crypto.PlayerPublicKey;
+ import net.minestom.server.entity.EquipmentSlot;
+ import net.minestom.server.entity.GameMode;
+ import net.minestom.server.entity.Metadata;
+@@ -19,15 +14,14 @@ import net.minestom.server.item.Material;
+ import net.minestom.server.network.packet.client.ClientPacket;
+ import net.minestom.server.network.packet.client.handshake.HandshakePacket;
+ import net.minestom.server.network.packet.server.ServerPacket;
+-import net.minestom.server.network.packet.server.handshake.ResponsePacket;
++import net.minestom.server.network.packet.server.common.DisconnectPacket;
+ import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
+ import net.minestom.server.network.packet.server.login.LoginSuccessPacket;
+ import net.minestom.server.network.packet.server.login.SetCompressionPacket;
+ import net.minestom.server.network.packet.server.play.*;
+ import net.minestom.server.network.packet.server.play.DeclareRecipesPacket.Ingredient;
+ import net.minestom.server.network.packet.server.status.PongPacket;
+-import net.minestom.server.utils.crypto.KeyUtils;
+-import org.apache.commons.net.util.Base64;
++import net.minestom.server.network.packet.server.status.ResponsePacket;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.junit.jupiter.api.BeforeAll;
+ import org.junit.jupiter.api.Test;
+@@ -90,7 +84,7 @@ public class PacketWriteReadTest {
          SERVER_PACKETS.add(new CloseWindowPacket((byte) 2));
          SERVER_PACKETS.add(new CollectItemPacket(5, 5, 5));
          SERVER_PACKETS.add(new CraftRecipeResponse((byte) 2, "recipe"));
@@ -9983,7 +10007,7 @@ index f23020126745417521cc687d2eac2bc1539549c8..4a4400f88ad9ceee0815eb9ba370563f
          SERVER_PACKETS.add(new DeclareRecipesPacket(
                  List.of(new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
                                  "minecraft:sticks",
-@@ -114,9 +114,9 @@ public class PacketWriteReadTest {
+@@ -114,9 +108,9 @@ public class PacketWriteReadTest {
          SERVER_PACKETS.add(new DisconnectPacket(COMPONENT));
          SERVER_PACKETS.add(new DisplayScoreboardPacket((byte) 5, "scoreboard"));
          SERVER_PACKETS.add(new EffectPacket(5, VEC, 5, false));
