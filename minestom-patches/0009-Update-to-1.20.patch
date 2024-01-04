@@ -2670,14 +2670,23 @@ index c1d23ebdb7a8ac85eac5bfb80f91652e629b5f8f..e0fc93a772904b3a6be28b9bbd379c00
          short velocityX = 0, velocityZ = 0, velocityY = 0;
          if (entity.getEntityMeta() instanceof ObjectDataProvider objectDataProvider) {
 diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-index 9f4cfa4a898ca348d60883ec140a874c2b9cd8fa..ca4ee88add47c66fafeac58f98ed1b6403a76631 100644
+index 9f4cfa4a898ca348d60883ec140a874c2b9cd8fa..23754c19cfb7a8d2dc65c319b2573d90bcffa60e 100644
 --- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 +++ b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
+@@ -78,7 +78,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+ 
+     private static Map<String, BiFunction<Entity, Metadata, EntityMeta>> createMetaMap() {
+         return Map.<String, BiFunction<Entity, Metadata, EntityMeta>>ofEntries(
+-                entry("minecraft:allay", EntityMeta::new), // TODO dedicated metadata
++                entry("minecraft:allay", AllayMeta::new), // Microtus - 1.20
+                 entry("minecraft:area_effect_cloud", AreaEffectCloudMeta::new),
+                 entry("minecraft:armor_stand", ArmorStandMeta::new),
+                 entry("minecraft:arrow", ArrowMeta::new),
 @@ -86,6 +86,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
                  entry("minecraft:bat", BatMeta::new),
                  entry("minecraft:bee", BeeMeta::new),
                  entry("minecraft:blaze", BlazeMeta::new),
-+                entry("minecraft:breeze", EntityMeta::new), //TODO: Add dedicated metadata when the wiki is updated
++                entry("minecraft:breeze", BreezeMeta::new), // Microtus - 1.20
                  entry("minecraft:boat", BoatMeta::new),
                  entry("minecraft:chest_boat", EntityMeta::new), // TODO dedicated metadata
                  entry("minecraft:cat", CatMeta::new),
@@ -2937,6 +2946,92 @@ index 841e274ae10f56f58511f8e4c7d32c87e2d202bb..bc265c12a287769d1b2471e91b5d99b9
 +      //  this.fakePlayer.addPacketToQueue(clientPlayPacket);
      }
  }
+diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/BreezeMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/BreezeMeta.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..df3be9e3c01a1ee2bac72a14575f1d760fc6cbb9
+--- /dev/null
++++ b/src/main/java/net/minestom/server/entity/metadata/monster/BreezeMeta.java
+@@ -0,0 +1,15 @@
++package net.minestom.server.entity.metadata.monster;
++
++import net.minestom.server.entity.Entity;
++import net.minestom.server.entity.Metadata;
++import org.jetbrains.annotations.NotNull;
++
++public class BreezeMeta extends MonsterMeta {
++
++    public static final byte OFFSET = MonsterMeta.MAX_OFFSET;
++    public static final byte MAX_OFFSET = OFFSET + 0;
++
++    public BreezeMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
++        super(entity, metadata);
++    }
++}
+diff --git a/src/main/java/net/minestom/server/entity/metadata/other/AllayMeta.java b/src/main/java/net/minestom/server/entity/metadata/other/AllayMeta.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..9fa003e206339bee19471f8968a8e3fb57d53021
+--- /dev/null
++++ b/src/main/java/net/minestom/server/entity/metadata/other/AllayMeta.java
+@@ -0,0 +1,59 @@
++package net.minestom.server.entity.metadata.other;
++
++import net.minestom.server.entity.Entity;
++import net.minestom.server.entity.Metadata;
++import net.minestom.server.entity.metadata.PathfinderMobMeta;
++import org.jetbrains.annotations.NotNull;
++
++/**
++ * The metadata implementation contains each additional information which an Allay can have.
++ * @version 1.0.0
++ * @since 1.1.4
++ */
++public class AllayMeta extends PathfinderMobMeta {
++
++    public static final byte OFFSET = PathfinderMobMeta.MAX_OFFSET;
++    public static final byte MAX_OFFSET = OFFSET + 2;
++
++    /**
++     * Creates a new AllayMeta.
++     *
++     * @param entity the entity to apply the metadata to
++     * @param metadata the metadata
++     */
++    public AllayMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
++        super(entity, metadata);
++    }
++
++    /**
++     * Gets the state if an Allay is dancing.
++     * @return true if an Allay is dancing, false otherwise
++     */
++    public boolean isDancing() {
++        return super.metadata.getIndex(OFFSET, false);
++    }
++
++    /**
++     * Sets the state if an Allay is dancing.
++     * @param value the value to set
++     */
++    public void setDancing(boolean value) {
++        super.metadata.setIndex(OFFSET, Metadata.Boolean(value));
++    }
++
++    /**
++     * Gets the state if an Allay can duplicate items.
++     * @return true if an Allay can duplicate items, false otherwise
++     */
++    public boolean canDuplicate() {
++        return super.metadata.getIndex(OFFSET + 1, true);
++    }
++
++    /**
++     * Sets the state if an Allay can duplicate items.
++     * @param value the value to set
++     */
++    public void setCanDuplicate(boolean value) {
++        super.metadata.setIndex(OFFSET + 1, Metadata.Boolean(value));
++    }
++}
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerPluginMessageEvent.java b/src/main/java/net/minestom/server/event/player/PlayerPluginMessageEvent.java
 index cb00028e219bed6a9b5351f26489545b6838c917..aee14e3d886edb8e227f4244b91ab47f1b65bbba 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerPluginMessageEvent.java
