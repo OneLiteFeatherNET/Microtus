@@ -17,7 +17,7 @@ index ff0b45ffe8ac3ce607de0c4312b11451014a11a5..8e7ad8420da6168ea2444dae90e5bc68
          SNIFFING,
          EMERGING,
 diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-index ca4ee88add47c66fafeac58f98ed1b6403a76631..6f64dcec23b3e90ff09f74250c44e73b197274c5 100644
+index 23754c19cfb7a8d2dc65c319b2573d90bcffa60e..69330b33f092e5a13e1f4e0a6d6950e45109e147 100644
 --- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 +++ b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 @@ -33,10 +33,7 @@ import net.minestom.server.entity.metadata.water.AxolotlMeta;
@@ -34,7 +34,7 @@ index ca4ee88add47c66fafeac58f98ed1b6403a76631..6f64dcec23b3e90ff09f74250c44e73b
  
 @@ -88,7 +85,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
                  entry("minecraft:blaze", BlazeMeta::new),
-                 entry("minecraft:breeze", EntityMeta::new), //TODO: Add dedicated metadata when the wiki is updated
+                 entry("minecraft:breeze", BreezeMeta::new), // Microtus - 1.20
                  entry("minecraft:boat", BoatMeta::new),
 -                entry("minecraft:chest_boat", EntityMeta::new), // TODO dedicated metadata
 +                entry("minecraft:chest_boat", BoatMeta::new), // Microtus - entity meta update
