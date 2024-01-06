@@ -382,28 +382,29 @@ index d6dd0549db22ee58c4057012fcc46a3aba8f087b..b93d4b722d088ec3de4a3fd4874ff94b
          Tickable, Schedulable, Snapshotable, EventHandler<InstanceEvent>, Taggable, PacketGroupingAudience {
  
 diff --git a/src/main/java/net/minestom/server/inventory/Inventory.java b/src/main/java/net/minestom/server/inventory/Inventory.java
-index 9d80f6331c1320603680411d1eff3d710c38e6c3..ab57e8814738acb22cd9bfc8565a449038f1c4d8 100644
+index 9d80f6331c1320603680411d1eff3d710c38e6c3..a267f72163368fbd3526cb17fb2e5b1487c36e8e 100644
 --- a/src/main/java/net/minestom/server/inventory/Inventory.java
 +++ b/src/main/java/net/minestom/server/inventory/Inventory.java
-@@ -53,9 +53,18 @@ public non-sealed class Inventory extends AbstractInventory implements Viewable
+@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
+ /**
+  * Represents an inventory which can be viewed by a collection of {@link Player}.
+  * <p>
+- * You can create one with {@link Inventory#Inventory(InventoryType, String)} or by making your own subclass.
++ * You can create one with {@link Inventory#Inventory(InventoryType, Component)} or by making your own subclass.
+  * It can then be opened using {@link Player#openInventory(Inventory)}.
+  */
+ public non-sealed class Inventory extends AbstractInventory implements Viewable {
+@@ -53,10 +53,6 @@ public non-sealed class Inventory extends AbstractInventory implements Viewable
          this.offset = getSize();
      }
  
-+    //Microtus start - Update deprecation status
-+    /**
-+     * Creates a new Inventory reference with a given size and title.
-+     * The method is deprecated please use {@link Inventory#Inventory(InventoryType, Component)} instead.
-+     * @param inventoryType the inventory type
-+     * @param title the inventory title
-+     */
-+    @Deprecated(forRemoval = true, since = "1.1.3")
-     public Inventory(@NotNull InventoryType inventoryType, @NotNull String title) {
-         this(inventoryType, Component.text(title));
-     }
-+    //Microtus end - Update deprecation status
- 
+-    public Inventory(@NotNull InventoryType inventoryType, @NotNull String title) {
+-        this(inventoryType, Component.text(title));
+-    }
+-
      private static byte generateId() {
          return (byte) ID_COUNTER.updateAndGet(i -> i + 1 >= 128 ? 1 : i + 1);
+     }
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
 index 6108c4283fc1128fddd208914095cd7739524f0f..d467975f66e85606eb551b845cc0415773a2d517 100644
 --- a/src/main/java/net/minestom/server/inventory/InventoryType.java
@@ -938,3 +939,167 @@ index 7e181a47c91f8f925b20eb9f4705dabdb24a0c2f..43e25a3f283ea6af40d32deb142c2741
  
      private TimeUnit() {
      }
+diff --git a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java b/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
+index d0df75b49e882760cc1813ff813c2882a5870c61..87a076a18c37898f80266bb25a7f756a2c7cd369 100644
+--- a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
++++ b/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
+@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.*;
+ 
+ @EnvTest
+-public class InventoryIntegrationTest {
+-
++class InventoryIntegrationTest {
++    private static final Component TITLE = Component.text("title");
+     private static final ItemStack MAGIC_STACK = ItemStack.of(Material.DIAMOND, 3);
+ 
+     @Test
+@@ -115,7 +115,7 @@ public class InventoryIntegrationTest {
+         var instance = env.createFlatInstance();
+         var connection = env.createConnection();
+         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
+-        final var inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        final var inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         player.openInventory(inventory);
+         assertSame(inventory, player.getOpenInventory());
+         player.closeInventory();
+@@ -128,7 +128,7 @@ public class InventoryIntegrationTest {
+         var connection = env.createConnection();
+         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
+         var listener = env.listen(ItemDropEvent.class);
+-        final var firstInventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        final var firstInventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         player.openInventory(firstInventory);
+         assertSame(firstInventory, player.getOpenInventory());
+         firstInventory.setCursorItem(player, ItemStack.of(Material.STONE));
+@@ -139,10 +139,9 @@ public class InventoryIntegrationTest {
+ 
+         player.openInventory(firstInventory);
+         firstInventory.setCursorItem(player, ItemStack.of(Material.STONE));
+-        final var secondInventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        final var secondInventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         listener.followup(event -> event.getPlayer().openInventory(secondInventory));
+         player.closeInventory();
+         assertSame(secondInventory, player.getOpenInventory());
+     }
+-
+ }
+diff --git a/src/test/java/net/minestom/server/inventory/InventoryTest.java b/src/test/java/net/minestom/server/inventory/InventoryTest.java
+index 612e3b162f38d6367dc016530270e38d46913281..87e903169091dfb6576c8102c61294ad7e884cfa 100644
+--- a/src/test/java/net/minestom/server/inventory/InventoryTest.java
++++ b/src/test/java/net/minestom/server/inventory/InventoryTest.java
+@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
+ 
+ public class InventoryTest {
+ 
++    private static final Component TITLE = Component.text("title");
++
+     static {
+         // Required to prevent initialization error during event call
+         MinecraftServer.init();
+@@ -17,7 +19,7 @@ public class InventoryTest {
+ 
+     @Test
+     public void testCreation() {
+-        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         assertEquals(InventoryType.CHEST_1_ROW, inventory.getInventoryType());
+         assertEquals(Component.text("title"), inventory.getTitle());
+ 
+@@ -30,7 +32,7 @@ public class InventoryTest {
+         var item1 = ItemStack.of(Material.DIAMOND);
+         var item2 = ItemStack.of(Material.GOLD_INGOT);
+ 
+-        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         assertSame(ItemStack.AIR, inventory.getItemStack(0));
+         inventory.setItemStack(0, item1);
+         assertSame(item1, inventory.getItemStack(0));
+@@ -54,7 +56,7 @@ public class InventoryTest {
+     @Test
+     public void testTake() {
+         ItemStack item = ItemStack.of(Material.DIAMOND, 32);
+-        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         inventory.setItemStack(0, item);
+         assertTrue(inventory.takeItemStack(item, TransactionOption.DRY_RUN));
+         assertTrue(inventory.takeItemStack(item.withAmount(31), TransactionOption.DRY_RUN));
+@@ -67,7 +69,7 @@ public class InventoryTest {
+ 
+     @Test
+     public void testAdd() {
+-        Inventory inventory = new Inventory(InventoryType.HOPPER, "title");
++        Inventory inventory = new Inventory(InventoryType.HOPPER, TITLE);
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.DIAMOND, 32), TransactionOption.ALL_OR_NOTHING));
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.GOLD_BLOCK, 32), TransactionOption.ALL_OR_NOTHING));
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.MAP, 32), TransactionOption.ALL_OR_NOTHING));
+@@ -79,7 +81,7 @@ public class InventoryTest {
+     @Test
+     public void testIds() {
+         for (int i = 0; i <= 1000; ++i) {
+-            final byte windowId = new Inventory(InventoryType.CHEST_1_ROW, "title").getWindowId();
++            final byte windowId = new Inventory(InventoryType.CHEST_1_ROW, TITLE).getWindowId();
+             assertTrue(windowId > 0);
+         }
+     }
+diff --git a/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
+index 93069a5a925fda0d289e03b72281b92d795ac4c2..3262b08e463feb4dcfd49fbf34b8f3e0be4f37e8 100644
+--- a/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
++++ b/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
+@@ -1,5 +1,6 @@
+ package net.minestom.server.inventory.click.integration;
+ 
++import net.kyori.adventure.text.Component;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import net.minestom.server.coordinate.Pos;
+@@ -99,7 +100,7 @@ public class HeldClickIntegrationTest {
+     public void heldExternal(Env env) {
+         var instance = env.createFlatInstance();
+         var player = env.createPlayer(instance, new Pos(0, 40, 0));
+-        var inventory = new Inventory(InventoryType.HOPPER, "test");
++        var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
+         var playerInv = player.getInventory();
+         player.openInventory(inventory);
+         var listener = env.listen(InventoryPreClickEvent.class);
+diff --git a/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
+index 87a81674699095298ef8614417497025bb70b479..87d2b8b17fb77c48206b32bb6b5dbc10d29a5d6f 100644
+--- a/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
++++ b/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
+@@ -1,6 +1,7 @@
+ package net.minestom.server.inventory.click.integration;
+ 
+ 
++import net.kyori.adventure.text.Component;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import net.minestom.server.coordinate.Pos;
+@@ -85,7 +86,7 @@ public class LeftClickIntegrationTest {
+     public void leftExternal(Env env) {
+         var instance = env.createFlatInstance();
+         var player = env.createPlayer(instance, new Pos(0, 40, 0));
+-        var inventory = new Inventory(InventoryType.HOPPER, "test");
++        var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
+         player.openInventory(inventory);
+         var listener = env.listen(InventoryPreClickEvent.class);
+         inventory.setItemStack(1, ItemStack.of(Material.DIAMOND));
+diff --git a/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
+index c4e4b6e403c628346273597f87507870e62860d3..9fc358b8ff4fd6c0f7f4cd86b2a7484a060450a5 100644
+--- a/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
++++ b/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
+@@ -1,5 +1,6 @@
+ package net.minestom.server.inventory.click.integration;
+ 
++import net.kyori.adventure.text.Component;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import net.minestom.server.coordinate.Pos;
+@@ -107,7 +108,7 @@ public class RightClickIntegrationTest {
+     public void rightExternal(Env env) {
+         var instance = env.createFlatInstance();
+         var player = env.createPlayer(instance, new Pos(0, 40, 0));
+-        var inventory = new Inventory(InventoryType.HOPPER, "test");
++        var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
+         player.openInventory(inventory);
+         var listener = env.listen(InventoryPreClickEvent.class);
+         inventory.setItemStack(1, ItemStack.of(Material.DIAMOND));
