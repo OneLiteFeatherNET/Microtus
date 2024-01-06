@@ -31,6 +31,9 @@ In our case we do this not because there a problem with the license, but we want
 The modulation means that we can drop or update patches without any problems.
 Further information about the patching process can be found [here](Patch-Files.md).
 
+#### Testing
+Contributed code should contain unit tests to ensure that the code works as expected.
+Read more about testing [here](Testing.md).
 
 ### Reporting bugs
 
