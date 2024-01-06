@@ -1,0 +1,1105 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Joltras <MinnyMouseXD@gmail.com>
+Date: Tue, 2 Jan 2024 21:55:26 +0100
+Subject: [PATCH] Remove deprecated code
+
+
+diff --git a/src/main/java/net/minestom/server/advancements/notifications/Notification.java b/src/main/java/net/minestom/server/advancements/notifications/Notification.java
+index 90660466e837326cb98d26032dd04b4f19247295..15fee4d25369b8b3e76cfae3eccaa2e634e14821 100644
+--- a/src/main/java/net/minestom/server/advancements/notifications/Notification.java
++++ b/src/main/java/net/minestom/server/advancements/notifications/Notification.java
+@@ -9,18 +9,9 @@ import org.jetbrains.annotations.NotNull;
+ /**
+  * Represents a message which can be sent using the {@link NotificationCenter}.
+  */
++// Microtus - remove deprecated methods
+ public record Notification(@NotNull Component title, @NotNull FrameType frameType, @NotNull ItemStack icon) {
+     public Notification(@NotNull Component title, @NotNull FrameType frameType, @NotNull Material icon) {
+         this(title, frameType, ItemStack.of(icon));
+     }
+-
+-    @Deprecated
+-    public @NotNull Component getTitle() {
+-        return title;
+-    }
+-
+-    @Deprecated
+-    public @NotNull FrameType getFrameType() {
+-        return frameType;
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
+index 04244d43a556e33b5ce9cb4cf727433f976af35b..ded5231b0ac28efbebd5ff86e8a0f03a1eee5f7f 100644
+--- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
++++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
+@@ -10,7 +10,6 @@ import net.kyori.adventure.text.Component;
+ import net.kyori.adventure.text.format.NamedTextColor;
+ import net.kyori.adventure.title.Title;
+ import net.kyori.adventure.title.TitlePart;
+-import net.minestom.server.coordinate.Pos;
+ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.entity.Entity;
+ import net.minestom.server.network.packet.server.ServerPacket;
+@@ -24,6 +23,7 @@ import java.util.Collection;
+ /**
+  * Utility methods to convert adventure enums to their packet values.
+  */
++// Microtus - remove deprecated methods
+ public class AdventurePacketConvertor {
+     private static final Object2IntMap<NamedTextColor> NAMED_TEXT_COLOR_ID_MAP = new Object2IntArrayMap<>(16);
+ 
+@@ -142,19 +142,6 @@ public class AdventurePacketConvertor {
+         }
+     }
+ 
+-    /**
+-     * Creates an entity sound packet from an Adventure sound.
+-     *
+-     * @param sound  the sound
+-     * @param entity the entity the sound is coming from
+-     * @return the packet
+-     * @deprecated Use {@link #createSoundPacket(Sound, Sound.Emitter)}
+-     */
+-    @Deprecated(forRemoval = true)
+-    public static ServerPacket createEntitySoundPacket(@NotNull Sound sound, @NotNull Entity entity) {
+-        return createSoundPacket(sound, entity);
+-    }
+-
+     /**
+      * Creates a sound stop packet from a sound stop.
+      *
+diff --git a/src/main/java/net/minestom/server/color/Color.java b/src/main/java/net/minestom/server/color/Color.java
+index 9fdaf30d8553660a75555228cbe63fcf99445fa6..2418b648c18f95bdea57ce56a3247234b4ac9620 100644
+--- a/src/main/java/net/minestom/server/color/Color.java
++++ b/src/main/java/net/minestom/server/color/Color.java
+@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
+  * <p>
+  * Colors must be in the range of 0-255.
+  */
++// Microtus - remove deprecated methods
+ public record Color(int red, int green, int blue) implements RGBLike {
+     private static final int BIT_MASK = 0xff;
+ 
+@@ -102,19 +103,4 @@ public record Color(int red, int green, int blue) implements RGBLike {
+         b = Math.round(averageBlue * gainFactor);
+         return new Color(r, g, b);
+     }
+-
+-    @Deprecated
+-    public int getRed() {
+-        return this.red;
+-    }
+-
+-    @Deprecated
+-    public int getGreen() {
+-        return this.green;
+-    }
+-
+-    @Deprecated
+-    public int getBlue() {
+-        return this.blue;
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/command/CommandSender.java b/src/main/java/net/minestom/server/command/CommandSender.java
+index 20a22bac01f21fb14a5a2be6353d3fbb0abacb0d..a0c10efbbc2e53d3ea2815faf6f8840cb144e73f 100644
+--- a/src/main/java/net/minestom/server/command/CommandSender.java
++++ b/src/main/java/net/minestom/server/command/CommandSender.java
+@@ -34,52 +34,4 @@ public interface CommandSender extends PermissionHandler, Audience, Taggable, Id
+             sendMessage(message);
+         }
+     }
+-
+-    /**
+-     * Gets if the sender is a {@link Player}.
+-     * <p>
+-     * Consider using {@code instanceof} instead.
+-     *
+-     * @return true if 'this' is a player, false otherwise
+-     */
+-    @Deprecated
+-    default boolean isPlayer() {
+-        return false;
+-    }
+-
+-    /**
+-     * Gets if the sender is a {@link ConsoleSender}.
+-     * <p>
+-     * Consider using {@code instanceof} instead.
+-     *
+-     * @return true if 'this' is the console, false otherwise
+-     */
+-    @Deprecated
+-    default boolean isConsole() {
+-        return false;
+-    }
+-
+-    /**
+-     * Casts this object to a {@link Player}.
+-     * No checks are performed, {@link ClassCastException} can very much happen.
+-     *
+-     * @throws ClassCastException if 'this' is not a player
+-     * @see #isPlayer()
+-     */
+-    @Deprecated
+-    default Player asPlayer() {
+-        throw new ClassCastException("CommandSender is not a Player");
+-    }
+-
+-    /**
+-     * Casts this object to a {@link ConsoleSender}.
+-     * No checks are performed, {@link ClassCastException} can very much happen.
+-     *
+-     * @throws ClassCastException if 'this' is not a console sender
+-     * @see #isConsole()
+-     */
+-    @Deprecated
+-    default ConsoleSender asConsole() {
+-        throw new ClassCastException("CommandSender is not the ConsoleSender");
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/command/ConsoleSender.java b/src/main/java/net/minestom/server/command/ConsoleSender.java
+index d97bc82ae1cd4f52268d16b394274d6a31b31656..c8f7392ec3fc95af089be33ff676182215637f68 100644
+--- a/src/main/java/net/minestom/server/command/ConsoleSender.java
++++ b/src/main/java/net/minestom/server/command/ConsoleSender.java
+@@ -45,16 +45,6 @@ public class ConsoleSender implements CommandSender {
+         return permissions;
+     }
+ 
+-    @Override
+-    public boolean isConsole() {
+-        return true;
+-    }
+-
+-    @Override
+-    public ConsoleSender asConsole() {
+-        return this;
+-    }
+-
+     @Override
+     public @NotNull TagHandler tagHandler() {
+         return tagHandler;
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index 2886dc65a8f79cab946434b093ae3161bf5c2cb1..c9dba2f5de90de81512b3f17fa94023b3e2c3334 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -2112,16 +2112,6 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         this.identity = Identity.identity(uuid);
+     }
+ 
+-    @Override
+-    public boolean isPlayer() {
+-        return true;
+-    }
+-
+-    @Override
+-    public Player asPlayer() {
+-        return this;
+-    }
+-
+     protected void sendChunkUpdates(Chunk newChunk) {
+         if (chunkUpdateLimitChecker.addToHistory(newChunk)) {
+             final int newX = newChunk.getChunkX();
+diff --git a/src/main/java/net/minestom/server/entity/PlayerSkin.java b/src/main/java/net/minestom/server/entity/PlayerSkin.java
+index fe85cf8ad30097aaef147977d8b59b163fc75760..7230c9b2d052493b08e6df99b738c6ede5d112f5 100644
+--- a/src/main/java/net/minestom/server/entity/PlayerSkin.java
++++ b/src/main/java/net/minestom/server/entity/PlayerSkin.java
+@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
+  * Can be applied to a player with {@link Player#setSkin(PlayerSkin)}
+  * or in the linked event {@link net.minestom.server.event.player.PlayerSkinInitEvent}.
+  */
++// Microtus - remove deprecated methods
+ public record PlayerSkin(String textures, String signature) {
+ 
+     /**
+@@ -60,20 +61,4 @@ public record PlayerSkin(String textures, String signature) {
+             return null;
+         }
+     }
+-
+-    /**
+-     * @deprecated use {@link #textures()}
+-     */
+-    @Deprecated
+-    public String getTextures() {
+-        return textures;
+-    }
+-
+-    /**
+-     * @deprecated use {@link #signature()}
+-     */
+-    @Deprecated
+-    public String getSignature() {
+-        return signature;
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java b/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
+index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..1b05107e945189da3e963917f01fc028515f2f4b 100644
+--- a/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
++++ b/src/main/java/net/minestom/server/entity/ai/target/ClosestEntityTarget.java
+@@ -13,32 +13,12 @@ import java.util.function.Predicate;
+ /**
+  * Target the closest targetable entity (based on the target predicate)
+  */
++// Microtus - remove deprecated methods
+ public class ClosestEntityTarget extends TargetSelector {
+ 
+     private final double range;
+     private final Predicate<Entity> targetPredicate;
+ 
+-    /**
+-     * @param entityCreature the entity (self)
+-     * @param range          the maximum range the entity can target others within
+-     * @param entitiesTarget the entities to target by class
+-     * @deprecated Use {@link #ClosestEntityTarget(EntityCreature, double, Predicate)}
+-     */
+-    @SafeVarargs
+-    @Deprecated
+-    public ClosestEntityTarget(@NotNull EntityCreature entityCreature, float range,
+-                               @NotNull Class<? extends LivingEntity>... entitiesTarget) {
+-        this(entityCreature, range, ent -> {
+-            Class<? extends Entity> clazz = ent.getClass();
+-            for (Class<? extends LivingEntity> targetClass : entitiesTarget) {
+-                if (targetClass.isAssignableFrom(clazz)) {
+-                    return true;
+-                }
+-            }
+-            return false;
+-        });
+-    }
+-
+     /**
+      * @param entityCreature  the entity (self)
+      * @param range           the maximum range the entity can target others within
+diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
+index 60d7102b205bc04a60678fecc2da0009ce56437a..de4ff6d92dc8965fc6f0c7f77994623adacba55e 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
+@@ -76,28 +76,6 @@ public class LivingEntityMeta extends EntityMeta {
+         super.metadata.setIndex(OFFSET + 4, Metadata.VarInt(value));
+     }
+ 
+-    /**
+-     * @deprecated
+-     * This returns the bee stinger count, not the absorption heart count
+-     * Use {@link #getBeeStingerCount()} instead
+-     * @return The number of bee stingers in this entity
+-     */
+-    @Deprecated
+-    public int getHealthAddedByAbsorption() {
+-        return super.metadata.getIndex(OFFSET + 5, 0);
+-    }
+-
+-    /**
+-     * @deprecated
+-     * This sets the bee stinger count, not the absorption heart count
+-     * Use {@link #setBeeStingerCount(int)} instead
+-     * @param value The number of bee stingers for this entity to have
+-     */
+-    @Deprecated
+-    public void setHealthAddedByAbsorption(int value) {
+-        super.metadata.setIndex(OFFSET + 5, Metadata.VarInt(value));
+-    }
+-
+     /**
+      * Gets the amount of bee stingers in this entity
+      * @return The amount of bee stingers
+@@ -122,5 +100,4 @@ public class LivingEntityMeta extends EntityMeta {
+     public void setBedInWhichSleepingPosition(@Nullable Point value) {
+         super.metadata.setIndex(OFFSET + 6, Metadata.OptPosition(value));
+     }
+-
+ }
+diff --git a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
+index b45665fb719606ade2bc83318ba25866487a6dc4..df17858bfe3dbff2b21554d14ab5fcf8efc898b5 100644
+--- a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
++++ b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
+@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
+ /**
+  * Called when a player is finished eating.
+  */
++// Microtus - remove deprecated methods
+ public class PlayerEatEvent implements ItemEvent, PlayerInstanceEvent {
+ 
+     private final Player player;
+@@ -21,17 +22,6 @@ public class PlayerEatEvent implements ItemEvent, PlayerInstanceEvent {
+         this.hand = hand;
+     }
+ 
+-    /**
+-     * Gets the food item that has been eaten.
+-     *
+-     * @return the food item
+-     * @deprecated use getItemStack() for the eaten item
+-     */
+-    @Deprecated
+-    public @NotNull ItemStack getFoodItem() {
+-        return foodItem;
+-    }
+-
+     public @NotNull Player.Hand getHand() {
+         return hand;
+     }
+diff --git a/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
+index 27de8eee60012568cfd85e612f9a7377085f9033..3d6960753812ef9d01047ec3c5f91a3623542e99 100644
+--- a/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
++++ b/src/main/java/net/minestom/server/event/player/PlayerPreEatEvent.java
+@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
+  * or to cancel its processing, cancelling the event means that the player will
+  * continue the animation indefinitely.
+  */
++// Microtus - remove deprecated methods
+ public class PlayerPreEatEvent implements ItemEvent, PlayerInstanceEvent, CancellableEvent {
+ 
+     private final Player player;
+@@ -28,17 +29,6 @@ public class PlayerPreEatEvent implements ItemEvent, PlayerInstanceEvent, Cancel
+         this.eatingTime = eatingTime;
+     }
+ 
+-    /**
+-     * The food item which will be eaten.
+-     *
+-     * @return the food item
+-     * @deprecated use getItemStack() for the eaten item
+-     */
+-    @Deprecated
+-    public @NotNull ItemStack getFoodItem() {
+-        return foodItem;
+-    }
+-
+     public @NotNull Player.Hand getHand() {
+         return hand;
+     }
+diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
+index d6dd0549db22ee58c4057012fcc46a3aba8f087b..b93d4b722d088ec3de4a3fd4874ff94b6bb22364 100644
+--- a/src/main/java/net/minestom/server/instance/Instance.java
++++ b/src/main/java/net/minestom/server/instance/Instance.java
+@@ -61,6 +61,7 @@ import java.util.stream.Collectors;
+  * with {@link InstanceManager#registerInstance(Instance)}, and
+  * you need to be sure to signal the {@link ThreadDispatcher} of every partition/element changes.
+  */
++// Microtus - remove deprecated methods
+ public abstract class Instance implements Block.Getter, Block.Setter,
+         Tickable, Schedulable, Snapshotable, EventHandler<InstanceEvent>, Taggable, PacketGroupingAudience {
+ 
+diff --git a/src/main/java/net/minestom/server/inventory/Inventory.java b/src/main/java/net/minestom/server/inventory/Inventory.java
+index 9d80f6331c1320603680411d1eff3d710c38e6c3..a267f72163368fbd3526cb17fb2e5b1487c36e8e 100644
+--- a/src/main/java/net/minestom/server/inventory/Inventory.java
++++ b/src/main/java/net/minestom/server/inventory/Inventory.java
+@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
+ /**
+  * Represents an inventory which can be viewed by a collection of {@link Player}.
+  * <p>
+- * You can create one with {@link Inventory#Inventory(InventoryType, String)} or by making your own subclass.
++ * You can create one with {@link Inventory#Inventory(InventoryType, Component)} or by making your own subclass.
+  * It can then be opened using {@link Player#openInventory(Inventory)}.
+  */
+ public non-sealed class Inventory extends AbstractInventory implements Viewable {
+@@ -53,10 +53,6 @@ public non-sealed class Inventory extends AbstractInventory implements Viewable
+         this.offset = getSize();
+     }
+ 
+-    public Inventory(@NotNull InventoryType inventoryType, @NotNull String title) {
+-        this(inventoryType, Component.text(title));
+-    }
+-
+     private static byte generateId() {
+         return (byte) ID_COUNTER.updateAndGet(i -> i + 1 >= 128 ? 1 : i + 1);
+     }
+diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
+index 6108c4283fc1128fddd208914095cd7739524f0f..d467975f66e85606eb551b845cc0415773a2d517 100644
+--- a/src/main/java/net/minestom/server/inventory/InventoryType.java
++++ b/src/main/java/net/minestom/server/inventory/InventoryType.java
+@@ -3,6 +3,7 @@ package net.minestom.server.inventory;
+ /**
+  * Represents a type of {@link Inventory}
+  */
++// Microtus - remove deprecated methods
+ public enum InventoryType {
+ 
+     CHEST_1_ROW(9),
+@@ -43,13 +44,4 @@ public enum InventoryType {
+     public int getSize() {
+         return size;
+     }
+-
+-    /**
+-     * @deprecated use {@link #getSize()}
+-     */
+-    @Deprecated
+-    public int getAdditionalSlot() {
+-        return size;
+-    }
+-
+ }
+diff --git a/src/main/java/net/minestom/server/inventory/type/AnvilInventory.java b/src/main/java/net/minestom/server/inventory/type/AnvilInventory.java
+index 8a7c9f2c154e22d3df90c8ee20856bb0b2f3d4de..ed21091b4ac0b75e8b2d61a614a7307912afb7de 100644
+--- a/src/main/java/net/minestom/server/inventory/type/AnvilInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/AnvilInventory.java
+@@ -14,10 +14,6 @@ public class AnvilInventory extends Inventory {
+         super(InventoryType.ANVIL, title);
+     }
+ 
+-    public AnvilInventory(@NotNull String title) {
+-        super(InventoryType.ANVIL, title);
+-    }
+-
+     /**
+      * Gets the anvil repair cost.
+      *
+diff --git a/src/main/java/net/minestom/server/inventory/type/BeaconInventory.java b/src/main/java/net/minestom/server/inventory/type/BeaconInventory.java
+index 30551dae67cde1d869a4bd6b8645d0db317cf1a4..0a2dd297603fa13a6bb7af835a4bcbfee47f1b93 100644
+--- a/src/main/java/net/minestom/server/inventory/type/BeaconInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/BeaconInventory.java
+@@ -17,10 +17,6 @@ public class BeaconInventory extends Inventory {
+         super(InventoryType.BEACON, title);
+     }
+ 
+-    public BeaconInventory(@NotNull String title) {
+-        super(InventoryType.BEACON, title);
+-    }
+-
+     /**
+      * Gets the beacon power level.
+      *
+diff --git a/src/main/java/net/minestom/server/inventory/type/BrewingStandInventory.java b/src/main/java/net/minestom/server/inventory/type/BrewingStandInventory.java
+index ed0bc7d783d17dcae72343138ffc3d36fad5b4d9..7c88145f40a102b8d40f8815052d44e8166f4abf 100644
+--- a/src/main/java/net/minestom/server/inventory/type/BrewingStandInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/BrewingStandInventory.java
+@@ -15,10 +15,6 @@ public class BrewingStandInventory extends Inventory {
+         super(InventoryType.BREWING_STAND, title);
+     }
+ 
+-    public BrewingStandInventory(@NotNull String title) {
+-        super(InventoryType.BREWING_STAND, title);
+-    }
+-
+     /**
+      * Gets the brewing stand brew time.
+      *
+diff --git a/src/main/java/net/minestom/server/inventory/type/EnchantmentTableInventory.java b/src/main/java/net/minestom/server/inventory/type/EnchantmentTableInventory.java
+index bd855c32a5171683627bf2729ab13ef0acebd934..e448d882bbd9f9cdf05943f3e913f8654d99d039 100644
+--- a/src/main/java/net/minestom/server/inventory/type/EnchantmentTableInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/EnchantmentTableInventory.java
+@@ -18,10 +18,6 @@ public class EnchantmentTableInventory extends Inventory {
+         super(InventoryType.ENCHANTMENT, title);
+     }
+ 
+-    public EnchantmentTableInventory(@NotNull String title) {
+-        super(InventoryType.ENCHANTMENT, title);
+-    }
+-
+     /**
+      * Gets the level requirement in a slot.
+      *
+diff --git a/src/main/java/net/minestom/server/inventory/type/FurnaceInventory.java b/src/main/java/net/minestom/server/inventory/type/FurnaceInventory.java
+index 9e357da9936b8eb3df5aa9e5d07ef6a39297a792..56435798d4933351565b29c93f388e2808340af1 100644
+--- a/src/main/java/net/minestom/server/inventory/type/FurnaceInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/FurnaceInventory.java
+@@ -17,10 +17,6 @@ public class FurnaceInventory extends Inventory {
+         super(InventoryType.FURNACE, title);
+     }
+ 
+-    public FurnaceInventory(@NotNull String title) {
+-        super(InventoryType.FURNACE, title);
+-    }
+-
+     /**
+      * Represents the amount of tick until the fire icon come empty.
+      *
+diff --git a/src/main/java/net/minestom/server/inventory/type/VillagerInventory.java b/src/main/java/net/minestom/server/inventory/type/VillagerInventory.java
+index 048fa58139363ac64588da40c50f25ebaa46eb0e..48136123cb796bb8c1c28836ed711f7887b77dbf 100644
+--- a/src/main/java/net/minestom/server/inventory/type/VillagerInventory.java
++++ b/src/main/java/net/minestom/server/inventory/type/VillagerInventory.java
+@@ -24,10 +24,6 @@ public class VillagerInventory extends Inventory {
+         super(InventoryType.MERCHANT, title);
+     }
+ 
+-    public VillagerInventory(@NotNull String title) {
+-        super(InventoryType.MERCHANT, title);
+-    }
+-
+     public List<TradeListPacket.Trade> getTrades() {
+         return Collections.unmodifiableList(trades);
+     }
+diff --git a/src/main/java/net/minestom/server/item/ItemStack.java b/src/main/java/net/minestom/server/item/ItemStack.java
+index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..ce210a60496d042456f5dcf7342d6d1d48956c35 100644
+--- a/src/main/java/net/minestom/server/item/ItemStack.java
++++ b/src/main/java/net/minestom/server/item/ItemStack.java
+@@ -24,6 +24,7 @@ import java.util.function.UnaryOperator;
+  * <p>
+  * An item stack cannot be null, {@link ItemStack#AIR} should be used instead.
+  */
++// Microtus - remove deprecated methods
+ public sealed interface ItemStack extends TagReadable, HoverEventSource<HoverEvent.ShowItem>
+         permits ItemStackImpl {
+     /**
+@@ -180,25 +181,6 @@ public sealed interface ItemStack extends TagReadable, HoverEventSource<HoverEve
+     @ApiStatus.Experimental
+     @NotNull NBTCompound toItemNBT();
+ 
+-
+-    @Deprecated
+-    @Contract(pure = true)
+-    default @NotNull Material getMaterial() {
+-        return material();
+-    }
+-
+-    @Deprecated
+-    @Contract(pure = true)
+-    default int getAmount() {
+-        return amount();
+-    }
+-
+-    @Deprecated
+-    @Contract(pure = true)
+-    default @NotNull ItemMeta getMeta() {
+-        return meta();
+-    }
+-
+     sealed interface Builder extends TagWritable
+             permits ItemStackImpl.Builder {
+         @Contract(value = "_ -> this")
+diff --git a/src/main/java/net/minestom/server/ping/ResponseData.java b/src/main/java/net/minestom/server/ping/ResponseData.java
+index 706d9a7579f7da51ff0de98829c69d8b0534cd89..35856fe0e16e47b252c4693ebca9057f35af9c9b 100644
+--- a/src/main/java/net/minestom/server/ping/ResponseData.java
++++ b/src/main/java/net/minestom/server/ping/ResponseData.java
+@@ -1,11 +1,7 @@
+ package net.minestom.server.ping;
+ 
+-import com.google.gson.JsonObject;
+ import net.kyori.adventure.text.Component;
+-import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+ import net.minestom.server.MinecraftServer;
+-import net.minestom.server.entity.Player;
+ import net.minestom.server.event.server.ServerListPingEvent;
+ import net.minestom.server.utils.identity.NamedAndIdentified;
+ import org.jetbrains.annotations.NotNull;
+@@ -17,6 +13,7 @@ import java.util.*;
+  *
+  * @see ServerListPingEvent
+  */
++// Microtus - remove deprecated methods
+ public class ResponseData {
+     private static final Component DEFAULT_DESCRIPTION = Component.text("Minestom Server");
+ 
+@@ -44,17 +41,6 @@ public class ResponseData {
+         this.playersHidden = false;
+     }
+ 
+-    /**
+-     * Sets the name for the response.
+-     *
+-     * @param name The name for the response data.
+-     * @deprecated This is named incorrectly, use {@link #setVersion(String)} instead
+-     */
+-    @Deprecated
+-    public void setName(String name) {
+-        this.setVersion(name);
+-    }
+-
+     /**
+      * Sets the version name for the response.
+      *
+@@ -127,89 +113,6 @@ public class ResponseData {
+         return online;
+     }
+ 
+-    /**
+-     * Adds some players to the response.
+-     *
+-     * @param players the players
+-     * @deprecated Use {@link #addEntries(Collection)}}
+-     */
+-    @Deprecated
+-    public void addPlayer(Iterable<Player> players) {
+-        for (Player player : players) {
+-            this.addPlayer(player);
+-        }
+-    }
+-
+-    /**
+-     * Adds a player to the response.
+-     *
+-     * @param player the player
+-     * @deprecated Use {@link #addEntry(NamedAndIdentified)}
+-     */
+-    @Deprecated
+-    public void addPlayer(Player player) {
+-        this.addEntry(player);
+-    }
+-
+-    /**
+-     * Adds a player to the response.
+-     *
+-     * @param name The name of the player.
+-     * @param uuid The unique identifier of the player.
+-     * @deprecated Use {@link #addEntry(NamedAndIdentified)} with {@link NamedAndIdentified#of(String, UUID)}
+-     */
+-    @Deprecated
+-    public void addPlayer(String name, UUID uuid) {
+-        this.addEntry(NamedAndIdentified.of(name, uuid));
+-    }
+-
+-    /**
+-     * Adds a player to the response.
+-     * <p>
+-     * {@link UUID#randomUUID()} is used as the player's UUID.
+-     *
+-     * @param name The name of the player.
+-     * @deprecated Use {@link #addEntry(NamedAndIdentified)} with {@link NamedAndIdentified#named(String)}
+-     */
+-    @Deprecated
+-    public void addPlayer(String name) {
+-        this.addEntry(NamedAndIdentified.named(name));
+-    }
+-
+-    /**
+-     * Removes all of the ping players from this {@link #entries}. The {@link #entries} list
+-     * will be empty this call returns.
+-     *
+-     * @deprecated Use {@link #clearEntries()}
+-     */
+-    @Deprecated
+-    public void clearPlayers() {
+-        this.clearEntries();
+-    }
+-
+-    /**
+-     * Get the list of the response players.
+-     *
+-     * @return the list of the response players.
+-     * @deprecated Use {@link #getEntries()}. This return value is now unmodifiable and this operation is incredibly costly.
+-     */
+-    @Deprecated(forRemoval = true) // to throw an error for people using it - this method is *horrible*
+-    public List<PingPlayer> getPlayers() {
+-        return this.entries.stream()
+-                .map(entry -> PingPlayer.of(PlainComponentSerializer.plain().serialize(entry.getName()), entry.getUuid())).toList();
+-    }
+-
+-    /**
+-     * Sets the response description.
+-     *
+-     * @param description The description for the response data.
+-     * @deprecated Use {@link #setDescription(Component)}
+-     */
+-    @Deprecated
+-    public void setDescription(String description) {
+-        this.description = LegacyComponentSerializer.legacySection().deserialize(description);
+-    }
+-
+     /**
+      * Sets the response description.
+      *
+@@ -313,43 +216,4 @@ public class ResponseData {
+         return playersHidden;
+     }
+ 
+-    /**
+-     * Converts the response data into a {@link JsonObject}.
+-     *
+-     * @return The converted response data as a json tree.
+-     * @deprecated Use {@link ServerListPingType#getPingResponse(ResponseData)}
+-     */
+-    @Deprecated
+-    public @NotNull JsonObject build() {
+-        return ServerListPingType.getModernPingResponse(this, true);
+-    }
+-
+-    /**
+-     * Represents a player line in the server list hover.
+-     *
+-     * @deprecated See {@link NamedAndIdentified}
+-     */
+-    @Deprecated
+-    public static class PingPlayer {
+-
+-        private static @NotNull PingPlayer of(@NotNull String name, @NotNull UUID uuid) {
+-            return new PingPlayer(name, uuid);
+-        }
+-
+-        private final String name;
+-        private final UUID uuid;
+-
+-        private PingPlayer(@NotNull String name, @NotNull UUID uuid) {
+-            this.name = name;
+-            this.uuid = uuid;
+-        }
+-
+-        public @NotNull String getName() {
+-            return name;
+-        }
+-
+-        public @NotNull UUID getUuid() {
+-            return uuid;
+-        }
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java b/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
+index b5817c96772fd399320bc61cafecf2101a55e867..efc4545df49796557446f2edca16ad52775f0809 100644
+--- a/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
++++ b/src/main/java/net/minestom/server/scoreboard/BelowNameTag.java
+@@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
+ /**
+  * Represents a scoreboard which rendered a tag below the name.
+  */
++// Microtus - remove deprecated methods
+ public class BelowNameTag implements Scoreboard {
+ 
+     /**
+@@ -25,18 +26,6 @@ public class BelowNameTag implements Scoreboard {
+ 
+     private final ScoreboardObjectivePacket scoreboardObjectivePacket;
+ 
+-    /**
+-     * Creates a new below name scoreboard.
+-     *
+-     * @param name  The objective name of the scoreboard
+-     * @param value The value of the scoreboard
+-     * @deprecated Use {@link #BelowNameTag(String, Component)}
+-     */
+-    @Deprecated
+-    public BelowNameTag(String name, String value) {
+-        this(name, Component.text(value));
+-    }
+-
+     /**
+      * Creates a new below name scoreboard.
+      *
+diff --git a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
+index b14aebca46465331160051e55ceaab6439999ce4..ac1def5cf1771ae79f83f2603192d822b2741fdb 100644
+--- a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
++++ b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
+@@ -14,22 +14,9 @@ import java.util.Collection;
+ /**
+  * This interface represents all scoreboard of Minecraft.
+  */
++// Microtus - remove deprecated methods
+ public interface Scoreboard extends Viewable, PacketGroupingAudience {
+ 
+-    /**
+-     * Creates a creation objective packet.
+-     *
+-     * @param value The value for the objective
+-     * @param type  The type for the objective
+-     * @return the creation objective packet
+-     * @deprecated Use {@link #getCreationObjectivePacket(Component, ScoreboardObjectivePacket.Type)}
+-     */
+-    @Deprecated
+-    @NotNull
+-    default ScoreboardObjectivePacket getCreationObjectivePacket(String value, ScoreboardObjectivePacket.Type type) {
+-        return this.getCreationObjectivePacket(Component.text(value), type);
+-    }
+-
+     /**
+      * Creates a creation objective packet.
+      *
+diff --git a/src/main/java/net/minestom/server/scoreboard/Sidebar.java b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
+index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..f7f1749dd151728337bd4b8d67765c6ad93ceac4 100644
+--- a/src/main/java/net/minestom/server/scoreboard/Sidebar.java
++++ b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
+@@ -21,13 +21,14 @@ import java.util.concurrent.atomic.AtomicInteger;
+ /**
+  * Represents a sidebar which can contain up to 16 {@link ScoreboardLine}.
+  * <p>
+- * In order to use it you need to create a new instance using the constructor {@link #Sidebar(String)} and create new lines
++ * In order to use it you need to create a new instance using the constructor {@link #Sidebar(Component)} and create new lines
+  * with {@link #createLine(ScoreboardLine)}. You can then add a {@link Player} to the viewing list using {@link #addViewer(Player)}
+  * and remove him later with {@link #removeViewer(Player)}.
+  * <p>
+  * Lines can be modified using their respective identifier using
+  * {@link #updateLineContent(String, Component)} and {@link #updateLineScore(String, int)}.
+  */
++// Microtus - remove deprecated methods
+ public class Sidebar implements Scoreboard {
+ 
+     private static final AtomicInteger COUNTER = new AtomicInteger();
+@@ -52,17 +53,6 @@ public class Sidebar implements Scoreboard {
+ 
+     private Component title;
+ 
+-    /**
+-     * Creates a new sidebar
+-     *
+-     * @param title The title of the sidebar
+-     * @deprecated Use {@link #Sidebar(Component)}
+-     */
+-    @Deprecated
+-    public Sidebar(@NotNull String title) {
+-        this(Component.text(title));
+-    }
+-
+     /**
+      * Creates a new sidebar
+      *
+@@ -79,17 +69,6 @@ public class Sidebar implements Scoreboard {
+         }
+     }
+ 
+-    /**
+-     * Changes the {@link Sidebar} title
+-     *
+-     * @param title The new sidebar title
+-     * @deprecated Use {@link #setTitle(Component)}
+-     */
+-    @Deprecated
+-    public void setTitle(@NotNull String title) {
+-        this.setTitle(Component.text(title));
+-    }
+-
+     /**
+      * Changes the {@link Sidebar} title
+      *
+diff --git a/src/main/java/net/minestom/server/scoreboard/TabList.java b/src/main/java/net/minestom/server/scoreboard/TabList.java
+index 7127b875ce50b8637ea63921519b780ea6b6bc4a..35cc1584d9e319264cb385d63958b7c9c237a8f0 100644
+--- a/src/main/java/net/minestom/server/scoreboard/TabList.java
++++ b/src/main/java/net/minestom/server/scoreboard/TabList.java
+@@ -12,6 +12,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
+ /**
+  * Represents the {@link Player} tab list as a {@link Scoreboard}.
+  */
++// Microtus - remove deprecated methods
+ public class TabList implements Scoreboard {
+ 
+     /**
+@@ -68,14 +69,13 @@ public class TabList implements Scoreboard {
+         return result;
+     }
+ 
+-    @NotNull
+     @Override
+-    public Set<Player> getViewers() {
++    public @NotNull Set<Player> getViewers() {
+         return unmodifiableViewers;
+     }
+ 
+     @Override
+-    public String getObjectiveName() {
++    public @NotNull String getObjectiveName() {
+         return this.objectiveName;
+     }
+ }
+diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
+index e68ff90079bea1debfa543b14f6df39396359234..3dff7d06972dfb2aeab589cb1032e5eee5cc1fb1 100644
+--- a/src/main/java/net/minestom/server/utils/NamespaceID.java
++++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
+@@ -12,6 +12,7 @@ import java.util.Objects;
+  * Represents a namespaced ID
+  * https://minecraft.gamepedia.com/Namespaced_ID
+  */
++// Microtus - remove deprecated methods
+ public final class NamespaceID implements CharSequence, Key {
+     private static final String legalLetters = "[0123456789abcdefghijklmnopqrstuvwxyz_-]+";
+     private static final String legalPathLetters = "[0123456789abcdefghijklmnopqrstuvwxyz./_-]+";
+@@ -67,14 +68,12 @@ public final class NamespaceID implements CharSequence, Key {
+     public boolean equals(Object o) {
+         if (this == o) return true;
+         if (!(o instanceof final Key that)) return false;
+-        return Objects.equals(this.domain, that.namespace()) && Objects.equals(this.path, that.value()); // Microtus - Fix namespace hashcode and equals
++        return Objects.equals(this.full, that.asString());
+     }
+ 
+     @Override
+     public int hashCode() {
+-        int result = this.domain.hashCode(); // Microtus start - Fix namespace hashcode and equals
+-        result = (31 * result) + this.path.hashCode();
+-        return result; // Microtus end - Fix namespace hashcode and equals
++        return full.hashCode();
+     }
+ 
+     @Override
+@@ -112,14 +111,4 @@ public final class NamespaceID implements CharSequence, Key {
+     public @NotNull String asString() {
+         return this.full;
+     }
+-
+-    @Deprecated
+-    public String getDomain() {
+-        return domain();
+-    }
+-
+-    @Deprecated
+-    public String getPath() {
+-        return path();
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/utils/time/TimeUnit.java b/src/main/java/net/minestom/server/utils/time/TimeUnit.java
+index 7e181a47c91f8f925b20eb9f4705dabdb24a0c2f..43e25a3f283ea6af40d32deb142c274117e0d91c 100644
+--- a/src/main/java/net/minestom/server/utils/time/TimeUnit.java
++++ b/src/main/java/net/minestom/server/utils/time/TimeUnit.java
+@@ -11,11 +11,6 @@ public final class TimeUnit {
+     public static final TemporalUnit MILLISECOND = ChronoUnit.MILLIS;
+     public static final TemporalUnit SERVER_TICK = Tick.SERVER_TICKS;
+     public static final TemporalUnit CLIENT_TICK = Tick.CLIENT_TICKS;
+-    /**
+-     * @deprecated Please use either {@link #SERVER_TICK} or {@link #CLIENT_TICK}
+-     */
+-    @Deprecated(forRemoval = true)
+-    public static final TemporalUnit TICK = CLIENT_TICK;
+ 
+     private TimeUnit() {
+     }
+diff --git a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java b/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
+index d0df75b49e882760cc1813ff813c2882a5870c61..87a076a18c37898f80266bb25a7f756a2c7cd369 100644
+--- a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
++++ b/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
+@@ -15,8 +15,8 @@ import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.*;
+ 
+ @EnvTest
+-public class InventoryIntegrationTest {
+-
++class InventoryIntegrationTest {
++    private static final Component TITLE = Component.text("title");
+     private static final ItemStack MAGIC_STACK = ItemStack.of(Material.DIAMOND, 3);
+ 
+     @Test
+@@ -115,7 +115,7 @@ public class InventoryIntegrationTest {
+         var instance = env.createFlatInstance();
+         var connection = env.createConnection();
+         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
+-        final var inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        final var inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         player.openInventory(inventory);
+         assertSame(inventory, player.getOpenInventory());
+         player.closeInventory();
+@@ -128,7 +128,7 @@ public class InventoryIntegrationTest {
+         var connection = env.createConnection();
+         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
+         var listener = env.listen(ItemDropEvent.class);
+-        final var firstInventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        final var firstInventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         player.openInventory(firstInventory);
+         assertSame(firstInventory, player.getOpenInventory());
+         firstInventory.setCursorItem(player, ItemStack.of(Material.STONE));
+@@ -139,10 +139,9 @@ public class InventoryIntegrationTest {
+ 
+         player.openInventory(firstInventory);
+         firstInventory.setCursorItem(player, ItemStack.of(Material.STONE));
+-        final var secondInventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        final var secondInventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         listener.followup(event -> event.getPlayer().openInventory(secondInventory));
+         player.closeInventory();
+         assertSame(secondInventory, player.getOpenInventory());
+     }
+-
+ }
+diff --git a/src/test/java/net/minestom/server/inventory/InventoryTest.java b/src/test/java/net/minestom/server/inventory/InventoryTest.java
+index 612e3b162f38d6367dc016530270e38d46913281..87e903169091dfb6576c8102c61294ad7e884cfa 100644
+--- a/src/test/java/net/minestom/server/inventory/InventoryTest.java
++++ b/src/test/java/net/minestom/server/inventory/InventoryTest.java
+@@ -10,6 +10,8 @@ import static org.junit.jupiter.api.Assertions.*;
+ 
+ public class InventoryTest {
+ 
++    private static final Component TITLE = Component.text("title");
++
+     static {
+         // Required to prevent initialization error during event call
+         MinecraftServer.init();
+@@ -17,7 +19,7 @@ public class InventoryTest {
+ 
+     @Test
+     public void testCreation() {
+-        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         assertEquals(InventoryType.CHEST_1_ROW, inventory.getInventoryType());
+         assertEquals(Component.text("title"), inventory.getTitle());
+ 
+@@ -30,7 +32,7 @@ public class InventoryTest {
+         var item1 = ItemStack.of(Material.DIAMOND);
+         var item2 = ItemStack.of(Material.GOLD_INGOT);
+ 
+-        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         assertSame(ItemStack.AIR, inventory.getItemStack(0));
+         inventory.setItemStack(0, item1);
+         assertSame(item1, inventory.getItemStack(0));
+@@ -54,7 +56,7 @@ public class InventoryTest {
+     @Test
+     public void testTake() {
+         ItemStack item = ItemStack.of(Material.DIAMOND, 32);
+-        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
++        Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
+         inventory.setItemStack(0, item);
+         assertTrue(inventory.takeItemStack(item, TransactionOption.DRY_RUN));
+         assertTrue(inventory.takeItemStack(item.withAmount(31), TransactionOption.DRY_RUN));
+@@ -67,7 +69,7 @@ public class InventoryTest {
+ 
+     @Test
+     public void testAdd() {
+-        Inventory inventory = new Inventory(InventoryType.HOPPER, "title");
++        Inventory inventory = new Inventory(InventoryType.HOPPER, TITLE);
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.DIAMOND, 32), TransactionOption.ALL_OR_NOTHING));
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.GOLD_BLOCK, 32), TransactionOption.ALL_OR_NOTHING));
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.MAP, 32), TransactionOption.ALL_OR_NOTHING));
+@@ -79,7 +81,7 @@ public class InventoryTest {
+     @Test
+     public void testIds() {
+         for (int i = 0; i <= 1000; ++i) {
+-            final byte windowId = new Inventory(InventoryType.CHEST_1_ROW, "title").getWindowId();
++            final byte windowId = new Inventory(InventoryType.CHEST_1_ROW, TITLE).getWindowId();
+             assertTrue(windowId > 0);
+         }
+     }
+diff --git a/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
+index 93069a5a925fda0d289e03b72281b92d795ac4c2..3262b08e463feb4dcfd49fbf34b8f3e0be4f37e8 100644
+--- a/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
++++ b/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
+@@ -1,5 +1,6 @@
+ package net.minestom.server.inventory.click.integration;
+ 
++import net.kyori.adventure.text.Component;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import net.minestom.server.coordinate.Pos;
+@@ -99,7 +100,7 @@ public class HeldClickIntegrationTest {
+     public void heldExternal(Env env) {
+         var instance = env.createFlatInstance();
+         var player = env.createPlayer(instance, new Pos(0, 40, 0));
+-        var inventory = new Inventory(InventoryType.HOPPER, "test");
++        var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
+         var playerInv = player.getInventory();
+         player.openInventory(inventory);
+         var listener = env.listen(InventoryPreClickEvent.class);
+diff --git a/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
+index 87a81674699095298ef8614417497025bb70b479..87d2b8b17fb77c48206b32bb6b5dbc10d29a5d6f 100644
+--- a/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
++++ b/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
+@@ -1,6 +1,7 @@
+ package net.minestom.server.inventory.click.integration;
+ 
+ 
++import net.kyori.adventure.text.Component;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import net.minestom.server.coordinate.Pos;
+@@ -85,7 +86,7 @@ public class LeftClickIntegrationTest {
+     public void leftExternal(Env env) {
+         var instance = env.createFlatInstance();
+         var player = env.createPlayer(instance, new Pos(0, 40, 0));
+-        var inventory = new Inventory(InventoryType.HOPPER, "test");
++        var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
+         player.openInventory(inventory);
+         var listener = env.listen(InventoryPreClickEvent.class);
+         inventory.setItemStack(1, ItemStack.of(Material.DIAMOND));
+diff --git a/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
+index c4e4b6e403c628346273597f87507870e62860d3..9fc358b8ff4fd6c0f7f4cd86b2a7484a060450a5 100644
+--- a/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
++++ b/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
+@@ -1,5 +1,6 @@
+ package net.minestom.server.inventory.click.integration;
+ 
++import net.kyori.adventure.text.Component;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import net.minestom.server.coordinate.Pos;
+@@ -107,7 +108,7 @@ public class RightClickIntegrationTest {
+     public void rightExternal(Env env) {
+         var instance = env.createFlatInstance();
+         var player = env.createPlayer(instance, new Pos(0, 40, 0));
+-        var inventory = new Inventory(InventoryType.HOPPER, "test");
++        var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
+         player.openInventory(inventory);
+         var listener = env.listen(InventoryPreClickEvent.class);
+         inventory.setItemStack(1, ItemStack.of(Material.DIAMOND));
