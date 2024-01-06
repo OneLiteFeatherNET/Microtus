@@ -72,7 +72,7 @@ index 0000000000000000000000000000000000000000..d7ef61eaed4232bc5303a5879a2d9859
 +//Microtus end - integrate world spawn position
 \ No newline at end of file
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index d6dd0549db22ee58c4057012fcc46a3aba8f087b..e440c29bc7e55c1131bb3b5582a984acc8b43b0a 100644
+index b93d4b722d088ec3de4a3fd4874ff94b6bb22364..2e130875240631dd08d406effdf027b7aa7b1d30 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
 @@ -8,6 +8,7 @@ import net.minestom.server.ServerProcess;
@@ -98,7 +98,7 @@ index d6dd0549db22ee58c4057012fcc46a3aba8f087b..e440c29bc7e55c1131bb3b5582a984ac
  import net.minestom.server.network.packet.server.play.TimeUpdatePacket;
  import net.minestom.server.snapshot.*;
  import net.minestom.server.tag.TagHandler;
-@@ -103,6 +106,8 @@ public abstract class Instance implements Block.Getter, Block.Setter,
+@@ -104,6 +107,8 @@ public abstract class Instance implements Block.Getter, Block.Setter,
      // Adventure
      private final Pointers pointers;
  
@@ -107,7 +107,7 @@ index d6dd0549db22ee58c4057012fcc46a3aba8f087b..e440c29bc7e55c1131bb3b5582a984ac
      /**
       * Creates a new instance.
       *
-@@ -362,6 +367,44 @@ public abstract class Instance implements Block.Getter, Block.Setter,
+@@ -363,6 +368,44 @@ public abstract class Instance implements Block.Getter, Block.Setter,
          return worldAge;
      }
  
