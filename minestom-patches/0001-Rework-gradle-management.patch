@@ -172,7 +172,7 @@ index 60b18683dd01e7f349f7f22465db2bde969c9690..5f8acd515579c6356296929cbe512ed1
  
  dependencies {
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4f251d7f29d10a95ce145a97664dd6fa69d7cb6e 100644
+index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4c814c0fcffad9e906a533af9da34ec949036d0f 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -3,29 +3,29 @@ metadata.format.version = "1.1"

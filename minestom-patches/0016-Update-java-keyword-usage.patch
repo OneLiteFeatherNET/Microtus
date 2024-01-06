@@ -2451,7 +2451,7 @@ index ca0fec6265f2373a96d63a7b4c402ab35aa0395e..063ad7f76714778b6e459db03e13066b
                  List.of(Word("a")),
                  List.of(Word("b"), Word("a"))
 diff --git a/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java b/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
-index 42cfa09255a0fb576f5db0edde46233252916f11..1a56d96f878ba6cab7234a7cfbb08f9e11927cf1 100644
+index 7a627a040eef54d025678321a0a8a4a7d13eb89c..d1ad4d85fe8d15b225dda7b3f4637fa698c0cc43 100644
 --- a/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
 +++ b/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
 @@ -18,9 +18,9 @@ import static net.minestom.server.command.builder.arguments.ArgumentType.*;
@@ -3615,7 +3615,7 @@ index c2bf3603d30cfc95e5d4aa5a9669cb08dca218c6..0566d0edc971797d11df73af3772b504
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
 diff --git a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
-index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c1b5d7937 100644
+index e45da56efa86de6342b5959ff3f402dd7392ae99..d67343807b0050165a17a762ee17cb0939f18130 100644
 --- a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
 @@ -23,13 +23,13 @@ import java.util.List;
@@ -3689,7 +3689,7 @@ index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c
  
          var instance = env.createFlatInstance();
 diff --git a/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
-index 30e9977964d9d0e9732f3b6216cf1c839f7bc63c..1bd8b09c6c8f5c8ae02d398b6d44f88b6f491418 100644
+index 68e67fb596e8007ba5ab5e2fc2bb4125fbada7c5..bf7d92861fc9f5bbfa20026c76cae2a53c17ed29 100644
 --- a/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
 @@ -26,10 +26,10 @@ import java.util.concurrent.CompletableFuture;
@@ -3724,7 +3724,7 @@ index 30e9977964d9d0e9732f3b6216cf1c839f7bc63c..1bd8b09c6c8f5c8ae02d398b6d44f88b
          final int viewDiameter = MinecraftServer.getChunkViewDistance() * 2 + 1;
          // Preload all possible chunks to avoid issues due to async loading
 diff --git a/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
-index 1dac5752d654cf22dc83d02c396dcb2c9be904e7..760f92b1f25da06ef91c08cb91b31b387d8e9edf 100644
+index e781dac8105ca4253d8b95c55f0657c2b9183ab2..5436ee18f7e90c69643c62e0a4c4bc111b27587b 100644
 --- a/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
 @@ -17,12 +17,11 @@ import java.util.Set;
@@ -4059,7 +4059,7 @@ index 1e8f352c6dea803bbe9cea8998fb4d03535f6177..7fcb6ffa93f15baf5dc1d77f21a01068
  
              @Override
 diff --git a/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java b/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
-index 837eda9fe513972169ed8d0e528cbcdc387e5401..96522d656031c43dce30959e90a20f6ee82905e3 100644
+index 400271ef5d61a29cb34b1e191d3570d2ff2d4d09..0fe69fd6447431152a65c02dbf8936042a0e877b 100644
 --- a/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
 +++ b/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
 @@ -17,10 +17,10 @@ import java.util.Map;
@@ -4073,7 +4073,7 @@ index 837eda9fe513972169ed8d0e528cbcdc387e5401..96522d656031c43dce30959e90a20f6e
 -    public void basic() {
 +    void basic() {
          assertNull(BlockUtils.extractClientNbt(Block.STONE));
-         assertNull(BlockUtils.extractClientNbt(Block.GRASS));
+         assertNull(BlockUtils.extractClientNbt(Block.GRASS_BLOCK));
          assertEquals(NBTCompound.EMPTY, BlockUtils.extractClientNbt(Block.CHEST));
 @@ -30,7 +30,7 @@ public class BlockClientNbtTest {
      }
@@ -4212,7 +4212,7 @@ index 5fa43d5236e483b25b94dc757b98a3a483409c70..3b8ec507d023e4b10085695caf2fcad7
          Point end = Block.LANTERN.registry().collisionShape().relativeEnd();
  
 diff --git a/src/test/java/net/minestom/server/instance/ChunkViewerIntegrationTest.java b/src/test/java/net/minestom/server/instance/ChunkViewerIntegrationTest.java
-index 429a26a0a498574bff8109bbaa8d14c9a4b477d2..5e9b92c3c5c749ad75351f97d5d9799ae6937096 100644
+index 920c9ff5a6f89c205b2e90f597032181965fd21c..61f478a5102a6d9d75668532b65f865b8f2c0ac3 100644
 --- a/src/test/java/net/minestom/server/instance/ChunkViewerIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/instance/ChunkViewerIntegrationTest.java
 @@ -13,11 +13,11 @@ import org.junit.jupiter.params.provider.ValueSource;
@@ -4344,7 +4344,7 @@ index 45508ef388c32099b2bdac4a7a75808be3ce6d6c..fa1ed75e21bb788e634b9202605c26b2
          var updater = new EntityTracker.Update<>() {
              @Override
 diff --git a/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java b/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
-index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6a52ea23e 100644
+index 5df0c70b1c6b11fa20181184fe71a6f0e51add70..6655a400483b8b951097f9661f7d172c3620cef1 100644
 --- a/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
 @@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -4360,7 +4360,7 @@ index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
          AtomicReference<Exception> failed = new AtomicReference<>();
-@@ -34,61 +34,55 @@ public class GeneratorForkConsumerIntegrationTest {
+@@ -34,44 +34,40 @@ public class GeneratorForkConsumerIntegrationTest {
      }
  
      @Test
@@ -4423,38 +4423,8 @@ index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6
 +    void neighborZ(Env env) {
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
--        instance.setGenerator(unit -> {
--            unit.fork(setter -> {
--                var dynamic = (GeneratorImpl.DynamicFork) setter;
--                assertNull(dynamic.minSection);
--                assertEquals(0, dynamic.width);
--                assertEquals(0, dynamic.height);
--                assertEquals(0, dynamic.depth);
--                setter.setBlock(unit.absoluteStart(), Block.STONE);
--                setter.setBlock(unit.absoluteStart().add(0, 0, 16), Block.GRASS);
--                assertEquals(unit.absoluteStart(), dynamic.minSection);
--                assertEquals(1, dynamic.width);
--                assertEquals(1, dynamic.height);
--                assertEquals(2, dynamic.depth);
--            });
--        });
-+        instance.setGenerator(unit -> unit.fork(setter -> {
-+            var dynamic = (GeneratorImpl.DynamicFork) setter;
-+            assertNull(dynamic.minSection);
-+            assertEquals(0, dynamic.width);
-+            assertEquals(0, dynamic.height);
-+            assertEquals(0, dynamic.depth);
-+            setter.setBlock(unit.absoluteStart(), Block.STONE);
-+            setter.setBlock(unit.absoluteStart().add(0, 0, 16), Block.GRASS);
-+            assertEquals(unit.absoluteStart(), dynamic.minSection);
-+            assertEquals(1, dynamic.width);
-+            assertEquals(1, dynamic.height);
-+            assertEquals(2, dynamic.depth);
-+        }));
-         instance.loadChunk(0, 0).join();
-         instance.setGenerator(null);
-         instance.loadChunk(0, 1).join();
-@@ -97,24 +91,22 @@ public class GeneratorForkConsumerIntegrationTest {
+         instance.setGenerator(unit -> {
+@@ -97,7 +93,7 @@ public class GeneratorForkConsumerIntegrationTest {
      }
  
      @Test
@@ -4462,38 +4432,8 @@ index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6
 +    void neighborX(Env env) {
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
--        instance.setGenerator(unit -> {
--            unit.fork(setter -> {
--                var dynamic = (GeneratorImpl.DynamicFork) setter;
--                assertNull(dynamic.minSection);
--                assertEquals(0, dynamic.width);
--                assertEquals(0, dynamic.height);
--                assertEquals(0, dynamic.depth);
--                setter.setBlock(unit.absoluteStart(), Block.STONE);
--                setter.setBlock(unit.absoluteStart().add(16, 0, 0), Block.GRASS);
--                assertEquals(unit.absoluteStart(), dynamic.minSection);
--                assertEquals(2, dynamic.width);
--                assertEquals(1, dynamic.height);
--                assertEquals(1, dynamic.depth);
--            });
--        });
-+        instance.setGenerator(unit -> unit.fork(setter -> {
-+            var dynamic = (GeneratorImpl.DynamicFork) setter;
-+            assertNull(dynamic.minSection);
-+            assertEquals(0, dynamic.width);
-+            assertEquals(0, dynamic.height);
-+            assertEquals(0, dynamic.depth);
-+            setter.setBlock(unit.absoluteStart(), Block.STONE);
-+            setter.setBlock(unit.absoluteStart().add(16, 0, 0), Block.GRASS);
-+            assertEquals(unit.absoluteStart(), dynamic.minSection);
-+            assertEquals(2, dynamic.width);
-+            assertEquals(1, dynamic.height);
-+            assertEquals(1, dynamic.depth);
-+        }));
-         instance.loadChunk(0, 0).join();
-         instance.setGenerator(null);
-         instance.loadChunk(1, 0).join();
-@@ -123,31 +115,29 @@ public class GeneratorForkConsumerIntegrationTest {
+         instance.setGenerator(unit -> {
+@@ -123,7 +119,7 @@ public class GeneratorForkConsumerIntegrationTest {
      }
  
      @Test
@@ -4501,37 +4441,8 @@ index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6
 +    void neighborY(Env env) {
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
--        instance.setGenerator(unit -> {
--            unit.fork(setter -> {
--                var dynamic = (GeneratorImpl.DynamicFork) setter;
--                assertNull(dynamic.minSection);
--                assertEquals(0, dynamic.width);
--                assertEquals(0, dynamic.height);
--                assertEquals(0, dynamic.depth);
--                setter.setBlock(unit.absoluteStart(), Block.STONE);
--                setter.setBlock(unit.absoluteStart().add(0, 16, 0), Block.GRASS);
--                assertEquals(unit.absoluteStart(), dynamic.minSection);
--                assertEquals(1, dynamic.width);
--                assertEquals(2, dynamic.height);
--                assertEquals(1, dynamic.depth);
--            });
--        });
-+        instance.setGenerator(unit -> unit.fork(setter -> {
-+            var dynamic = (GeneratorImpl.DynamicFork) setter;
-+            assertNull(dynamic.minSection);
-+            assertEquals(0, dynamic.width);
-+            assertEquals(0, dynamic.height);
-+            assertEquals(0, dynamic.depth);
-+            setter.setBlock(unit.absoluteStart(), Block.STONE);
-+            setter.setBlock(unit.absoluteStart().add(0, 16, 0), Block.GRASS);
-+            assertEquals(unit.absoluteStart(), dynamic.minSection);
-+            assertEquals(1, dynamic.width);
-+            assertEquals(2, dynamic.height);
-+            assertEquals(1, dynamic.depth);
-+        }));
-         instance.loadChunk(0, 0).join();
-         assertEquals(Block.STONE, instance.getBlock(0, -64, 0));
-         assertEquals(Block.GRASS, instance.getBlock(0, -48, 0));
+         instance.setGenerator(unit -> {
+@@ -147,7 +143,7 @@ public class GeneratorForkConsumerIntegrationTest {
      }
  
      @Test
@@ -4818,7 +4729,7 @@ index 4a53ede725c99c4448e28d11625476eed34189c5..ad3ba534f6a91b90a713518aba46ac26
          var chunkUnit = GeneratorImpl.section(section, -1, -1, 0);
          Generator generator = chunk -> chunk.modifier().fill(Block.STONE);
 diff --git a/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java b/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
-index 5b0d774bc9d87540382de3b88f48f7542f8f473c..fc21a2c8e00e201b266f6e71d90249dc71b1cce6 100644
+index a2019e8a46f96c6b4fec81bd2f388e9f017c29d4..a4e6a37b559c39d51fa6a49fc3d089d22dbda240 100644
 --- a/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
 @@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -5988,33 +5899,18 @@ index 107e1c53a77414a300beb46143875dda25a4503f..ac349777f80d2711dcb120908ea8dd9b
          assertBufferTypeCollection(BOOLEAN, List.of(true), new byte[]{0x01, 0x01});
      }
 diff --git a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
-index 3e424c24f5c7064992c469439a0049f040ef038c..eb265352ab3a27a6bb8fb31df610027789570b83 100644
+index b38286f56eeb175bb0071762a6b35ffb80f86d11..154e67df1e287eca3fd7c08420f84843e17a2c00 100644
 --- a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
 +++ b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
-@@ -1,15 +1,9 @@
+@@ -1,7 +1,6 @@
  package net.minestom.server.network;
  
  import com.google.gson.JsonObject;
 -
--import java.io.PrintStream;
--
  import net.kyori.adventure.bossbar.BossBar;
  import net.kyori.adventure.text.Component;
--import net.minestom.server.MinecraftServer;
  import net.minestom.server.coordinate.Vec;
--import net.minestom.server.crypto.ChatSession;
--import net.minestom.server.crypto.PlayerPublicKey;
- import net.minestom.server.entity.EquipmentSlot;
- import net.minestom.server.entity.GameMode;
- import net.minestom.server.entity.Metadata;
-@@ -26,18 +20,11 @@ import net.minestom.server.network.packet.server.login.SetCompressionPacket;
- import net.minestom.server.network.packet.server.play.*;
- import net.minestom.server.network.packet.server.play.DeclareRecipesPacket.Ingredient;
- import net.minestom.server.network.packet.server.status.PongPacket;
--import net.minestom.server.utils.crypto.KeyUtils;
--import org.apache.commons.net.util.Base64;
- import org.jglrxavpok.hephaistos.nbt.NBT;
- import org.junit.jupiter.api.BeforeAll;
+@@ -27,11 +26,6 @@ import org.junit.jupiter.api.BeforeAll;
  import org.junit.jupiter.api.Test;
  
  import java.lang.reflect.InvocationTargetException;
@@ -6026,7 +5922,7 @@ index 3e424c24f5c7064992c469439a0049f040ef038c..eb265352ab3a27a6bb8fb31df6100277
  import java.util.ArrayList;
  import java.util.List;
  import java.util.Map;
-@@ -148,12 +135,12 @@ public class PacketWriteReadTest {
+@@ -142,12 +136,12 @@ public class PacketWriteReadTest {
      }
  
      @Test
@@ -6042,7 +5938,7 @@ index 3e424c24f5c7064992c469439a0049f040ef038c..eb265352ab3a27a6bb8fb31df6100277
      }
  
 diff --git a/src/test/java/net/minestom/server/network/SendablePacketTest.java b/src/test/java/net/minestom/server/network/SendablePacketTest.java
-index e1f05206055e80600e5fc3dcfb45599c081ab337..05527ae21b137891c54990d8a76f577bb47ad91b 100644
+index d5b20c96147adbd5f6079f870bf640ab21745c3b..8f296145a678091530b44ca741967816fc7efbf5 100644
 --- a/src/test/java/net/minestom/server/network/SendablePacketTest.java
 +++ b/src/test/java/net/minestom/server/network/SendablePacketTest.java
 @@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
@@ -6068,7 +5964,7 @@ index e1f05206055e80600e5fc3dcfb45599c081ab337..05527ae21b137891c54990d8a76f577b
          var cached = new CachedPacket(packet);
          assertSame(packet, cached.packet());
 diff --git a/src/test/java/net/minestom/server/network/SocketReadTest.java b/src/test/java/net/minestom/server/network/SocketReadTest.java
-index 0f168ab61b905901d8aaca71d16526bcd8473d42..b86f9f16335d294f5ab0fe2b8211713aa99ad052 100644
+index 4c8db0970221df2535cbde87e8b3848c318f1cb3..0b97ff1b1ecc71bf5f8a2ccef2c2443277e40b18 100644
 --- a/src/test/java/net/minestom/server/network/SocketReadTest.java
 +++ b/src/test/java/net/minestom/server/network/SocketReadTest.java
 @@ -16,11 +16,11 @@ import java.util.zip.DataFormatException;
@@ -6113,7 +6009,7 @@ index 0f168ab61b905901d8aaca71d16526bcd8473d42..b86f9f16335d294f5ab0fe2b8211713a
  
          var packet = new ClientPluginMessagePacket("channel", new byte[2000]);
 diff --git a/src/test/java/net/minestom/server/network/SocketWriteTest.java b/src/test/java/net/minestom/server/network/SocketWriteTest.java
-index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..8f8aee350f584b5ef886f8529f56f21fa922be12 100644
+index 35f3799ca1aabf40af3fa75ac344886f09e01975..ff89827c7389fbf123fd9e0cea934472a09a47ca 100644
 --- a/src/test/java/net/minestom/server/network/SocketWriteTest.java
 +++ b/src/test/java/net/minestom/server/network/SocketWriteTest.java
 @@ -14,7 +14,7 @@ import static net.minestom.server.network.NetworkBuffer.STRING;
@@ -6171,10 +6067,10 @@ index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..8f8aee350f584b5ef886f8529f56f21f
  
          var buffer = ObjectPool.PACKET_POOL.get();
 diff --git a/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java b/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
-index 1836cf2b698dbbc8004a3a168448f1e13f3edd92..75680c92345e95f46e0528e618080f3217315381 100644
+index 3f9ec91fb26c5d4977d0564b7a12a94ded60e318..34d36e768ce1b23e1ea632670b2a427f8a7351c7 100644
 --- a/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
 +++ b/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
-@@ -10,10 +10,10 @@ import java.nio.file.Files;
+@@ -11,10 +11,10 @@ import java.nio.file.Files;
  
  import static org.junit.jupiter.api.Assertions.*;
  
@@ -6185,33 +6081,33 @@ index 1836cf2b698dbbc8004a3a168448f1e13f3edd92..75680c92345e95f46e0528e618080f32
 -    public void inetAddressTest() throws IOException {
 +    void inetAddressTest() throws IOException {
          InetSocketAddress address = new InetSocketAddress("localhost", 25565);
-         var server = new Server(new PacketProcessor());
+         var server = new Server(new PacketProcessor(new PacketListenerManager()));
          server.init(address);
-@@ -26,7 +26,7 @@ public class ServerAddressTest {
+@@ -27,7 +27,7 @@ public class ServerAddressTest {
      }
  
      @Test
 -    public void inetAddressDynamicTest() throws IOException {
 +    void inetAddressDynamicTest() throws IOException {
          InetSocketAddress address = new InetSocketAddress("localhost", 0);
-         var server = new Server(new PacketProcessor());
+         var server = new Server(new PacketProcessor(new PacketListenerManager()));
          server.init(address);
-@@ -39,7 +39,7 @@ public class ServerAddressTest {
+@@ -40,7 +40,7 @@ public class ServerAddressTest {
      }
  
      @Test
 -    public void unixAddressTest() throws IOException {
 +    void unixAddressTest() throws IOException {
          UnixDomainSocketAddress address = UnixDomainSocketAddress.of("minestom.sock");
-         var server = new Server(new PacketProcessor());
+         var server = new Server(new PacketProcessor(new PacketListenerManager()));
          server.init(address);
-@@ -54,7 +54,7 @@ public class ServerAddressTest {
+@@ -55,7 +55,7 @@ public class ServerAddressTest {
      }
  
      @Test
 -    public void noAddressTest() throws IOException {
 +    void noAddressTest() throws IOException {
-         var server = new Server(new PacketProcessor());
+         var server = new Server(new PacketProcessor(new PacketListenerManager()));
          assertDoesNotThrow(server::stop);
      }
 diff --git a/src/test/java/net/minestom/server/permission/TestPermissions.java b/src/test/java/net/minestom/server/permission/TestPermissions.java
