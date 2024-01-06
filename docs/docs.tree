@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE instance-profile
+        SYSTEM "https://resources.jetbrains.com/writerside/1.0/product-profile.dtd">
+
+<instance-profile id="docs"
+                  name="Microtus"
+                  start-page="Overview.md">
+    <toc-element topic="Overview.md"/>
+    <toc-element topic="Contributing.md">
+        <toc-element topic="Patch-Files.md"/>
+        <toc-element topic="Testing.md"/>
+    </toc-element>
+    <toc-element topic="Changelog.md"/>
+</instance-profile>
