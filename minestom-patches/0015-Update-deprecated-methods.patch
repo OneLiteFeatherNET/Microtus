@@ -480,10 +480,10 @@ index b5817c96772fd399320bc61cafecf2101a55e867..b5c67427644748d5199ac42757c7360e
          this(name, Component.text(value));
      }
 diff --git a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
-index b14aebca46465331160051e55ceaab6439999ce4..9a1ad120480b8cf11106915185ef63cf8d445a3b 100644
+index be0dc908c1b67c0ab4d90336f2eb554a13345649..75b882667c48e54202d4940910b08017eda80d44 100644
 --- a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
 +++ b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
-@@ -24,7 +24,7 @@ public interface Scoreboard extends Viewable, PacketGroupingAudience {
+@@ -25,7 +25,7 @@ public interface Scoreboard extends Viewable, PacketGroupingAudience {
       * @return the creation objective packet
       * @deprecated Use {@link #getCreationObjectivePacket(Component, ScoreboardObjectivePacket.Type)}
       */
@@ -493,10 +493,10 @@ index b14aebca46465331160051e55ceaab6439999ce4..9a1ad120480b8cf11106915185ef63cf
      default ScoreboardObjectivePacket getCreationObjectivePacket(String value, ScoreboardObjectivePacket.Type type) {
          return this.getCreationObjectivePacket(Component.text(value), type);
 diff --git a/src/main/java/net/minestom/server/scoreboard/Sidebar.java b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
-index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..efc5627faddcc6b688437df7febb6e2593348e93 100644
+index 45c157197205d60668fb4a8da948c5e04b8b9933..2e7997d768699443ea3bfb443becb771b428a9b6 100644
 --- a/src/main/java/net/minestom/server/scoreboard/Sidebar.java
 +++ b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
-@@ -58,7 +58,7 @@ public class Sidebar implements Scoreboard {
+@@ -55,7 +55,7 @@ public class Sidebar implements Scoreboard {
       * @param title The title of the sidebar
       * @deprecated Use {@link #Sidebar(Component)}
       */
@@ -505,7 +505,7 @@ index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..efc5627faddcc6b688437df7febb6e25
      public Sidebar(@NotNull String title) {
          this(Component.text(title));
      }
-@@ -85,7 +85,7 @@ public class Sidebar implements Scoreboard {
+@@ -82,7 +82,7 @@ public class Sidebar implements Scoreboard {
       * @param title The new sidebar title
       * @deprecated Use {@link #setTitle(Component)}
       */
