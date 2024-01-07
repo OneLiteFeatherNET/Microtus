@@ -26,6 +26,118 @@ index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..5ced7af84795d75e856970f0875f3ee7
                  final Player player = event.getPlayer();
  
                  var instances = MinecraftServer.getInstanceManager().getInstances();
+diff --git a/demo/src/main/java/net/minestom/demo/commands/SideBarCommand.java b/demo/src/main/java/net/minestom/demo/commands/SideBarCommand.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..c6d60ef4f193882ca3ce096bdc79122d0d1c8a9e
+--- /dev/null
++++ b/demo/src/main/java/net/minestom/demo/commands/SideBarCommand.java
+@@ -0,0 +1,106 @@
++package net.minestom.demo.commands;
++
++import net.kyori.adventure.text.Component;
++import net.kyori.adventure.text.format.NamedTextColor;
++import net.kyori.adventure.text.format.TextDecoration;
++import net.minestom.server.command.CommandSender;
++import net.minestom.server.command.builder.Command;
++import net.minestom.server.command.builder.CommandContext;
++import net.minestom.server.command.builder.arguments.ArgumentType;
++import net.minestom.server.command.builder.arguments.ArgumentWord;
++import net.minestom.server.command.builder.condition.Conditions;
++import net.minestom.server.entity.Player;
++import net.minestom.server.scoreboard.NumberFormat;
++import net.minestom.server.scoreboard.Sidebar;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++/**
++ * Demo command to show a sidebar.
++ * Credits goes out to <a href="https://github.com/DeidaraMC">DeidaraMC</a> for the original code.
++ * The code is a bit modified to reflect the changes in the API.
++ */
++public final class SideBarCommand extends Command {
++    private static final int MAX_LINES = 16;
++    private final Sidebar sidebar = new Sidebar(Component.text("Demo Scoreboard").decorate(TextDecoration.BOLD));
++    private int currentLine = 0;
++
++    public SideBarCommand() {
++        super("sidebar");
++
++        setDefaultExecutor((source, args) -> source.sendMessage(Component.text("Unknown syntax (note: title must be quoted)")));
++        setCondition(Conditions::playerOnly);
++
++        ArgumentWord option = ArgumentType.Word("option").from("add-line", "remove-line", "set-title", "toggle", "update-content", "update-score");
++        var content = ArgumentType.String("content").setDefaultValue("");
++        var targetLine = ArgumentType.Integer("target line").setDefaultValue(-1);
++
++        addSyntax(this::handleSidebar, option);
++        addSyntax(this::handleSidebar, option, content);
++        addSyntax(this::handleSidebar, option, content, targetLine);
++    }
++
++    private void handleSidebar(@NotNull CommandSender source, @NotNull CommandContext context) {
++        Player player = (Player) source;
++        String option = context.get("option");
++        String content = context.get("content");
++        int targetLine = context.get("target line");
++        if (targetLine == -1) targetLine = currentLine;
++        switch (option) {
++            case "add-line":
++                addLine(content, null);
++                break;
++            case "remove-line":
++                removeLine();
++                break;
++            case "set-title":
++                setTitle(content);
++                break;
++            case "toggle":
++                toggleSidebar(player);
++                break;
++            case "update-content":
++                updateLineContent(content, String.valueOf(targetLine));
++                break;
++            case "update-score":
++                updateLineScore(Integer.parseInt(content), String.valueOf(targetLine));
++                break;
++            default:
++                source.sendMessage(Component.text("Unknown option: " + option));
++                break;
++        }
++    }
++
++    private void addLine(@NotNull String content, @Nullable NumberFormat numberFormat) {
++        if (currentLine > MAX_LINES) return;
++        sidebar.createLine(new Sidebar.ScoreboardLine(
++                String.valueOf(currentLine),
++                Component.text(content).color(NamedTextColor.WHITE), currentLine, numberFormat)
++        );
++        currentLine++;
++    }
++
++    private void removeLine() {
++        if (currentLine <= 0) return;
++        sidebar.removeLine(String.valueOf(currentLine));
++        currentLine--;
++    }
++
++    private void setTitle(@NotNull String title) {
++        sidebar.setTitle(Component.text(title).decorate(TextDecoration.BOLD));
++    }
++
++    private void toggleSidebar(@NotNull Player player) {
++        if (!sidebar.removeViewer(player)) {
++            sidebar.addViewer(player);
++        }
++    }
++
++    private void updateLineContent(@NotNull String content, @NotNull String lineId) {
++        sidebar.updateLineContent(lineId, Component.text(content).color(NamedTextColor.WHITE));
++    }
++
++    private void updateLineScore(int score, @NotNull String lineId) {
++        sidebar.updateLineScore(lineId, score);
++    }
++}
 diff --git a/src/autogenerated/java/net/minestom/server/entity/EntityTypes.java b/src/autogenerated/java/net/minestom/server/entity/EntityTypes.java
 index 4c56bf3557eb5b0cd305e0deeb7d5e34b8f19127..9c01f52531933a7460653503fdf412bf472e1701 100644
 --- a/src/autogenerated/java/net/minestom/server/entity/EntityTypes.java
@@ -4227,10 +4339,10 @@ index 0000000000000000000000000000000000000000..0b7760127548fd8bdb90ab533cd3d01f
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/ConnectionManager.java b/src/main/java/net/minestom/server/network/ConnectionManager.java
-index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e9db44c2c 100644
+index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c66b6dc2a7 100644
 --- a/src/main/java/net/minestom/server/network/ConnectionManager.java
 +++ b/src/main/java/net/minestom/server/network/ConnectionManager.java
-@@ -4,12 +4,19 @@ import net.kyori.adventure.text.Component;
+@@ -4,12 +4,20 @@ import net.kyori.adventure.text.Component;
  import net.kyori.adventure.text.format.NamedTextColor;
  import net.minestom.server.MinecraftServer;
  import net.minestom.server.entity.Player;
@@ -4243,6 +4355,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e
  import net.minestom.server.instance.Instance;
 +import net.minestom.server.message.Messenger;
 +import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
++import net.minestom.server.network.packet.server.common.PluginMessagePacket;
 +import net.minestom.server.network.packet.server.configuration.ClientRegistryDataPacket;
 +import net.minestom.server.network.packet.server.configuration.FinishConfigurationPacket;
  import net.minestom.server.network.packet.server.login.LoginSuccessPacket;
@@ -4253,7 +4366,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e
  import net.minestom.server.network.player.PlayerConnection;
  import net.minestom.server.network.player.PlayerSocketConnection;
  import net.minestom.server.utils.StringUtils;
-@@ -18,24 +25,29 @@ import net.minestom.server.utils.debug.DebugUtils;
+@@ -18,8 +26,10 @@ import net.minestom.server.utils.debug.DebugUtils;
  import net.minestom.server.utils.validate.Check;
  import org.jctools.queues.MessagePassingQueue;
  import org.jctools.queues.MpscUnboundedArrayQueue;
@@ -4261,15 +4374,10 @@ index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e
  import org.jetbrains.annotations.NotNull;
  import org.jetbrains.annotations.Nullable;
 +import org.jglrxavpok.hephaistos.nbt.NBT;
-+import org.jglrxavpok.hephaistos.nbt.NBTCompound;
  
  import java.util.*;
  import java.util.concurrent.CompletableFuture;
- import java.util.concurrent.ConcurrentHashMap;
-+import java.util.concurrent.ConcurrentLinkedQueue;
- import java.util.concurrent.CopyOnWriteArraySet;
- import java.util.function.Function;
- 
+@@ -30,12 +40,13 @@ import java.util.function.Function;
  /**
   * Manages the connected clients.
   */
@@ -4284,7 +4392,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e
      private final Set<Player> players = new CopyOnWriteArraySet<>();
      private final Set<Player> unmodifiablePlayers = Collections.unmodifiableSet(players);
      private final Map<PlayerConnection, Player> connectionPlayerMap = new ConcurrentHashMap<>();
-@@ -135,7 +147,7 @@ public final class ConnectionManager {
+@@ -135,7 +146,7 @@ public final class ConnectionManager {
  
      /**
       * Computes the UUID of the specified connection.
@@ -4293,7 +4401,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e
       * to give the player the right {@link UUID}.
       *
       * @param playerConnection the player connection
-@@ -182,30 +194,81 @@ public final class ConnectionManager {
+@@ -182,30 +193,81 @@ public final class ConnectionManager {
          final Player player = this.connectionPlayerMap.remove(connection);
          if (player == null) return;
          this.players.remove(player);
@@ -4383,7 +4491,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e
              // Change UUID/Username based on the event
              {
                  final String eventUsername = asyncPlayerPreLoginEvent.getUsername();
-@@ -217,72 +280,57 @@ public final class ConnectionManager {
+@@ -217,72 +279,57 @@ public final class ConnectionManager {
                      player.setUuid(eventUuid);
                  }
              }
@@ -4416,6 +4524,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e
 +    @Override
 +    public void doConfiguration(@NotNull Player player, boolean hasFirstConfig) {
 +        AsyncUtils.runAsync(() -> {
++            player.sendPacket(PluginMessagePacket.getBrandPacket());
 +            var event = new AsyncPlayerConfigurationEvent(player, hasFirstConfig);
 +            EventDispatcher.call(event);
  
@@ -4453,7 +4562,6 @@ index b080de14ec2509b15108f171694653d3dc62cd93..8c9b0c91bbaa7cb9bbd97717f6770c5e
 +                player.sendPacket(new ClientRegistryDataPacket(NBT.Compound(registryData)));
 +                player.sendPacket(TagsPacket.DEFAULT_TAGS);
              }
-+
 +
 +            player.setPendingInstance(spawningInstance);
 +            player.sendPacket(new FinishConfigurationPacket());
@@ -8477,10 +8585,10 @@ index 2aa51c061fba30a8523047923210c3d4d5558592..5af4f3ef8867505025909fcd6402cd4b
  
      @Override
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/ScoreboardObjectivePacket.java b/src/main/java/net/minestom/server/network/packet/server/play/ScoreboardObjectivePacket.java
-index 58c949a352328a5f4c9136a9a826b71a4f913f0a..08ad3215133e7676f92aa0da4b9e07a2f4e81226 100644
+index 58c949a352328a5f4c9136a9a826b71a4f913f0a..5aa245b61a8943d813e9b3286bd2e417c984ecf4 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/ScoreboardObjectivePacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/server/play/ScoreboardObjectivePacket.java
-@@ -1,8 +1,10 @@
+@@ -1,10 +1,14 @@
  package net.minestom.server.network.packet.server.play;
  
  import net.kyori.adventure.text.Component;
@@ -8490,15 +8598,72 @@ index 58c949a352328a5f4c9136a9a826b71a4f913f0a..08ad3215133e7676f92aa0da4b9e07a2
 +import net.minestom.server.network.packet.server.ServerPacketState;
  import net.minestom.server.network.packet.server.ServerPacket;
  import net.minestom.server.network.packet.server.ServerPacketIdentifier;
++import net.minestom.server.scoreboard.NumberFormat;
++import net.minestom.server.scoreboard.Sidebar;
  import org.jetbrains.annotations.NotNull;
-@@ -14,6 +16,7 @@ import java.util.function.UnaryOperator;
+ import org.jetbrains.annotations.Nullable;
+ 
+@@ -14,27 +18,34 @@ import java.util.function.UnaryOperator;
  
  import static net.minestom.server.network.NetworkBuffer.*;
  
+-public record ScoreboardObjectivePacket(@NotNull String objectiveName, byte mode,
+-                                        @Nullable Component objectiveValue,
+-                                        @Nullable Type type) implements ComponentHoldingServerPacket {
 +@ServerPacketState(states = {ConnectionState.PLAY})
- public record ScoreboardObjectivePacket(@NotNull String objectiveName, byte mode,
-                                         @Nullable Component objectiveValue,
-                                         @Nullable Type type) implements ComponentHoldingServerPacket {
++public record ScoreboardObjectivePacket(
++        @NotNull String objectiveName,
++        byte mode,
++        @Nullable Component objectiveValue,
++        @Nullable Type type,
++        @Nullable NumberFormat numberFormat
++) implements ComponentHoldingServerPacket {
+     public ScoreboardObjectivePacket(@NotNull NetworkBuffer reader) {
+         this(read(reader));
+     }
+ 
+-    private ScoreboardObjectivePacket(ScoreboardObjectivePacket packet) {
+-        this(packet.objectiveName, packet.mode, packet.objectiveValue, packet.type);
++    private ScoreboardObjectivePacket(@NotNull ScoreboardObjectivePacket packet) {
++        this(packet.objectiveName, packet.mode, packet.objectiveValue, packet.type, packet.numberFormat);
+     }
+ 
+-    private static ScoreboardObjectivePacket read(@NotNull NetworkBuffer reader) {
+-        var objectiveName = reader.read(STRING);
+-        var mode = reader.read(BYTE);
++    private static @NotNull ScoreboardObjectivePacket read(@NotNull NetworkBuffer reader) {
++        String objectiveName = reader.read(STRING);
++        byte mode = reader.read(BYTE);
+         Component objectiveValue = null;
+         Type type = null;
++        NumberFormat numberFormat = NumberFormat.asBlank();
+         if (mode == 0 || mode == 2) {
+             objectiveValue = reader.read(COMPONENT);
+             type = Type.values()[reader.read(VAR_INT)];
++            numberFormat = reader.readOptional(NumberFormat::new);
+         }
+-        return new ScoreboardObjectivePacket(objectiveName, mode, objectiveValue, type);
++        return new ScoreboardObjectivePacket(objectiveName, mode, objectiveValue, type, numberFormat);
+     }
+ 
+     @Override
+@@ -46,6 +57,7 @@ public record ScoreboardObjectivePacket(@NotNull String objectiveName, byte mode
+             writer.write(COMPONENT, objectiveValue);
+             assert type != null;
+             writer.write(VAR_INT, type.ordinal());
++            writer.writeOptional(numberFormat);
+         }
+     }
+ 
+@@ -63,7 +75,7 @@ public record ScoreboardObjectivePacket(@NotNull String objectiveName, byte mode
+     @Override
+     public @NotNull ServerPacket copyWithOperator(@NotNull UnaryOperator<Component> operator) {
+         return mode == 0 || mode == 2 ? new ScoreboardObjectivePacket(objectiveName, mode,
+-                operator.apply(objectiveValue), type) : this;
++                operator.apply(objectiveValue), type, numberFormat) : this;
+     }
+ 
+     /**
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/SelectAdvancementTabPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/SelectAdvancementTabPacket.java
 index ccb1610dc8e49510a95e87c619afe6edfe87ba92..95bd2798db06273b4ddda9c1972816b9f43d217a 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/SelectAdvancementTabPacket.java
@@ -9138,42 +9303,95 @@ index 07499cd8acc37004e7780960b96343395d67c610..a1e07801d3ed9faf753e914247c922de
                                  @NotNull LightData lightData) implements ServerPacket {
      public UpdateLightPacket(@NotNull NetworkBuffer reader) {
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/UpdateScorePacket.java b/src/main/java/net/minestom/server/network/packet/server/play/UpdateScorePacket.java
-index ce2150a27dd563d2f168366b5ac34a4f8fafcb7b..fff1854f796930ac93e130b17330a7209865caa6 100644
+index ce2150a27dd563d2f168366b5ac34a4f8fafcb7b..6f68ed085261b5dc5a46da2fecbd795c32257833 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/UpdateScorePacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/server/play/UpdateScorePacket.java
-@@ -1,12 +1,15 @@
+@@ -1,36 +1,68 @@
  package net.minestom.server.network.packet.server.play;
  
++import net.kyori.adventure.text.Component;
 +import net.minestom.server.network.ConnectionState;
  import net.minestom.server.network.NetworkBuffer;
 +import net.minestom.server.network.packet.server.ServerPacketState;
  import net.minestom.server.network.packet.server.ServerPacket;
  import net.minestom.server.network.packet.server.ServerPacketIdentifier;
++import net.minestom.server.scoreboard.NumberFormat;
  import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
  
  import static net.minestom.server.network.NetworkBuffer.*;
  
+-public record UpdateScorePacket(@NotNull String entityName, byte action,
+-                                @NotNull String objectiveName, int value) implements ServerPacket {
++/**
++ * The class is the packet definition from the packet which updates a score.
++ * It usually sends when a score is changed.
++ * For more information visit the <a href="https://wiki.vg/Protocol#Update_Score">wiki</a>
++ * @param entityName the name of the entity
++ * @param objectiveName the name of the objective
++ * @param value the value of the score
++ * @param displayName the display name of the score (optional)
++ * @param numberFormat the format of the score (optional)
++ */
 +@ServerPacketState(states = {ConnectionState.PLAY})
- public record UpdateScorePacket(@NotNull String entityName, byte action,
-                                 @NotNull String objectiveName, int value) implements ServerPacket {
++public record UpdateScorePacket(
++        @NotNull String entityName,
++        @NotNull String objectiveName,
++        int value,
++        @Nullable Component displayName,
++        @Nullable NumberFormat numberFormat
++) implements ServerPacket {
      public UpdateScorePacket(@NotNull NetworkBuffer reader) {
-@@ -17,11 +20,11 @@ public record UpdateScorePacket(@NotNull String entityName, byte action,
-         this(packet.entityName, packet.action, packet.objectiveName, packet.value);
-     }
- 
+-        this(read(reader));
+-    }
+-
+-    private UpdateScorePacket(UpdateScorePacket packet) {
+-        this(packet.entityName, packet.action, packet.objectiveName, packet.value);
+-    }
+-
 -    private static UpdateScorePacket read(@NotNull NetworkBuffer reader) {
 -        var entityName = reader.read(STRING);
 -        var action = reader.read(BYTE);
 -        var objectiveName = reader.read(STRING);
 -        var value = action != 1 ? reader.read(VAR_INT) : 0;
-+    private static @NotNull UpdateScorePacket read(@NotNull NetworkBuffer reader) {
-+        String entityName = reader.read(STRING);
-+        byte action = reader.read(BYTE);
-+        String objectiveName = reader.read(STRING);
-+        int value = action != 1 ? reader.read(VAR_INT) : 0;
-         return new UpdateScorePacket(entityName, action, objectiveName, value);
+-        return new UpdateScorePacket(entityName, action, objectiveName, value);
++        this(
++                reader.read(STRING),
++                reader.read(STRING),
++                reader.read(VAR_INT),
++                reader.readOptional(COMPONENT),
++                reader.readOptional(NumberFormat::new)
++        );
      }
  
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+         writer.write(STRING, entityName);
+-        writer.write(BYTE, action);
+         writer.write(STRING, objectiveName);
+-        if (action != 1) writer.write(VAR_INT, value);
++        writer.write(VAR_INT, value);
++        writer.writeOptional(COMPONENT, displayName);
++        writer.writeOptional(numberFormat);
++    }
++
++    /**
++     * Returns an indicator if the score has a display name or not.
++     * @return true if the score has a display name, false otherwise
++     */
++    public boolean hasDisplayName() {
++        return displayName != null;
++    }
++
++    /**
++     * Returns an indicator if the score has a {@link NumberFormat} or not.
++     * @return true if the score has a format, false otherwise
++     */
++    public boolean hasNumberFormat() {
++        return numberFormat != null;
+     }
+ 
+     @Override
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/UpdateSimulationDistancePacket.java b/src/main/java/net/minestom/server/network/packet/server/play/UpdateSimulationDistancePacket.java
 index 8fbf700f95987ce0d6d9b8be6bf1de62b6ee9a82..7f7435b390e145e4e72eaa62cb87f56dc7f62ee9 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/UpdateSimulationDistancePacket.java
@@ -9797,6 +10015,313 @@ index 8c1e43dbda6ba9e726470431339cc8c872bc0305..5599949c9ffb9ac1c251a62f0d7a4f97
 +    INVALID_URL,
 +    FAILED_TO_RELOAD,
 +    DISCARDED
+ }
+diff --git a/src/main/java/net/minestom/server/scoreboard/NumberFormat.java b/src/main/java/net/minestom/server/scoreboard/NumberFormat.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..6d19ebf382b970500782214d9dcd8e290146b1d1
+--- /dev/null
++++ b/src/main/java/net/minestom/server/scoreboard/NumberFormat.java
+@@ -0,0 +1,85 @@
++package net.minestom.server.scoreboard;
++
++import net.kyori.adventure.text.Component;
++import net.minestom.server.network.NetworkBuffer;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++/**
++ * Mojang introduced a change to the score format for scoreboards in the 1.20.3 update a few times ago.
++ * Now, the format has the following options:
++ * - styled: the score  will be displayed with the selected style
++ * - fixed: the score will be displayed with the given component
++ * - blank: the score is not shown
++ * @param component the component
++ * @param formatType the format type
++ */
++public record NumberFormat(
++        @Nullable Component component,
++        @NotNull FormatType formatType
++) implements NetworkBuffer.Writer {
++
++    private NumberFormat() {
++        this(null, FormatType.BLANK);
++    }
++
++    /**
++     * A number format which lets the sidebar scores be blank
++     *
++     * @return the created number format
++     */
++    public static @NotNull NumberFormat asBlank() {
++        return new NumberFormat();
++    }
++
++    /**
++     * A number format which lets the sidebar scores be styled with explicit text
++     *
++     * @param component the styled component
++     * @return the created number format
++     */
++    public static @NotNull NumberFormat asStyled(@NotNull Component component) {
++        return new NumberFormat(component, FormatType.STYLED);
++    }
++
++    /**
++     * A number format which lets the sidebar scores be styled with explicit text
++     *
++     * @param component the fixed component
++     * @return the number format
++     */
++    public static @NotNull NumberFormat asFixed(@NotNull Component component) {
++        return new NumberFormat(component, FormatType.FIXED);
++    }
++
++    /**
++     * Creates a number format from a network buffer
++     *
++     * @param reader the network buffer
++     */
++    public NumberFormat(@NotNull NetworkBuffer reader) {
++        this(reader.readOptional(NetworkBuffer.COMPONENT), FormatType.VALUES[reader.read(NetworkBuffer.VAR_INT)]);
++    }
++
++    /**
++     * Writes the number format to a {@link NetworkBuffer}.
++     * @param writer the {@link NetworkBuffer} reference to accept the data
++     */
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.VAR_INT, formatType.ordinal());
++        if (formatType == FormatType.BLANK) return;
++        assert component != null;
++        writer.write(NetworkBuffer.COMPONENT, component);
++    }
++
++    /**
++     * Represents the format options for a player score entry.
++     * For more details see <a href="https://minecraft.wiki/w/Scoreboard#Single_criteria">this page</a>
++     */
++    private enum FormatType {
++        BLANK, STYLED, FIXED;
++
++        static final FormatType[] VALUES = values();
++    }
++}
+diff --git a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
+index b14aebca46465331160051e55ceaab6439999ce4..be0dc908c1b67c0ab4d90336f2eb554a13345649 100644
+--- a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
++++ b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
+@@ -8,6 +8,7 @@ import net.minestom.server.network.packet.server.play.DisplayScoreboardPacket;
+ import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
+ import net.minestom.server.network.packet.server.play.UpdateScorePacket;
+ import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ 
+ import java.util.Collection;
+ 
+@@ -38,7 +39,7 @@ public interface Scoreboard extends Viewable, PacketGroupingAudience {
+      * @return the creation objective packet
+      */
+     default @NotNull ScoreboardObjectivePacket getCreationObjectivePacket(Component value, ScoreboardObjectivePacket.Type type) {
+-        return new ScoreboardObjectivePacket(getObjectiveName(), (byte) 0, value, type);
++        return new ScoreboardObjectivePacket(getObjectiveName(), (byte) 0, value, type, null);
+     }
+ 
+     /**
+@@ -47,9 +48,10 @@ public interface Scoreboard extends Viewable, PacketGroupingAudience {
+      * @return the destruction objective packet
+      */
+     default @NotNull ScoreboardObjectivePacket getDestructionObjectivePacket() {
+-        return new ScoreboardObjectivePacket(getObjectiveName(), (byte) 1, null, null);
++        return new ScoreboardObjectivePacket(getObjectiveName(), (byte) 1, null, null, null);
+     }
+ 
++
+     /**
+      * Creates the {@link DisplayScoreboardPacket}.
+      *
+@@ -66,8 +68,17 @@ public interface Scoreboard extends Viewable, PacketGroupingAudience {
+      * @param player The player
+      * @param score  The new score
+      */
+-    default void updateScore(Player player, int score) {
+-        sendPacketsToViewers(new UpdateScorePacket(player.getUsername(), (byte) 0, getObjectiveName(), score));
++    default void updateScore(@NotNull Player player, int score, @NotNull Component displayName, @Nullable NumberFormat numberFormat) {
++        //TODO: I'm (theEvilReaper) not really happy about this solution, but it okay for the moment
++        sendPacketsToViewers(
++                new UpdateScorePacket(
++                        player.getUsername(),
++                        getObjectiveName(),
++                        score,
++                        displayName,
++                        numberFormat
++                )
++        );
+     }
+ 
+     /**
+diff --git a/src/main/java/net/minestom/server/scoreboard/Sidebar.java b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
+index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..45c157197205d60668fb4a8da948c5e04b8b9933 100644
+--- a/src/main/java/net/minestom/server/scoreboard/Sidebar.java
++++ b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
+@@ -4,10 +4,7 @@ import it.unimi.dsi.fastutil.ints.IntLinkedOpenHashSet;
+ import net.kyori.adventure.text.Component;
+ import net.kyori.adventure.text.format.NamedTextColor;
+ import net.minestom.server.entity.Player;
+-import net.minestom.server.network.packet.server.play.DisplayScoreboardPacket;
+-import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
+-import net.minestom.server.network.packet.server.play.TeamsPacket;
+-import net.minestom.server.network.packet.server.play.UpdateScorePacket;
++import net.minestom.server.network.packet.server.play.*;
+ import net.minestom.server.utils.validate.Check;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+@@ -98,7 +95,7 @@ public class Sidebar implements Scoreboard {
+     public void setTitle(@NotNull Component title) {
+         this.title = title;
+         sendPacketToViewers(new ScoreboardObjectivePacket(objectiveName, (byte) 2, title,
+-                ScoreboardObjectivePacket.Type.INTEGER));
++                ScoreboardObjectivePacket.Type.INTEGER, null));
+     }
+ 
+     /**
+@@ -260,7 +257,10 @@ public class Sidebar implements Scoreboard {
+          * The score of the line
+          */
+         private int line;
+-
++        /**
++         * The number format of the line
++         */
++        private NumberFormat numberFormat;
+         private final String teamName;
+         /**
+          * The name of the score ({@code entityName}) which is essentially an identifier
+@@ -273,9 +273,14 @@ public class Sidebar implements Scoreboard {
+         private SidebarTeam sidebarTeam;
+ 
+         public ScoreboardLine(@NotNull String id, @NotNull Component content, int line) {
++            this(id, content, line, null);
++        }
++
++        public ScoreboardLine(@NotNull String id, @NotNull Component content, int line, @Nullable NumberFormat numberFormat) {
+             this.id = id;
+             this.content = content;
+             this.line = line;
++            this.numberFormat = numberFormat;
+ 
+             this.teamName = TEAM_PREFIX + COUNTER.incrementAndGet();
+         }
+@@ -334,8 +339,9 @@ public class Sidebar implements Scoreboard {
+          * @param objectiveName The objective name to be updated
+          * @return a {@link UpdateScorePacket}
+          */
+-        private UpdateScorePacket getScoreCreationPacket(String objectiveName) {
+-            return new UpdateScorePacket(entityName, (byte) 0, objectiveName, line);
++        private @NotNull UpdateScorePacket getScoreCreationPacket(String objectiveName) {
++            //TODO displayName acts as a suffix to the objective name, find way to handle elegantly
++            return new UpdateScorePacket(entityName, objectiveName, line, Component.empty(), numberFormat);
+         }
+ 
+         /**
+@@ -344,8 +350,8 @@ public class Sidebar implements Scoreboard {
+          * @param objectiveName The objective name to be destroyed
+          * @return a {@link UpdateScorePacket}
+          */
+-        private UpdateScorePacket getScoreDestructionPacket(String objectiveName) {
+-            return new UpdateScorePacket(entityName, (byte) 1, objectiveName, 0);
++        private @NotNull ResetScorePacket getScoreDestructionPacket(String objectiveName) {
++            return new ResetScorePacket(entityName, objectiveName);
+         }
+ 
+         /**
+@@ -355,8 +361,9 @@ public class Sidebar implements Scoreboard {
+          * @param score         The new score
+          * @return a {@link UpdateScorePacket}
+          */
+-        private UpdateScorePacket getLineScoreUpdatePacket(String objectiveName, int score) {
+-            return new UpdateScorePacket(entityName, (byte) 0, objectiveName, score);
++        private @NotNull UpdateScorePacket getLineScoreUpdatePacket(String objectiveName, int score) {
++            //TODO displayName acts as a suffix to the objective name, find way to handle elegantly
++            return new UpdateScorePacket(entityName, objectiveName, score, Component.empty(), numberFormat);
+         }
+ 
+         /**
+@@ -376,15 +383,14 @@ public class Sidebar implements Scoreboard {
+     private static class SidebarTeam {
+ 
+         private final String teamName;
+-        private Component prefix, suffix;
+         private final String entityName;
+-
+         private final Component teamDisplayName = Component.text("displaynametest");
+         private final byte friendlyFlags = 0x00;
+         private final TeamsPacket.NameTagVisibility nameTagVisibility = TeamsPacket.NameTagVisibility.NEVER;
+         private final TeamsPacket.CollisionRule collisionRule = TeamsPacket.CollisionRule.NEVER;
+         private final NamedTextColor teamColor = NamedTextColor.DARK_GREEN;
+-
++        private Component prefix;
++        private Component suffix;
+ 
+         /**
+          * The constructor to creates a team
+@@ -406,7 +412,7 @@ public class Sidebar implements Scoreboard {
+          *
+          * @return a {@link TeamsPacket} which creates a new team
+          */
+-        private TeamsPacket getCreationPacket() {
++        private @NotNull TeamsPacket getCreationPacket() {
+             final var action = new TeamsPacket.CreateTeamAction(teamDisplayName, friendlyFlags,
+                     nameTagVisibility, collisionRule, teamColor, prefix, suffix, List.of(entityName));
+             return new TeamsPacket(teamName, action);
+@@ -417,7 +423,7 @@ public class Sidebar implements Scoreboard {
+          *
+          * @return a {@link TeamsPacket} which destroyed a team
+          */
+-        private TeamsPacket getDestructionPacket() {
++        private @NotNull TeamsPacket getDestructionPacket() {
+             return new TeamsPacket(teamName, new TeamsPacket.RemoveTeamAction());
+         }
+ 
+@@ -427,7 +433,7 @@ public class Sidebar implements Scoreboard {
+          * @param prefix The new prefix
+          * @return a {@link TeamsPacket} with the updated prefix
+          */
+-        private TeamsPacket updatePrefix(Component prefix) {
++        private @NotNull TeamsPacket updatePrefix(Component prefix) {
+             final var action = new TeamsPacket.UpdateTeamAction(teamDisplayName, friendlyFlags,
+                     nameTagVisibility, collisionRule, teamColor, prefix, suffix);
+             return new TeamsPacket(teamName, action);
+@@ -438,7 +444,7 @@ public class Sidebar implements Scoreboard {
+          *
+          * @return the entity name
+          */
+-        private String getEntityName() {
++        private @NotNull String getEntityName() {
+             return entityName;
+         }
+ 
+@@ -447,7 +453,7 @@ public class Sidebar implements Scoreboard {
+          *
+          * @return the prefix
+          */
+-        private Component getPrefix() {
++        private @Nullable Component getPrefix() {
+             return prefix;
+         }
+ 
+diff --git a/src/main/java/net/minestom/server/scoreboard/TabList.java b/src/main/java/net/minestom/server/scoreboard/TabList.java
+index 7127b875ce50b8637ea63921519b780ea6b6bc4a..04858b9a979b3609749c73a481a11d3b15882d51 100644
+--- a/src/main/java/net/minestom/server/scoreboard/TabList.java
++++ b/src/main/java/net/minestom/server/scoreboard/TabList.java
+@@ -75,7 +75,7 @@ public class TabList implements Scoreboard {
+     }
+ 
+     @Override
+-    public String getObjectiveName() {
++    public @NotNull String getObjectiveName() {
+         return this.objectiveName;
+     }
  }
 diff --git a/src/main/java/net/minestom/server/utils/PacketUtils.java b/src/main/java/net/minestom/server/utils/PacketUtils.java
 index f4fb64ee7d6d14c9e276f4de64db459b75c834d7..9ca70b8160b059f8a8a5240570bba08b5a287ee2 100644
