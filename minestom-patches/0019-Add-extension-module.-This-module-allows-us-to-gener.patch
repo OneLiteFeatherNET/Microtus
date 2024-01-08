@@ -38,7 +38,7 @@ index 5f8acd515579c6356296929cbe512ed14049741e..731101eb87c45f02ce7f569d7e8cc02e
 \ No newline at end of file
 diff --git a/extension/build.gradle.kts b/extension/build.gradle.kts
 new file mode 100644
-index 0000000000000000000000000000000000000000..62805cdee9881048464f23e2b2efe910412b8a42
+index 0000000000000000000000000000000000000000..546019a50242a4185ca720407fe27131db8cc63c
 --- /dev/null
 +++ b/extension/build.gradle.kts
 @@ -0,0 +1,47 @@
@@ -50,7 +50,7 @@ index 0000000000000000000000000000000000000000..62805cdee9881048464f23e2b2efe910
 +}
 +
 +group = "net.onelitefeather.microtus"
-+version = "0.0.1"
++version = "1.0.0"
 +
 +repositories {
 +    mavenCentral()
