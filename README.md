@@ -47,8 +47,8 @@ repositories {
 ### Dependency Section
 ```kt
 dependencies {
-    implementation("net.onelitefeather.microtus:Minestom:1.1.3-SNAPSHOT")
-    testImplementation("net.onelitefeather.microtus.testing:testing:1.1.3-SNAPSHOT")
+    implementation("net.onelitefeather.microtus:Minestom:1.2.1")
+    testImplementation("net.onelitefeather.microtus.testing:testing:1.2.1")
 }
 ```
 </details>
@@ -61,8 +61,8 @@ For example: `1.1.0`
 ### Dependency Section
 ```kt
 dependencies {
-    implementation("net.onelitefeather.microtus:Minestom:1.1.3")
-    testImplementation("net.onelitefeather.microtus.testing:testing:1.1.3")
+    implementation("net.onelitefeather.microtus:Minestom:1.2.1")
+    testImplementation("net.onelitefeather.microtus.testing:testing:1.2.1")
 }
 ```
 </details>
