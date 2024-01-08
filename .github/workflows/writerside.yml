@@ -38,6 +38,7 @@ jobs:
             instance: ${{ env.INSTANCE }}
             artifact: ${{ env.ARTIFACT }}
             docker-version: ${{ env.DOCKER_VERSION }}
+            location: 'docs'
 
         - name: Upload documentation
           uses: actions/upload-artifact@v3
