@@ -54,7 +54,7 @@ These fields are available from the plugin:
 - externalDependencies:
   - Are handled via `extensionLibrary` from gradle
 
-A functionally example looks like this:
+An example looks like this:
 ```Kotlin
 extension {
   authors = listOf("TheMeinerLP")
