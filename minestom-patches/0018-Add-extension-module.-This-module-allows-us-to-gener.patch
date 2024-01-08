@@ -7,7 +7,7 @@ Subject: [PATCH] Add extension module. This module allows us to generate the
 
 
 diff --git a/extension/build.gradle.kts b/extension/build.gradle.kts
-index a6a1426e31d719e01438f42c0cf799b3751b65a0..15e6493f211542df7668a8fde666c2a440f39039 100644
+index 732a369f72435d3a44fccf915298cbd2405feea7..62805cdee9881048464f23e2b2efe910412b8a42 100644
 --- a/extension/build.gradle.kts
 +++ b/extension/build.gradle.kts
 @@ -17,8 +17,8 @@ dependencies {
