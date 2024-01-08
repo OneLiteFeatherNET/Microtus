@@ -4,6 +4,20 @@
     "config:base",
     ":semanticCommitsDisabled"
   ],
+  "regexManagers": [
+    {
+      "fileMatch": ["README.md"],
+      "matchStrings": ["implementation\\(\"net.onelitefeather.microtus:Minestom:(?<currentValue>.*?)\\\""],
+      "depNameTemplate": "net.onelitefeather.microtus:Minestom",
+      "datasourceTemplate": "maven"
+    },
+    {
+      "fileMatch": ["README.md"],
+      "matchStrings": ["testImplementation\\(\"net.onelitefeather.microtus.testing:testing:(?<currentValue>.*?)\\\""],
+      "depNameTemplate": "net.onelitefeather.microtus:Minestom",
+      "datasourceTemplate": "maven"
+    }
+  ],
   "ignoreDeps": [],
   "labels": ["Renovate"],
   "rebaseWhen": "conflicted",
