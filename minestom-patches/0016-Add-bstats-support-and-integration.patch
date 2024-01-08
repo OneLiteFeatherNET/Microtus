@@ -1,0 +1,284 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Phillipp Glanz <6745190+TheMeinerLP@users.noreply.github.com>
+Date: Mon, 8 Jan 2024 10:42:33 +0100
+Subject: [PATCH] Add bstats support and integration
+
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 66f9e056758c471fb400b90caa363f47053f738e..c0d1971ae1bcf7743a1bf7496d625fae3d675323 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -106,5 +106,8 @@ dependencies {
+     // NBT parsing/manipulation/saving
+     api("io.github.jglrxavpok.hephaistos:common:${libs.versions.hephaistos.get()}")
+     api("io.github.jglrxavpok.hephaistos:gson:${libs.versions.hephaistos.get()}")
++
++    // BStats
++    api(libs.bstats.base)
+ }
+ 
+diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
+index 4f251d7f29d10a95ce145a97664dd6fa69d7cb6e..0bfbb4cfb674a5a6a50b9a5c4ced39e7c979e3cc 100644
+--- a/gradle/libs.versions.toml
++++ b/gradle/libs.versions.toml
+@@ -42,6 +42,9 @@ jcstress = "0.16"
+ # Gradle plugins
+ blossom = "2.1.0"
+ 
++# Bstats
++bstats = "3.0.2"
++
+ [libraries]
+ 
+ # Important Dependencies
+@@ -100,6 +103,9 @@ jmh-annotationprocessor = { group = "org.openjdk.jmh", name = "jmh-generator-ann
+ # JCStress
+ jcstress-core = { group = "org.openjdk.jcstress", name = "jcstress-core", version.ref = "jcstress" }
+ 
++# BStats
++bstats-base = { group = "org.bstats", name = "bstats-base", version.ref = "bstats"}
++
+ [bundles]
+ 
+ kotlin = ["kotlin-stdlib-jdk8", "kotlin-reflect"]
+diff --git a/src/main/java/net/minestom/server/Metrics.java b/src/main/java/net/minestom/server/Metrics.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..fb4b59f4f0740729d5d77d837736ef842589cae5
+--- /dev/null
++++ b/src/main/java/net/minestom/server/Metrics.java
+@@ -0,0 +1,147 @@
++package net.minestom.server;
++
++import java.io.IOException;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.util.HashMap;
++import java.util.Map;
++import java.util.UUID;
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++import net.minestom.server.extras.MojangAuth;
++import net.minestom.server.extras.bungee.BungeeCordProxy;
++import net.minestom.server.extras.velocity.VelocityProxy;
++import net.minestom.server.utils.debug.DebugUtils;
++import org.bstats.MetricsBase;
++import org.bstats.charts.DrilldownPie;
++import org.bstats.charts.SimplePie;
++import org.bstats.charts.SingleLineChart;
++import org.bstats.json.JsonObjectBuilder;
++
++public class Metrics {
++    private static String bStatsUuid = System.getProperty("minestom.bstats.id");
++    private final static int SERVICE_ID = 20684;
++    private MetricsBase metrics;
++
++    public void start() {
++        MinecraftServer.LOGGER.info("Enable bstats.");
++        String serverUUID = bStatsUuid;
++        if (serverUUID == null) {
++            Path bStatsFile = Path.of(".bstats");
++            if (Files.notExists(bStatsFile)) {
++                try {
++                    Files.createFile(bStatsFile);
++                } catch (IOException e) {
++                    MinecraftServer.LOGGER.error("BStats file cannot created.");
++                    return;
++                }
++                try {
++                    Files.writeString(bStatsFile, UUID.randomUUID().toString());
++                } catch (IOException e) {
++                    MinecraftServer.LOGGER.error("BStats file cannot be written.");
++                    return;
++                }
++            }
++            try {
++                serverUUID = Files.readString(bStatsFile);
++            } catch (IOException e) {
++                MinecraftServer.LOGGER.error("BStats file cannot be readed.");
++                return;
++            }
++        }
++        System.setProperty("bstats.relocatecheck", "false");
++        metrics = new MetricsBase("server-implementation", serverUUID, SERVICE_ID,true,  this::getServerData, jsonObjectBuilder -> {}, null, () -> true, MinecraftServer.LOGGER::error,MinecraftServer.LOGGER::info,
++                DebugUtils.INSIDE_TEST, DebugUtils.INSIDE_TEST,DebugUtils.INSIDE_TEST);
++
++        metrics.addCustomChart(new SimplePie("minecraft_version", () -> {
++            String minecraftVersion = MinecraftServer.VERSION_NAME;
++            minecraftVersion = minecraftVersion.substring(minecraftVersion.indexOf("MC: ") + 4, minecraftVersion.length() - 1);
++            return minecraftVersion;
++        }));
++
++        metrics.addCustomChart(new SingleLineChart("players", () -> MinecraftServer.getConnectionManager().getOnlinePlayers().size()));
++        metrics.addCustomChart(new SimplePie("online_mode", () -> {
++            if (MojangAuth.isEnabled()) {
++                return "online";
++            } else if (VelocityProxy.isEnabled() || BungeeCordProxy.isEnabled()) {
++                return "proxied";
++            } else {
++                return "offline";
++            }
++        }));
++        final String paperVersion = "git-Microtus-%s-%s".formatted(Git.branch(), Git.commit());
++        metrics.addCustomChart(new SimplePie("minestom_version", () -> paperVersion));
++        metrics.addCustomChart(new DrilldownPie("java_version", () -> {
++            Map<String, Map<String, Integer>> map = new HashMap<>();
++            String javaVersion = System.getProperty("java.version");
++            Map<String, Integer> entry = new HashMap<>();
++            entry.put(javaVersion, 1);
++
++            // http://openjdk.java.net/jeps/223
++            // Java decided to change their versioning scheme and in doing so modified the java.version system
++            // property to return $major[.$minor][.$secuity][-ea], as opposed to 1.$major.0_$identifier
++            // we can handle pre-9 by checking if the "major" is equal to "1", otherwise, 9+
++            String majorVersion = javaVersion.split("\\.")[0];
++            String release;
++
++            int indexOf = javaVersion.lastIndexOf('.');
++
++            if (majorVersion.equals("1")) {
++                release = "Java " + javaVersion.substring(0, indexOf);
++            } else {
++                // of course, it really wouldn't be all that simple if they didn't add a quirk, now would it
++                // valid strings for the major may potentially include values such as -ea to deannotate a pre release
++                Matcher versionMatcher = Pattern.compile("\\d+").matcher(majorVersion);
++                if (versionMatcher.find()) {
++                    majorVersion = versionMatcher.group(0);
++                }
++                release = "Java " + majorVersion;
++            }
++            map.put(release, entry);
++
++            return map;
++        }));
++
++        metrics.addCustomChart(new DrilldownPie("extensions", () -> {
++            Map<String, Map<String, Integer>> map = new HashMap<>();
++
++            // count legacy plugins
++            int extensions = MinecraftServer.getExtensionManager().getExtensions().size();
++
++            // insert real value as lower dimension
++            Map<String, Integer> entry = new HashMap<>();
++            entry.put(String.valueOf(extensions), 1);
++
++            // create buckets as higher dimension
++            if (extensions == 0) {
++                map.put("0 \uD83D\uDE0E", entry); // :sunglasses:
++            } else if (extensions <= 5) {
++                map.put("1-5", entry);
++            } else if (extensions <= 10) {
++                map.put("6-10", entry);
++            } else if (extensions <= 25) {
++                map.put("11-25", entry);
++            } else if (extensions <= 50) {
++                map.put("26-50", entry);
++            } else {
++                map.put("50+ \uD83D\uDE2D", entry); // :cry:
++            }
++
++            return map;
++        }));
++    }
++
++    public void shutdown() {
++        if (this.metrics != null) {
++            this.metrics.shutdown();
++        }
++    }
++
++    private void getServerData(JsonObjectBuilder builder) {
++        builder.appendField("osName", System.getProperty("os.name"));
++        builder.appendField("osArch", System.getProperty("os.arch"));
++        builder.appendField("osVersion", System.getProperty("os.version"));
++        builder.appendField("coreCount", Runtime.getRuntime().availableProcessors());
++    }
++
++}
+diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
+index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c60f590cba 100644
+--- a/src/main/java/net/minestom/server/ServerProcessImpl.java
++++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
+@@ -1,6 +1,12 @@
+ package net.minestom.server;
+ 
+ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
++import java.io.IOException;
++import java.net.SocketAddress;
++import java.util.ArrayList;
++import java.util.List;
++import java.util.concurrent.atomic.AtomicBoolean;
++import java.util.concurrent.atomic.AtomicReference;
+ import net.minestom.server.advancements.AdvancementManager;
+ import net.minestom.server.adventure.bossbar.BossBarManager;
+ import net.minestom.server.command.CommandManager;
+@@ -23,7 +29,11 @@ import net.minestom.server.network.PacketProcessor;
+ import net.minestom.server.network.socket.Server;
+ import net.minestom.server.recipe.RecipeManager;
+ import net.minestom.server.scoreboard.TeamManager;
+-import net.minestom.server.snapshot.*;
++import net.minestom.server.snapshot.EntitySnapshot;
++import net.minestom.server.snapshot.InstanceSnapshot;
++import net.minestom.server.snapshot.ServerSnapshot;
++import net.minestom.server.snapshot.SnapshotImpl;
++import net.minestom.server.snapshot.SnapshotUpdater;
+ import net.minestom.server.terminal.MinestomTerminal;
+ import net.minestom.server.thread.Acquirable;
+ import net.minestom.server.thread.ThreadDispatcher;
+@@ -36,13 +46,6 @@ import org.jetbrains.annotations.NotNull;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
+-import java.io.IOException;
+-import java.net.SocketAddress;
+-import java.util.ArrayList;
+-import java.util.List;
+-import java.util.concurrent.atomic.AtomicBoolean;
+-import java.util.concurrent.atomic.AtomicReference;
+-
+ final class ServerProcessImpl implements ServerProcess {
+     private final static Logger LOGGER = LoggerFactory.getLogger(ServerProcessImpl.class);
+ 
+@@ -65,6 +68,7 @@ final class ServerProcessImpl implements ServerProcess {
+     private final BossBarManager bossBar;
+     private final TagManager tag;
+     private final Server server;
++    private final Metrics metrics;
+ 
+     private final ThreadDispatcher<Chunk> dispatcher;
+     private final Ticker ticker;
+@@ -72,6 +76,9 @@ final class ServerProcessImpl implements ServerProcess {
+     private final AtomicBoolean started = new AtomicBoolean();
+     private final AtomicBoolean stopped = new AtomicBoolean();
+ 
++    private static boolean bstatsEnabled = System.getProperty("minestom.bstats.enabled") == null;
++
++
+     public ServerProcessImpl() throws IOException {
+         this.exception = new ExceptionManager();
+         this.extension = new ExtensionManager(this);
+@@ -95,6 +102,7 @@ final class ServerProcessImpl implements ServerProcess {
+ 
+         this.dispatcher = ThreadDispatcher.singleThread();
+         this.ticker = new TickerImpl();
++        this.metrics = new Metrics();
+     }
+ 
+     @Override
+@@ -233,6 +241,9 @@ final class ServerProcessImpl implements ServerProcess {
+         if (MinecraftServer.isTerminalEnabled()) {
+             MinestomTerminal.start();
+         }
++        if (bstatsEnabled) {
++            this.metrics.start();
++        }
+         // Stop the server on SIGINT
+         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+     }
+@@ -251,6 +262,7 @@ final class ServerProcessImpl implements ServerProcess {
+         benchmark.disable();
+         MinestomTerminal.stop();
+         dispatcher.shutdown();
++        this.metrics.shutdown();
+         LOGGER.info(MinecraftServer.getBrandName() + " server stopped successfully.");
+     }
+ 
