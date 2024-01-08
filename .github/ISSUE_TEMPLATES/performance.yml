@@ -28,8 +28,8 @@ body:
       description: |
         Please include other helpful links below.
         The more information we receive, the quicker and more effective we can be at finding the solution to the issue.
-      validations:
-        required: false
+    validations:
+      required: false
   - type: markdown
     attributes:
       value: |
