@@ -6,6 +6,10 @@
                   name="Microtus"
                   start-page="Overview.md">
     <toc-element topic="Overview.md"/>
+    <toc-element topic="Changes.md">
+        <toc-element topic="Extension-Generation.md"/>
+        <toc-element topic="Instance.md"/>
+    </toc-element>
     <toc-element topic="Contributing.md">
         <toc-element topic="Patch-Files.md"/>
         <toc-element topic="Testing.md"/>
