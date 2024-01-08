@@ -42,9 +42,10 @@ jobs:
           path: patched-minestom/build/libs/minestom-*.jar
       - name: Publish to Github
         run: |
-          ./gradlew :patched-minestom:publish :patched-minestom:testing:publish -PforceSign=true --info
+          ./gradlew :patched-minestom:publish :patched-minestom:testing:publish :patched-minestom:extension:publish -PforceSign=true
         env:
           ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.SONATYPE_USERNAME }}"
           ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.SONATYPE_PASSWORD }}"
           ORG_GRADLE_PROJECT_onelitefeatherSigningKey: "${{ secrets.ONELITEFEATHER_GPG_KEY }}"
           ORG_GRADLE_PROJECT_onelitefeatherSigningPassword: "${{ secrets.ONELITEFEATHER_GPG_PASSWORD }}"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

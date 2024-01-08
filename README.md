@@ -66,3 +66,40 @@ dependencies {
 }
 ```
 </details>
+
+## Extension usage
+### settings.gradle.kts
+Read more about here: https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-gradle-registry
+```kt
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        maven("https://maven.pkg.github.com/OneLiteFeatherNET/Microtus") {
+            credentials {
+              username = "Your username"
+              password = "your github token"
+            }
+        }
+    }
+}
+```
+
+### build.gradle.kts
+```kt
+plugins {
+    id("net.onelitefeather.microtus.extension") version "0.0.1"
+}
+
+dependencies {
+  extensionLibrary("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2") // Use the external dependencies function from minestom
+}
+extension {
+  authors = listOf("TheMeinerLP")
+  entrypoint = "net.onelitefeather.microtus.extension.ProjectEntry"
+  // dependencies = listOf("LuckPerms") // To generate dependencies
+  // version = "1.0.0" // Normally its use the project version
+  // name = "Example" // Normally its use the project name
+  // External dependencies are handled via `extensionLibrary("String")` from gradle
+}
+```
+

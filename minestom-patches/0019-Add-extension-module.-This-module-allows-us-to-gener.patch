@@ -1,0 +1,355 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Tue, 8 Aug 2023 21:11:25 +0200
+Subject: [PATCH] Add extension module. This module allows us to generate the
+ extension.json very easily inside gradle. Also some external dependencies
+ will automatically include.
+
+
+diff --git a/demo/build.gradle.kts b/demo/build.gradle.kts
+index 5f8acd515579c6356296929cbe512ed14049741e..731101eb87c45f02ce7f569d7e8cc02e6f030c7a 100644
+--- a/demo/build.gradle.kts
++++ b/demo/build.gradle.kts
+@@ -5,6 +5,7 @@ plugins {
+     id("minestom.common-conventions")
+     id("minestom.native-conventions")
+     id("com.github.johnrengelman.shadow") version ("7.1.2")
++    id("net.onelitefeather.microtus.extension")
+ }
+ 
+ application {
+@@ -13,10 +14,16 @@ application {
+ }
+ 
+ dependencies {
++    extensionLibrary("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2")
+     implementation(rootProject)
+     implementation(libs.jNoise)
+ }
+ 
+ tasks.withType<ShadowJar> {
+     archiveFileName.set("minestom-demo.jar")
++}
++
++extension {
++    authors = listOf("yolo")
++    entrypoint = "net.onelitefeather.microtus.extension.Test"
+ }
+\ No newline at end of file
+diff --git a/extension/build.gradle.kts b/extension/build.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..546019a50242a4185ca720407fe27131db8cc63c
+--- /dev/null
++++ b/extension/build.gradle.kts
+@@ -0,0 +1,47 @@
++plugins {
++    `java-gradle-plugin`
++    `kotlin-dsl`
++    id("com.gradle.plugin-publish") version "1.2.1"
++    id("org.cadixdev.licenser") version "0.6.1"
++}
++
++group = "net.onelitefeather.microtus"
++version = "1.0.0"
++
++repositories {
++    mavenCentral()
++    gradlePluginPortal()
++}
++
++dependencies {
++    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2") {
++        exclude(group = "org.jetbrains.kotlin")
++    }
++    testImplementation(platform("org.junit:junit-bom:5.10.1"))
++    testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
++}
++gradlePlugin {
++    website.set("https://github.com/OneLiteFeatherNET/Microtus")
++    vcsUrl.set("https://github.com/OneLiteFeatherNET/Microtus")
++    plugins {
++        register("extension") {
++            id = "net.onelitefeather.microtus.extension"
++            displayName = "Extension (Minestom)"
++            description = "Generate extension.json for Minestom extensions based on the Gradle project"
++            implementationClass = "net.onelitefeather.microtus.ExtensionPlugin"
++            tags.set(listOf("minestom", "microtus", "extension"))
++        }
++    }
++}
++
++publishing {
++    repositories {
++        maven {
++            url = uri("https://maven.pkg.github.com/OneLiteFeatherNET/Microtus")
++            credentials {
++                username = System.getenv("GITHUB_ACTOR")
++                password = System.getenv("GITHUB_TOKEN")
++            }
++        }
++    }
++}
+\ No newline at end of file
+diff --git a/extension/src/main/kotlin/net/onelitefeather/microtus/ExtensionPlugin.kt b/extension/src/main/kotlin/net/onelitefeather/microtus/ExtensionPlugin.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..e02e9d94396638513ef177ff6d396418d9c53f5f
+--- /dev/null
++++ b/extension/src/main/kotlin/net/onelitefeather/microtus/ExtensionPlugin.kt
+@@ -0,0 +1,76 @@
++package net.onelitefeather.microtus
++
++import net.onelitefeather.microtus.models.Extension
++import org.gradle.api.Plugin
++import org.gradle.api.Project
++import org.gradle.api.plugins.JavaPlugin
++import org.gradle.api.tasks.SourceSet
++import org.gradle.api.tasks.SourceSetContainer
++import org.gradle.kotlin.dsl.getByType
++import org.gradle.kotlin.dsl.register
++import org.gradle.kotlin.dsl.withType
++
++/**
++ * Represents the gradle plugin extension which can be integrated into a `build.gradle.kts` file to define the properties of the extension.
++ * The usage of this plugin is as follows:
++ *
++ * ```kotlin
++ * plugins {
++ *    id("net.onelitefeather.microtus.extension") version "<version>"
++ *    // ...
++ * }
++ *
++ * extension {
++ *  //... use the properties of the extension here
++ * }
++ * ```
++ *
++ * @since 1.2.0
++ * @author TheMeinerLP
++ */
++class ExtensionPlugin : Plugin<Project> {
++
++    private val fileName = "extension.json"
++
++    /**
++     * Applies the plugin to the project.
++     * @param target the project to apply the plugin to
++     */
++    override fun apply(target: Project) {
++        target.run {
++            val generatedResourcesDirectory = layout.buildDirectory.dir("generated/extension")
++            val extension = Extension()
++            extensions.add("extension", extension)
++
++            val library = project.configurations.maybeCreate("library")
++            val libraries = project.configurations.create("extensionLibrary").extendsFrom(library)
++
++            val generateTask = tasks.register<GenerateExtension>("generateExtension") {
++                group = "minestom"
++
++                fileName.set(this@ExtensionPlugin.fileName)
++                librariesRootComponent.set(libraries.incoming.resolutionResult.root)
++                outputDirectory.set(generatedResourcesDirectory)
++                this.extension.set(provider {
++                    setDefaults(project, extension)
++                    extension
++                })
++            }
++            plugins.withType<JavaPlugin> {
++                extensions.getByType<SourceSetContainer>().named(SourceSet.MAIN_SOURCE_SET_NAME) {
++                    resources.srcDir(generateTask)
++                }
++            }
++        }
++    }
++
++    /**
++     * Sets some default variables to a [Extension] object.
++     * @param project the project to get the name and version from
++     * @param extension the extension to set the variables to
++     */
++    private fun setDefaults(project: Project, extension: Extension) {
++        extension.name = extension.name ?: project.name
++        extension.version = extension.version ?: project.version.toString()
++    }
++}
+\ No newline at end of file
+diff --git a/extension/src/main/kotlin/net/onelitefeather/microtus/GenerateExtension.kt b/extension/src/main/kotlin/net/onelitefeather/microtus/GenerateExtension.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..0df18c5afb0e2cfdd26e4f95336d498f67cc0bb7
+--- /dev/null
++++ b/extension/src/main/kotlin/net/onelitefeather/microtus/GenerateExtension.kt
+@@ -0,0 +1,79 @@
++package net.onelitefeather.microtus
++
++import com.fasterxml.jackson.annotation.JsonInclude
++import com.fasterxml.jackson.databind.ObjectMapper
++import com.fasterxml.jackson.databind.module.SimpleModule
++import com.fasterxml.jackson.module.kotlin.registerKotlinModule
++import net.onelitefeather.microtus.models.Extension
++import org.gradle.api.DefaultTask
++import org.gradle.api.artifacts.repositories.MavenArtifactRepository
++import org.gradle.api.artifacts.result.ResolvedComponentResult
++import org.gradle.api.artifacts.result.ResolvedDependencyResult
++import org.gradle.api.file.DirectoryProperty
++import org.gradle.api.provider.Property
++import org.gradle.api.tasks.*
++import kotlin.jvm.Throws
++
++/**
++ * Defines the task which generates the required extension.json file for Minestom.
++ * @since 1.2.0
++ * @author TheMeinerLP
++ */
++abstract class GenerateExtension : DefaultTask() {
++    @get:Input
++    abstract val fileName: Property<String>
++
++    @get:Nested
++    abstract val extension: Property<Extension>
++
++    @get:OutputDirectory
++    abstract val outputDirectory: DirectoryProperty
++
++    @get:Input
++    @get:Optional
++    abstract val librariesRootComponent: Property<ResolvedComponentResult>
++
++    /**
++     * Generates an extension.json file based on the given properties.
++     */
++    @TaskAction
++    fun generate() {
++        val module = SimpleModule()
++        val mapper = ObjectMapper()
++                .registerKotlinModule()
++                .registerModule(module)
++                .setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
++        val extension = extension.get()
++        val dependencies = librariesRootComponent.orNull.collectLibraries()
++        val repos = this.project.repositories.withType(MavenArtifactRepository::class.java)
++        val externalDependencies = Extension.ExternalDependencies()
++        externalDependencies.artifacts = dependencies.toList()
++        val mavenCentral = Extension.Repository()
++        mavenCentral.url = "https://repo.maven.apache.org/maven2/"
++        mavenCentral.name = "mavenCentral"
++        val mappedRepos = repos.map {
++            val repo = Extension.Repository()
++            repo.url = it.url.toString()
++            repo.name = it.name
++            repo
++        }.toList()
++        externalDependencies.repositories = if (mappedRepos.isNotEmpty() || dependencies.isNotEmpty()) {
++            mappedRepos + listOf(mavenCentral)
++        } else {
++            listOf()
++        }
++        extension.externalDependencies = externalDependencies
++        mapper.writeValue(outputDirectory.file(fileName).get().asFile, extension)
++    }
++
++    /**
++     * Collects all libraries from the root component and the additional libraries.
++     * @param additional the additional libraries to add
++     */
++    private fun ResolvedComponentResult?.collectLibraries(additional: List<String>? = null): List<String> {
++        val resolved = this?.dependencies?.map { dependencyResult ->
++            (dependencyResult as? ResolvedDependencyResult)?.selected?.moduleVersion?.toString() ?: error("No moduleVersion for $dependencyResult")
++        }
++        return ((additional ?: listOf()) + (resolved ?: listOf())).distinct()
++    }
++}
+\ No newline at end of file
+diff --git a/extension/src/main/kotlin/net/onelitefeather/microtus/models/Extension.kt b/extension/src/main/kotlin/net/onelitefeather/microtus/models/Extension.kt
+new file mode 100644
+index 0000000000000000000000000000000000000000..3e8976c597067bb93e3fa86ec6c1add11559844b
+--- /dev/null
++++ b/extension/src/main/kotlin/net/onelitefeather/microtus/models/Extension.kt
+@@ -0,0 +1,76 @@
++package net.onelitefeather.microtus.models
++
++import org.gradle.api.tasks.Input
++import org.gradle.api.tasks.Optional
++import org.gradle.internal.impldep.com.fasterxml.jackson.annotation.JsonProperty
++
++/**
++ * Represents the allowed data fields for an extension.json file which is required from Minestom to load an extension.
++ * The following fields are allowed (fields with a * are required):
++ *
++ * - name: The name of the extension (*)
++ * - version: The version of the extension (*)
++ * - entrypoint: The entrypoint of the extension (*)
++ * - authors: The authors of the extension
++ * - dependencies: The dependencies of the extension
++ * - externalDependencies: The external dependencies of the extension
++ * @since 1.2.0
++ * @author TheMeinerLP
++ */
++class Extension() {
++    @Input
++    var name: String? = null
++
++    @Input
++    var version: String? = null
++
++    @Input
++    var entrypoint: String? = null
++
++    @Input
++    @Optional
++    @JsonProperty("authors")
++    var authors: List<String>? = null
++
++    @Input
++    @Optional
++    @JsonProperty("dependencies")
++    var dependencies: List<String>? = null
++
++    @Input
++    @Optional
++    @JsonProperty("externalDependencies")
++    var externalDependencies: ExternalDependencies? = null
++
++    /**
++     * Represents the external dependencies which is required for the extension to work.
++     * @since 1.2.0
++     * @author TheMeinerLP
++     */
++    class ExternalDependencies {
++        @JsonProperty("repositories")
++        var repositories: List<Repository>? = null
++
++        @Input
++        @Optional
++        @JsonProperty("artifacts")
++        var artifacts: List<String>? = null
++
++    }
++
++    /**
++     * Represents a repository which is used by an extension to load external dependencies.
++     * @since 1.2.0
++     * @author TheMeinerLP
++     * @see ExternalDependencies
++     */
++    class Repository {
++        @Input
++        @JsonProperty("name")
++        var name: String? = null
++
++        @Input
++        @JsonProperty("url")
++        var url: String? = null
++    }
++}
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+index 3fb63e467ef2d6fe82c96f53718e5b8292c36ad4..1b5cf05f0aef98edb87aa5bd3164b3af5fddf1e6 100644
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -13,6 +13,7 @@ pluginManagement {
+         gradlePluginPortal()
+     }
+     includeBuild("build-logic")
++    includeBuild("extension")
+ }
+ 
+ rootProject.name = "Minestom"
