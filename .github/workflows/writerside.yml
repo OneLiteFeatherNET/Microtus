@@ -27,7 +27,9 @@ env:
 jobs:
     build:
         runs-on: ubuntu-latest
-
+        defaults:
+          run:
+            working-directory: ./docs
         steps:
         - name: Checkout repository
           uses: actions/checkout@v3
@@ -38,7 +40,6 @@ jobs:
             instance: ${{ env.INSTANCE }}
             artifact: ${{ env.ARTIFACT }}
             docker-version: ${{ env.DOCKER_VERSION }}
-            location: 'docs'
 
         - name: Upload documentation
           uses: actions/upload-artifact@v3
