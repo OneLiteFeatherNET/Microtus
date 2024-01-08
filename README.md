@@ -17,6 +17,16 @@ Discord for discussion: [OneLiteFeather.net](https://discord.onelitefeather.net)
 
 For details how you can contribute to the project please read our [Contributing](CONTRIBUTING.md).
 
+## Usage of Jitpack:
+
+Some of the project's dependencies are only available in the Jitpack repository.
+To ensure a seamless experience, kindly include this repository in your project configuration to prevent any potential issues.
+
+```kt
+maven("https://jitpack.io")
+```
+
+
 ## Usage of microtus
 Since 23.07.2023 we are now official on the maven central for releases and snapshots.  
 To use Microtus in your projects you need: 
@@ -37,8 +47,8 @@ repositories {
 ### Dependency Section
 ```kt
 dependencies {
-    implementation("net.onelitefeather.microtus:Minestom:1.1.2-SNAPSHOT")
-    testImplementation("net.onelitefeather.microtus.testing:testing:1.1.2-SNAPSHOT")
+    implementation("net.onelitefeather.microtus:Minestom:1.1.3-SNAPSHOT")
+    testImplementation("net.onelitefeather.microtus.testing:testing:1.1.3-SNAPSHOT")
 }
 ```
 </details>
@@ -51,8 +61,8 @@ For example: `1.1.0`
 ### Dependency Section
 ```kt
 dependencies {
-    implementation("net.onelitefeather.microtus:Minestom:1.1.2")
-    testImplementation("net.onelitefeather.microtus.testing:testing:1.1.2")
+    implementation("net.onelitefeather.microtus:Minestom:1.1.3")
+    testImplementation("net.onelitefeather.microtus.testing:testing:1.1.3")
 }
 ```
 </details>
