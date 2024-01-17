@@ -5,7 +5,7 @@ Subject: [PATCH] Add missing telemetry boolean to the advancement structure
 
 
 diff --git a/demo/src/main/java/net/minestom/demo/Main.java b/demo/src/main/java/net/minestom/demo/Main.java
-index 114b0f3c6ecbc267b91617655ebb02f1e96134dc..c9ac500c4626b6d9a6c2f77c020553b9e5b3dfc2 100644
+index 54f9b110eef8d4499d14848f695c8c103d80f94c..7a5cd6295fbdf87b24b346ddfaeeaab9dc91fdcf 100644
 --- a/demo/src/main/java/net/minestom/demo/Main.java
 +++ b/demo/src/main/java/net/minestom/demo/Main.java
 @@ -54,6 +54,7 @@ public class Main {

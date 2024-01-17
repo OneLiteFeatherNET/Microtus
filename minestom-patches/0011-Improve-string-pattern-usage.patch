@@ -5,55 +5,26 @@ Subject: [PATCH] Improve string pattern usage
 
 
 diff --git a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-index dbc2a51b94bc07bf4e04d6f6f2af91307fc4c323..1fe7c7ed47b7cc269ab6ccf40d57d83319d0da3b 100644
+index 025816042714f6c22ee2a3c23cb3a04f652eee29..39cff8557dd9b9b8fe90a5c0fe6136d2aa44a126 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-@@ -16,6 +16,7 @@ import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
- import net.minestom.server.network.player.GameProfile;
- import net.minestom.server.network.player.PlayerConnection;
- import net.minestom.server.network.player.PlayerSocketConnection;
-+import net.minestom.server.utils.UniqueIdUtils; // Microtus - improve string pattern usage + add private constructor
- import org.jetbrains.annotations.NotNull;
- import org.slf4j.Logger;
- import org.slf4j.LoggerFactory;
-@@ -24,6 +25,7 @@ import java.net.SocketAddress;
- import java.util.ArrayList;
- import java.util.List;
- import java.util.UUID;
-+import java.util.regex.Pattern; // Microtus - improve string pattern usage + add private constructor
+@@ -102,11 +102,11 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
+                                     ((java.net.InetSocketAddress) connection.getRemoteAddress()).getPort());
+                             socketConnection.setRemoteAddress(socketAddress);
  
- import static net.minestom.server.network.NetworkBuffer.*;
- 
-@@ -31,8 +33,12 @@ import static net.minestom.server.network.NetworkBuffer.*;
- public record HandshakePacket(int protocolVersion, @NotNull String serverAddress,
-                               int serverPort, int indent) implements ClientPreplayPacket {
- 
--    private final static Logger LOGGER = LoggerFactory.getLogger(HandshakePacket.class);
-+    // Microtus start - improve string pattern usage + add private constructor
-+    private static final Logger LOGGER = LoggerFactory.getLogger(HandshakePacket.class);
- 
-+    private static final Pattern UUID_REPLACEMENT =
-+            Pattern.compile("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)");
-+    // Microtus end - improve string pattern usage + add private constructor
-     /**
-      * Text sent if a player tries to connect with an invalid version of the client
-      */
-@@ -86,12 +92,11 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
-                         ((java.net.InetSocketAddress) connection.getRemoteAddress()).getPort());
-                 socketConnection.setRemoteAddress(socketAddress);
- 
+-                            // Microtus start - improve string pattern usage + add private constructor
+-                            UUID playerUuid = java.util.UUID.fromString(
+-                                    UUID_REPLACEMENT.matcher(split[2]).replaceAll(UniqueIdUtils.UUID_GROUP_REPLACEMENT)
+-                            );
+-                            // Microtus end - improve string pattern usage + add private constructor
 +                // Microtus start - improve string pattern usage + add private constructor
-                 UUID playerUuid = java.util.UUID.fromString(
--                        split[2]
--                                .replaceFirst(
--                                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"
--                                )
++                UUID playerUuid = java.util.UUID.fromString(
 +                        UUID_REPLACEMENT.matcher(split[2]).replaceAll(UniqueIdUtils.UUID_GROUP_REPLACEMENT)
-                 );
++                );
 +                // Microtus end - improve string pattern usage + add private constructor
  
-                 List<GameProfile.Property> properties = new ArrayList<>();
-                 if (hasProperties) {
+                             List<GameProfile.Property> properties = new ArrayList<>();
+                             if (hasProperties) {
 diff --git a/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java
 index 6dd8f7c8ea5f0f09041ca7d8dce13de693404ef3..cb6c3762e717cc2e732ada1cfc34cea3b9c1464b 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java

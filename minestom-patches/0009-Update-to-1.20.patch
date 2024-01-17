@@ -4,8 +4,21 @@ Date: Thu, 29 Jun 2023 13:58:46 +0200
 Subject: [PATCH] Update to 1.20
 
 
+diff --git a/demo/src/main/java/net/minestom/demo/Main.java b/demo/src/main/java/net/minestom/demo/Main.java
+index 114b0f3c6ecbc267b91617655ebb02f1e96134dc..54f9b110eef8d4499d14848f695c8c103d80f94c 100644
+--- a/demo/src/main/java/net/minestom/demo/Main.java
++++ b/demo/src/main/java/net/minestom/demo/Main.java
+@@ -97,8 +97,6 @@ public class Main {
+ 
+         PlayerInit.init();
+ 
+-        OptifineSupport.enable();
+-
+         //VelocityProxy.enable("rBeJJ79W4MVU");
+         //BungeeCordProxy.enable();
+ 
 diff --git a/demo/src/main/java/net/minestom/demo/PlayerInit.java b/demo/src/main/java/net/minestom/demo/PlayerInit.java
-index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..5ced7af84795d75e856970f0875f3ee7045271a9 100644
+index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..1d6302322df1d8706f0eada9feba5e3611687172 100644
 --- a/demo/src/main/java/net/minestom/demo/PlayerInit.java
 +++ b/demo/src/main/java/net/minestom/demo/PlayerInit.java
 @@ -16,6 +16,8 @@ import net.minestom.server.event.entity.EntityAttackEvent;
@@ -17,7 +30,15 @@ index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..5ced7af84795d75e856970f0875f3ee7
  import net.minestom.server.event.server.ServerTickMonitorEvent;
  import net.minestom.server.instance.Instance;
  import net.minestom.server.instance.InstanceContainer;
-@@ -81,7 +83,7 @@ public class PlayerInit {
+@@ -39,6 +41,7 @@ import java.util.Random;
+ import java.util.Set;
+ import java.util.concurrent.ThreadLocalRandom;
+ import java.util.concurrent.atomic.AtomicReference;
++import net.minestom.server.world.biomes.Biome;
+ 
+ public class PlayerInit {
+ 
+@@ -81,15 +84,24 @@ public class PlayerInit {
                  itemEntity.setVelocity(velocity);
              })
              .addListener(PlayerDisconnectEvent.class, event -> System.out.println("DISCONNECTION " + event.getPlayer().getUsername()))
@@ -25,7 +46,32 @@ index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..5ced7af84795d75e856970f0875f3ee7
 +            .addListener(AsyncPlayerConfigurationEvent.class, event -> {
                  final Player player = event.getPlayer();
  
++                try {
++                    System.out.println("Test");
++                    Thread.sleep(3 * 1000);
++                    System.out.println("Test");
++                } catch (Exception e) {
++                    throw new RuntimeException(e);
++                }
                  var instances = MinecraftServer.getInstanceManager().getInstances();
+                 Instance instance = instances.stream().skip(new Random().nextInt(instances.size())).findFirst().orElse(null);
+                 event.setSpawningInstance(instance);
+                 int x = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
+                 int z = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
+                 player.setRespawnPoint(new Pos(0, 42f, 0));
++                player.setDeathLocation(instance.getDimensionType(), new Pos(0, 42f, 0));
++                System.out.println("Test");
+             })
+             .addListener(PlayerSpawnEvent.class, event -> {
+                 final Player player = event.getPlayer();
+@@ -139,6 +151,7 @@ public class PlayerInit {
+     public static void init() {
+         var eventHandler = MinecraftServer.getGlobalEventHandler();
+         eventHandler.addChild(DEMO_NODE);
++        // MinecraftServer.getBiomeManager().addBiome(Biome.PLAINS);
+ 
+         eventHandler.addListener(ServerTickMonitorEvent.class, event -> LAST_TICK.set(event.getTickMonitor()));
+ 
 diff --git a/demo/src/main/java/net/minestom/demo/commands/SideBarCommand.java b/demo/src/main/java/net/minestom/demo/commands/SideBarCommand.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..c6d60ef4f193882ca3ce096bdc79122d0d1c8a9e
@@ -4339,10 +4385,15 @@ index 0000000000000000000000000000000000000000..0b7760127548fd8bdb90ab533cd3d01f
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/ConnectionManager.java b/src/main/java/net/minestom/server/network/ConnectionManager.java
-index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c66b6dc2a7 100644
+index b080de14ec2509b15108f171694653d3dc62cd93..2f36da7f28ddadae010612be622310882a3b4d4a 100644
 --- a/src/main/java/net/minestom/server/network/ConnectionManager.java
 +++ b/src/main/java/net/minestom/server/network/ConnectionManager.java
-@@ -4,12 +4,20 @@ import net.kyori.adventure.text.Component;
+@@ -1,15 +1,25 @@
+ package net.minestom.server.network;
+ 
++import static net.minestom.server.network.packet.server.ServerPacketIdentifier.KEEP_ALIVE;
++
+ import net.kyori.adventure.text.Component;
  import net.kyori.adventure.text.format.NamedTextColor;
  import net.minestom.server.MinecraftServer;
  import net.minestom.server.entity.Player;
@@ -4356,17 +4407,17 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 +import net.minestom.server.message.Messenger;
 +import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
 +import net.minestom.server.network.packet.server.common.PluginMessagePacket;
++import net.minestom.server.network.packet.server.common.TagsPacket;
 +import net.minestom.server.network.packet.server.configuration.ClientRegistryDataPacket;
 +import net.minestom.server.network.packet.server.configuration.FinishConfigurationPacket;
  import net.minestom.server.network.packet.server.login.LoginSuccessPacket;
 -import net.minestom.server.network.packet.server.play.KeepAlivePacket;
 +import net.minestom.server.network.packet.server.common.KeepAlivePacket;
 +import net.minestom.server.network.packet.server.play.StartConfigurationPacket;
-+import net.minestom.server.network.packet.server.play.TagsPacket;
  import net.minestom.server.network.player.PlayerConnection;
  import net.minestom.server.network.player.PlayerSocketConnection;
  import net.minestom.server.utils.StringUtils;
-@@ -18,8 +26,10 @@ import net.minestom.server.utils.debug.DebugUtils;
+@@ -18,8 +28,10 @@ import net.minestom.server.utils.debug.DebugUtils;
  import net.minestom.server.utils.validate.Check;
  import org.jctools.queues.MessagePassingQueue;
  import org.jctools.queues.MpscUnboundedArrayQueue;
@@ -4377,7 +4428,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
  
  import java.util.*;
  import java.util.concurrent.CompletableFuture;
-@@ -30,12 +40,13 @@ import java.util.function.Function;
+@@ -30,14 +42,21 @@ import java.util.function.Function;
  /**
   * Manages the connected clients.
   */
@@ -4388,11 +4439,21 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
      private static final Component TIMEOUT_TEXT = Component.text("Timeout", NamedTextColor.RED);
  
      private final MessagePassingQueue<Player> waitingPlayers = new MpscUnboundedArrayQueue<>(64);
+-    private final Set<Player> players = new CopyOnWriteArraySet<>();
+-    private final Set<Player> unmodifiablePlayers = Collections.unmodifiableSet(players);
 +    private final Set<Player> configurationPlayers = new CopyOnWriteArraySet<>();
-     private final Set<Player> players = new CopyOnWriteArraySet<>();
-     private final Set<Player> unmodifiablePlayers = Collections.unmodifiableSet(players);
++    private final Set<Player> playPlayers = new CopyOnWriteArraySet<>();
++
++    // The players who need keep alive ticks. This was added because we may not send a keep alive in
++    // the time after sending finish configuration but before receiving configuration end (to swap to play).
++    // I(mattw) could not come up with a better way to express this besides completely splitting client/server
++    // states. Perhaps there will be an improvement in the future.
++    private final Set<Player> keepAlivePlayers = new CopyOnWriteArraySet<>();
++    private final Set<Player> unmodifiablePlayers = Collections.unmodifiableSet(playPlayers);
      private final Map<PlayerConnection, Player> connectionPlayerMap = new ConcurrentHashMap<>();
-@@ -135,7 +146,7 @@ public final class ConnectionManager {
+ 
+     // The uuid provider once a player login
+@@ -135,7 +154,7 @@ public final class ConnectionManager {
  
      /**
       * Computes the UUID of the specified connection.
@@ -4401,11 +4462,23 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
       * to give the player the right {@link UUID}.
       *
       * @param playerConnection the player connection
-@@ -182,30 +193,81 @@ public final class ConnectionManager {
+@@ -166,7 +185,7 @@ public final class ConnectionManager {
+     }
+ 
+     public synchronized void registerPlayer(@NotNull Player player) {
+-        this.players.add(player);
++        this.playPlayers.add(player);
+         this.connectionPlayerMap.put(player.getPlayerConnection(), player);
+     }
+ 
+@@ -181,31 +200,86 @@ public final class ConnectionManager {
+     public synchronized void removePlayer(@NotNull PlayerConnection connection) {
          final Player player = this.connectionPlayerMap.remove(connection);
          if (player == null) return;
-         this.players.remove(player);
+-        this.players.remove(player);
 +        this.configurationPlayers.remove(player);
++        this.playPlayers.remove(player);
++        this.keepAlivePlayers.remove(player);
      }
  
      /**
@@ -4416,9 +4489,10 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 +     * Shutdowns the connection manager by kicking all the currently connected players.
 +     */
 +    public synchronized void shutdown() {
-+        this.players.clear();
-+        this.connectionPlayerMap.clear();
 +        this.configurationPlayers.clear();
++        this.playPlayers.clear();
++        this.keepAlivePlayers.clear();
++        this.connectionPlayerMap.clear();
 +    }
 +
 +    /**
@@ -4426,8 +4500,10 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 +     */
 +    public void updateWaitingPlayers() {
 +        this.waitingPlayers.drain(player -> {
-+            configurationPlayers.remove(player);
-+            players.add(player);
++            player.getPlayerConnection().setConnectionState(ConnectionState.PLAY);
++            System.out.println("PLAY!");
++            playPlayers.add(player);
++            keepAlivePlayers.add(player);
 +
 +            // Spawn the player at Player#getRespawnPoint
 +            CompletableFuture<Void> spawnFuture = player.UNSAFE_init();
@@ -4442,8 +4518,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 +        updateWaitingPlayers();
 +
 +        // Send keep alive packets
-+        handleKeepAlive(configurationPlayers, tickStart);
-+        handleKeepAlive(players, tickStart);
++        handleKeepAlive(keepAlivePlayers, tickStart);
 +
 +        // Interpret packets for configuration players
 +        configurationPlayers.forEach(Player::interpretPacketQueue);
@@ -4460,6 +4535,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 -        return AsyncUtils.runAsync(() -> {
 +    private void handleKeepAlive(@NotNull Collection<Player> playerGroup, long tickStart) {
 +        final KeepAlivePacket keepAlivePacket = new KeepAlivePacket(tickStart);
++
 +        for (Player player : playerGroup) {
 +            final long lastKeepAlive = tickStart - player.getLastKeepAlive();
 +            if (lastKeepAlive > KEEP_ALIVE_DELAY && player.didAnswerKeepAlive()) {
@@ -4491,7 +4567,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
              // Change UUID/Username based on the event
              {
                  final String eventUsername = asyncPlayerPreLoginEvent.getUsername();
-@@ -217,72 +279,57 @@ public final class ConnectionManager {
+@@ -217,72 +291,71 @@ public final class ConnectionManager {
                      player.setUuid(eventUuid);
                  }
              }
@@ -4503,7 +4579,6 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 -            playerConnection.setConnectionState(ConnectionState.PLAY);
 -            if (register) registerPlayer(player);
 -            this.waitingPlayers.relaxedOffer(player);
-+            configurationPlayers.add(player);
          });
      }
  
@@ -4523,10 +4598,10 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 -    }
 +    @Override
 +    public void doConfiguration(@NotNull Player player, boolean hasFirstConfig) {
-+        AsyncUtils.runAsync(() -> {
-+            player.sendPacket(PluginMessagePacket.getBrandPacket());
-+            var event = new AsyncPlayerConfigurationEvent(player, hasFirstConfig);
-+            EventDispatcher.call(event);
++        if (hasFirstConfig) {
++            configurationPlayers.add(player);
++            keepAlivePlayers.add(player);
++        }
  
 -    /**
 -     * Shutdowns the connection manager by kicking all the currently connected players.
@@ -4535,8 +4610,9 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 -        this.players.clear();
 -        this.connectionPlayerMap.clear();
 -    }
-+            final Instance spawningInstance = event.getSpawningInstance();
-+            Check.notNull(spawningInstance, "You need to specify a spawning instance in the AsyncPlayerConfigurationEvent");
++        player.getPlayerConnection().setConnectionState(ConnectionState.CONFIGURATION);
++        CompletableFuture<Void> configFuture = AsyncUtils.runAsync(() -> {
++            player.sendPacket(PluginMessagePacket.getBrandPacket());
  
 -    /**
 -     * Connects waiting players.
@@ -4553,19 +4629,33 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 -                waitingPlayer.UNSAFE_init(spawningInstance).join();
 -            } else {
 -                waitingPlayer.UNSAFE_init(spawningInstance);
++            var event = new AsyncPlayerConfigurationEvent(player, hasFirstConfig);
++            EventDispatcher.call(event);
++
++            final Instance spawningInstance = event.getSpawningInstance();
++            Check.notNull(spawningInstance, "You need to specify a spawning instance in the AsyncPlayerConfigurationEvent");
++
++            // Registry data (if it should be sent)
 +            if (event.shouldSendRegistryData()) {
-+                Map<String, NBT> registryData = new HashMap<>();
-+                registryData.put("minecraft:chat_type", Messenger.chatRegistry());
-+                registryData.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
-+                registryData.put("minecraft:worldgen/biome", MinecraftServer.getBiomeManager().toNBT());
-+                registryData.put("minecraft:damage_type", DamageType.getNBT());
-+                player.sendPacket(new ClientRegistryDataPacket(NBT.Compound(registryData)));
++                var registry = new HashMap<String, NBT>();
++                /*registry.put("minecraft:chat_type", Messenger.chatRegistry());
++                registry.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
++                registry.put("minecraft:worldgen/biome", MinecraftServer.getBiomeManager().toNBT());
++                registry.put("minecraft:damage_type", DamageType.getNBT());*/
++                player.sendPacket(new ClientRegistryDataPacket(NBT.Compound(registry)));
++
 +                player.sendPacket(TagsPacket.DEFAULT_TAGS);
              }
 +
++            // Wait for pending resource packs if any
++            /* var packFuture = player.getResourcePackFuture();
++            if (packFuture != null) packFuture.join();*/
++
++            keepAlivePlayers.remove(player);
 +            player.setPendingInstance(spawningInstance);
 +            player.sendPacket(new FinishConfigurationPacket());
          });
++        if (DebugUtils.INSIDE_TEST) configFuture.join();
      }
  
 -    /**
@@ -4592,7 +4682,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..bda0e4a1497b665d8582a831aa81f0c6
 +    @Override
 +    public void transitionPlayToConfig(@NotNull Player player) {
 +        // Abort transition if player is already in configuration state
-+        if (player.getPlayerConnection().getConnectionState().ordinal() == ConnectionState.CONFIGURATION.ordinal()) return;
++        // if (player.getPlayerConnection().getConnectionState().ordinal() == ConnectionState.CONFIGURATION.ordinal()) return;
 +        player.sendPacket(new StartConfigurationPacket());
 +        this.configurationPlayers.add(player);
 +    }
@@ -4629,10 +4719,39 @@ index e8508e0c00fdd8536d0b5a87bfe8697d52369b47..eed55c022b77b1976b4e0cac4876877b
      public static final Type<ItemStack> ITEM = NetworkBufferTypes.ITEM;
  
 diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..60f83f5f48055b6c4754910d69c94ed4f83f0685 100644
+index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..75e2238f2fda3d9309471cd3f0d5cd0e4bb863e6 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 +++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-@@ -293,6 +293,16 @@ final class NetworkBufferTypes {
+@@ -237,7 +237,15 @@ final class NetworkBufferTypes {
+                     buffer.nbtWriter = nbtWriter;
+                 }
+                 try {
+-                    nbtWriter.writeNamed("", value);
++                    // Microtus start - update nbt sending and reading
++                    if (value == NBTEnd.INSTANCE) {
++                        // Kotlin - https://discord.com/channels/706185253441634317/706186227493109860/1163703658341478462
++                        buffer.write(BYTE, (byte) NBTType.TAG_End.getOrdinal());
++                    } else {
++                        buffer.write(BYTE, (byte) value.getID().getOrdinal());
++                        nbtWriter.writeRaw(value);
++                    }
++                    // Microtus end - update nbt sending and reading
+                 } catch (IOException e) {
+                     throw new RuntimeException(e);
+                 }
+@@ -260,7 +268,10 @@ final class NetworkBufferTypes {
+                     buffer.nbtReader = nbtReader;
+                 }
+                 try {
+-                    return nbtReader.read();
++                    byte tagId = buffer.read(BYTE);
++                    if (tagId == NBTType.TAG_End.getOrdinal())
++                        return NBTEnd.INSTANCE;
++                    return nbtReader.readRaw(tagId);
+                 } catch (IOException | NBTException e) {
+                     throw new RuntimeException(e);
+                 }
+@@ -293,6 +304,16 @@ final class NetworkBufferTypes {
                  final String json = buffer.read(STRING);
                  return GsonComponentSerializer.gson().deserialize(json);
              });
@@ -4650,7 +4769,7 @@ index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..60f83f5f48055b6c4754910d69c94ed4
              (buffer, value) -> {
                  buffer.write(LONG, value.getMostSignificantBits());
 diff --git a/src/main/java/net/minestom/server/network/PacketProcessor.java b/src/main/java/net/minestom/server/network/PacketProcessor.java
-index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..c33dd77f2b76b33a0c30133b79cb382e9f302c40 100644
+index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..026857d5280018d7f2f8fb7eff69f7712584f0b6 100644
 --- a/src/main/java/net/minestom/server/network/PacketProcessor.java
 +++ b/src/main/java/net/minestom/server/network/PacketProcessor.java
 @@ -1,38 +1,39 @@
@@ -4720,14 +4839,14 @@ index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..c33dd77f2b76b33a0c30133b79cb382e
 -            player.addPacketToQueue(packet);
 +        final ConnectionState state = connection.getConnectionState();
 +
-+        // If the packet intends to switch state, do it now.
++        /*// If the packet intends to switch state, do it now.
 +        // Since packets are processed next tick for players, we have to switch immediately.
 +        // TODO HOWEVER THIS WILL NOT ACTUALLY WORK BECAUSE WHEN WE QUEUE THE PACKET IT HAS THE WRONG LISTENER.
 +        ServerStateFlow nextState = packet.getClass().getAnnotation(ServerStateFlow.class);
 +
 +        if (nextState != null && state.ordinal() != nextState.next().ordinal()) {
 +            connection.setConnectionState(nextState.next());
-+        }
++        }*/
 +
 +        switch (state) {
 +            // Process all pre-config packets immediately
@@ -4952,28 +5071,6 @@ index 0000000000000000000000000000000000000000..1475b944ca327685877305e89a79bd15
 + * @since 1.2.0
 + */
 +public record PacketResponsibleImpl(@NotNull Int2ObjectArrayMap<Function<NetworkBuffer, ClientPacket>> packetMap) implements PacketResponsible { }
-diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientConnectionStatePacket.java b/src/main/java/net/minestom/server/network/packet/client/ClientConnectionStatePacket.java
-new file mode 100644
-index 0000000000000000000000000000000000000000..f65a1b41fda7720d96eaa5c6956355dd96ef89cd
---- /dev/null
-+++ b/src/main/java/net/minestom/server/network/packet/client/ClientConnectionStatePacket.java
-@@ -0,0 +1,16 @@
-+package net.minestom.server.network.packet.client;
-+
-+import net.minestom.server.network.ConnectionState;
-+import org.jetbrains.annotations.Nullable;
-+
-+/**
-+ * @author theEvilReaper
-+ * @version 1.0.0
-+ * @since 1.2.0
-+ **/
-+public interface ClientConnectionStatePacket extends ClientPacket {
-+
-+    default @Nullable ConnectionState nextState() {
-+        return null;
-+    }
-+}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientPackets.java b/src/main/java/net/minestom/server/network/packet/client/ClientPackets.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..051fbee95d73bee52c93c8cb86894f364bbe5204
@@ -5328,19 +5425,18 @@ index f02b383cae469bfec285346d79d3f2aee31d7eac..e26e3b6b330c37b16c26df50eed84485
              throw new IllegalArgumentException("Locale cannot be longer than 128 characters.");
 diff --git a/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java b/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..da5ba383058f996c4f88e5281bd6e4d8b3e486d9
+index 0000000000000000000000000000000000000000..b593110113ff86e285fde774eadbac1d28b74824
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/client/configuration/ClientFinishConfigurationPacket.java
-@@ -0,0 +1,24 @@
+@@ -0,0 +1,18 @@
 +package net.minestom.server.network.packet.client.configuration;
 +
-+import net.minestom.server.network.ConnectionState;
 +import net.minestom.server.network.NetworkBuffer;
-+import net.minestom.server.network.packet.client.ClientConnectionStatePacket;
++import net.minestom.server.network.packet.client.ClientPacket;
 +import org.jetbrains.annotations.NotNull;
-+import org.jetbrains.annotations.Nullable;
 +
-+public record ClientFinishConfigurationPacket() implements ClientConnectionStatePacket {
++
++public record ClientFinishConfigurationPacket() implements ClientPacket {
 +
 +    public ClientFinishConfigurationPacket(@NotNull NetworkBuffer ignore) {
 +        this();
@@ -5350,17 +5446,12 @@ index 0000000000000000000000000000000000000000..da5ba383058f996c4f88e5281bd6e4d8
 +    public void write(@NotNull NetworkBuffer writer) {
 +        // Nothing do to here
 +    }
-+
-+    @Override
-+    public @NotNull ConnectionState nextState() {
-+        return ConnectionState.PLAY;
-+    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-index e8922654e4f71aa447bf71af42c86ec2760de3ed..dbc2a51b94bc07bf4e04d6f6f2af91307fc4c323 100644
+index e8922654e4f71aa447bf71af42c86ec2760de3ed..025816042714f6c22ee2a3c23cb3a04f652eee29 100644
 --- a/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/client/handshake/HandshakePacket.java
-@@ -10,6 +10,7 @@ import net.minestom.server.MinecraftServer;
+@@ -10,11 +10,13 @@ import net.minestom.server.MinecraftServer;
  import net.minestom.server.extras.bungee.BungeeCordProxy;
  import net.minestom.server.network.ConnectionState;
  import net.minestom.server.network.NetworkBuffer;
@@ -5368,7 +5459,17 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..dbc2a51b94bc07bf4e04d6f6f2af9130
  import net.minestom.server.network.packet.client.ClientPreplayPacket;
  import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
  import net.minestom.server.network.player.GameProfile;
-@@ -26,8 +27,9 @@ import java.util.UUID;
+ import net.minestom.server.network.player.PlayerConnection;
+ import net.minestom.server.network.player.PlayerSocketConnection;
++import net.minestom.server.utils.UniqueIdUtils; // Microtus - improve string pattern usage + add private constructor
+ import org.jetbrains.annotations.NotNull;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+@@ -23,14 +25,20 @@ import java.net.SocketAddress;
+ import java.util.ArrayList;
+ import java.util.List;
+ import java.util.UUID;
++import java.util.regex.Pattern; // Microtus - improve string pattern usage + add private constructor
  
  import static net.minestom.server.network.NetworkBuffer.*;
  
@@ -5377,9 +5478,17 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..dbc2a51b94bc07bf4e04d6f6f2af9130
 -                              int serverPort, int nextState) implements ClientPreplayPacket {
 +                              int serverPort, int indent) implements ClientPreplayPacket {
  
-     private final static Logger LOGGER = LoggerFactory.getLogger(HandshakePacket.class);
+-    private final static Logger LOGGER = LoggerFactory.getLogger(HandshakePacket.class);
++    // Microtus start - improve string pattern usage + add private constructor
++    private static final Logger LOGGER = LoggerFactory.getLogger(HandshakePacket.class);
  
-@@ -61,14 +63,14 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
++    private static final Pattern UUID_REPLACEMENT =
++            Pattern.compile("(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)");
++    // Microtus end - improve string pattern usage + add private constructor
+     /**
+      * Text sent if a player tries to connect with an invalid version of the client
+      */
+@@ -61,88 +69,87 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
          }
          writer.write(STRING, serverAddress);
          writer.write(UNSIGNED_SHORT, serverPort);
@@ -5390,13 +5499,74 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..dbc2a51b94bc07bf4e04d6f6f2af9130
      @Override
      public void process(@NotNull PlayerConnection connection) {
          String address = serverAddress;
-         // Bungee support (IP forwarding)
+-        // Bungee support (IP forwarding)
 -        if (BungeeCordProxy.isEnabled() && connection instanceof PlayerSocketConnection socketConnection && nextState == 2) {
-+        if (BungeeCordProxy.isEnabled() && connection instanceof PlayerSocketConnection socketConnection && indent == 2) {
-             final String[] split = address.split("\00");
- 
-             if (split.length == 3 || split.length == 4) {
-@@ -138,7 +140,7 @@ public record HandshakePacket(int protocolVersion, @NotNull String serverAddress
+-            final String[] split = address.split("\00");
+-
+-            if (split.length == 3 || split.length == 4) {
+-                boolean hasProperties = split.length == 4;
+-                if (BungeeCordProxy.isBungeeGuardEnabled() && !hasProperties) {
+-                    bungeeDisconnect(socketConnection);
+-                    return;
+-                }
+-
+-                address = split[0];
+-
+-                final SocketAddress socketAddress = new java.net.InetSocketAddress(split[1],
+-                        ((java.net.InetSocketAddress) connection.getRemoteAddress()).getPort());
+-                socketConnection.setRemoteAddress(socketAddress);
+-
+-                UUID playerUuid = java.util.UUID.fromString(
+-                        split[2]
+-                                .replaceFirst(
+-                                        "(\\p{XDigit}{8})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}{4})(\\p{XDigit}+)", "$1-$2-$3-$4-$5"
+-                                )
+-                );
+-
+-                List<GameProfile.Property> properties = new ArrayList<>();
+-                if (hasProperties) {
+-                    boolean foundBungeeGuardToken = false;
+-                    final String rawPropertyJson = split[3];
+-                    final JsonArray propertyJson = JsonParser.parseString(rawPropertyJson).getAsJsonArray();
+-                    for (JsonElement element : propertyJson) {
+-                        final JsonObject jsonObject = element.getAsJsonObject();
+-                        final JsonElement name = jsonObject.get("name");
+-                        final JsonElement value = jsonObject.get("value");
+-                        final JsonElement signature = jsonObject.get("signature");
+-                        if (name == null || value == null) continue;
+-
+-                        final String nameString = name.getAsString();
+-                        final String valueString = value.getAsString();
+-                        final String signatureString = signature == null ? null : signature.getAsString();
+-
+-                        if (BungeeCordProxy.isBungeeGuardEnabled() && nameString.equals("bungeeguard-token")) {
+-                            if (foundBungeeGuardToken || !BungeeCordProxy.isValidBungeeGuardToken(valueString)) {
+-                                bungeeDisconnect(socketConnection);
+-                                return;
+-                            }
+-
+-                            foundBungeeGuardToken = true;
+-                        }
+-
+-                        properties.add(new GameProfile.Property(nameString, valueString, signatureString));
+-                    }
+-
+-                    if (BungeeCordProxy.isBungeeGuardEnabled() && !foundBungeeGuardToken) {
+-                        bungeeDisconnect(socketConnection);
+-                        return;
+-                    }
+-                }
+-
+-                final GameProfile gameProfile = new GameProfile(playerUuid, "test", properties);
+-                socketConnection.UNSAFE_setProfile(gameProfile);
+-            } else {
+-                bungeeDisconnect(socketConnection);
+-                return;
+-            }
+-        }
+-
+         if (connection instanceof PlayerSocketConnection) {
+             // Give to the connection the server info that the client used
              ((PlayerSocketConnection) connection).refreshServerInformation(address, serverPort, protocolVersion);
          }
  
@@ -5405,6 +5575,75 @@ index e8922654e4f71aa447bf71af42c86ec2760de3ed..dbc2a51b94bc07bf4e04d6f6f2af9130
              case 1 -> connection.setConnectionState(ConnectionState.STATUS);
              case 2 -> {
                  if (protocolVersion == MinecraftServer.PROTOCOL_VERSION) {
+                     connection.setConnectionState(ConnectionState.LOGIN);
++                    // Bungee support (IP forwarding)
++                    if (BungeeCordProxy.isEnabled() && connection instanceof PlayerSocketConnection socketConnection && indent == 2) {
++                        final String[] split = address.split("\00");
++
++                        if (split.length == 3 || split.length == 4) {
++                            boolean hasProperties = split.length == 4;
++                            if (BungeeCordProxy.isBungeeGuardEnabled() && !hasProperties) {
++                                bungeeDisconnect(socketConnection);
++                                return;
++                            }
++
++                            address = split[0];
++
++                            final SocketAddress socketAddress = new java.net.InetSocketAddress(split[1],
++                                    ((java.net.InetSocketAddress) connection.getRemoteAddress()).getPort());
++                            socketConnection.setRemoteAddress(socketAddress);
++
++                            // Microtus start - improve string pattern usage + add private constructor
++                            UUID playerUuid = java.util.UUID.fromString(
++                                    UUID_REPLACEMENT.matcher(split[2]).replaceAll(UniqueIdUtils.UUID_GROUP_REPLACEMENT)
++                            );
++                            // Microtus end - improve string pattern usage + add private constructor
++
++                            List<GameProfile.Property> properties = new ArrayList<>();
++                            if (hasProperties) {
++                                boolean foundBungeeGuardToken = false;
++                                final String rawPropertyJson = split[3];
++                                final JsonArray propertyJson = JsonParser.parseString(rawPropertyJson).getAsJsonArray();
++                                for (JsonElement element : propertyJson) {
++                                    final JsonObject jsonObject = element.getAsJsonObject();
++                                    final JsonElement name = jsonObject.get("name");
++                                    final JsonElement value = jsonObject.get("value");
++                                    final JsonElement signature = jsonObject.get("signature");
++                                    if (name == null || value == null) continue;
++
++                                    final String nameString = name.getAsString();
++                                    final String valueString = value.getAsString();
++                                    final String signatureString = signature == null ? null : signature.getAsString();
++
++                                    if (BungeeCordProxy.isBungeeGuardEnabled() && nameString.equals("bungeeguard-token")) {
++                                        if (foundBungeeGuardToken || !BungeeCordProxy.isValidBungeeGuardToken(valueString)) {
++                                            bungeeDisconnect(socketConnection);
++                                            return;
++                                        }
++
++                                        foundBungeeGuardToken = true;
++                                    }
++
++                                    properties.add(new GameProfile.Property(nameString, valueString, signatureString));
++                                }
++
++                                if (BungeeCordProxy.isBungeeGuardEnabled() && !foundBungeeGuardToken) {
++                                    bungeeDisconnect(socketConnection);
++                                    return;
++                                }
++                            }
++
++                            final GameProfile gameProfile = new GameProfile(playerUuid, "test", properties);
++                            socketConnection.UNSAFE_setProfile(gameProfile);
++                        } else {
++                            bungeeDisconnect(socketConnection);
++                            return;
++                        }
++                    }
++
+                 } else {
+                     // Incorrect client version
+                     disconnect(connection, INVALID_VERSION_TEXT);
 diff --git a/src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientEncryptionResponsePacket.java
 similarity index 94%
 rename from src/main/java/net/minestom/server/network/packet/client/login/EncryptionResponsePacket.java
@@ -5459,18 +5698,17 @@ index c327a3b5c10fa2d3c31f672044431c76031a111c..6dd8f7c8ea5f0f09041ca7d8dce13de6
          writer.write(BYTE_ARRAY, sharedSecret);
 diff --git a/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginAcknowledgedPacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginAcknowledgedPacket.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..04cad8341585a62eb1532d660126822e83ace8c5
+index 0000000000000000000000000000000000000000..6cddddd4ec6ab9d5036ee1b69ad52129223e59e4
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginAcknowledgedPacket.java
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,17 @@
 +package net.minestom.server.network.packet.client.login;
 +
-+import net.minestom.server.network.ConnectionState;
 +import net.minestom.server.network.NetworkBuffer;
-+import net.minestom.server.network.packet.client.ClientConnectionStatePacket;
++import net.minestom.server.network.packet.client.ClientPacket;
 +import org.jetbrains.annotations.NotNull;
 +
-+public record ClientLoginAcknowledgedPacket() implements ClientConnectionStatePacket {
++public record ClientLoginAcknowledgedPacket() implements ClientPacket {
 +
 +    public ClientLoginAcknowledgedPacket(@NotNull NetworkBuffer buffer) {
 +        this();
@@ -5479,11 +5717,6 @@ index 0000000000000000000000000000000000000000..04cad8341585a62eb1532d660126822e
 +    @Override
 +    public void write(@NotNull NetworkBuffer writer) {
 +
-+    }
-+
-+    @Override
-+    public @NotNull ConnectionState nextState() {
-+        return ConnectionState.CONFIGURATION;
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginPluginResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/login/ClientLoginPluginResponsePacket.java
@@ -5762,18 +5995,20 @@ index fec3c5c7f36e11ee815cc639af50942f27a09744..6459020de3f7933fcb5801917efc218f
          return new ClientAdvancementTabPacket(action, tabIdentifier);
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientConfigurationAckPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientConfigurationAckPacket.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..d5611b45365406d773d28f5d9385c5102f5fafaa
+index 0000000000000000000000000000000000000000..1801de1b15bebbc121fa4ee0f29c9aa3daa78b30
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/client/play/ClientConfigurationAckPacket.java
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,20 @@
 +package net.minestom.server.network.packet.client.play;
 +
 +import net.minestom.server.network.ConnectionState;
 +import net.minestom.server.network.NetworkBuffer;
-+import net.minestom.server.network.packet.client.ClientConnectionStatePacket;
++import net.minestom.server.network.packet.client.ClientPacket;
++import net.minestom.server.network.packet.server.ServerStateFlow;
 +import org.jetbrains.annotations.NotNull;
 +
-+public record ClientConfigurationAckPacket() implements ClientConnectionStatePacket {
++@ServerStateFlow(next = ConnectionState.CONFIGURATION)
++public record ClientConfigurationAckPacket() implements ClientPacket {
 +
 +    public ClientConfigurationAckPacket(@NotNull NetworkBuffer ignore) {
 +        this();
@@ -5782,11 +6017,6 @@ index 0000000000000000000000000000000000000000..d5611b45365406d773d28f5d9385c510
 +    @Override
 +    public void write(@NotNull NetworkBuffer writer) {
 +        // Nothing to write
-+    }
-+
-+    @Override
-+    public @NotNull ConnectionState nextState() {
-+        return ConnectionState.CONFIGURATION;
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java b/src/main/java/net/minestom/server/network/packet/client/play/ClientUpdateSignPacket.java
@@ -5989,10 +6219,10 @@ index 3b4672b7d4241f7629d1a281b6e1006743725cd1..7dc83e22055610547c2eae3fbe6afc28
          return cache;
 diff --git a/src/main/java/net/minestom/server/network/packet/server/ConfigureServerPacket.java b/src/main/java/net/minestom/server/network/packet/server/ConfigureServerPacket.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..8e8421dff48cdd34334b384670eb42d364ee15e1
+index 0000000000000000000000000000000000000000..e8c5a522f60d61e9e3eb31d903ba3fc709accb4f
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/server/ConfigureServerPacket.java
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,11 @@
 +package net.minestom.server.network.packet.server;
 +
 +import net.minestom.server.network.ConnectionState;
@@ -6003,10 +6233,6 @@ index 0000000000000000000000000000000000000000..8e8421dff48cdd34334b384670eb42d3
 +public interface ConfigureServerPacket {
 +
 +    int getConfigurePacketId();
-+
-+    default @Nullable ConnectionState nextState() {
-+        return null;
-+    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/server/ServerPacket.java b/src/main/java/net/minestom/server/network/packet/server/ServerPacket.java
 index f82edb80002bf019e6f00520176c998931a58547..1d3810d58aaadf1dee28fbbf54829a5de11b9239 100644
@@ -6638,19 +6864,20 @@ index 0000000000000000000000000000000000000000..66a358842b2704ed6f1471e88a742ce4
 +}
 diff --git a/src/main/java/net/minestom/server/network/packet/server/configuration/FinishConfigurationPacket.java b/src/main/java/net/minestom/server/network/packet/server/configuration/FinishConfigurationPacket.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4a11ca9382d1b8e80706549878e5e51d7cc6105e
+index 0000000000000000000000000000000000000000..5ee42975ceff444500a8d40f9f54f01e0132f7db
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/server/configuration/FinishConfigurationPacket.java
-@@ -0,0 +1,28 @@
+@@ -0,0 +1,29 @@
 +package net.minestom.server.network.packet.server.configuration;
 +
 +import net.minestom.server.network.ConnectionState;
 +import net.minestom.server.network.NetworkBuffer;
-+import net.minestom.server.network.packet.server.*;
++import net.minestom.server.network.packet.server.ServerPacket;
++import net.minestom.server.network.packet.server.ServerPacketIdentifier;
++import net.minestom.server.network.packet.server.ServerPacketState;
 +import org.jetbrains.annotations.NotNull;
 +
 +@ServerPacketState(states = {ConnectionState.CONFIGURATION})
-+@ServerStateFlow(next = ConnectionState.PLAY)
 +public record FinishConfigurationPacket() implements ServerPacket {
 +    public FinishConfigurationPacket(@NotNull NetworkBuffer ignored) {
 +        this();
@@ -6777,27 +7004,29 @@ index f6cf0fa27b2556035aa66e3ca394e2ccb64b2260..1a9b322433b172a005680b9e907f8cfa
                                         byte @Nullable [] data) implements ServerPacket {
      public LoginPluginRequestPacket(@NotNull NetworkBuffer reader) {
 diff --git a/src/main/java/net/minestom/server/network/packet/server/login/LoginSuccessPacket.java b/src/main/java/net/minestom/server/network/packet/server/login/LoginSuccessPacket.java
-index 3de0135d70389551a0eb71860d09b3dd8364b3c0..4ce9c8418e048cbe5dd5cdaf431ed69ff9c33f92 100644
+index 3de0135d70389551a0eb71860d09b3dd8364b3c0..1a3a4881b4d1c7f205b3b8784e81db2d1f03a4f7 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/login/LoginSuccessPacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/server/login/LoginSuccessPacket.java
-@@ -1,8 +1,11 @@
+@@ -1,15 +1,17 @@
  package net.minestom.server.network.packet.server.login;
  
++import static net.minestom.server.network.NetworkBuffer.STRING;
++import static net.minestom.server.network.NetworkBuffer.VAR_INT;
++
++import java.util.UUID;
 +import net.minestom.server.network.ConnectionState;
  import net.minestom.server.network.NetworkBuffer;
-+import net.minestom.server.network.packet.server.ServerPacketState;
  import net.minestom.server.network.packet.server.ServerPacket;
  import net.minestom.server.network.packet.server.ServerPacketIdentifier;
-+import net.minestom.server.network.packet.server.ServerStateFlow;
++import net.minestom.server.network.packet.server.ServerPacketState;
  import org.jetbrains.annotations.NotNull;
  
- import java.util.UUID;
-@@ -10,6 +13,8 @@ import java.util.UUID;
- import static net.minestom.server.network.NetworkBuffer.STRING;
- import static net.minestom.server.network.NetworkBuffer.VAR_INT;
- 
+-import java.util.UUID;
+-
+-import static net.minestom.server.network.NetworkBuffer.STRING;
+-import static net.minestom.server.network.NetworkBuffer.VAR_INT;
+-
 +@ServerPacketState(states = {ConnectionState.LOGIN})
-+@ServerStateFlow(next = ConnectionState.CONFIGURATION)
  public record LoginSuccessPacket(@NotNull UUID uuid, @NotNull String username, int properties) implements ServerPacket {
      public LoginSuccessPacket(@NotNull NetworkBuffer reader) {
          this(reader.read(NetworkBuffer.UUID), reader.read(STRING), reader.read(VAR_INT));
@@ -9010,21 +9239,21 @@ index 905b47a3aad46ebdc119118447ef3500dafbebb9..d277f00d5a1f347e0abd97abe8d55680
          this(reader.read(BLOCK_POSITION), reader.read(FLOAT));
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/StartConfigurationPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/StartConfigurationPacket.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..7bff86ffa232ac9e923968f7ad34846b40603a03
+index 0000000000000000000000000000000000000000..2d992400a265b5ba86167b8bfcd60c137fa8a06e
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/network/packet/server/play/StartConfigurationPacket.java
 @@ -0,0 +1,28 @@
 +package net.minestom.server.network.packet.server.play;
 +
-+import net.minestom.server.network.ConnectionState;
-+import net.minestom.server.network.NetworkBuffer;
-+import net.minestom.server.network.packet.server.*;
-+import org.jetbrains.annotations.NotNull;
-+
 +import static net.minestom.server.network.packet.server.ServerPacketIdentifier.START_CONFIGURATION_PACKET;
 +
++import net.minestom.server.network.ConnectionState;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.server.ServerPacket;
++import net.minestom.server.network.packet.server.ServerPacketState;
++import org.jetbrains.annotations.NotNull;
++
 +@ServerPacketState(states = {ConnectionState.PLAY})
-+@ServerStateFlow(next = ConnectionState.CONFIGURATION)
 +public record StartConfigurationPacket() implements ServerPacket {
 +
 +    @Override
@@ -9888,7 +10117,7 @@ index 7a388357b1cdd52a7cba4b44a0fe4c317e812b9f..5bd15373633de4b592c3b26b2d344eac
  
      /**
 diff --git a/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java b/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
-index cc335a6f6903542e8ac139d5a4deeed2252d9cae..37255a88fbc38bf3bea0b097a97022719fc28697 100644
+index cc335a6f6903542e8ac139d5a4deeed2252d9cae..eae3a16c9264478cba5ce8168508890246ce3449 100644
 --- a/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
 +++ b/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
 @@ -362,15 +362,30 @@ public class PlayerSocketConnection extends PlayerConnection {
@@ -9903,14 +10132,14 @@ index cc335a6f6903542e8ac139d5a4deeed2252d9cae..37255a88fbc38bf3bea0b097a9702271
 +        if (player != null && MinestomAdventure.AUTOMATIC_COMPONENT_TRANSLATION && serverPacket instanceof ComponentHoldingServerPacket holdingPacket) {
 +            serverPacket = holdingPacket.copyWithOperator(component ->
 +                    GlobalTranslator.render(component, Objects.requireNonNullElseGet(player.getLocale(), MinestomAdventure::getDefaultLocale)));
-+        }
+         }
 +
-+        ServerPacketState state = serverPacket.getClass().getAnnotation(ServerPacketState.class);
++        /*ServerPacketState state = serverPacket.getClass().getAnnotation(ServerPacketState.class);
 +
 +        if (state == null || !ServerStateValidator.validate(state, getConnectionState())) {
 +            PacketUtils.invalidPacketState(serverPacket.getClass(), getConnectionState(), state == null ? null : state.states());
 +            return;
-         }
++        }*/
 +
          try (var hold = ObjectPool.PACKET_POOL.hold()) {
 -            var buffer = PacketUtils.createFramedPacket(hold.get(), serverPacket, compressed);

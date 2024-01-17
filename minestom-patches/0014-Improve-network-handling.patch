@@ -21,25 +21,10 @@ index 8e7ad8420da6168ea2444dae90e5bc68bb32c176..3241e9577c38e301096cebf96cb72816
          this.lastSyncedPosition = position;
      }
 diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-index 10d00f747f8f9247c0120d9952f89250662f3d15..8044908bb1e5109eb9437bba2ce109889358400d 100644
+index 9c78e57d3e553b9d731d994e4581c58fa936e1f0..7005a7e4fc8abaf4fc7f9618c25678378b2072fa 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 +++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-@@ -237,7 +237,13 @@ final class NetworkBufferTypes {
-                     buffer.nbtWriter = nbtWriter;
-                 }
-                 try {
--                    nbtWriter.writeNamed("", value);
-+                    // Microtus start - update nbt sending and reading
-+                    if (value == NBTEnd.INSTANCE) {
-+                        buffer.write(BYTE, (byte) NBTType.TAG_End.getOrdinal());
-+                    } else {
-+                        nbtWriter.writeNamed("", value);
-+                    }
-+                    // Microtus end - update nbt sending and reading
-                 } catch (IOException e) {
-                     throw new RuntimeException(e);
-                 }
-@@ -323,7 +329,11 @@ final class NetworkBufferTypes {
+@@ -334,7 +334,11 @@ final class NetworkBufferTypes {
                  buffer.write(BOOLEAN, true);
                  buffer.write(VAR_INT, value.material().id());
                  buffer.write(BYTE, (byte) value.amount());
