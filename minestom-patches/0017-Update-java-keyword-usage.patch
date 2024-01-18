@@ -5157,16 +5157,17 @@ index 3372ade456530be692de5f74e8c9515d32614df2..583214ea6d1a4bb59956ee727644f571
          assertThrows(Exception.class, () -> Palette.newPalette(0, 5, 3));
          assertThrows(Exception.class, () -> Palette.newPalette(1, 5, 3));
 diff --git a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java b/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
-index d0df75b49e882760cc1813ff813c2882a5870c61..ed95d0daf7d90aa7e7ab926500766416aacfc21b 100644
+index 924bd641f7c293894be4514d035c3306bec4e321..b4a5813ecc407959a7ca222c69fb4527e17658a9 100644
 --- a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
-@@ -15,12 +15,12 @@ import org.junit.jupiter.api.Test;
+@@ -15,13 +15,13 @@ import org.junit.jupiter.api.Test;
  import static org.junit.jupiter.api.Assertions.*;
  
  @EnvTest
 -public class InventoryIntegrationTest {
 +class InventoryIntegrationTest {
  
+     private static final Component TITLE = Component.text("title");
      private static final ItemStack MAGIC_STACK = ItemStack.of(Material.DIAMOND, 3);
  
      @Test
@@ -5175,7 +5176,7 @@ index d0df75b49e882760cc1813ff813c2882a5870c61..ed95d0daf7d90aa7e7ab926500766416
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -44,7 +44,7 @@ public class InventoryIntegrationTest {
+@@ -45,7 +45,7 @@ public class InventoryIntegrationTest {
      }
  
      @Test
@@ -5184,7 +5185,7 @@ index d0df75b49e882760cc1813ff813c2882a5870c61..ed95d0daf7d90aa7e7ab926500766416
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -68,7 +68,7 @@ public class InventoryIntegrationTest {
+@@ -69,7 +69,7 @@ public class InventoryIntegrationTest {
      }
  
      @Test
@@ -5193,7 +5194,7 @@ index d0df75b49e882760cc1813ff813c2882a5870c61..ed95d0daf7d90aa7e7ab926500766416
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -111,7 +111,7 @@ public class InventoryIntegrationTest {
+@@ -112,7 +112,7 @@ public class InventoryIntegrationTest {
      }
  
      @Test
@@ -5202,7 +5203,7 @@ index d0df75b49e882760cc1813ff813c2882a5870c61..ed95d0daf7d90aa7e7ab926500766416
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -123,7 +123,7 @@ public class InventoryIntegrationTest {
+@@ -124,7 +124,7 @@ public class InventoryIntegrationTest {
      }
  
      @Test
@@ -5212,7 +5213,7 @@ index d0df75b49e882760cc1813ff813c2882a5870c61..ed95d0daf7d90aa7e7ab926500766416
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
 diff --git a/src/test/java/net/minestom/server/inventory/InventoryTest.java b/src/test/java/net/minestom/server/inventory/InventoryTest.java
-index 612e3b162f38d6367dc016530270e38d46913281..2f3e637b8939987726dd15fdfedafdca51b9cf48 100644
+index be239c29fa9966b6407edb4eb2902f4c613af172..57c9c9f2ebce8790e2982b3c3156081a71c50ec7 100644
 --- a/src/test/java/net/minestom/server/inventory/InventoryTest.java
 +++ b/src/test/java/net/minestom/server/inventory/InventoryTest.java
 @@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
@@ -5222,18 +5223,9 @@ index 612e3b162f38d6367dc016530270e38d46913281..2f3e637b8939987726dd15fdfedafdca
 -public class InventoryTest {
 +class InventoryTest {
  
-     static {
-         // Required to prevent initialization error during event call
-@@ -16,7 +16,7 @@ public class InventoryTest {
-     }
+     private static final Component TITLE = Component.text("title");
  
-     @Test
--    public void testCreation() {
-+    void testCreation() {
-         Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
-         assertEquals(InventoryType.CHEST_1_ROW, inventory.getInventoryType());
-         assertEquals(Component.text("title"), inventory.getTitle());
-@@ -26,7 +26,7 @@ public class InventoryTest {
+@@ -28,7 +28,7 @@ public class InventoryTest {
      }
  
      @Test
@@ -5242,32 +5234,23 @@ index 612e3b162f38d6367dc016530270e38d46913281..2f3e637b8939987726dd15fdfedafdca
          var item1 = ItemStack.of(Material.DIAMOND);
          var item2 = ItemStack.of(Material.GOLD_INGOT);
  
-@@ -52,7 +52,7 @@ public class InventoryTest {
+@@ -54,7 +54,7 @@ public class InventoryTest {
      }
  
      @Test
 -    public void testTake() {
 +    void testTake() {
          ItemStack item = ItemStack.of(Material.DIAMOND, 32);
-         Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, "title");
+         Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
          inventory.setItemStack(0, item);
-@@ -66,7 +66,7 @@ public class InventoryTest {
-     }
- 
-     @Test
--    public void testAdd() {
-+    void testAdd() {
-         Inventory inventory = new Inventory(InventoryType.HOPPER, "title");
-         assertTrue(inventory.addItemStack(ItemStack.of(Material.DIAMOND, 32), TransactionOption.ALL_OR_NOTHING));
-         assertTrue(inventory.addItemStack(ItemStack.of(Material.GOLD_BLOCK, 32), TransactionOption.ALL_OR_NOTHING));
-@@ -77,7 +77,7 @@ public class InventoryTest {
+@@ -79,7 +79,7 @@ public class InventoryTest {
      }
  
      @Test
 -    public void testIds() {
 +    void testIds() {
          for (int i = 0; i <= 1000; ++i) {
-             final byte windowId = new Inventory(InventoryType.CHEST_1_ROW, "title").getWindowId();
+             final byte windowId = new Inventory(InventoryType.CHEST_1_ROW, TITLE).getWindowId();
              assertTrue(windowId > 0);
 diff --git a/src/test/java/net/minestom/server/inventory/PlayerInventoryIntegrationTest.java b/src/test/java/net/minestom/server/inventory/PlayerInventoryIntegrationTest.java
 index 268a34a27684778f116dbbed910a67fff8ffbfc7..762d5e53f5ee07b36ecda7e68ca6e1b4fb95ccfd 100644
@@ -5414,10 +5397,10 @@ index 992051039124e3bf50dd4d667cb7433195f8c735..20e112920723b6046de91875a49757bf
          assertEquals(CRAFT_SLOT_1, 37);
          assertEquals(CRAFT_SLOT_2, 38);
 diff --git a/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
-index 93069a5a925fda0d289e03b72281b92d795ac4c2..55145c0001750c019f83135800e4481e7f89bd28 100644
+index 3262b08e463feb4dcfd49fbf34b8f3e0be4f37e8..a664364f14360465ffee21ba909df8175bfda625 100644
 --- a/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
-@@ -19,10 +19,10 @@ import java.util.List;
+@@ -20,10 +20,10 @@ import java.util.List;
  import static org.junit.jupiter.api.Assertions.*;
  
  @EnvTest
@@ -5430,7 +5413,7 @@ index 93069a5a925fda0d289e03b72281b92d795ac4c2..55145c0001750c019f83135800e4481e
          var instance = env.createFlatInstance();
          var player = env.createPlayer(instance, new Pos(0, 40, 0));
          var inventory = player.getInventory();
-@@ -96,7 +96,7 @@ public class HeldClickIntegrationTest {
+@@ -97,7 +97,7 @@ public class HeldClickIntegrationTest {
      }
  
      @Test
@@ -5438,12 +5421,12 @@ index 93069a5a925fda0d289e03b72281b92d795ac4c2..55145c0001750c019f83135800e4481e
 +    void heldExternal(Env env) {
          var instance = env.createFlatInstance();
          var player = env.createPlayer(instance, new Pos(0, 40, 0));
-         var inventory = new Inventory(InventoryType.HOPPER, "test");
+         var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
 diff --git a/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
-index 87a81674699095298ef8614417497025bb70b479..57639fad9010c6e1d271bf27d83efed5d2026af9 100644
+index 87d2b8b17fb77c48206b32bb6b5dbc10d29a5d6f..29080621650b8eff45270b55ed11807e3f1d5945 100644
 --- a/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
-@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
+@@ -22,10 +22,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  import static org.junit.jupiter.api.Assertions.assertNull;
  
  @EnvTest
@@ -5456,7 +5439,7 @@ index 87a81674699095298ef8614417497025bb70b479..57639fad9010c6e1d271bf27d83efed5
          var instance = env.createFlatInstance();
          var player = env.createPlayer(instance, new Pos(0, 40, 0));
          var inventory = player.getInventory();
-@@ -82,7 +82,7 @@ public class LeftClickIntegrationTest {
+@@ -83,7 +83,7 @@ public class LeftClickIntegrationTest {
      }
  
      @Test
@@ -5464,12 +5447,12 @@ index 87a81674699095298ef8614417497025bb70b479..57639fad9010c6e1d271bf27d83efed5
 +    void leftExternal(Env env) {
          var instance = env.createFlatInstance();
          var player = env.createPlayer(instance, new Pos(0, 40, 0));
-         var inventory = new Inventory(InventoryType.HOPPER, "test");
+         var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
 diff --git a/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
-index c4e4b6e403c628346273597f87507870e62860d3..ca2706d6dd9aa201043c921ee187bbb48c8df3bd 100644
+index 9fc358b8ff4fd6c0f7f4cd86b2a7484a060450a5..c77cac539ad5b2b4badb1fb37b549851418eac95 100644
 --- a/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
-@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
+@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  import static org.junit.jupiter.api.Assertions.assertNull;
  
  @EnvTest
@@ -5482,7 +5465,7 @@ index c4e4b6e403c628346273597f87507870e62860d3..ca2706d6dd9aa201043c921ee187bbb4
          var instance = env.createFlatInstance();
          var player = env.createPlayer(instance, new Pos(0, 40, 0));
          var inventory = player.getInventory();
-@@ -104,7 +104,7 @@ public class RightClickIntegrationTest {
+@@ -105,7 +105,7 @@ public class RightClickIntegrationTest {
      }
  
      @Test
@@ -5490,7 +5473,7 @@ index c4e4b6e403c628346273597f87507870e62860d3..ca2706d6dd9aa201043c921ee187bbb4
 +    void rightExternal(Env env) {
          var instance = env.createFlatInstance();
          var player = env.createPlayer(instance, new Pos(0, 40, 0));
-         var inventory = new Inventory(InventoryType.HOPPER, "test");
+         var inventory = new Inventory(InventoryType.HOPPER, Component.text("test"));
 diff --git a/src/test/java/net/minestom/server/item/ItemAirTest.java b/src/test/java/net/minestom/server/item/ItemAirTest.java
 index db3d855f8114fe9cf0e2e61e834dd3de1157a135..17720b6b3b43d6b92c590864467dbfbac547609e 100644
 --- a/src/test/java/net/minestom/server/item/ItemAirTest.java
