@@ -5,7 +5,7 @@ Subject: [PATCH] Update java keyword usage
 
 
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 2d9fe8a7a8ebb0d6ef5af7ece430d769c158c164..26af86e8b53e2af54c6cee272d2f7aad17be0912 100644
+index 22887d997f8375309e5a687db051e68fa2b6a5f8..de8968352c61f51907691be8cf9e9f391406ccb3 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 @@ -45,6 +45,8 @@ public class AdventurePacketConvertor {
