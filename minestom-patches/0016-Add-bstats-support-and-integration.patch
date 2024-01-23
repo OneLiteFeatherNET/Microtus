@@ -18,7 +18,7 @@ index 22f62e8000f5417a8e22ab8d5591ca5f613c3323..5afbe3d8420c9c82b81443748ea39328
  }
  
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index 4f251d7f29d10a95ce145a97664dd6fa69d7cb6e..0bfbb4cfb674a5a6a50b9a5c4ced39e7c979e3cc 100644
+index 4de407f8a09adb19c1a787f6cc06c2278ce4e0fe..16dab6542ac2c681dad630c6f11790b8aa4bc4a2 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -42,6 +42,9 @@ jcstress = "0.16"
