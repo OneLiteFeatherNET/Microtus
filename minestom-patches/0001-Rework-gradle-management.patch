@@ -172,7 +172,7 @@ index 60b18683dd01e7f349f7f22465db2bde969c9690..5f8acd515579c6356296929cbe512ed1
  
  dependencies {
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4f251d7f29d10a95ce145a97664dd6fa69d7cb6e 100644
+index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4de407f8a09adb19c1a787f6cc06c2278ce4e0fe 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -3,29 +3,29 @@ metadata.format.version = "1.1"
@@ -181,8 +181,8 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4f251d7f29d10a95ce145a97664dd6fa
  # Important dependencies
 -adventure = "4.12.0"
 -kotlin = "1.7.22"
-+adventure = "4.14.0"
-+kotlin = "1.9.21"
++adventure = "4.15.0"
++kotlin = "1.9.22"
  hydrazine = "1.7.2"
  dependencyGetter = "v1.0.1"
 -minestomData = "ddde11056e"
@@ -195,7 +195,7 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4f251d7f29d10a95ce145a97664dd6fa
 -tinylog = "2.5.0"
 -jline = "3.21.0"
 +tinylog = "2.6.2"
-+jline = "3.24.1"
++jline = "3.25.1"
  
  # Performance / Data Structures
 -caffeine = "3.1.2"
@@ -214,7 +214,7 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4f251d7f29d10a95ce145a97664dd6fa
 -mockito = "4.2.0"
 +junit-jupiter = "5.10.1"
 +junit-platform = "1.10.1"
-+mockito = "5.8.0"
++mockito = "5.9.0"
  
  # Code Generation
  javaPoet = "1.13.0"
@@ -244,6 +244,13 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..4f251d7f29d10a95ce145a97664dd6fa
  jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
  
  # Logging
+@@ -110,4 +110,4 @@ terminal = ["jline", "jline-jansi"]
+ 
+ [plugins]
+ 
+-blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
++blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
+\ No newline at end of file
 diff --git a/jcstress-tests/build.gradle.kts b/jcstress-tests/build.gradle.kts
 index dc62cdcae7dc1e23bc9d72303673edf77f607422..b2fda1d37d23c05dc422df00f8db3930bddedad1 100644
 --- a/jcstress-tests/build.gradle.kts
