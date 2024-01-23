@@ -1,8 +1,8 @@
 # Extension Gradle Plugin
 
 When you don't want to create a `extension.json` file for each extension, so you can use
-our `extension` gradle plugin. This generates  automatically the specific file for you.
-Before you include it in your `build.gradle.kts` file you need to add the correct maven repository to 
+our `extension` gradle plugin. This generates automatically the specific file for you.
+Before you include it in your `build.gradle.kts` file, you need to add the correct maven repository to 
 your plugin management and the plugin itself to `plugins` section
 
 PluginManagement section:
@@ -36,8 +36,9 @@ dependencies {
 } 
 ```
 
-Now you should be able to define a `extension` block in your `build.gradle`
-file without any issues. The syntax of configure the plugin follows the kotlin dsl script or groovy script definition.
+Now you should be able to define an `extension` block in your `build.gradle`
+file without any issues.
+The syntax of configuring the plugin follows the kotlin dsl script or groovy script definition.
 
 ### Configure extension generation
 

@@ -2,8 +2,8 @@
 
 The Instance class from Minestom represents the world object which is known from other server implementations which
 relies on the vanilla server from Mojang. In comparison to the vanilla server, the Instance doesn't have the same
-functionality. The project made some changes which adds additional features to the implementation of the Instance. Each
-additional changes is listed below.
+functionality. The project made some changes which add additional features to the implementation of the Instance. Each
+additional change is listed below.
 
 ## Worldspawn Position
 

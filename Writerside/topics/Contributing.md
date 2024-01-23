@@ -7,7 +7,7 @@ These help us to improve the project and maintain a consistent style for each co
 
 ### Code contributions
 
-If you would like to contribute code you can do so through GitHub by forking.
+If you would like to contribute code, you can do so through GitHub by forking
 the repository and sending a pull request.
 You can read GitHub's documentation on forking and pull requests [here](https://help.github.com/articles/fork-a-repo/).
 If you want to contribute to Microtus, please fork the repository to your personal account and not to an organization. 
@@ -27,7 +27,8 @@ readable as possible.
 #### Understanding patches
 The project uses a patch oriented way to apply changes to the source code from Minestom.
 This behavior is similar to the [PaperMC](https://github.com/PaperMC) project.
-In our case we do this not because there a problem with the license, but we want to keep the project as modular as possible.
+In our case, we do this not because there is a problem with the license,
+but we want to keep the project as modular as possible.
 The modulation means that we can drop or update patches without any problems.
 Further information about the patching process can be found [here](Patch-Files.md).
 
