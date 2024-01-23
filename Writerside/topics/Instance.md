@@ -41,7 +41,7 @@ The `setWorldSpawnPosition` method is implemented in two different variants. The
 doesn't send the `SpawnPositionPacket` to the players which are currently registered in the instance. If your use case
 needs the packet to be sent, you can use the second variant of the method.
 
-If you need to track the change of the world spawn position, you can use the `WorldSpawnChangeEvent` which is called
+If you need to track the change of the world spawn position, you can use the `InstanceWorldPositionChangeEvent` which is called
 when the world spawn position is changed.
 
 From the event you can get the involved `Instance` and the old and new `Pos` of the world spawn position.
