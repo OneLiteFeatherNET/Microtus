@@ -18,7 +18,7 @@ index 22f62e8000f5417a8e22ab8d5591ca5f613c3323..5afbe3d8420c9c82b81443748ea39328
  }
  
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index 4de407f8a09adb19c1a787f6cc06c2278ce4e0fe..16dab6542ac2c681dad630c6f11790b8aa4bc4a2 100644
+index 62ce19b6a9435b70ef3bc53d9cdb47e5fe728960..761ea39d71296076fb7586d804cdc7805611008d 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -42,6 +42,9 @@ jcstress = "0.16"
@@ -31,7 +31,7 @@ index 4de407f8a09adb19c1a787f6cc06c2278ce4e0fe..16dab6542ac2c681dad630c6f11790b8
  [libraries]
  
  # Important Dependencies
-@@ -100,6 +103,9 @@ jmh-annotationprocessor = { group = "org.openjdk.jmh", name = "jmh-generator-ann
+@@ -101,6 +104,9 @@ jmh-annotationprocessor = { group = "org.openjdk.jmh", name = "jmh-generator-ann
  # JCStress
  jcstress-core = { group = "org.openjdk.jcstress", name = "jcstress-core", version.ref = "jcstress" }
  
