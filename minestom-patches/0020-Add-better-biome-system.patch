@@ -630,10 +630,24 @@ index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4
      }
  
 diff --git a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
-index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..a36a38b88e627327e1411bc940a01be51c8d11e8 100644
+index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..26e4ac5f5d4c2d4de409f75a61558645dab6268f 100644
 --- a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
 +++ b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
-@@ -15,13 +15,12 @@ import java.util.Map;
+@@ -2,10 +2,13 @@ package net.minestom.server.world.biomes;
+ 
+ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
++import net.minestom.server.ServerProcessImpl;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+ import org.jglrxavpok.hephaistos.nbt.NBTType;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
+ 
+ import java.util.Collection;
+ import java.util.Collections;
+@@ -15,13 +18,13 @@ import java.util.Map;
  /**
   * Allows servers to register custom dimensions. Also used during player joining to send the list of all existing dimensions.
   * <p>
@@ -642,16 +656,21 @@ index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..a36a38b88e627327e1411bc940a01be5
   */
  public final class BiomeManager {
      private final Int2ObjectMap<Biome> biomes = new Int2ObjectOpenHashMap<>();
++    private final static Logger LOGGER = LoggerFactory.getLogger(BiomeManager.class);
  
      public BiomeManager() {
 -        addBiome(Biome.PLAINS);
      }
  
      /**
-@@ -30,6 +29,7 @@ public final class BiomeManager {
+@@ -30,6 +33,11 @@ public final class BiomeManager {
       * @param biome the biome to add
       */
      public synchronized void addBiome(Biome biome) {
++        if (biomes.values().stream().anyMatch(listBiome -> listBiome.name().equals(biome.name()))) {
++            LOGGER.error("You cannot register the biome because it is already registered. Please remove the biome to overwrite it");
++            return;
++        }
 +        biome.setId(biomes.size());
          this.biomes.put(biome.id(), biome);
      }
