@@ -37,7 +37,7 @@ The complete structure of the project relies on patches. So it is important to h
 If you are interests how git works there you have a small basic tutorial
 <https://git-scm.com/docs/gittutorial>.
 
-Lets set up the project on your local machine
+Let's set up the project on your local machine
 
 1. Clone your fork to your local machine
 2. Open the project with your favorite IDE
