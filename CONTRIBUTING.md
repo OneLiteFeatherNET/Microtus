@@ -23,9 +23,8 @@ To get started with the contributing of change, you will need some additional so
 Most of them can be obtained in (most) package managers on different platforms.
 
 - `git` - Version control system
-- A Java 17 or later JDK:
+- A Java 21 or later JDK:
   - [Adoptium](https://adoptium.net/) has builds for most operating systems
-  - In a later update Microtus requires JDK 21 to build!
 
 ## Understanding Patches
 
