@@ -12,6 +12,29 @@ index 0000000000000000000000000000000000000000..699b1c32b83add65f7087600c1eeec56
 @@ -0,0 +1 @@
 +64e6262b-983b-4ef3-85f0-3b91a81f391c
 \ No newline at end of file
+diff --git a/demo/src/main/java/net/minestom/demo/commands/TestCommand.java b/demo/src/main/java/net/minestom/demo/commands/TestCommand.java
+index 75482a6787f08e9bb15d85821a56a643b037ee93..185a8d4d31a28551fc7de3830533a91d5702f91a 100644
+--- a/demo/src/main/java/net/minestom/demo/commands/TestCommand.java
++++ b/demo/src/main/java/net/minestom/demo/commands/TestCommand.java
+@@ -8,6 +8,7 @@ import net.minestom.server.command.CommandSender;
+ import net.minestom.server.command.builder.Command;
+ import net.minestom.server.command.builder.CommandContext;
+ import net.minestom.server.command.builder.arguments.ArgumentType;
++import net.minestom.server.entity.Player;
+ import net.minestom.server.sound.SoundEvent;
+ 
+ public class TestCommand extends Command {
+@@ -21,7 +22,9 @@ public class TestCommand extends Command {
+ 
+         setDefaultExecutor((sender, context) -> {
+             sender.playSound(Sound.sound(Key.key("item.trumpet.doot"), Sound.Source.PLAYER, 1, 1));
+-            AdventurePacketConvertor.createSoundPacket(Sound.sound(Key.key(SoundEvent.BLOCK_ANVIL_HIT.name()), Sound.Source.HOSTILE, 1, 1), sender.asPlayer());
++            if (sender instanceof Player player) {
++                AdventurePacketConvertor.createSoundPacket(Sound.sound(Key.key(SoundEvent.BLOCK_ANVIL_HIT.name()), Sound.Source.HOSTILE, 1, 1), player);
++            }
+         });
+         addSyntax((sender, context) -> System.out.println("executed"), block);
+ 
 diff --git a/src/main/java/net/minestom/server/advancements/notifications/Notification.java b/src/main/java/net/minestom/server/advancements/notifications/Notification.java
 index 90660466e837326cb98d26032dd04b4f19247295..4d543a0aae99c1df10c6e72d1f4ad16b8a5a9ebe 100644
 --- a/src/main/java/net/minestom/server/advancements/notifications/Notification.java
