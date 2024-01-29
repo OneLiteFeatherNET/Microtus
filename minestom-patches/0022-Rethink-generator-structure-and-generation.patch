@@ -140,14 +140,15 @@ index ae427644f16ed3c6d99d07ba071cb0c1ebe776d4..c518f0b3d993621f221cf979b36cecc6
      }
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
-index a56248de382badce98656ce4006452beb8990cc8..2192cf67dca9abbc73c4edf4a5ab4d103b3c3828 100644
+index 69eb7e67dd5253bca7e7948335a8f2f2acd849f1..2192cf67dca9abbc73c4edf4a5ab4d103b3c3828 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
-@@ -2,33 +2,66 @@ package net.minestom.codegen;
+@@ -2,36 +2,66 @@ package net.minestom.codegen;
  
  import com.google.gson.Gson;
  import com.google.gson.GsonBuilder;
 -import com.squareup.javapoet.JavaFile;
+-import java.util.regex.Pattern;
 +import com.squareup.javapoet.ClassName;
 +import org.jetbrains.annotations.ApiStatus;
  import org.jetbrains.annotations.NotNull;
@@ -166,6 +167,7 @@ index a56248de382badce98656ce4006452beb8990cc8..2192cf67dca9abbc73c4edf4a5ab4d10
 +@ApiStatus.Internal
 +public abstract class MinestomCodeGenerator implements CodeExporter {
      protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
+-    protected static final Pattern minecraftNamespaceRegex = Pattern.compile("minecraft:");
 +    protected static final ClassName NAMESPACE_ID_CLASS =
 +            ClassName.get("net.minestom.server.utils", "NamespaceID");
 +    protected static final ClassName REGISTRY_CLASS =
@@ -174,16 +176,7 @@ index a56248de382badce98656ce4006452beb8990cc8..2192cf67dca9abbc73c4edf4a5ab4d10
 +    protected static final Modifier[] PRIVATE_FINAL_MODIFIERS = {Modifier.PRIVATE, Modifier.FINAL};
 +    protected static final String DEFAULT_INDENT = "    ";
 +    protected String packageName;
- 
--    public abstract void generate();
--
--    protected void writeFiles(@NotNull List<JavaFile> fileList, File outputFolder) {
--        for (JavaFile javaFile : fileList) {
--            try {
--                javaFile.writeTo(outputFolder);
--            } catch (IOException e) {
--                LOGGER.error("An error occured while writing source code to the file system.", e);
--            }
++
 +    /**
 +     * Creates a new code generator.
 +     * @param packageName the package name of the generated class
@@ -191,25 +184,34 @@ index a56248de382badce98656ce4006452beb8990cc8..2192cf67dca9abbc73c4edf4a5ab4d10
 +    protected MinestomCodeGenerator(@NotNull String packageName) {
 +        if (packageName.trim().isEmpty()) {
 +            throw new IllegalArgumentException("Package name cannot be empty");
-         }
++        }
 +        this.packageName = packageName;
++    }
+ 
+     public abstract void generate();
+ 
+-    protected void writeFiles(@NotNull List<JavaFile> fileList, File outputFolder) {
+-        for (JavaFile javaFile : fileList) {
+-            try {
+-                javaFile.writeTo(outputFolder);
+-            } catch (IOException e) {
+-                LOGGER.error("An error occured while writing source code to the file system.", e);
+-            }
+-        }
++    protected static @NotNull String toConstant(@NotNull String namespace) {
++        return namespace.replace("minecraft:", "").toUpperCase(Locale.ROOT);
      }
  
--    protected static String toConstant(String namespace) {
-+    public abstract void generate();
-+
-+    protected static @NotNull String toConstant(@NotNull String namespace) {
-         return namespace.replace("minecraft:", "").toUpperCase(Locale.ROOT);
-     }
-+
 +    protected static @NotNull String toConstant(@NotNull String namespace, @NotNull Map<String, String> arguments) {
 +        if (arguments.isEmpty()) return toConstant(namespace);
-+
+ 
+-    protected static String toConstant(String namespace) {
+-        return minecraftNamespaceRegex.matcher(namespace).replaceAll("").toUpperCase(Locale.ROOT);
 +        for (Map.Entry<String, String> entry : arguments.entrySet()) {
 +            namespace = namespace.replace(entry.getKey(), entry.getValue());
 +        }
 +        return namespace.toUpperCase(Locale.ROOT);
-+    }
+     }
 +
 +    // When the method above consumes too much memory, use this one instead
 +    /*
