@@ -5,7 +5,7 @@ Subject: [PATCH] Fix switching of entity metadata
 
 
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 2b810253fc8992c659d306de2848df739cca432f..b866db1db304b88e86f11b139ed498c07323f2ec 100644
+index 49bdbbfe174381fb8a7e468b8a24a1910b687e4b..e59b452a0b9e08e084e2e1ce2f0b55d3022e6758 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -27,6 +27,7 @@ import net.minestom.server.coordinate.Vec;
