@@ -394,10 +394,10 @@ index 0000000000000000000000000000000000000000..ad9152ca44eb6521458aa20a4484278c
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-index 75e2238f2fda3d9309471cd3f0d5cd0e4bb863e6..9c78e57d3e553b9d731d994e4581c58fa936e1f0 100644
+index 7d7f4cab472337ffcc522e5c4a56dfdfa2db74e2..b5df65dce1976421d60597fc82e72f9fd02a952a 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 +++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-@@ -570,7 +570,7 @@ final class NetworkBufferTypes {
+@@ -571,7 +571,7 @@ final class NetworkBufferTypes {
              },
              buffer -> {
                  final int ordinal = buffer.read(VAR_INT);

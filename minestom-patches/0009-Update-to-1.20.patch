@@ -18,7 +18,7 @@ index 114b0f3c6ecbc267b91617655ebb02f1e96134dc..54f9b110eef8d4499d14848f695c8c10
          //BungeeCordProxy.enable();
  
 diff --git a/demo/src/main/java/net/minestom/demo/PlayerInit.java b/demo/src/main/java/net/minestom/demo/PlayerInit.java
-index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..1d6302322df1d8706f0eada9feba5e3611687172 100644
+index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..0bce8c742e3703fb9de8a77df984827b00a6c40f 100644
 --- a/demo/src/main/java/net/minestom/demo/PlayerInit.java
 +++ b/demo/src/main/java/net/minestom/demo/PlayerInit.java
 @@ -16,6 +16,8 @@ import net.minestom.server.event.entity.EntityAttackEvent;
@@ -38,7 +38,7 @@ index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..1d6302322df1d8706f0eada9feba5e36
  
  public class PlayerInit {
  
-@@ -81,15 +84,24 @@ public class PlayerInit {
+@@ -81,15 +84,21 @@ public class PlayerInit {
                  itemEntity.setVelocity(velocity);
              })
              .addListener(PlayerDisconnectEvent.class, event -> System.out.println("DISCONNECTION " + event.getPlayer().getUsername()))
@@ -47,9 +47,7 @@ index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..1d6302322df1d8706f0eada9feba5e36
                  final Player player = event.getPlayer();
  
 +                try {
-+                    System.out.println("Test");
 +                    Thread.sleep(3 * 1000);
-+                    System.out.println("Test");
 +                } catch (Exception e) {
 +                    throw new RuntimeException(e);
 +                }
@@ -60,11 +58,10 @@ index ed00bfc9a8bf7c2efebdf95e2bde6eda17608e0b..1d6302322df1d8706f0eada9feba5e36
                  int z = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
                  player.setRespawnPoint(new Pos(0, 42f, 0));
 +                player.setDeathLocation(instance.getDimensionType(), new Pos(0, 42f, 0));
-+                System.out.println("Test");
              })
              .addListener(PlayerSpawnEvent.class, event -> {
                  final Player player = event.getPlayer();
-@@ -139,6 +151,7 @@ public class PlayerInit {
+@@ -139,6 +148,7 @@ public class PlayerInit {
      public static void init() {
          var eventHandler = MinecraftServer.getGlobalEventHandler();
          eventHandler.addChild(DEMO_NODE);
@@ -2765,6 +2762,409 @@ index 0000000000000000000000000000000000000000..6c656228a1eb0a7dddf54b630eda00a1
 +        threadDispatcher.refreshThreads(tickTime);
 +    }
 +}
+diff --git a/src/main/java/net/minestom/server/adventure/serializer/nbt/NbtComponentSerializer.java b/src/main/java/net/minestom/server/adventure/serializer/nbt/NbtComponentSerializer.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..a397352e9f7e5e136b6211f1a1437f976b3b9135
+--- /dev/null
++++ b/src/main/java/net/minestom/server/adventure/serializer/nbt/NbtComponentSerializer.java
+@@ -0,0 +1,12 @@
++package net.minestom.server.adventure.serializer.nbt;
++
++import net.kyori.adventure.text.Component;
++import net.kyori.adventure.text.serializer.ComponentSerializer;
++import org.jetbrains.annotations.NotNull;
++import org.jglrxavpok.hephaistos.nbt.NBT;
++
++public interface NbtComponentSerializer extends ComponentSerializer<Component, Component, NBT> {
++    static @NotNull NbtComponentSerializer nbt() {
++        return NbtComponentSerializerImpl.INSTANCE;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/adventure/serializer/nbt/NbtComponentSerializerImpl.java b/src/main/java/net/minestom/server/adventure/serializer/nbt/NbtComponentSerializerImpl.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..12bb3091ab287b8e4c784a654002f07d72ecaffe
+--- /dev/null
++++ b/src/main/java/net/minestom/server/adventure/serializer/nbt/NbtComponentSerializerImpl.java
+@@ -0,0 +1,378 @@
++package net.minestom.server.adventure.serializer.nbt;
++
++import net.kyori.adventure.key.Key;
++import net.kyori.adventure.nbt.api.BinaryTagHolder;
++import net.kyori.adventure.text.*;
++import net.kyori.adventure.text.event.ClickEvent;
++import net.kyori.adventure.text.event.HoverEvent;
++import net.kyori.adventure.text.format.NamedTextColor;
++import net.kyori.adventure.text.format.Style;
++import net.kyori.adventure.text.format.TextColor;
++import net.kyori.adventure.text.format.TextDecoration;
++import net.minestom.server.utils.validate.Check;
++import org.intellij.lang.annotations.Subst;
++import org.jetbrains.annotations.NotNull;
++import org.jglrxavpok.hephaistos.nbt.NBT;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++import org.jglrxavpok.hephaistos.nbt.NBTList;
++import org.jglrxavpok.hephaistos.nbt.NBTType;
++import org.jglrxavpok.hephaistos.nbt.mutable.MutableNBTCompound;
++
++import java.util.ArrayList;
++import java.util.Collection;
++import java.util.UUID;
++
++//todo write tests for me!!
++final class NbtComponentSerializerImpl implements NbtComponentSerializer {
++    static final NbtComponentSerializer INSTANCE = new NbtComponentSerializerImpl();
++
++    @Override
++    public @NotNull Component deserialize(@NotNull NBT input) {
++        return deserializeAnyComponent(input);
++    }
++
++    @Override
++    public @NotNull NBT serialize(@NotNull Component component) {
++        return serializeComponent(component);
++    }
++
++    // DESERIALIZATION
++
++    private @NotNull Component deserializeAnyComponent(@NotNull NBT nbt) {
++        if (nbt instanceof NBTCompound compound) {
++            return deserializeComponent(compound);
++        } else {
++            //todo raw string + list
++            throw new UnsupportedOperationException("Unknown NBT type: " + nbt.getClass().getName());
++        }
++    }
++
++    private @NotNull Component deserializeComponent(@NotNull NBTCompound compound) {
++        ComponentBuilder<?, ?> builder;
++        var type = compound.getString("type");
++        if (type != null) {
++            // If type is specified, use that
++            builder = switch (type) {
++                case "text" -> deserializeTextComponent(compound);
++                case "translatable" -> deserializeTranslatableComponent(compound);
++                case "score" -> deserializeScoreComponent(compound);
++                case "selector" -> deserializeSelectorComponent(compound);
++                case "keybind" -> deserializeKeybindComponent(compound);
++                case "nbt" -> deserializeNbtComponent(compound);
++                default -> throw new UnsupportedOperationException("Unknown component type: " + type);
++            };
++        } else {
++            // Try to infer the type from the fields present.
++            if (compound.containsKey("text")) {
++                builder = deserializeTextComponent(compound);
++            } else if (compound.containsKey("translate")) {
++                builder = deserializeTranslatableComponent(compound);
++            } else if (compound.containsKey("score")) {
++                builder = deserializeScoreComponent(compound);
++            } else if (compound.containsKey("selector")) {
++                builder = deserializeSelectorComponent(compound);
++            } else if (compound.containsKey("keybind")) {
++                builder = deserializeKeybindComponent(compound);
++            } else if (compound.containsKey("nbt")) {
++                builder = deserializeNbtComponent(compound);
++            } else throw new UnsupportedOperationException("Unable to infer component type");
++        }
++
++        // Children
++        var extra = compound.getList("extra");
++        Check.argCondition(extra != null && !extra.getSubtagType().equals(NBTType.TAG_Compound),
++                "Extra field must be a list of compounds");
++        if (extra != null) {
++            var list = new ArrayList<ComponentLike>();
++            for (var child : extra) list.add(deserializeAnyComponent(child));
++            builder.append(list);
++        }
++
++        // Formatting
++        var style = Style.style();
++        var color = compound.getString("color");
++        if (color != null) {
++            var hexColor = TextColor.fromHexString(color);
++            if (hexColor != null) {
++                style.color(hexColor);
++            } else {
++                var namedColor = NamedTextColor.NAMES.value(color);
++                if (namedColor != null) {
++                    style.color(namedColor);
++                } else {
++                    throw new UnsupportedOperationException("Unknown color: " + color);
++                }
++            }
++        }
++        @Subst("minecraft:default") var font = compound.getString("font");
++        if (font != null) style.font(Key.key(font));
++        var bold = compound.getByte("bold");
++        if (bold != null) style.decoration(TextDecoration.BOLD, bold == 1 ? TextDecoration.State.TRUE : TextDecoration.State.FALSE);
++        var italic = compound.getByte("italic");
++        if (italic != null) style.decoration(TextDecoration.ITALIC, italic == 1 ? TextDecoration.State.TRUE : TextDecoration.State.FALSE);
++        var underlined = compound.getByte("underlined");
++        if (underlined != null) style.decoration(TextDecoration.UNDERLINED, underlined == 1 ? TextDecoration.State.TRUE : TextDecoration.State.FALSE);
++        var strikethrough = compound.getByte("strikethrough");
++        if (strikethrough != null) style.decoration(TextDecoration.STRIKETHROUGH, strikethrough == 1 ? TextDecoration.State.TRUE : TextDecoration.State.FALSE);
++        var obfuscated = compound.getByte("obfuscated");
++        if (obfuscated != null) style.decoration(TextDecoration.OBFUSCATED, obfuscated == 1 ? TextDecoration.State.TRUE : TextDecoration.State.FALSE);
++        builder.style(style.build());
++
++        // Interactivity
++        var insertion = compound.getString("insertion");
++        if (insertion != null) builder.insertion(insertion);
++        var clickEvent = compound.getCompound("clickEvent");
++        if (clickEvent != null) builder.clickEvent(deserializeClickEvent(clickEvent));
++        var hoverEvent = compound.getCompound("hoverEvent");
++        if (hoverEvent != null) builder.hoverEvent(deserializeHoverEvent(hoverEvent));
++
++        return builder.build();
++    }
++
++    private @NotNull ComponentBuilder<?, ?> deserializeTextComponent(@NotNull NBTCompound compound) {
++        var text = compound.getString("text");
++        Check.notNull(text, "Text component must have a text field");
++        return Component.text().content(text);
++    }
++
++    private @NotNull ComponentBuilder<?, ?> deserializeTranslatableComponent(@NotNull NBTCompound compound) {
++        var key = compound.getString("translate");
++        Check.notNull(key, "Translatable component must have a translate field");
++        var builder = Component.translatable().key(key);
++
++        var fallback = compound.getString("fallback");
++        if (fallback != null) builder.fallback(fallback);
++
++        NBTList<NBTCompound> args = compound.getList("with");
++        Check.argCondition(args != null && !args.getSubtagType().equals(NBTType.TAG_Compound),
++                "Translatable component with field must be a list of compounds");
++        if (args != null) {
++            var list = new ArrayList<ComponentLike>();
++            for (var arg : args) list.add(deserializeComponent(arg));
++            builder.arguments(list);
++        }
++
++        return builder;
++    }
++
++    private @NotNull ComponentBuilder<?, ?> deserializeScoreComponent(@NotNull NBTCompound compound) {
++        var scoreCompound = compound.getCompound("score");
++        Check.notNull(scoreCompound, "Score component must have a score field");
++        var name = scoreCompound.getString("name");
++        Check.notNull(name, "Score component score field must have a name field");
++        var objective = scoreCompound.getString("objective");
++        Check.notNull(objective, "Score component score field must have an objective field");
++        var builder = Component.score().name(name).objective(objective);
++
++        var value = scoreCompound.getString("value");
++        if (value != null)
++            //noinspection deprecation
++            builder.value(value);
++
++        return builder;
++    }
++
++    private @NotNull ComponentBuilder<?, ?> deserializeSelectorComponent(@NotNull NBTCompound compound) {
++        var selector = compound.getString("selector");
++        Check.notNull(selector, "Selector component must have a selector field");
++        var builder = Component.selector().pattern(selector);
++
++        var separator = compound.get("separator");
++        if (separator != null) builder.separator(deserializeAnyComponent(separator));
++
++        return builder;
++    }
++
++    private @NotNull ComponentBuilder<?, ?> deserializeKeybindComponent(@NotNull NBTCompound compound) {
++        var keybind = compound.getString("keybind");
++        Check.notNull(keybind, "Keybind component must have a keybind field");
++        return Component.keybind().keybind(keybind);
++    }
++
++    private @NotNull ComponentBuilder<?, ?> deserializeNbtComponent(@NotNull NBTCompound compound) {
++        throw new UnsupportedOperationException("NBTComponent is not implemented yet");
++    }
++
++    private @NotNull ClickEvent deserializeClickEvent(@NotNull NBTCompound compound) {
++        var actionName = compound.getString("action");
++        Check.notNull(actionName, "Click event must have an action field");
++        var action = ClickEvent.Action.NAMES.value(actionName);
++        Check.notNull(action, "Unknown click event action: " + actionName);
++        var value = compound.getString("value");
++        Check.notNull(value, "Click event must have a value field");
++        return ClickEvent.clickEvent(action, value);
++    }
++
++    private @NotNull HoverEvent<?> deserializeHoverEvent(@NotNull NBTCompound compound) {
++        var actionName = compound.getString("action");
++        Check.notNull(actionName, "Hover event must have an action field");
++        var contents = compound.getCompound("contents");
++        Check.notNull(contents, "Hover event must have a contents field");
++
++        var action = HoverEvent.Action.NAMES.value(actionName);
++        if (action == HoverEvent.Action.SHOW_TEXT) {
++            return HoverEvent.showText(deserializeComponent(contents));
++        } else if (action == HoverEvent.Action.SHOW_ITEM) {
++            @Subst("minecraft:stick") var id = contents.getString("id");
++            Check.notNull(id, "Show item hover event must have an id field");
++            var count = contents.getInt("count");
++            var countInt = count == null ? 1 : count;
++            var tag = contents.getString("tag");
++            var binaryTag = tag == null ? null : BinaryTagHolder.binaryTagHolder(tag);
++            return HoverEvent.showItem(Key.key(id), countInt, binaryTag);
++        } else if (action == HoverEvent.Action.SHOW_ENTITY) {
++            var name = contents.getCompound("name");
++            var nameComponent = name == null ? null : deserializeComponent(name);
++            @Subst("minecraft:pig") var type = contents.getString("type");
++            Check.notNull(type, "Show entity hover event must have a type field");
++            var id = contents.getString("id");
++            Check.notNull(id, "Show entity hover event must have an id field");
++            return HoverEvent.showEntity(Key.key(type), UUID.fromString(id), nameComponent);
++        } else {
++            throw new UnsupportedOperationException("Unknown hover event action: " + actionName);
++        }
++    }
++
++    // SERIALIZATION
++
++    private @NotNull NBT serializeComponent(@NotNull Component component) {
++        MutableNBTCompound compound = new MutableNBTCompound();
++
++        // Base component types
++        if (component instanceof TextComponent text) {
++            compound.setString("type", "text");
++            compound.setString("text", text.content());
++        } else if (component instanceof TranslatableComponent translatable) {
++            compound.setString("type", "translatable");
++            compound.setString("translate", translatable.key());
++            var fallback = translatable.fallback();
++            if (fallback != null) compound.setString("fallback", fallback);
++            var args = translatable.arguments();
++            if (!args.isEmpty()) compound.set("with", serializeTranslationArgs(args));
++        } else if (component instanceof ScoreComponent score) {
++            compound.setString("type", "score");
++            var scoreCompound = new MutableNBTCompound();
++            scoreCompound.setString("name", score.name());
++            scoreCompound.setString("objective", score.objective());
++            @SuppressWarnings("deprecation") var value = score.value();
++            if (value != null) scoreCompound.setString("value", value);
++            compound.set("score", scoreCompound.toCompound());
++        } else if (component instanceof SelectorComponent selector) {
++            compound.setString("type", "selector");
++            compound.setString("selector", selector.pattern());
++            var separator = selector.separator();
++            if (separator != null) compound.set("separator", serializeComponent(separator));
++        } else if (component instanceof KeybindComponent keybind) {
++            compound.setString("type", "keybind");
++            compound.setString("keybind", keybind.keybind());
++        } else if (component instanceof NBTComponent<?, ?> nbt) {
++            //todo
++            throw new UnsupportedOperationException("NBTComponent is not implemented yet");
++        } else {
++            throw new UnsupportedOperationException("Unknown component type: " + component.getClass().getName());
++        }
++
++        // Children
++        if (!component.children().isEmpty()) {
++            var children = new ArrayList<NBT>();
++            for (var child : component.children())
++                children.add(serializeComponent(child));
++            compound.set("extra", new NBTList<>(NBTType.TAG_Compound, children));
++        }
++
++        // Formatting
++        var style = component.style();
++        var color = style.color();
++        if (color != null) {
++            if (color instanceof NamedTextColor named) {
++                compound.setString("color", named.toString());
++            } else {
++                compound.setString("color", color.asHexString());
++            }
++        }
++        var font = style.font();
++        if (font != null)
++            compound.setString("font", font.toString());
++        var bold = style.decoration(TextDecoration.BOLD);
++        if (bold != TextDecoration.State.NOT_SET)
++            setBool(compound, "bold", bold == TextDecoration.State.TRUE);
++        var italic = style.decoration(TextDecoration.ITALIC);
++        if (italic != TextDecoration.State.NOT_SET)
++            setBool(compound, "italic", italic == TextDecoration.State.TRUE);
++        var underlined = style.decoration(TextDecoration.UNDERLINED);
++        if (underlined != TextDecoration.State.NOT_SET)
++            setBool(compound, "underlined", underlined == TextDecoration.State.TRUE);
++        var strikethrough = style.decoration(TextDecoration.STRIKETHROUGH);
++        if (strikethrough != TextDecoration.State.NOT_SET)
++            setBool(compound, "strikethrough", strikethrough == TextDecoration.State.TRUE);
++        var obfuscated = style.decoration(TextDecoration.OBFUSCATED);
++        if (obfuscated != TextDecoration.State.NOT_SET)
++            setBool(compound, "obfuscated", obfuscated == TextDecoration.State.TRUE);
++
++        // Interactivity
++        var insertion = component.insertion();
++        if (insertion != null) compound.setString("insertion", insertion);
++        var clickEvent = component.clickEvent();
++        if (clickEvent != null) compound.set("clickEvent", serializeClickEvent(clickEvent));
++        var hoverEvent = component.hoverEvent();
++        if (hoverEvent != null) compound.set("hoverEvent", serializeHoverEvent(hoverEvent));
++
++        return compound.toCompound();
++    }
++
++    private @NotNull NBT serializeTranslationArgs(@NotNull Collection<TranslationArgument> args) {
++        var list = new ArrayList<NBT>();
++        for (var arg : args)
++            list.add(serializeComponent(arg.asComponent()));
++        return new NBTList<>(NBTType.TAG_Compound, list);
++    }
++
++    private @NotNull NBT serializeClickEvent(@NotNull ClickEvent event) {
++        var compound = new MutableNBTCompound();
++        compound.setString("action", event.action().toString());
++        compound.setString("value", event.value());
++        return compound.toCompound();
++    }
++
++    @SuppressWarnings("unchecked")
++    private @NotNull NBT serializeHoverEvent(@NotNull HoverEvent<?> event) {
++        var compound = new MutableNBTCompound();
++
++        //todo surely there is a better way to do this?
++        compound.setString("action", event.action().toString());
++        if (event.action() == HoverEvent.Action.SHOW_TEXT) {
++            var value = ((HoverEvent<Component>) event).value();
++            compound.set("contents", serializeComponent(value));
++        } else if (event.action() == HoverEvent.Action.SHOW_ITEM) {
++            var value = ((HoverEvent<HoverEvent.ShowItem>) event).value();
++
++            var itemCompound = new MutableNBTCompound();
++            itemCompound.setString("id", value.item().asString());
++            if (value.count() != 1) itemCompound.setInt("count", value.count());
++            var tag = value.nbt();
++            if (tag != null) itemCompound.setString("tag", tag.string());
++
++            compound.set("contents", itemCompound.toCompound());
++        } else if (event.action() == HoverEvent.Action.SHOW_ENTITY) {
++            var value = ((HoverEvent<HoverEvent.ShowEntity>) event).value();
++
++            var entityCompound = new MutableNBTCompound();
++            var name = value.name();
++            if (name != null) entityCompound.set("name", serializeComponent(name));
++            entityCompound.setString("type", value.type().asString());
++            entityCompound.setString("id", value.id().toString());
++
++            compound.set("contents", entityCompound.toCompound());
++        } else {
++            throw new UnsupportedOperationException("Unknown hover event action: " + event.action());
++        }
++
++        return compound.toCompound();
++    }
++
++    private void setBool(@NotNull MutableNBTCompound compound, @NotNull String key, boolean value) {
++        compound.setByte(key, value ? (byte) 1 : 0);
++    }
++
++
++}
+\ No newline at end of file
 diff --git a/src/main/java/net/minestom/server/entity/EntitySpawnType.java b/src/main/java/net/minestom/server/entity/EntitySpawnType.java
 index c1d23ebdb7a8ac85eac5bfb80f91652e629b5f8f..e0fc93a772904b3a6be28b9bbd379c00cb5ab560 100644
 --- a/src/main/java/net/minestom/server/entity/EntitySpawnType.java
@@ -4385,7 +4785,7 @@ index 0000000000000000000000000000000000000000..0b7760127548fd8bdb90ab533cd3d01f
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/ConnectionManager.java b/src/main/java/net/minestom/server/network/ConnectionManager.java
-index b080de14ec2509b15108f171694653d3dc62cd93..2f36da7f28ddadae010612be622310882a3b4d4a 100644
+index b080de14ec2509b15108f171694653d3dc62cd93..db236a40ca37536fbc2da827d73efcf47fca7e91 100644
 --- a/src/main/java/net/minestom/server/network/ConnectionManager.java
 +++ b/src/main/java/net/minestom/server/network/ConnectionManager.java
 @@ -1,15 +1,25 @@
@@ -4471,7 +4871,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..2f36da7f28ddadae010612be62231088
          this.connectionPlayerMap.put(player.getPlayerConnection(), player);
      }
  
-@@ -181,31 +200,86 @@ public final class ConnectionManager {
+@@ -181,31 +200,85 @@ public final class ConnectionManager {
      public synchronized void removePlayer(@NotNull PlayerConnection connection) {
          final Player player = this.connectionPlayerMap.remove(connection);
          if (player == null) return;
@@ -4501,7 +4901,6 @@ index b080de14ec2509b15108f171694653d3dc62cd93..2f36da7f28ddadae010612be62231088
 +    public void updateWaitingPlayers() {
 +        this.waitingPlayers.drain(player -> {
 +            player.getPlayerConnection().setConnectionState(ConnectionState.PLAY);
-+            System.out.println("PLAY!");
 +            playPlayers.add(player);
 +            keepAlivePlayers.add(player);
 +
@@ -4567,7 +4966,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..2f36da7f28ddadae010612be62231088
              // Change UUID/Username based on the event
              {
                  final String eventUsername = asyncPlayerPreLoginEvent.getUsername();
-@@ -217,72 +291,71 @@ public final class ConnectionManager {
+@@ -217,72 +290,71 @@ public final class ConnectionManager {
                      player.setUuid(eventUuid);
                  }
              }
@@ -4638,13 +5037,13 @@ index b080de14ec2509b15108f171694653d3dc62cd93..2f36da7f28ddadae010612be62231088
 +            // Registry data (if it should be sent)
 +            if (event.shouldSendRegistryData()) {
 +                var registry = new HashMap<String, NBT>();
-+                /*registry.put("minecraft:chat_type", Messenger.chatRegistry());
++                registry.put("minecraft:chat_type", Messenger.chatRegistry());
 +                registry.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
 +                registry.put("minecraft:worldgen/biome", MinecraftServer.getBiomeManager().toNBT());
-+                registry.put("minecraft:damage_type", DamageType.getNBT());*/
++                registry.put("minecraft:damage_type", DamageType.getNBT());
 +                player.sendPacket(new ClientRegistryDataPacket(NBT.Compound(registry)));
-+
-+                player.sendPacket(TagsPacket.DEFAULT_TAGS);
++                //TODO: Check what is wrong
++                // player.sendPacket(TagsPacket.DEFAULT_TAGS);
              }
 +
 +            // Wait for pending resource packs if any
@@ -4719,10 +5118,18 @@ index e8508e0c00fdd8536d0b5a87bfe8697d52369b47..eed55c022b77b1976b4e0cac4876877b
      public static final Type<ItemStack> ITEM = NetworkBufferTypes.ITEM;
  
 diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..75e2238f2fda3d9309471cd3f0d5cd0e4bb863e6 100644
+index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..7d7f4cab472337ffcc522e5c4a56dfdfa2db74e2 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 +++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-@@ -237,7 +237,15 @@ final class NetworkBufferTypes {
+@@ -2,6 +2,7 @@ package net.minestom.server.network;
+ 
+ import net.kyori.adventure.text.Component;
+ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
++import net.minestom.server.adventure.serializer.nbt.NbtComponentSerializer;
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.entity.Entity;
+@@ -237,7 +238,15 @@ final class NetworkBufferTypes {
                      buffer.nbtWriter = nbtWriter;
                  }
                  try {
@@ -4739,7 +5146,7 @@ index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..75e2238f2fda3d9309471cd3f0d5cd0e
                  } catch (IOException e) {
                      throw new RuntimeException(e);
                  }
-@@ -260,7 +268,10 @@ final class NetworkBufferTypes {
+@@ -260,7 +269,10 @@ final class NetworkBufferTypes {
                      buffer.nbtReader = nbtReader;
                  }
                  try {
@@ -4751,28 +5158,28 @@ index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..75e2238f2fda3d9309471cd3f0d5cd0e
                  } catch (IOException | NBTException e) {
                      throw new RuntimeException(e);
                  }
-@@ -293,6 +304,16 @@ final class NetworkBufferTypes {
-                 final String json = buffer.read(STRING);
-                 return GsonComponentSerializer.gson().deserialize(json);
+@@ -284,6 +296,16 @@ final class NetworkBufferTypes {
+                 return new Vec(x, y, z);
              });
-+    static final TypeImpl<Component> JSON_COMPONENT = new TypeImpl<>(Component.class,
+     static final TypeImpl<Component> COMPONENT = new TypeImpl<>(Component.class,
 +            (buffer, value) -> {
-+                final String json = GsonComponentSerializer.gson().serialize(value);
-+                buffer.write(STRING, json);
++                final NBT nbt = NbtComponentSerializer.nbt().serialize(value);
++                buffer.write(NBT, nbt);
 +                return -1;
 +            },
 +            buffer -> {
-+                final String json = buffer.read(STRING);
-+                return GsonComponentSerializer.gson().deserialize(json);
++                final NBT nbt = buffer.read(NBT);
++                return NbtComponentSerializer.nbt().deserialize(nbt);
 +            });
-     static final TypeImpl<UUID> UUID = new TypeImpl<>(UUID.class,
++    static final TypeImpl<Component> JSON_COMPONENT = new TypeImpl<>(Component.class,
              (buffer, value) -> {
-                 buffer.write(LONG, value.getMostSignificantBits());
+                 final String json = GsonComponentSerializer.gson().serialize(value);
+                 buffer.write(STRING, json);
 diff --git a/src/main/java/net/minestom/server/network/PacketProcessor.java b/src/main/java/net/minestom/server/network/PacketProcessor.java
-index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..026857d5280018d7f2f8fb7eff69f7712584f0b6 100644
+index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..ce67299e272a920ca2e90e84e655379d95c89968 100644
 --- a/src/main/java/net/minestom/server/network/PacketProcessor.java
 +++ b/src/main/java/net/minestom/server/network/PacketProcessor.java
-@@ -1,38 +1,39 @@
+@@ -1,41 +1,42 @@
  package net.minestom.server.network;
  
  import net.minestom.server.entity.Player;
@@ -4819,15 +5226,18 @@ index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..026857d5280018d7f2f8fb7eff69f771
 -            case LOGIN -> loginHandler.create(packetId, buffer);
 -            case STATUS -> statusHandler.create(packetId, buffer);
 -            case UNKNOWN -> {
-+            case CONFIGURATION -> getConfigurationPackets().create(packetId, buffer);
-+            case PLAY -> getPlayPackets().create(packetId, buffer);
-+            case LOGIN -> getLoginPackets().create(packetId, buffer);
-+            case STATUS -> getStatusPackets().create(packetId, buffer);
 +            case HANDSHAKE -> {
                  assert packetId == 0;
                  yield new HandshakePacket(buffer);
              }
-@@ -43,12 +44,26 @@ public record PacketProcessor(@NotNull ClientPacketsHandler statusHandler,
++            case STATUS -> getStatusPackets().create(packetId, buffer);
++            case LOGIN -> getLoginPackets().create(packetId, buffer);
++            case CONFIGURATION -> getConfigurationPackets().create(packetId, buffer);
++            case PLAY -> getPlayPackets().create(packetId, buffer);
+         };
+         body.position(buffer.readIndex());
+         return clientPacket;
+@@ -43,12 +44,16 @@ public record PacketProcessor(@NotNull ClientPacketsHandler statusHandler,
  
      public ClientPacket process(@NotNull PlayerConnection connection, int packetId, ByteBuffer body) {
          final ClientPacket packet = create(connection.getConnectionState(), packetId, body);
@@ -4838,16 +5248,6 @@ index dcfbd8b3cee40e810e6c402dade4de757a3d06f3..026857d5280018d7f2f8fb7eff69f771
 -            assert player != null;
 -            player.addPacketToQueue(packet);
 +        final ConnectionState state = connection.getConnectionState();
-+
-+        /*// If the packet intends to switch state, do it now.
-+        // Since packets are processed next tick for players, we have to switch immediately.
-+        // TODO HOWEVER THIS WILL NOT ACTUALLY WORK BECAUSE WHEN WE QUEUE THE PACKET IT HAS THE WRONG LISTENER.
-+        ServerStateFlow nextState = packet.getClass().getAnnotation(ServerStateFlow.class);
-+
-+        if (nextState != null && state.ordinal() != nextState.next().ordinal()) {
-+            connection.setConnectionState(nextState.next());
-+        }*/
-+
 +        switch (state) {
 +            // Process all pre-config packets immediately
 +            case HANDSHAKE, STATUS, LOGIN -> packetListenerManager.processClientPacket(state, packet, connection);
@@ -10117,10 +10517,10 @@ index 7a388357b1cdd52a7cba4b44a0fe4c317e812b9f..5bd15373633de4b592c3b26b2d344eac
  
      /**
 diff --git a/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java b/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
-index cc335a6f6903542e8ac139d5a4deeed2252d9cae..eae3a16c9264478cba5ce8168508890246ce3449 100644
+index cc335a6f6903542e8ac139d5a4deeed2252d9cae..29a0d2f623edd7b519c7eee911ba80b06ffc3382 100644
 --- a/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
 +++ b/src/main/java/net/minestom/server/network/player/PlayerSocketConnection.java
-@@ -362,15 +362,30 @@ public class PlayerSocketConnection extends PlayerConnection {
+@@ -362,14 +362,18 @@ public class PlayerSocketConnection extends PlayerConnection {
  
      private void writeServerPacketSync(ServerPacket serverPacket, boolean compressed) {
          final Player player = getPlayer();
@@ -10134,13 +10534,6 @@ index cc335a6f6903542e8ac139d5a4deeed2252d9cae..eae3a16c9264478cba5ce81685088902
 +                    GlobalTranslator.render(component, Objects.requireNonNullElseGet(player.getLocale(), MinestomAdventure::getDefaultLocale)));
          }
 +
-+        /*ServerPacketState state = serverPacket.getClass().getAnnotation(ServerPacketState.class);
-+
-+        if (state == null || !ServerStateValidator.validate(state, getConnectionState())) {
-+            PacketUtils.invalidPacketState(serverPacket.getClass(), getConnectionState(), state == null ? null : state.states());
-+            return;
-+        }*/
-+
          try (var hold = ObjectPool.PACKET_POOL.hold()) {
 -            var buffer = PacketUtils.createFramedPacket(hold.get(), serverPacket, compressed);
 +
@@ -10150,13 +10543,15 @@ index cc335a6f6903542e8ac139d5a4deeed2252d9cae..eae3a16c9264478cba5ce81685088902
 +                default -> PacketUtils.createFramedPacket(hold.get(), serverPacket, serverPacket.getId(), compressed);
 +            };
              writeBufferSync(buffer, 0, buffer.limit());
-+            ServerStateFlow stateFlow = serverPacket.getClass().getAnnotation(ServerStateFlow.class);
-+            if (stateFlow != null && getConnectionState().ordinal() != stateFlow.next().ordinal()) {
-+                setConnectionState(stateFlow.next());
-+            }
          }
      }
+@@ -441,4 +445,4 @@ public class PlayerSocketConnection extends PlayerConnection {
  
+     record EncryptionContext(Cipher encrypt, Cipher decrypt) {
+     }
+-}
++}
+\ No newline at end of file
 diff --git a/src/main/java/net/minestom/server/resourcepack/ResourcePack.java b/src/main/java/net/minestom/server/resourcepack/ResourcePack.java
 index 041fd40f2bb4711b99e399695dcdbd6c4385e972..14242f2bb7872ea09de19d46d93210e66cdb91a2 100644
 --- a/src/main/java/net/minestom/server/resourcepack/ResourcePack.java
