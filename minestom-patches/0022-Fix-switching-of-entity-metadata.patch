@@ -1,0 +1,59 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Phillipp Glanz <6745190+TheMeinerLP@users.noreply.github.com>
+Date: Wed, 10 Jan 2024 21:48:06 +0100
+Subject: [PATCH] Fix switching of entity metadata
+
+
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index 49bdbbfe174381fb8a7e468b8a24a1910b687e4b..e59b452a0b9e08e084e2e1ce2f0b55d3022e6758 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -27,6 +27,7 @@ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.effects.Effects;
+ import net.minestom.server.entity.damage.DamageType;
+ import net.minestom.server.entity.fakeplayer.FakePlayer;
++import net.minestom.server.entity.metadata.EntityMeta;
+ import net.minestom.server.entity.metadata.PlayerMeta;
+ import net.minestom.server.entity.vehicle.PlayerVehicleInformation;
+ import net.minestom.server.event.EventDispatcher;
+@@ -839,8 +840,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         sendPacket(new UpdateHealthPacket(health, food, foodSaturation));
+     }
+ 
+-    @Override
+-    public @NotNull PlayerMeta getEntityMeta() {
++    public @NotNull PlayerMeta getUnsafeEntityMeta() {
+         return (PlayerMeta) super.getEntityMeta();
+     }
+ 
+@@ -850,7 +850,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+      * @return the player additional hearts
+      */
+     public float getAdditionalHearts() {
+-        return getEntityMeta().getAdditionalHearts();
++        return getUnsafeEntityMeta().getAdditionalHearts();
+     }
+ 
+     /**
+@@ -859,7 +859,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+      * @param additionalHearts the count of additional hearts
+      */
+     public void setAdditionalHearts(float additionalHearts) {
+-        getEntityMeta().setAdditionalHearts(additionalHearts);
++        getUnsafeEntityMeta().setAdditionalHearts(additionalHearts);
+     }
+ 
+     /**
+diff --git a/src/main/java/net/minestom/server/listener/PlayerDiggingListener.java b/src/main/java/net/minestom/server/listener/PlayerDiggingListener.java
+index fbdfe21c2cec8a5085aed299c6dc91fa04840f7c..d5bf810e291f3f2ac48fe1463f8f0bf8a4a64674 100644
+--- a/src/main/java/net/minestom/server/listener/PlayerDiggingListener.java
++++ b/src/main/java/net/minestom/server/listener/PlayerDiggingListener.java
+@@ -134,7 +134,7 @@ public final class PlayerDiggingListener {
+     }
+ 
+     private static void updateItemState(Player player) {
+-        PlayerMeta meta = player.getEntityMeta();
++        PlayerMeta meta = player.getUnsafeEntityMeta();
+         if (!meta.isHandActive()) return;
+         Player.Hand hand = meta.getActiveHand();
+ 
