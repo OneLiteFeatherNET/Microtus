@@ -4785,7 +4785,7 @@ index 0000000000000000000000000000000000000000..0b7760127548fd8bdb90ab533cd3d01f
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/network/ConnectionManager.java b/src/main/java/net/minestom/server/network/ConnectionManager.java
-index b080de14ec2509b15108f171694653d3dc62cd93..db236a40ca37536fbc2da827d73efcf47fca7e91 100644
+index b080de14ec2509b15108f171694653d3dc62cd93..2cd9e6d66dbf8375585ae3180a8a169df190fc11 100644
 --- a/src/main/java/net/minestom/server/network/ConnectionManager.java
 +++ b/src/main/java/net/minestom/server/network/ConnectionManager.java
 @@ -1,15 +1,25 @@
@@ -4966,7 +4966,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..db236a40ca37536fbc2da827d73efcf4
              // Change UUID/Username based on the event
              {
                  final String eventUsername = asyncPlayerPreLoginEvent.getUsername();
-@@ -217,72 +290,71 @@ public final class ConnectionManager {
+@@ -217,72 +290,70 @@ public final class ConnectionManager {
                      player.setUuid(eventUuid);
                  }
              }
@@ -5042,8 +5042,7 @@ index b080de14ec2509b15108f171694653d3dc62cd93..db236a40ca37536fbc2da827d73efcf4
 +                registry.put("minecraft:worldgen/biome", MinecraftServer.getBiomeManager().toNBT());
 +                registry.put("minecraft:damage_type", DamageType.getNBT());
 +                player.sendPacket(new ClientRegistryDataPacket(NBT.Compound(registry)));
-+                //TODO: Check what is wrong
-+                // player.sendPacket(TagsPacket.DEFAULT_TAGS);
++                player.sendPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
              }
 +
 +            // Wait for pending resource packs if any
