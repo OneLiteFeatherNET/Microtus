@@ -171,7 +171,7 @@ index 0000000000000000000000000000000000000000..fb4b59f4f0740729d5d77d837736ef84
 +
 +}
 diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
-index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c60f590cba 100644
+index ae8115900a8ca21f7b8757ef2341be89df692672..308c99d4233cc68a0915800b3b8d3cead123f2a1 100644
 --- a/src/main/java/net/minestom/server/ServerProcessImpl.java
 +++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
 @@ -1,6 +1,12 @@
@@ -187,7 +187,7 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
  import net.minestom.server.advancements.AdvancementManager;
  import net.minestom.server.adventure.bossbar.BossBarManager;
  import net.minestom.server.command.CommandManager;
-@@ -23,7 +29,11 @@ import net.minestom.server.network.PacketProcessor;
+@@ -20,7 +26,11 @@ import net.minestom.server.network.PacketProcessor;
  import net.minestom.server.network.socket.Server;
  import net.minestom.server.recipe.RecipeManager;
  import net.minestom.server.scoreboard.TeamManager;
@@ -198,9 +198,9 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
 +import net.minestom.server.snapshot.SnapshotImpl;
 +import net.minestom.server.snapshot.SnapshotUpdater;
  import net.minestom.server.terminal.MinestomTerminal;
- import net.minestom.server.thread.Acquirable;
  import net.minestom.server.thread.ThreadDispatcher;
-@@ -36,13 +46,6 @@ import org.jetbrains.annotations.NotNull;
+ import net.minestom.server.timer.SchedulerManager;
+@@ -31,13 +41,6 @@ import org.jetbrains.annotations.NotNull;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
  
@@ -214,7 +214,7 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
  final class ServerProcessImpl implements ServerProcess {
      private final static Logger LOGGER = LoggerFactory.getLogger(ServerProcessImpl.class);
  
-@@ -65,6 +68,7 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -60,6 +63,7 @@ final class ServerProcessImpl implements ServerProcess {
      private final BossBarManager bossBar;
      private final TagManager tag;
      private final Server server;
@@ -222,7 +222,7 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
  
      private final ThreadDispatcher<Chunk> dispatcher;
      private final Ticker ticker;
-@@ -72,6 +76,9 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -67,6 +71,9 @@ final class ServerProcessImpl implements ServerProcess {
      private final AtomicBoolean started = new AtomicBoolean();
      private final AtomicBoolean stopped = new AtomicBoolean();
  
@@ -232,15 +232,15 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
      public ServerProcessImpl() throws IOException {
          this.exception = new ExceptionManager();
          this.extension = new ExtensionManager(this);
-@@ -95,6 +102,7 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -90,6 +97,7 @@ final class ServerProcessImpl implements ServerProcess {
  
          this.dispatcher = ThreadDispatcher.singleThread();
-         this.ticker = new TickerImpl();
+         this.ticker = new TickerImpl(this.scheduler, this.connection, this.exception, this.instance, this.dispatcher);
 +        this.metrics = new Metrics();
      }
  
      @Override
-@@ -233,6 +241,9 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -226,6 +234,9 @@ final class ServerProcessImpl implements ServerProcess {
          if (MinecraftServer.isTerminalEnabled()) {
              MinestomTerminal.start();
          }
@@ -250,11 +250,11 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
          // Stop the server on SIGINT
          Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
      }
-@@ -251,6 +262,7 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -244,6 +255,7 @@ final class ServerProcessImpl implements ServerProcess {
          benchmark.disable();
          MinestomTerminal.stop();
          dispatcher.shutdown();
 +        this.metrics.shutdown();
-         LOGGER.info(MinecraftServer.getBrandName() + " server stopped successfully.");
+         LOGGER.info("{} server stopped successfully.", MinecraftServer.getBrandName() );
      }
  

@@ -213,7 +213,7 @@ index 0000000000000000000000000000000000000000..3c125bfa40ac413f79d8d17318de1236
 +    }
 +}
 diff --git a/demo/src/main/java/net/minestom/demo/Main.java b/demo/src/main/java/net/minestom/demo/Main.java
-index c9ac500c4626b6d9a6c2f77c020553b9e5b3dfc2..977d1435323be6c0abb12d904f733496c31088ee 100644
+index 7a5cd6295fbdf87b24b346ddfaeeaab9dc91fdcf..977d1435323be6c0abb12d904f733496c31088ee 100644
 --- a/demo/src/main/java/net/minestom/demo/Main.java
 +++ b/demo/src/main/java/net/minestom/demo/Main.java
 @@ -11,7 +11,6 @@ import net.minestom.server.command.CommandManager;
@@ -224,16 +224,7 @@ index c9ac500c4626b6d9a6c2f77c020553b9e5b3dfc2..977d1435323be6c0abb12d904f733496
  import net.minestom.server.instance.block.BlockManager;
  import net.minestom.server.instance.block.rule.vanilla.RedstonePlacementRule;
  import net.minestom.server.ping.ResponseData;
-@@ -98,8 +97,6 @@ public class Main {
- 
-         PlayerInit.init();
- 
--        OptifineSupport.enable();
--
-         //VelocityProxy.enable("rBeJJ79W4MVU");
-         //BungeeCordProxy.enable();
- 
-@@ -109,6 +106,44 @@ public class Main {
+@@ -107,6 +106,44 @@ public class Main {
          OpenToLAN.open(new OpenToLANConfig().eventCallDelay(Duration.of(1, TimeUnit.DAY)));
  
          minecraftServer.start("0.0.0.0", 25565);
@@ -467,10 +458,10 @@ index 0000000000000000000000000000000000000000..a11ba6e607e5c2e224632c10a258a647
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
-index e160c7e81791c5c270ec342b32c8b6c60f590cba..f046dc6ad23381ea683e11d7bbc0d3d73958538b 100644
+index 308c99d4233cc68a0915800b3b8d3cead123f2a1..2d917a7d8185c2cdb8605bf2b01a843e2decfe73 100644
 --- a/src/main/java/net/minestom/server/ServerProcessImpl.java
 +++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
-@@ -42,6 +42,7 @@ import net.minestom.server.utils.PacketUtils;
+@@ -37,6 +37,7 @@ import net.minestom.server.timer.SchedulerManager;
  import net.minestom.server.utils.collection.MappedCollection;
  import net.minestom.server.world.DimensionTypeManager;
  import net.minestom.server.world.biomes.BiomeManager;
@@ -478,9 +469,9 @@ index e160c7e81791c5c270ec342b32c8b6c60f590cba..f046dc6ad23381ea683e11d7bbc0d3d7
  import org.jetbrains.annotations.NotNull;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
-@@ -238,6 +239,9 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -231,6 +232,9 @@ final class ServerProcessImpl implements ServerProcess {
  
-         LOGGER.info(MinecraftServer.getBrandName() + " server started successfully.");
+         LOGGER.info("{} server started successfully.", MinecraftServer.getBrandName());
  
 +        Biomes.registerBiomes();
 +        LOGGER.info("Register Biomes({})", biome.unmodifiableCollection().size());
