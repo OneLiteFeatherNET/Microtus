@@ -55,15 +55,26 @@ index a56248de382badce98656ce4006452beb8990cc8..69eb7e67dd5253bca7e7948335a8f2f2
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..c6019f9cc3ddbee0e1e82c9fa5e8aedfb7db6f24
+index 0000000000000000000000000000000000000000..3c125bfa40ac413f79d8d17318de1236ebddc7ae
 --- /dev/null
 +++ b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-@@ -0,0 +1,142 @@
+@@ -0,0 +1,153 @@
 +package net.minestom.codegen.biome;
 +
 +import com.google.gson.JsonElement;
 +import com.google.gson.JsonObject;
-+import com.squareup.javapoet.*;
++
++import com.squareup.javapoet.ArrayTypeName;
++import com.squareup.javapoet.ClassName;
++
++import com.squareup.javapoet.FieldSpec;
++import com.squareup.javapoet.TypeSpec;
++import com.squareup.javapoet.MethodSpec;
++import com.squareup.javapoet.ParameterSpec;
++import com.squareup.javapoet.AnnotationSpec;
++import com.squareup.javapoet.TypeName;
++import com.squareup.javapoet.CodeBlock;
++import com.squareup.javapoet.JavaFile;
 +
 +import java.awt.Color;
 +
@@ -932,10 +943,10 @@ index 0000000000000000000000000000000000000000..1ddad4d7ea400653786608669689a84e
 +}
 diff --git a/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java b/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..ff5edb198616ef30e8ae9ec21e11d659bdb06d21
+index 0000000000000000000000000000000000000000..0a84f495820afa685c08fd97bb454865ba976564
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java
-@@ -0,0 +1,27 @@
+@@ -0,0 +1,34 @@
 +package net.minestom.server.world.biomes.particle;
 +
 +import net.minestom.server.particle.Particle;
@@ -946,6 +957,13 @@ index 0000000000000000000000000000000000000000..ff5edb198616ef30e8ae9ec21e11d659
 +
 +import java.util.Map;
 +
++/**
++ * Particle effect which used based on the color values.
++ * @param red can between 0 and 1 and is divided by 255
++ * @param green can between 0 and 1 and is divided by 255
++ * @param blue can between 0 and 1 and is divided by 255
++ * @param scale can between 0.01 to 4
++ */
 +@ApiStatus.Experimental
 +public record DustOption(float red, float green, float blue, float scale) implements BiomeOption {
 +    @Override
@@ -965,10 +983,10 @@ index 0000000000000000000000000000000000000000..ff5edb198616ef30e8ae9ec21e11d659
 +}
 diff --git a/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java b/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..2f87f2787af8b1b643a4097a818080f2298362e5
+index 0000000000000000000000000000000000000000..a977cd052c10fd1b540b7934251d62e550361ca1
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java
-@@ -0,0 +1,23 @@
+@@ -0,0 +1,27 @@
 +package net.minestom.server.world.biomes.particle;
 +
 +import net.minestom.server.item.ItemStack;
@@ -977,6 +995,10 @@ index 0000000000000000000000000000000000000000..2f87f2787af8b1b643a4097a818080f2
 +import org.jetbrains.annotations.NotNull;
 +import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 +
++/**
++ * Particle effect which used based on an item inside the biome.
++ * @param item to bes used
++ */
 +@ApiStatus.Experimental
 +public record ItemOption(@NotNull ItemStack item) implements BiomeOption {
 +
