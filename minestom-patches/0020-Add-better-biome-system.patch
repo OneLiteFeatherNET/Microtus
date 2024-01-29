@@ -55,39 +55,29 @@ index a56248de382badce98656ce4006452beb8990cc8..69eb7e67dd5253bca7e7948335a8f2f2
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..fc028e961c88e8d241d4e8c3a02a9a9272d045b9
+index 0000000000000000000000000000000000000000..c6019f9cc3ddbee0e1e82c9fa5e8aedfb7db6f24
 --- /dev/null
 +++ b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-@@ -0,0 +1,151 @@
+@@ -0,0 +1,142 @@
 +package net.minestom.codegen.biome;
 +
-+import com.google.gson.JsonArray;
 +import com.google.gson.JsonElement;
 +import com.google.gson.JsonObject;
-+import com.squareup.javapoet.AnnotationSpec;
-+import com.squareup.javapoet.ArrayTypeName;
-+import com.squareup.javapoet.ClassName;
-+import com.squareup.javapoet.CodeBlock;
-+import com.squareup.javapoet.FieldSpec;
-+import com.squareup.javapoet.JavaFile;
-+import com.squareup.javapoet.MethodSpec;
-+import com.squareup.javapoet.ParameterSpec;
-+import com.squareup.javapoet.TypeName;
-+import com.squareup.javapoet.TypeSpec;
++import com.squareup.javapoet.*;
 +
-+import java.awt.*;
-+import java.io.File;
-+import java.io.InputStream;
-+import java.io.InputStreamReader;
-+import java.util.Comparator;
-+import java.util.List;
-+import java.util.stream.StreamSupport;
-+import javax.lang.model.element.Modifier;
++import java.awt.Color;
++
 +import net.minestom.codegen.MinestomCodeGenerator;
 +import org.jetbrains.annotations.NotNull;
 +import org.jetbrains.annotations.Nullable;
 +import org.slf4j.Logger;
 +import org.slf4j.LoggerFactory;
++
++import javax.lang.model.element.Modifier;
++import java.io.File;
++import java.io.InputStream;
++import java.io.InputStreamReader;
++import java.util.List;
 +
 +public class BiomeGenerator extends MinestomCodeGenerator {
 +
@@ -186,14 +176,15 @@ index 0000000000000000000000000000000000000000..fc028e961c88e8d241d4e8c3a02a9a92
 +                effectCodeBlock = effectCodeBlock.add(".grassColor(0x$L)", grassColor);
 +            }
 +            if (biomeObject.has("foliageColor")) {
-+                var foliageColor = Integer.toHexString(new Color(biomeObject.get("foliageColor").getAsInt()).getRGB()).substring(2);;
++                var foliageColor = Integer.toHexString(new Color(biomeObject.get("foliageColor").getAsInt()).getRGB()).substring(2);
++                ;
 +                effectCodeBlock = effectCodeBlock.add(".foliageColor(0x$L)", foliageColor);
 +            }
 +            effectCodeBlock = effectCodeBlock.add(".build()");
-+            var namespacedCode = CodeBlock.of("$T.from($S)",namespaceIDCn, biome.replaceFirst("minecraft:", ""));
++            var namespacedCode = CodeBlock.of("$T.from($S)", namespaceIDCn, biome.replaceFirst("minecraft:", ""));
 +            biomesEnum.addEnumConstant(toConstant(biome), TypeSpec.anonymousClassBuilder(
 +                            "$T.builder().name($L).category($T.NONE).depth(0.125F).scale(0.05F).temperature($Lf).downfall($Lf).showPrecipitation($L).effects($L).build()",
-+                    biomeCn, namespacedCode,categoryCn, tempature, downfall, hasPrecipitation, effectCodeBlock.build()
++                            biomeCn, namespacedCode, categoryCn, tempature, downfall, hasPrecipitation, effectCodeBlock.build()
 +                    ).build()
 +            );
 +        });
@@ -855,40 +846,48 @@ index f2f3edeb37600c2b603c292a3d7179f61848f0c2..ce20735425d344574ad17001f410bd41
  }
 diff --git a/src/main/java/net/minestom/server/world/biomes/particle/BiomeOption.java b/src/main/java/net/minestom/server/world/biomes/particle/BiomeOption.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..a5a613fa0c5a302f82e39524fb8c3ecf405b2838
+index 0000000000000000000000000000000000000000..07ffda2ba5d3b7664db1d1ee9f850a0504397636
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/world/biomes/particle/BiomeOption.java
-@@ -0,0 +1,9 @@
+@@ -0,0 +1,16 @@
 +package net.minestom.server.world.biomes.particle;
 +
 +import net.minestom.server.particle.Particle;
++import org.jetbrains.annotations.NotNull;
 +import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 +
++/**
++ * Just a generic interface to hold data about biome particles
++ * @author TheMeinerLP
++ */
 +public interface BiomeOption {
++    @NotNull
 +    NBTCompound toNbt();
++    @NotNull
 +    Particle getType();
 +}
 diff --git a/src/main/java/net/minestom/server/world/biomes/particle/BlockOption.java b/src/main/java/net/minestom/server/world/biomes/particle/BlockOption.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..3ee1603a65b22b4dcc0e92c3515a7b5771b271bc
+index 0000000000000000000000000000000000000000..117d9a1ec79de53bf3e2df2a48c8a8a0010d3672
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/world/biomes/particle/BlockOption.java
-@@ -0,0 +1,31 @@
+@@ -0,0 +1,32 @@
 +package net.minestom.server.world.biomes.particle;
 +
 +import net.minestom.server.instance.block.Block;
 +import net.minestom.server.particle.Particle;
 +import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
 +import org.jglrxavpok.hephaistos.nbt.NBT;
 +import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 +
 +import java.util.Map;
 +
 +@ApiStatus.Experimental
-+public record BlockOption(Block block) implements BiomeOption {
++public record BlockOption(@NotNull Block block) implements BiomeOption {
 +
 +    @Override
-+    public NBTCompound toNbt() {
++    public @NotNull NBTCompound toNbt() {
 +        return NBT.Compound(nbtCompound -> {
 +            nbtCompound.setString("type", getType().namespace().toString());
 +            nbtCompound.setString("Name", block.name());
@@ -900,46 +899,48 @@ index 0000000000000000000000000000000000000000..3ee1603a65b22b4dcc0e92c3515a7b57
 +    }
 +
 +    @Override
-+    public Particle getType() {
++    public @NotNull Particle getType() {
 +        return Particle.BLOCK;
 +    }
 +
 +}
 diff --git a/src/main/java/net/minestom/server/world/biomes/particle/DefaultOption.java b/src/main/java/net/minestom/server/world/biomes/particle/DefaultOption.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..820baffdbf6f535cb8e42367bae69188cd56e366
+index 0000000000000000000000000000000000000000..1ddad4d7ea400653786608669689a84ed3078143
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/world/biomes/particle/DefaultOption.java
-@@ -0,0 +1,19 @@
+@@ -0,0 +1,20 @@
 +package net.minestom.server.world.biomes.particle;
 +
 +import net.minestom.server.particle.Particle;
++import org.jetbrains.annotations.NotNull;
 +import org.jglrxavpok.hephaistos.nbt.NBT;
 +import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 +
 +import java.util.Map;
 +
-+public record DefaultOption(Particle particle) implements BiomeOption {
++public record DefaultOption(@NotNull Particle particle) implements BiomeOption {
 +    @Override
-+    public NBTCompound toNbt() {
++    public @NotNull NBTCompound toNbt() {
 +        return NBT.Compound(Map.of("type", NBT.String(getType().namespace().toString())));
 +    }
 +
 +    @Override
-+    public Particle getType() {
++    public @NotNull Particle getType() {
 +        return particle;
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java b/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..605fbae6f90137c21d1cb94ac87db357364ed414
+index 0000000000000000000000000000000000000000..ff5edb198616ef30e8ae9ec21e11d659bdb06d21
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java
-@@ -0,0 +1,26 @@
+@@ -0,0 +1,27 @@
 +package net.minestom.server.world.biomes.particle;
 +
 +import net.minestom.server.particle.Particle;
 +import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
 +import org.jglrxavpok.hephaistos.nbt.NBT;
 +import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 +
@@ -948,7 +949,7 @@ index 0000000000000000000000000000000000000000..605fbae6f90137c21d1cb94ac87db357
 +@ApiStatus.Experimental
 +public record DustOption(float red, float green, float blue, float scale) implements BiomeOption {
 +    @Override
-+    public NBTCompound toNbt() {
++    public @NotNull NBTCompound toNbt() {
 +        return NBT.Compound(Map.of(
 +                "type", NBT.String(getType().namespace().toString()),
 +                "Red", NBT.Float(red),
@@ -958,34 +959,35 @@ index 0000000000000000000000000000000000000000..605fbae6f90137c21d1cb94ac87db357
 +    }
 +
 +    @Override
-+    public Particle getType() {
++    public @NotNull Particle getType() {
 +        return Particle.DUST;
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java b/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..635994d5ad72632e73f5ca4e1678516b75526032
+index 0000000000000000000000000000000000000000..2f87f2787af8b1b643a4097a818080f2298362e5
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java
-@@ -0,0 +1,22 @@
+@@ -0,0 +1,23 @@
 +package net.minestom.server.world.biomes.particle;
 +
 +import net.minestom.server.item.ItemStack;
 +import net.minestom.server.particle.Particle;
 +import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
 +import org.jglrxavpok.hephaistos.nbt.NBTCompound;
 +
 +@ApiStatus.Experimental
-+public record ItemOption(ItemStack item) implements BiomeOption {
++public record ItemOption(@NotNull ItemStack item) implements BiomeOption {
 +
 +    @Override
-+    public NBTCompound toNbt() {
++    public @NotNull NBTCompound toNbt() {
 +        NBTCompound nbtCompound = item.meta().toNBT();
 +        return nbtCompound.modify(n -> n.setString("type", getType().namespace().toString()));
 +    }
 +
 +    @Override
-+    public Particle getType() {
++    public @NotNull Particle getType() {
 +        return Particle.ITEM;
 +    }
 +
