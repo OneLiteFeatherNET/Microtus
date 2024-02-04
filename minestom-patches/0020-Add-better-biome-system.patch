@@ -55,13 +55,12 @@ index a56248de382badce98656ce4006452beb8990cc8..69eb7e67dd5253bca7e7948335a8f2f2
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036cad9be2bb
+index 0000000000000000000000000000000000000000..16d18271fd68146ef66e930828301c55cf69673c
 --- /dev/null
 +++ b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-@@ -0,0 +1,147 @@
+@@ -0,0 +1,142 @@
 +package net.minestom.codegen.biome;
 +
-+import com.google.gson.JsonArray;
 +import com.google.gson.JsonElement;
 +import com.google.gson.JsonObject;
 +import com.squareup.javapoet.AnnotationSpec;
@@ -77,9 +76,7 @@ index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036c
 +import java.io.File;
 +import java.io.InputStream;
 +import java.io.InputStreamReader;
-+import java.util.Comparator;
 +import java.util.List;
-+import java.util.stream.StreamSupport;
 +import javax.lang.model.element.Modifier;
 +import net.minestom.codegen.MinestomCodeGenerator;
 +import org.jetbrains.annotations.NotNull;
@@ -89,6 +86,7 @@ index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036c
 +
 +public class BiomeGenerator extends MinestomCodeGenerator {
 +
++    private static final String BIOME_KEY = "biome";
 +    private static final String BIOME_FILE_PACKAGE = "net.minestom.server.world.biomes"; // Microtus - Biomes
 +    private static final String CLASS_NAME = "Biomes"; // Microtus - Biomes
 +    private static final Logger LOGGER = LoggerFactory.getLogger(BiomeGenerator.class);
@@ -112,7 +110,6 @@ index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036c
 +            return;
 +        }
 +
-+
 +        JsonElement biomes = GSON.fromJson(new InputStreamReader(biomeFile), JsonElement.class);
 +        ClassName biomeCN = ClassName.get(BIOME_FILE_PACKAGE, CLASS_NAME);
 +        ClassName biomeCn = ClassName.get(BIOME_FILE_PACKAGE, "Biome");
@@ -127,7 +124,7 @@ index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036c
 +        // Fields
 +        biomesEnum.addFields(
 +                List.of(
-+                        FieldSpec.builder(biomeCn, "biome", Modifier.PRIVATE, Modifier.FINAL).build(),
++                        FieldSpec.builder(biomeCn, BIOME_KEY, Modifier.PRIVATE, Modifier.FINAL).build(),
 +                        FieldSpec.builder(ArrayTypeName.of(biomeCN), "VALUES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(CLASS_NAME + ".values()").build()  // Microtus - Banner and shield meta
 +                )
 +        );
@@ -137,17 +134,15 @@ index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036c
 +                List.of(
 +                        // Constructor
 +                        MethodSpec.constructorBuilder()
-+                                .addParameters(
-+                                        List.of(
-+                                                ParameterSpec.builder(biomeCn, "biome").addAnnotation(NotNull.class).build()
-+                                        )
++                                .addParameter(
++                                        ParameterSpec.builder(biomeCn, BIOME_KEY).addAnnotation(NotNull.class).build()
 +                                )
-+                                .addStatement("this.biome = biome")
++                                .addStatement("this.$L = $L", BIOME_KEY, BIOME_KEY)
 +                                .build(),
-+                        MethodSpec.methodBuilder("biome")
++                        MethodSpec.methodBuilder(BIOME_KEY)
 +                                .addModifiers(Modifier.PUBLIC)
 +                                .returns(biomeCn.annotated(AnnotationSpec.builder(NotNull.class).build()))
-+                                .addStatement("return this.biome")
++                                .addStatement("return this.$L", BIOME_KEY)
 +                                .build(),
 +                        MethodSpec.methodBuilder("getValue")
 +                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -158,8 +153,8 @@ index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036c
 +                                .build(),
 +                        MethodSpec.methodBuilder("registerBiomes")
 +                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-+                                .beginControlFlow("for (var biome : VALUES)")
-+                                .addStatement("$T.getBiomeManager().addBiome(biome.biome())", minecraftServerCn)
++                                .beginControlFlow("for (var $L : VALUES)", BIOME_KEY)
++                                .addStatement("$T.getBiomeManager().addBiome($L.$L())", minecraftServerCn, BIOME_KEY, BIOME_KEY)
 +                                .endControlFlow()
 +                                .build()
 +                )
@@ -167,7 +162,7 @@ index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036c
 +        final JsonObject biomesAsJsonObject = biomes.getAsJsonObject();
 +        biomesAsJsonObject.keySet().forEach(biome -> {
 +            var biomeObject = biomesAsJsonObject.get(biome).getAsJsonObject();
-+            var tempature = biomeObject.get("temperature").getAsFloat();
++            var temperature = biomeObject.get("temperature").getAsFloat();
 +            var downfall = biomeObject.get("downfall").getAsFloat();
 +            var hasPrecipitation = biomeObject.get("has_precipitation").getAsBoolean();
 +            var fogColor = biomeObject.get("fogColor").getAsInt();
@@ -176,20 +171,20 @@ index 0000000000000000000000000000000000000000..71820dc9b16220df223b00229dab036c
 +            var skyColor = biomeObject.get("skyColor").getAsInt();
 +            var effectCodeBlock = CodeBlock.builder();
 +
-+            effectCodeBlock = effectCodeBlock.add("$T.builder().fogColor(0x$L).waterColor(0x$L).waterFogColor(0x$L).skyColor(0x$L)", biomeEffectsCn, fogColor, waterColor, waterFogColor, skyColor);
++            effectCodeBlock.add("$T.builder().fogColor(0x$L).waterColor(0x$L).waterFogColor(0x$L).skyColor(0x$L)", biomeEffectsCn, fogColor, waterColor, waterFogColor, skyColor);
 +            if (biomeObject.has("grassColor")) {
 +                var grassColor = biomeObject.get("grassColor").getAsInt();
-+                effectCodeBlock = effectCodeBlock.add(".grassColor(0x$L)", grassColor);
++                effectCodeBlock.add(".grassColor(0x$L)", grassColor);
 +            }
 +            if (biomeObject.has("foliageColor")) {
 +                var foliageColor = biomeObject.get("foliageColor").getAsInt();
-+                effectCodeBlock = effectCodeBlock.add(".foliageColor(0x$L)", foliageColor);
++                effectCodeBlock.add(".foliageColor(0x$L)", foliageColor);
 +            }
-+            effectCodeBlock = effectCodeBlock.add(".build()");
++            effectCodeBlock.add(".build()");
 +            var namespacedCode = CodeBlock.of("$T.from($S)",namespaceIDCn, biome.replaceFirst("minecraft:", ""));
 +            biomesEnum.addEnumConstant(toConstant(biome), TypeSpec.anonymousClassBuilder(
 +                            "$T.builder().name($L).category($T.NONE).depth(0.125F).scale(0.05F).temperature($Lf).downfall($Lf).showPrecipitation($L).effects($L).build()",
-+                    biomeCn, namespacedCode,categoryCn, tempature, downfall, hasPrecipitation, effectCodeBlock.build()
++                            biomeCn, namespacedCode,categoryCn, temperature, downfall, hasPrecipitation, effectCodeBlock.build()
 +                    ).build()
 +            );
 +        });
