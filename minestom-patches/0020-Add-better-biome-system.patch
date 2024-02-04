@@ -55,7 +55,7 @@ index a56248de382badce98656ce4006452beb8990cc8..69eb7e67dd5253bca7e7948335a8f2f2
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..16d18271fd68146ef66e930828301c55cf69673c
+index 0000000000000000000000000000000000000000..13c12efedb65bc5880cd8c4d186427d36d847df8
 --- /dev/null
 +++ b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
 @@ -0,0 +1,142 @@
@@ -84,7 +84,7 @@ index 0000000000000000000000000000000000000000..16d18271fd68146ef66e930828301c55
 +import org.slf4j.Logger;
 +import org.slf4j.LoggerFactory;
 +
-+public class BiomeGenerator extends MinestomCodeGenerator {
++public final class BiomeGenerator extends MinestomCodeGenerator {
 +
 +    private static final String BIOME_KEY = "biome";
 +    private static final String BIOME_FILE_PACKAGE = "net.minestom.server.world.biomes"; // Microtus - Biomes
@@ -137,7 +137,7 @@ index 0000000000000000000000000000000000000000..16d18271fd68146ef66e930828301c55
 +                                .addParameter(
 +                                        ParameterSpec.builder(biomeCn, BIOME_KEY).addAnnotation(NotNull.class).build()
 +                                )
-+                                .addStatement("this.$L = $L", BIOME_KEY, BIOME_KEY)
++                                .addStatement("this.$1L = $1L", BIOME_KEY)
 +                                .build(),
 +                        MethodSpec.methodBuilder(BIOME_KEY)
 +                                .addModifiers(Modifier.PUBLIC)
@@ -154,7 +154,7 @@ index 0000000000000000000000000000000000000000..16d18271fd68146ef66e930828301c55
 +                        MethodSpec.methodBuilder("registerBiomes")
 +                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
 +                                .beginControlFlow("for (var $L : VALUES)", BIOME_KEY)
-+                                .addStatement("$T.getBiomeManager().addBiome($L.$L())", minecraftServerCn, BIOME_KEY, BIOME_KEY)
++                                .addStatement("$1T.getBiomeManager().addBiome($2L.$2L())", minecraftServerCn, BIOME_KEY)
 +                                .endControlFlow()
 +                                .build()
 +                )
