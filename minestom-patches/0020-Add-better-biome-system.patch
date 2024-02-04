@@ -1014,3 +1014,102 @@ index 0000000000000000000000000000000000000000..a977cd052c10fd1b540b7934251d62e5
 +    }
 +
 +}
+diff --git a/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java b/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
+index 7fcb6ffa93f15baf5dc1d77f21a01068461f8115..a48b14e279ba57203e86315043aa6d913c1a85f5 100644
+--- a/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
+@@ -1,9 +1,11 @@
+ package net.minestom.server.instance;
+ 
++import net.minestom.server.MinecraftServer;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.utils.NamespaceID;
+ import net.minestom.server.world.biomes.Biome;
++import net.minestom.server.world.biomes.Biomes;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import org.junit.jupiter.api.AfterAll;
+@@ -49,6 +51,7 @@ class AnvilLoaderIntegrationTest {
+ 
+     @Test
+     void loadHouse(Env env) {
++        MinecraftServer.getBiomeManager().addBiome(Biomes.PLAINS.biome());
+         // load a world that contains only a basic house and make sure it is loaded properly
+ 
+         AnvilLoader chunkLoader = new AnvilLoader(worldFolder) {
+@@ -146,6 +149,7 @@ class AnvilLoaderIntegrationTest {
+ 
+     @Test
+     void loadAndSaveChunk(Env env) throws InterruptedException {
++        MinecraftServer.getBiomeManager().addBiome(Biomes.PLAINS.biome());
+         Instance instance = env.createFlatInstance(new AnvilLoader(worldFolder) {
+             // Force loads inside current thread
+             @Override
+diff --git a/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java b/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
+index 3580264ac43c7268834e53315d968afe480e707c..0a00ce3ccc7fc54e4321c4c5a202328e950f0635 100644
+--- a/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
+@@ -1,5 +1,6 @@
+ package net.minestom.server.instance;
+ 
++import net.minestom.server.world.biomes.Biomes;
+ import net.minestom.testing.Env;
+ import net.minestom.testing.EnvTest;
+ import net.minestom.server.coordinate.Point;
+@@ -100,8 +101,8 @@ class GeneratorForkIntegrationTest {
+         var instance = manager.createInstanceContainer();
+         instance.setGenerator(unit -> {
+             var u = unit.fork(unit.absoluteStart(), unit.absoluteEnd().add(16, 0, 16));
+-            assertThrows(IllegalStateException.class, () -> u.modifier().setBiome(16, 0, 0, Biome.PLAINS));
+-            assertThrows(IllegalStateException.class, () -> u.modifier().fillBiome(Biome.PLAINS));
++            assertThrows(IllegalStateException.class, () -> u.modifier().setBiome(16, 0, 0, Biomes.PLAINS.biome()));
++            assertThrows(IllegalStateException.class, () -> u.modifier().fillBiome(Biomes.PLAINS.biome()));
+         });
+         instance.loadChunk(0, 0).join();
+     }
+diff --git a/src/test/java/net/minestom/server/instance/GeneratorTest.java b/src/test/java/net/minestom/server/instance/GeneratorTest.java
+index ad3ba534f6a91b90a713518aba46ac260fbcdd72..6ef0b29c6e535c856d8911e33315f2344d55cc73 100644
+--- a/src/test/java/net/minestom/server/instance/GeneratorTest.java
++++ b/src/test/java/net/minestom/server/instance/GeneratorTest.java
+@@ -8,6 +8,7 @@ import net.minestom.server.instance.generator.Generator;
+ import net.minestom.server.utils.MathUtils;
+ import net.minestom.server.utils.chunk.ChunkUtils;
+ import net.minestom.server.world.biomes.Biome;
++import net.minestom.server.world.biomes.Biomes;
+ import org.junit.jupiter.api.Test;
+ import org.junit.jupiter.params.ParameterizedTest;
+ import org.junit.jupiter.params.provider.Arguments;
+@@ -253,13 +254,13 @@ class GeneratorTest {
+         var chunkUnits = GeneratorImpl.chunk(minSection, maxSection, List.of(sections), chunkX, chunkZ);
+         Generator generator = chunk -> {
+             var modifier = chunk.modifier();
+-            modifier.setBiome(48, 0, -32, Biome.PLAINS);
+-            modifier.setBiome(48 + 8, 0, -32, Biome.PLAINS);
++            modifier.setBiome(48, 0, -32, Biomes.PLAINS.biome());
++            modifier.setBiome(48 + 8, 0, -32, Biomes.PLAINS.biome());
+         };
+         generator.generate(chunkUnits);
+-        assertEquals(Biome.PLAINS.id(), sections[0].biomePalette().get(0, 0, 0));
++        assertEquals(Biomes.PLAINS.biome().id(), sections[0].biomePalette().get(0, 0, 0));
+         assertEquals(0, sections[0].biomePalette().get(1, 0, 0));
+-        assertEquals(Biome.PLAINS.id(), sections[0].biomePalette().get(2, 0, 0));
++        assertEquals(Biomes.PLAINS.biome().id(), sections[0].biomePalette().get(2, 0, 0));
+     }
+ 
+     @Test
+@@ -274,12 +275,12 @@ class GeneratorTest {
+         var chunkUnits = GeneratorImpl.chunk(minSection, maxSection, List.of(sections), chunkX, chunkZ);
+         Generator generator = chunk -> {
+             var modifier = chunk.modifier();
+-            modifier.fillBiome(Biome.PLAINS);
++            modifier.fillBiome(Biomes.PLAINS.biome());
+         };
+         generator.generate(chunkUnits);
+         for (var section : sections) {
+             section.biomePalette().getAll((x, y, z, value) ->
+-                    assertEquals(Biome.PLAINS.id(), value));
++                    assertEquals(Biomes.PLAINS.biome().id(), value));
+         }
+     }
+ 
