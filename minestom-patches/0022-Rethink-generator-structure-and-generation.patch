@@ -524,10 +524,10 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..e4f963e9a8af55572c6f0c6891857b4d
 +    }
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-index 71820dc9b16220df223b00229dab036cad9be2bb..3c5bd860e7b7ae46d2e53d7eba6be1efee570e70 100644
+index 13c12efedb65bc5880cd8c4d186427d36d847df8..8d6b1271092f634fa9e2270d43aa6f071972b141 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-@@ -35,6 +35,7 @@ public class BiomeGenerator extends MinestomCodeGenerator {
+@@ -33,6 +33,7 @@ public final class BiomeGenerator extends MinestomCodeGenerator {
      private final File outputFolder;
  
      public BiomeGenerator(@Nullable InputStream biomeFile, @NotNull File outputFolder) {
