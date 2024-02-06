@@ -180,10 +180,10 @@ index 07dfb812a5dc4e10944545d4e19e00a125490d31..607fec9a560670c728ef3208d3987901
  //        new VillagerProfessionGenerator(
  //                new File(inputFolder, targetVersion + "_villager_professions.json"),
 diff --git a/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
-index 69eb7e67dd5253bca7e7948335a8f2f2acd849f1..9085f2fba74caacf6709b7d630e99ee72082787b 100644
+index 69eb7e67dd5253bca7e7948335a8f2f2acd849f1..1966f7d2c627604f74c2b590805088de1b1e4c8f 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
-@@ -2,36 +2,68 @@ package net.minestom.codegen;
+@@ -2,36 +2,51 @@ package net.minestom.codegen;
  
  import com.google.gson.Gson;
  import com.google.gson.GsonBuilder;
@@ -254,23 +254,6 @@ index 69eb7e67dd5253bca7e7948335a8f2f2acd849f1..9085f2fba74caacf6709b7d630e99ee7
 +        }
 +        return namespace.toUpperCase(Locale.ROOT);
      }
-+
-+    // When the method above consumes too much memory, use this one instead
-+    /*
-+    protected static @NotNull String toConstant(@NotNull String namespace, @NotNull Map<String, String> arguments) {
-+        if (arguments.isEmpty()) return toConstant(namespace);
-+
-+        StringBuilder builder = new StringBuilder(namespace);
-+
-+        for (Map.Entry<String, String> entry : arguments.entrySet()) {
-+            int startIndex = builder.indexOf(entry.getKey());
-+            while (startIndex != -1) {
-+                builder.replace(startIndex, startIndex + entry.getKey().length(), entry.getValue());
-+                startIndex = builder.indexOf(entry.getKey(), startIndex + entry.getValue().length());
-+            }
-+        }
-+        return builder.toString().toUpperCase(Locale.ROOT);
-+    }*/
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
 index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..618040b6ff868f2327c641ed3e5c205c8a00344f 100644
