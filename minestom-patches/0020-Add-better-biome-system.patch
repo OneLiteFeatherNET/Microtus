@@ -55,38 +55,43 @@ index a56248de382badce98656ce4006452beb8990cc8..69eb7e67dd5253bca7e7948335a8f2f2
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..13c12efedb65bc5880cd8c4d186427d36d847df8
+index 0000000000000000000000000000000000000000..3c125bfa40ac413f79d8d17318de1236ebddc7ae
 --- /dev/null
 +++ b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-@@ -0,0 +1,142 @@
+@@ -0,0 +1,153 @@
 +package net.minestom.codegen.biome;
 +
 +import com.google.gson.JsonElement;
 +import com.google.gson.JsonObject;
-+import com.squareup.javapoet.AnnotationSpec;
++
 +import com.squareup.javapoet.ArrayTypeName;
 +import com.squareup.javapoet.ClassName;
-+import com.squareup.javapoet.CodeBlock;
++
 +import com.squareup.javapoet.FieldSpec;
-+import com.squareup.javapoet.JavaFile;
++import com.squareup.javapoet.TypeSpec;
 +import com.squareup.javapoet.MethodSpec;
 +import com.squareup.javapoet.ParameterSpec;
++import com.squareup.javapoet.AnnotationSpec;
 +import com.squareup.javapoet.TypeName;
-+import com.squareup.javapoet.TypeSpec;
-+import java.io.File;
-+import java.io.InputStream;
-+import java.io.InputStreamReader;
-+import java.util.List;
-+import javax.lang.model.element.Modifier;
++import com.squareup.javapoet.CodeBlock;
++import com.squareup.javapoet.JavaFile;
++
++import java.awt.Color;
++
 +import net.minestom.codegen.MinestomCodeGenerator;
 +import org.jetbrains.annotations.NotNull;
 +import org.jetbrains.annotations.Nullable;
 +import org.slf4j.Logger;
 +import org.slf4j.LoggerFactory;
 +
-+public final class BiomeGenerator extends MinestomCodeGenerator {
++import javax.lang.model.element.Modifier;
++import java.io.File;
++import java.io.InputStream;
++import java.io.InputStreamReader;
++import java.util.List;
 +
-+    private static final String BIOME_KEY = "biome";
++public class BiomeGenerator extends MinestomCodeGenerator {
++
 +    private static final String BIOME_FILE_PACKAGE = "net.minestom.server.world.biomes"; // Microtus - Biomes
 +    private static final String CLASS_NAME = "Biomes"; // Microtus - Biomes
 +    private static final Logger LOGGER = LoggerFactory.getLogger(BiomeGenerator.class);
@@ -110,6 +115,7 @@ index 0000000000000000000000000000000000000000..13c12efedb65bc5880cd8c4d186427d3
 +            return;
 +        }
 +
++
 +        JsonElement biomes = GSON.fromJson(new InputStreamReader(biomeFile), JsonElement.class);
 +        ClassName biomeCN = ClassName.get(BIOME_FILE_PACKAGE, CLASS_NAME);
 +        ClassName biomeCn = ClassName.get(BIOME_FILE_PACKAGE, "Biome");
@@ -124,7 +130,7 @@ index 0000000000000000000000000000000000000000..13c12efedb65bc5880cd8c4d186427d3
 +        // Fields
 +        biomesEnum.addFields(
 +                List.of(
-+                        FieldSpec.builder(biomeCn, BIOME_KEY, Modifier.PRIVATE, Modifier.FINAL).build(),
++                        FieldSpec.builder(biomeCn, "biome", Modifier.PRIVATE, Modifier.FINAL).build(),
 +                        FieldSpec.builder(ArrayTypeName.of(biomeCN), "VALUES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(CLASS_NAME + ".values()").build()  // Microtus - Banner and shield meta
 +                )
 +        );
@@ -134,15 +140,17 @@ index 0000000000000000000000000000000000000000..13c12efedb65bc5880cd8c4d186427d3
 +                List.of(
 +                        // Constructor
 +                        MethodSpec.constructorBuilder()
-+                                .addParameter(
-+                                        ParameterSpec.builder(biomeCn, BIOME_KEY).addAnnotation(NotNull.class).build()
++                                .addParameters(
++                                        List.of(
++                                                ParameterSpec.builder(biomeCn, "biome").addAnnotation(NotNull.class).build()
++                                        )
 +                                )
-+                                .addStatement("this.$1L = $1L", BIOME_KEY)
++                                .addStatement("this.biome = biome")
 +                                .build(),
-+                        MethodSpec.methodBuilder(BIOME_KEY)
++                        MethodSpec.methodBuilder("biome")
 +                                .addModifiers(Modifier.PUBLIC)
 +                                .returns(biomeCn.annotated(AnnotationSpec.builder(NotNull.class).build()))
-+                                .addStatement("return this.$L", BIOME_KEY)
++                                .addStatement("return this.biome")
 +                                .build(),
 +                        MethodSpec.methodBuilder("getValue")
 +                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
@@ -153,38 +161,41 @@ index 0000000000000000000000000000000000000000..13c12efedb65bc5880cd8c4d186427d3
 +                                .build(),
 +                        MethodSpec.methodBuilder("registerBiomes")
 +                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-+                                .beginControlFlow("for (var $L : VALUES)", BIOME_KEY)
-+                                .addStatement("$1T.getBiomeManager().addBiome($2L.$2L())", minecraftServerCn, BIOME_KEY)
++                                .beginControlFlow("for (var biome : VALUES)")
++                                .addStatement("$T.getBiomeManager().addBiome(biome.biome())", minecraftServerCn)
 +                                .endControlFlow()
 +                                .build()
 +                )
 +        );
 +        final JsonObject biomesAsJsonObject = biomes.getAsJsonObject();
 +        biomesAsJsonObject.keySet().forEach(biome -> {
++
++
 +            var biomeObject = biomesAsJsonObject.get(biome).getAsJsonObject();
-+            var temperature = biomeObject.get("temperature").getAsFloat();
++            var tempature = biomeObject.get("temperature").getAsFloat();
 +            var downfall = biomeObject.get("downfall").getAsFloat();
 +            var hasPrecipitation = biomeObject.get("has_precipitation").getAsBoolean();
-+            var fogColor = biomeObject.get("fogColor").getAsInt();
-+            var waterColor = biomeObject.get("waterColor").getAsInt();
-+            var waterFogColor = biomeObject.get("waterFogColor").getAsInt();
-+            var skyColor = biomeObject.get("skyColor").getAsInt();
++            var fogColor = Integer.toHexString(new Color(biomeObject.get("fogColor").getAsInt()).getRGB()).substring(2);
++            var waterColor = Integer.toHexString(new Color(biomeObject.get("waterColor").getAsInt()).getRGB()).substring(2);
++            var waterFogColor = Integer.toHexString(new Color(biomeObject.get("waterFogColor").getAsInt()).getRGB()).substring(2);
++            var skyColor = Integer.toHexString(new Color(biomeObject.get("skyColor").getAsInt()).getRGB()).substring(2);
 +            var effectCodeBlock = CodeBlock.builder();
 +
-+            effectCodeBlock.add("$T.builder().fogColor(0x$L).waterColor(0x$L).waterFogColor(0x$L).skyColor(0x$L)", biomeEffectsCn, fogColor, waterColor, waterFogColor, skyColor);
++            effectCodeBlock = effectCodeBlock.add("$T.builder().fogColor(0x$L).waterColor(0x$L).waterFogColor(0x$L).skyColor(0x$L)", biomeEffectsCn, fogColor, waterColor, waterFogColor, skyColor);
 +            if (biomeObject.has("grassColor")) {
-+                var grassColor = biomeObject.get("grassColor").getAsInt();
-+                effectCodeBlock.add(".grassColor(0x$L)", grassColor);
++                var grassColor = Integer.toHexString(new Color(biomeObject.get("grassColor").getAsInt()).getRGB()).substring(2);
++                effectCodeBlock = effectCodeBlock.add(".grassColor(0x$L)", grassColor);
 +            }
 +            if (biomeObject.has("foliageColor")) {
-+                var foliageColor = biomeObject.get("foliageColor").getAsInt();
-+                effectCodeBlock.add(".foliageColor(0x$L)", foliageColor);
++                var foliageColor = Integer.toHexString(new Color(biomeObject.get("foliageColor").getAsInt()).getRGB()).substring(2);
++                ;
++                effectCodeBlock = effectCodeBlock.add(".foliageColor(0x$L)", foliageColor);
 +            }
-+            effectCodeBlock.add(".build()");
-+            var namespacedCode = CodeBlock.of("$T.from($S)",namespaceIDCn, biome.replaceFirst("minecraft:", ""));
++            effectCodeBlock = effectCodeBlock.add(".build()");
++            var namespacedCode = CodeBlock.of("$T.from($S)", namespaceIDCn, biome.replaceFirst("minecraft:", ""));
 +            biomesEnum.addEnumConstant(toConstant(biome), TypeSpec.anonymousClassBuilder(
 +                            "$T.builder().name($L).category($T.NONE).depth(0.125F).scale(0.05F).temperature($Lf).downfall($Lf).showPrecipitation($L).effects($L).build()",
-+                            biomeCn, namespacedCode,categoryCn, temperature, downfall, hasPrecipitation, effectCodeBlock.build()
++                            biomeCn, namespacedCode, categoryCn, tempature, downfall, hasPrecipitation, effectCodeBlock.build()
 +                    ).build()
 +            );
 +        });
@@ -202,7 +213,7 @@ index 0000000000000000000000000000000000000000..13c12efedb65bc5880cd8c4d186427d3
 +    }
 +}
 diff --git a/demo/src/main/java/net/minestom/demo/Main.java b/demo/src/main/java/net/minestom/demo/Main.java
-index c9ac500c4626b6d9a6c2f77c020553b9e5b3dfc2..74dc0732808842a21dc44df5c2f42700e71c4049 100644
+index c9ac500c4626b6d9a6c2f77c020553b9e5b3dfc2..977d1435323be6c0abb12d904f733496c31088ee 100644
 --- a/demo/src/main/java/net/minestom/demo/Main.java
 +++ b/demo/src/main/java/net/minestom/demo/Main.java
 @@ -11,7 +11,6 @@ import net.minestom.server.command.CommandManager;
@@ -222,6 +233,51 @@ index c9ac500c4626b6d9a6c2f77c020553b9e5b3dfc2..74dc0732808842a21dc44df5c2f42700
          //VelocityProxy.enable("rBeJJ79W4MVU");
          //BungeeCordProxy.enable();
  
+@@ -109,6 +106,44 @@ public class Main {
+         OpenToLAN.open(new OpenToLANConfig().eventCallDelay(Duration.of(1, TimeUnit.DAY)));
+ 
+         minecraftServer.start("0.0.0.0", 25565);
++        /* var oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:crimson_forest"));
++        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
++        var newBiome = Biome.builder().name(NamespaceID.from("minecraft:crimson_forest"))
++                .category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f)
++                .showPrecipitation(false)
++                .effects(BiomeEffects.builder().fogColor(0x330303).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff)
++                        .biomeParticle(new BiomeParticle(0.025f, new DefaultOption(Particle.CRIMSON_SPORE)))
++                        .build()).build();
++        MinecraftServer.getBiomeManager().addBiome(newBiome);
++
++        oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:warped_forest"));
++        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
++        newBiome = Biome.builder().name(NamespaceID.from("minecraft:warped_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x1a051a).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff)
++                        .biomeParticle(new BiomeParticle(0.01428f, new DefaultOption(Particle.WARPED_SPORE)))
++                        .build()).build();
++        MinecraftServer.getBiomeManager().addBiome(newBiome);
++
++        oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:basalt_deltas"));
++        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
++        newBiome = Biome.builder().name(NamespaceID.from("minecraft:basalt_deltas")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x685f70).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff)
++                .biomeParticle(new BiomeParticle(0.118093334f, new DefaultOption(Particle.WHITE_ASH)))
++                .build()).build();
++        MinecraftServer.getBiomeManager().addBiome(newBiome);
++
++        oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:soul_sand_valley"));
++        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
++        newBiome = Biome.builder().name(NamespaceID.from("minecraft:soul_sand_valley")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x1b4745).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff)
++                .biomeParticle(new BiomeParticle(0.00625f, new DefaultOption(Particle.ASH)))
++                .build()).build();
++        MinecraftServer.getBiomeManager().addBiome(newBiome);
++
++        oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:river"));
++        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
++        newBiome = Biome.builder().name(NamespaceID.from("minecraft:river")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7ba4ff)
++                // .biomeParticle(new BiomeParticle(0.118093334f, new DefaultOption(Particle.DRAGON_BREATH)))
++                .biomeParticle(new BiomeParticle(1f, new DustOption(1f,0f,0f, 1f)))
++                .build()).build();
++        MinecraftServer.getBiomeManager().addBiome(newBiome);*/
+ //        minecraftServer.start(java.net.UnixDomainSocketAddress.of("minestom-demo.sock"));
+         //Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly));
+     }
 diff --git a/demo/src/main/resources/extension.json b/demo/src/main/resources/extension.json
 deleted file mode 100644
 index efb46608f1c0ea0ab08486a554040c71e5341391..0000000000000000000000000000000000000000
@@ -244,7 +300,7 @@ index efb46608f1c0ea0ab08486a554040c71e5341391..00000000000000000000000000000000
 \ No newline at end of file
 diff --git a/src/autogenerated/java/net/minestom/server/world/biomes/Biomes.java b/src/autogenerated/java/net/minestom/server/world/biomes/Biomes.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..3e3c65dab6c484c52533f206d8b3acb4ce5c5575
+index 0000000000000000000000000000000000000000..a11ba6e607e5c2e224632c10a258a647231f9722
 --- /dev/null
 +++ b/src/autogenerated/java/net/minestom/server/world/biomes/Biomes.java
 @@ -0,0 +1,162 @@
@@ -259,133 +315,133 @@ index 0000000000000000000000000000000000000000..3e3c65dab6c484c52533f206d8b3acb4
 + * AUTOGENERATED by BiomeGenerator
 + */
 +public enum Biomes {
-+    SNOWY_SLOPES(Biome.builder().name(NamespaceID.from("minecraft:snowy_slopes")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.3f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8560639).build()).build()),
++    SNOWY_SLOPES(Biome.builder().name(NamespaceID.from("minecraft:snowy_slopes")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.3f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x829fff).build()).build()),
 +
-+    OLD_GROWTH_PINE_TAIGA(Biome.builder().name(NamespaceID.from("minecraft:old_growth_pine_taiga")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.3f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8168447).build()).build()),
++    OLD_GROWTH_PINE_TAIGA(Biome.builder().name(NamespaceID.from("minecraft:old_growth_pine_taiga")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.3f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7ca3ff).build()).build()),
 +
-+    MUSHROOM_FIELDS(Biome.builder().name(NamespaceID.from("minecraft:mushroom_fields")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.9f).downfall(1.0f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7842047).build()).build()),
++    MUSHROOM_FIELDS(Biome.builder().name(NamespaceID.from("minecraft:mushroom_fields")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.9f).downfall(1.0f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x77a8ff).build()).build()),
 +
-+    TAIGA(Biome.builder().name(NamespaceID.from("minecraft:taiga")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.25f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8233983).build()).build()),
++    TAIGA(Biome.builder().name(NamespaceID.from("minecraft:taiga")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.25f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7da3ff).build()).build()),
 +
-+    DEEP_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:deep_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    DEEP_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:deep_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    ERODED_BADLANDS(Biome.builder().name(NamespaceID.from("minecraft:eroded_badlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).grassColor(0x9470285).foliageColor(0x10387789).build()).build()),
++    ERODED_BADLANDS(Biome.builder().name(NamespaceID.from("minecraft:eroded_badlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).grassColor(0x90814d).foliageColor(0x9e814d).build()).build()),
 +
-+    FROZEN_RIVER(Biome.builder().name(NamespaceID.from("minecraft:frozen_river")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.0f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x3750089).waterFogColor(0x329011).skyColor(0x8364543).build()).build()),
++    FROZEN_RIVER(Biome.builder().name(NamespaceID.from("minecraft:frozen_river")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.0f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3938c9).waterFogColor(0x050533).skyColor(0x7fa1ff).build()).build()),
 +
-+    END_HIGHLANDS(Biome.builder().name(NamespaceID.from("minecraft:end_highlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x10518688).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x0).build()).build()),
++    END_HIGHLANDS(Biome.builder().name(NamespaceID.from("minecraft:end_highlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xa080a0).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x000000).build()).build()),
 +
-+    CHERRY_GROVE(Biome.builder().name(NamespaceID.from("minecraft:cherry_grove")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x6141935).waterFogColor(0x6141935).skyColor(0x8103167).grassColor(0x11983713).foliageColor(0x11983713).build()).build()),
++    CHERRY_GROVE(Biome.builder().name(NamespaceID.from("minecraft:cherry_grove")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x5db7ef).waterFogColor(0x5db7ef).skyColor(0x7ba4ff).grassColor(0xb6db61).foliageColor(0xb6db61).build()).build()),
 +
-+    SUNFLOWER_PLAINS(Biome.builder().name(NamespaceID.from("minecraft:sunflower_plains")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7907327).build()).build()),
++    SUNFLOWER_PLAINS(Biome.builder().name(NamespaceID.from("minecraft:sunflower_plains")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x78a7ff).build()).build()),
 +
-+    BIRCH_FOREST(Biome.builder().name(NamespaceID.from("minecraft:birch_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.6f).downfall(0.6f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8037887).build()).build()),
++    BIRCH_FOREST(Biome.builder().name(NamespaceID.from("minecraft:birch_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.6f).downfall(0.6f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7aa5ff).build()).build()),
 +
-+    WINDSWEPT_HILLS(Biome.builder().name(NamespaceID.from("minecraft:windswept_hills")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.2f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8233727).build()).build()),
++    WINDSWEPT_HILLS(Biome.builder().name(NamespaceID.from("minecraft:windswept_hills")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.2f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7da2ff).build()).build()),
 +
-+    BAMBOO_JUNGLE(Biome.builder().name(NamespaceID.from("minecraft:bamboo_jungle")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.95f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7842047).build()).build()),
++    BAMBOO_JUNGLE(Biome.builder().name(NamespaceID.from("minecraft:bamboo_jungle")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.95f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x77a8ff).build()).build()),
 +
-+    WOODED_BADLANDS(Biome.builder().name(NamespaceID.from("minecraft:wooded_badlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).grassColor(0x9470285).foliageColor(0x10387789).build()).build()),
++    WOODED_BADLANDS(Biome.builder().name(NamespaceID.from("minecraft:wooded_badlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).grassColor(0x90814d).foliageColor(0x9e814d).build()).build()),
 +
-+    BADLANDS(Biome.builder().name(NamespaceID.from("minecraft:badlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).grassColor(0x9470285).foliageColor(0x10387789).build()).build()),
++    BADLANDS(Biome.builder().name(NamespaceID.from("minecraft:badlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).grassColor(0x90814d).foliageColor(0x9e814d).build()).build()),
 +
-+    SAVANNA_PLATEAU(Biome.builder().name(NamespaceID.from("minecraft:savanna_plateau")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    SAVANNA_PLATEAU(Biome.builder().name(NamespaceID.from("minecraft:savanna_plateau")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    BEACH(Biome.builder().name(NamespaceID.from("minecraft:beach")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7907327).build()).build()),
++    BEACH(Biome.builder().name(NamespaceID.from("minecraft:beach")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x78a7ff).build()).build()),
 +
-+    DARK_FOREST(Biome.builder().name(NamespaceID.from("minecraft:dark_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.7f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7972607).build()).build()),
++    DARK_FOREST(Biome.builder().name(NamespaceID.from("minecraft:dark_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.7f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x79a6ff).build()).build()),
 +
-+    STONY_PEAKS(Biome.builder().name(NamespaceID.from("minecraft:stony_peaks")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(1.0f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7776511).build()).build()),
++    STONY_PEAKS(Biome.builder().name(NamespaceID.from("minecraft:stony_peaks")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(1.0f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x76a8ff).build()).build()),
 +
-+    MANGROVE_SWAMP(Biome.builder().name(NamespaceID.from("minecraft:mangrove_swamp")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x3832426).waterFogColor(0x5077600).skyColor(0x7907327).foliageColor(0x9285927).build()).build()),
++    MANGROVE_SWAMP(Biome.builder().name(NamespaceID.from("minecraft:mangrove_swamp")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3a7a6a).waterFogColor(0x4d7a60).skyColor(0x78a7ff).foliageColor(0x8db127).build()).build()),
 +
-+    SPARSE_JUNGLE(Biome.builder().name(NamespaceID.from("minecraft:sparse_jungle")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.95f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7842047).build()).build()),
++    SPARSE_JUNGLE(Biome.builder().name(NamespaceID.from("minecraft:sparse_jungle")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.95f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x77a8ff).build()).build()),
 +
-+    LUKEWARM_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:lukewarm_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4566514).waterFogColor(0x267827).skyColor(0x8103167).build()).build()),
++    LUKEWARM_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:lukewarm_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x45adf2).waterFogColor(0x041633).skyColor(0x7ba4ff).build()).build()),
 +
-+    RIVER(Biome.builder().name(NamespaceID.from("minecraft:river")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    RIVER(Biome.builder().name(NamespaceID.from("minecraft:river")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    STONY_SHORE(Biome.builder().name(NamespaceID.from("minecraft:stony_shore")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.2f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8233727).build()).build()),
++    STONY_SHORE(Biome.builder().name(NamespaceID.from("minecraft:stony_shore")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.2f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7da2ff).build()).build()),
 +
-+    WARPED_FOREST(Biome.builder().name(NamespaceID.from("minecraft:warped_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x1705242).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    WARPED_FOREST(Biome.builder().name(NamespaceID.from("minecraft:warped_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x1a051a).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    SNOWY_PLAINS(Biome.builder().name(NamespaceID.from("minecraft:snowy_plains")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.0f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8364543).build()).build()),
++    SNOWY_PLAINS(Biome.builder().name(NamespaceID.from("minecraft:snowy_plains")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.0f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7fa1ff).build()).build()),
 +
-+    DRIPSTONE_CAVES(Biome.builder().name(NamespaceID.from("minecraft:dripstone_caves")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7907327).build()).build()),
++    DRIPSTONE_CAVES(Biome.builder().name(NamespaceID.from("minecraft:dripstone_caves")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x78a7ff).build()).build()),
 +
-+    SNOWY_TAIGA(Biome.builder().name(NamespaceID.from("minecraft:snowy_taiga")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.5f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4020182).waterFogColor(0x329011).skyColor(0x8625919).build()).build()),
++    SNOWY_TAIGA(Biome.builder().name(NamespaceID.from("minecraft:snowy_taiga")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.5f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3d57d6).waterFogColor(0x050533).skyColor(0x839eff).build()).build()),
 +
-+    GROVE(Biome.builder().name(NamespaceID.from("minecraft:grove")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.2f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8495359).build()).build()),
++    GROVE(Biome.builder().name(NamespaceID.from("minecraft:grove")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.2f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x81a0ff).build()).build()),
 +
-+    SWAMP(Biome.builder().name(NamespaceID.from("minecraft:swamp")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x6388580).waterFogColor(0x2302743).skyColor(0x7907327).foliageColor(0x6975545).build()).build()),
++    SWAMP(Biome.builder().name(NamespaceID.from("minecraft:swamp")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x617b64).waterFogColor(0x232317).skyColor(0x78a7ff).foliageColor(0x6a7039).build()).build()),
 +
-+    JAGGED_PEAKS(Biome.builder().name(NamespaceID.from("minecraft:jagged_peaks")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.7f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8756735).build()).build()),
++    JAGGED_PEAKS(Biome.builder().name(NamespaceID.from("minecraft:jagged_peaks")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.7f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x859dff).build()).build()),
 +
-+    COLD_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:cold_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4020182).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    COLD_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:cold_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3d57d6).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    FOREST(Biome.builder().name(NamespaceID.from("minecraft:forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.7f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7972607).build()).build()),
++    FOREST(Biome.builder().name(NamespaceID.from("minecraft:forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.7f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x79a6ff).build()).build()),
 +
-+    LUSH_CAVES(Biome.builder().name(NamespaceID.from("minecraft:lush_caves")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    LUSH_CAVES(Biome.builder().name(NamespaceID.from("minecraft:lush_caves")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    BASALT_DELTAS(Biome.builder().name(NamespaceID.from("minecraft:basalt_deltas")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x6840176).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    BASALT_DELTAS(Biome.builder().name(NamespaceID.from("minecraft:basalt_deltas")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x685f70).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    DEEP_COLD_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:deep_cold_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4020182).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    DEEP_COLD_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:deep_cold_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3d57d6).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    ICE_SPIKES(Biome.builder().name(NamespaceID.from("minecraft:ice_spikes")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.0f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8364543).build()).build()),
++    ICE_SPIKES(Biome.builder().name(NamespaceID.from("minecraft:ice_spikes")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.0f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7fa1ff).build()).build()),
 +
-+    END_MIDLANDS(Biome.builder().name(NamespaceID.from("minecraft:end_midlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x10518688).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x0).build()).build()),
++    END_MIDLANDS(Biome.builder().name(NamespaceID.from("minecraft:end_midlands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xa080a0).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x000000).build()).build()),
 +
-+    FROZEN_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:frozen_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.0f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x3750089).waterFogColor(0x329011).skyColor(0x8364543).build()).build()),
++    FROZEN_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:frozen_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.0f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3938c9).waterFogColor(0x050533).skyColor(0x7fa1ff).build()).build()),
 +
-+    DESERT(Biome.builder().name(NamespaceID.from("minecraft:desert")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    DESERT(Biome.builder().name(NamespaceID.from("minecraft:desert")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    DEEP_FROZEN_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:deep_frozen_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x3750089).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    DEEP_FROZEN_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:deep_frozen_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3938c9).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    WINDSWEPT_FOREST(Biome.builder().name(NamespaceID.from("minecraft:windswept_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.2f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8233727).build()).build()),
++    WINDSWEPT_FOREST(Biome.builder().name(NamespaceID.from("minecraft:windswept_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.2f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7da2ff).build()).build()),
 +
-+    JUNGLE(Biome.builder().name(NamespaceID.from("minecraft:jungle")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.95f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7842047).build()).build()),
++    JUNGLE(Biome.builder().name(NamespaceID.from("minecraft:jungle")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.95f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x77a8ff).build()).build()),
 +
-+    OCEAN(Biome.builder().name(NamespaceID.from("minecraft:ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    OCEAN(Biome.builder().name(NamespaceID.from("minecraft:ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    OLD_GROWTH_SPRUCE_TAIGA(Biome.builder().name(NamespaceID.from("minecraft:old_growth_spruce_taiga")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.25f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8233983).build()).build()),
++    OLD_GROWTH_SPRUCE_TAIGA(Biome.builder().name(NamespaceID.from("minecraft:old_growth_spruce_taiga")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.25f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7da3ff).build()).build()),
 +
-+    SNOWY_BEACH(Biome.builder().name(NamespaceID.from("minecraft:snowy_beach")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.05f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4020182).waterFogColor(0x329011).skyColor(0x8364543).build()).build()),
++    SNOWY_BEACH(Biome.builder().name(NamespaceID.from("minecraft:snowy_beach")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.05f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3d57d6).waterFogColor(0x050533).skyColor(0x7fa1ff).build()).build()),
 +
-+    WINDSWEPT_SAVANNA(Biome.builder().name(NamespaceID.from("minecraft:windswept_savanna")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    WINDSWEPT_SAVANNA(Biome.builder().name(NamespaceID.from("minecraft:windswept_savanna")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    END_BARRENS(Biome.builder().name(NamespaceID.from("minecraft:end_barrens")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x10518688).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x0).build()).build()),
++    END_BARRENS(Biome.builder().name(NamespaceID.from("minecraft:end_barrens")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xa080a0).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x000000).build()).build()),
 +
-+    WARM_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:warm_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4445678).waterFogColor(0x270131).skyColor(0x8103167).build()).build()),
++    WARM_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:warm_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x43d5ee).waterFogColor(0x041f33).skyColor(0x7ba4ff).build()).build()),
 +
-+    DEEP_LUKEWARM_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:deep_lukewarm_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4566514).waterFogColor(0x267827).skyColor(0x8103167).build()).build()),
++    DEEP_LUKEWARM_OCEAN(Biome.builder().name(NamespaceID.from("minecraft:deep_lukewarm_ocean")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x45adf2).waterFogColor(0x041633).skyColor(0x7ba4ff).build()).build()),
 +
-+    FLOWER_FOREST(Biome.builder().name(NamespaceID.from("minecraft:flower_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.7f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7972607).build()).build()),
++    FLOWER_FOREST(Biome.builder().name(NamespaceID.from("minecraft:flower_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.7f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x79a6ff).build()).build()),
 +
-+    SOUL_SAND_VALLEY(Biome.builder().name(NamespaceID.from("minecraft:soul_sand_valley")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x1787717).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    SOUL_SAND_VALLEY(Biome.builder().name(NamespaceID.from("minecraft:soul_sand_valley")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x1b4745).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    NETHER_WASTES(Biome.builder().name(NamespaceID.from("minecraft:nether_wastes")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x3344392).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    NETHER_WASTES(Biome.builder().name(NamespaceID.from("minecraft:nether_wastes")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x330808).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    FROZEN_PEAKS(Biome.builder().name(NamespaceID.from("minecraft:frozen_peaks")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.7f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8756735).build()).build()),
++    FROZEN_PEAKS(Biome.builder().name(NamespaceID.from("minecraft:frozen_peaks")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(-0.7f).downfall(0.9f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x859dff).build()).build()),
 +
-+    THE_END(Biome.builder().name(NamespaceID.from("minecraft:the_end")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x10518688).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x0).build()).build()),
++    THE_END(Biome.builder().name(NamespaceID.from("minecraft:the_end")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xa080a0).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x000000).build()).build()),
 +
-+    SMALL_END_ISLANDS(Biome.builder().name(NamespaceID.from("minecraft:small_end_islands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x10518688).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x0).build()).build()),
++    SMALL_END_ISLANDS(Biome.builder().name(NamespaceID.from("minecraft:small_end_islands")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xa080a0).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x000000).build()).build()),
 +
-+    OLD_GROWTH_BIRCH_FOREST(Biome.builder().name(NamespaceID.from("minecraft:old_growth_birch_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.6f).downfall(0.6f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8037887).build()).build()),
++    OLD_GROWTH_BIRCH_FOREST(Biome.builder().name(NamespaceID.from("minecraft:old_growth_birch_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.6f).downfall(0.6f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7aa5ff).build()).build()),
 +
-+    CRIMSON_FOREST(Biome.builder().name(NamespaceID.from("minecraft:crimson_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x3343107).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    CRIMSON_FOREST(Biome.builder().name(NamespaceID.from("minecraft:crimson_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x330303).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    THE_VOID(Biome.builder().name(NamespaceID.from("minecraft:the_void")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    THE_VOID(Biome.builder().name(NamespaceID.from("minecraft:the_void")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    DEEP_DARK(Biome.builder().name(NamespaceID.from("minecraft:deep_dark")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7907327).build()).build()),
++    DEEP_DARK(Biome.builder().name(NamespaceID.from("minecraft:deep_dark")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x78a7ff).build()).build()),
 +
-+    MEADOW(Biome.builder().name(NamespaceID.from("minecraft:meadow")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x937679).waterFogColor(0x329011).skyColor(0x8103167).build()).build()),
++    MEADOW(Biome.builder().name(NamespaceID.from("minecraft:meadow")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.8f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x0e4ecf).waterFogColor(0x050533).skyColor(0x7ba4ff).build()).build()),
 +
-+    WINDSWEPT_GRAVELLY_HILLS(Biome.builder().name(NamespaceID.from("minecraft:windswept_gravelly_hills")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.2f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x8233727).build()).build()),
++    WINDSWEPT_GRAVELLY_HILLS(Biome.builder().name(NamespaceID.from("minecraft:windswept_gravelly_hills")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.2f).downfall(0.3f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7da2ff).build()).build()),
 +
-+    SAVANNA(Biome.builder().name(NamespaceID.from("minecraft:savanna")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7254527).build()).build()),
++    SAVANNA(Biome.builder().name(NamespaceID.from("minecraft:savanna")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff).build()).build()),
 +
-+    PLAINS(Biome.builder().name(NamespaceID.from("minecraft:plains")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0x12638463).waterColor(0x4159204).waterFogColor(0x329011).skyColor(0x7907327).build()).build());
++    PLAINS(Biome.builder().name(NamespaceID.from("minecraft:plains")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.8f).downfall(0.4f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x78a7ff).build()).build());
 +
 +    private static final Biomes[] VALUES = Biomes.values();
 +
@@ -625,10 +681,15 @@ index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4
      }
  
 diff --git a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
-index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..7ae7029b7bd1c314e6fdc2870a6303981a588453 100644
+index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..8532902956806455dbbb378ba56e08ffb43ecf2d 100644
 --- a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
 +++ b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
-@@ -6,6 +6,8 @@ import net.minestom.server.utils.NamespaceID;
+@@ -1,27 +1,30 @@
+ package net.minestom.server.world.biomes;
+ 
+-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+ import net.minestom.server.utils.NamespaceID;
  import org.jglrxavpok.hephaistos.nbt.NBT;
  import org.jglrxavpok.hephaistos.nbt.NBTCompound;
  import org.jglrxavpok.hephaistos.nbt.NBTType;
@@ -637,7 +698,12 @@ index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..7ae7029b7bd1c314e6fdc2870a630398
  
  import java.util.Collection;
  import java.util.Collections;
-@@ -15,13 +17,13 @@ import java.util.Map;
+ import java.util.Map;
++import java.util.List;
++import java.util.ArrayList;
++import java.util.stream.IntStream;
+ 
+ 
  /**
   * Allows servers to register custom dimensions. Also used during player joining to send the list of all existing dimensions.
   * <p>
@@ -645,7 +711,8 @@ index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..7ae7029b7bd1c314e6fdc2870a630398
 + * Contains {@link Biomes#PLAINS} by default but can be removed.
   */
  public final class BiomeManager {
-     private final Int2ObjectMap<Biome> biomes = new Int2ObjectOpenHashMap<>();
+-    private final Int2ObjectMap<Biome> biomes = new Int2ObjectOpenHashMap<>();
++    private final List<Biome> biomes = new ArrayList<>();
 +    private final static Logger LOGGER = LoggerFactory.getLogger(BiomeManager.class);
  
      public BiomeManager() {
@@ -653,15 +720,297 @@ index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..7ae7029b7bd1c314e6fdc2870a630398
      }
  
      /**
-@@ -30,6 +32,11 @@ public final class BiomeManager {
+@@ -30,7 +33,11 @@ public final class BiomeManager {
       * @param biome the biome to add
       */
      public synchronized void addBiome(Biome biome) {
-+        if (biomes.values().stream().anyMatch(listBiome -> listBiome.name().equals(biome.name()))) {
+-        this.biomes.put(biome.id(), biome);
++        if (biomes.stream().anyMatch(listBiome -> listBiome.name().equals(biome.name()))) {
 +            LOGGER.error("You cannot register the biome because it is already registered. Please remove the biome to overwrite it");
 +            return;
 +        }
-+        biome.setId(biomes.size());
-         this.biomes.put(biome.id(), biome);
++        this.biomes.add(biome);
      }
  
+     /**
+@@ -39,7 +46,7 @@ public final class BiomeManager {
+      * @param biome the biome to remove
+      */
+     public synchronized void removeBiome(Biome biome) {
+-        this.biomes.remove(biome.id());
++        this.biomes.remove(biome);
+     }
+ 
+     /**
+@@ -48,7 +55,7 @@ public final class BiomeManager {
+      * @return an immutable copy of the biomes already registered
+      */
+     public synchronized Collection<Biome> unmodifiableCollection() {
+-        return Collections.unmodifiableCollection(biomes.values());
++        return Collections.unmodifiableCollection(biomes);
+     }
+ 
+     /**
+@@ -63,7 +70,7 @@ public final class BiomeManager {
+ 
+     public synchronized Biome getByName(NamespaceID namespaceID) {
+         Biome biome = null;
+-        for (final Biome biomeT : biomes.values()) {
++        for (final Biome biomeT : biomes) {
+             if (biomeT.name().equals(namespaceID)) {
+                 biome = biomeT;
+                 break;
+@@ -73,8 +80,16 @@ public final class BiomeManager {
+     }
+ 
+     public synchronized NBTCompound toNBT() {
++        var biomes = new ArrayList<>(unmodifiableCollection());
++        List<NBTCompound> nbtCompounds = IntStream
++                .range(0, biomes.size())
++                .mapToObj(i -> {
++                    var biome = biomes.get(i);
++                    biome.setId(i);
++                    return biome;
++                }).map(Biome::toNbt).toList();
+         return NBT.Compound(Map.of(
+                 "type", NBT.String("minecraft:worldgen/biome"),
+-                "value", NBT.List(NBTType.TAG_Compound, biomes.values().stream().map(Biome::toNbt).toList())));
++                "value", NBT.List(NBTType.TAG_Compound, nbtCompounds)));
+     }
+ }
+diff --git a/src/main/java/net/minestom/server/world/biomes/BiomeParticle.java b/src/main/java/net/minestom/server/world/biomes/BiomeParticle.java
+index f2f3edeb37600c2b603c292a3d7179f61848f0c2..ce20735425d344574ad17001f410bd41db1dbda3 100644
+--- a/src/main/java/net/minestom/server/world/biomes/BiomeParticle.java
++++ b/src/main/java/net/minestom/server/world/biomes/BiomeParticle.java
+@@ -1,70 +1,15 @@
+ package net.minestom.server.world.biomes;
+ 
+-import net.minestom.server.instance.block.Block;
+-import net.minestom.server.item.ItemStack;
+-import net.minestom.server.utils.NamespaceID;
++import net.minestom.server.world.biomes.particle.BiomeOption;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+ 
+ import java.util.Map;
+ 
+-public record BiomeParticle(float probability, Option option) {
++public record BiomeParticle(float probability, BiomeOption option) {
+     public NBTCompound toNbt() {
+         return NBT.Compound(Map.of(
+                 "probability", NBT.Float(probability),
+                 "options", option.toNbt()));
+     }
+-
+-    public interface Option {
+-        NBTCompound toNbt();
+-    }
+-
+-    public record BlockOption(Block block) implements Option {
+-        //TODO also can be falling_dust
+-        private static final String type = "block";
+-
+-        @Override
+-        public NBTCompound toNbt() {
+-            return NBT.Compound(nbtCompound -> {
+-                nbtCompound.setString("type", type);
+-                nbtCompound.setString("Name", block.name());
+-                Map<String, String> propertiesMap = block.properties();
+-                if (propertiesMap.size() != 0) {
+-                    nbtCompound.set("Properties", NBT.Compound(p -> propertiesMap.forEach(p::setString)));
+-                }
+-            });
+-        }
+-    }
+-
+-    public record DustOption(float red, float green, float blue, float scale) implements Option {
+-        private static final String type = "dust";
+-
+-        @Override
+-        public NBTCompound toNbt() {
+-            return NBT.Compound(Map.of(
+-                    "type", NBT.String(type),
+-                    "r", NBT.Float(red),
+-                    "g", NBT.Float(green),
+-                    "b", NBT.Float(blue),
+-                    "scale", NBT.Float(scale)));
+-        }
+-    }
+-
+-    public record ItemOption(ItemStack item) implements Option {
+-        private static final String type = "item";
+-
+-        @Override
+-        public NBTCompound toNbt() {
+-            //todo test count might be wrong type
+-            NBTCompound nbtCompound = item.meta().toNBT();
+-            return nbtCompound.modify(n -> n.setString("type", type));
+-        }
+-    }
+-
+-    public record NormalOption(NamespaceID type) implements Option {
+-        @Override
+-        public NBTCompound toNbt() {
+-            return NBT.Compound(Map.of("type", NBT.String(type.toString())));
+-        }
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/world/biomes/particle/BiomeOption.java b/src/main/java/net/minestom/server/world/biomes/particle/BiomeOption.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..07ffda2ba5d3b7664db1d1ee9f850a0504397636
+--- /dev/null
++++ b/src/main/java/net/minestom/server/world/biomes/particle/BiomeOption.java
+@@ -0,0 +1,16 @@
++package net.minestom.server.world.biomes.particle;
++
++import net.minestom.server.particle.Particle;
++import org.jetbrains.annotations.NotNull;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++
++/**
++ * Just a generic interface to hold data about biome particles
++ * @author TheMeinerLP
++ */
++public interface BiomeOption {
++    @NotNull
++    NBTCompound toNbt();
++    @NotNull
++    Particle getType();
++}
+diff --git a/src/main/java/net/minestom/server/world/biomes/particle/BlockOption.java b/src/main/java/net/minestom/server/world/biomes/particle/BlockOption.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..117d9a1ec79de53bf3e2df2a48c8a8a0010d3672
+--- /dev/null
++++ b/src/main/java/net/minestom/server/world/biomes/particle/BlockOption.java
+@@ -0,0 +1,32 @@
++package net.minestom.server.world.biomes.particle;
++
++import net.minestom.server.instance.block.Block;
++import net.minestom.server.particle.Particle;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++import org.jglrxavpok.hephaistos.nbt.NBT;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++
++import java.util.Map;
++
++@ApiStatus.Experimental
++public record BlockOption(@NotNull Block block) implements BiomeOption {
++
++    @Override
++    public @NotNull NBTCompound toNbt() {
++        return NBT.Compound(nbtCompound -> {
++            nbtCompound.setString("type", getType().namespace().toString());
++            nbtCompound.setString("Name", block.name());
++            Map<String, String> propertiesMap = block.properties();
++            if (!propertiesMap.isEmpty()) {
++                nbtCompound.set("Properties", NBT.Compound(p -> propertiesMap.forEach(p::setString)));
++            }
++        });
++    }
++
++    @Override
++    public @NotNull Particle getType() {
++        return Particle.BLOCK;
++    }
++
++}
+diff --git a/src/main/java/net/minestom/server/world/biomes/particle/DefaultOption.java b/src/main/java/net/minestom/server/world/biomes/particle/DefaultOption.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..1ddad4d7ea400653786608669689a84ed3078143
+--- /dev/null
++++ b/src/main/java/net/minestom/server/world/biomes/particle/DefaultOption.java
+@@ -0,0 +1,20 @@
++package net.minestom.server.world.biomes.particle;
++
++import net.minestom.server.particle.Particle;
++import org.jetbrains.annotations.NotNull;
++import org.jglrxavpok.hephaistos.nbt.NBT;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++
++import java.util.Map;
++
++public record DefaultOption(@NotNull Particle particle) implements BiomeOption {
++    @Override
++    public @NotNull NBTCompound toNbt() {
++        return NBT.Compound(Map.of("type", NBT.String(getType().namespace().toString())));
++    }
++
++    @Override
++    public @NotNull Particle getType() {
++        return particle;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java b/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..0a84f495820afa685c08fd97bb454865ba976564
+--- /dev/null
++++ b/src/main/java/net/minestom/server/world/biomes/particle/DustOption.java
+@@ -0,0 +1,34 @@
++package net.minestom.server.world.biomes.particle;
++
++import net.minestom.server.particle.Particle;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++import org.jglrxavpok.hephaistos.nbt.NBT;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++
++import java.util.Map;
++
++/**
++ * Particle effect which used based on the color values.
++ * @param red can between 0 and 1 and is divided by 255
++ * @param green can between 0 and 1 and is divided by 255
++ * @param blue can between 0 and 1 and is divided by 255
++ * @param scale can between 0.01 to 4
++ */
++@ApiStatus.Experimental
++public record DustOption(float red, float green, float blue, float scale) implements BiomeOption {
++    @Override
++    public @NotNull NBTCompound toNbt() {
++        return NBT.Compound(Map.of(
++                "type", NBT.String(getType().namespace().toString()),
++                "Red", NBT.Float(red),
++                "Green", NBT.Float(green),
++                "Blue", NBT.Float(blue),
++                "Scale", NBT.Float(scale)));
++    }
++
++    @Override
++    public @NotNull Particle getType() {
++        return Particle.DUST;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java b/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..a977cd052c10fd1b540b7934251d62e550361ca1
+--- /dev/null
++++ b/src/main/java/net/minestom/server/world/biomes/particle/ItemOption.java
+@@ -0,0 +1,27 @@
++package net.minestom.server.world.biomes.particle;
++
++import net.minestom.server.item.ItemStack;
++import net.minestom.server.particle.Particle;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++
++/**
++ * Particle effect which used based on an item inside the biome.
++ * @param item to bes used
++ */
++@ApiStatus.Experimental
++public record ItemOption(@NotNull ItemStack item) implements BiomeOption {
++
++    @Override
++    public @NotNull NBTCompound toNbt() {
++        NBTCompound nbtCompound = item.meta().toNBT();
++        return nbtCompound.modify(n -> n.setString("type", getType().namespace().toString()));
++    }
++
++    @Override
++    public @NotNull Particle getType() {
++        return Particle.ITEM;
++    }
++
++}
