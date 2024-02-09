@@ -5,10 +5,10 @@ Subject: [PATCH] Add bstats support and integration
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 22f62e8000f5417a8e22ab8d5591ca5f613c3323..5afbe3d8420c9c82b81443748ea39328ed135e4e 100644
+index 78a66c810c634236afd593f0fc6c645f292fbff8..8ea894f1b1819289d1f7c94b44234f06e67d0152 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -106,5 +106,8 @@ dependencies {
+@@ -111,5 +111,8 @@ dependencies {
      // NBT parsing/manipulation/saving
      api("io.github.jglrxavpok.hephaistos:common:${libs.versions.hephaistos.get()}")
      api("io.github.jglrxavpok.hephaistos:gson:${libs.versions.hephaistos.get()}")

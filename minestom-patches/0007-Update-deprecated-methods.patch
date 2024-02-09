@@ -735,7 +735,7 @@ index 73adccbd40f67bc7768f3c9fd2b475b00c06bde4..9c0aa45cf13b618268df90f7497aeb72
       * Changes the {@link Sidebar} title
       *
 diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
-index e68ff90079bea1debfa543b14f6df39396359234..f6f0c593802eaed5bfa5b06f0df5a60226542075 100644
+index bd547661889e72fdea01eb1a13199ca469d82c96..7fe76bc41bce24f092fc343883f8667f6b0e0890 100644
 --- a/src/main/java/net/minestom/server/utils/NamespaceID.java
 +++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
 @@ -112,14 +112,4 @@ public final class NamespaceID implements CharSequence, Key {

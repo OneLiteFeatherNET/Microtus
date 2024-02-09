@@ -72,7 +72,7 @@ index 0000000000000000000000000000000000000000..d7ef61eaed4232bc5303a5879a2d9859
 +//Microtus end - integrate world spawn position
 \ No newline at end of file
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index f1d5182af481ce9f0ec86e7fcba0460d87431eec..32d37d82ce169592f080ec3f31b354ad9a72e16f 100644
+index ec148cc302a79e5757f46383fe876056e8bb9612..5a14fce16be96326d9b6ef1cf3c6a5db0aff8b78 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
 @@ -8,6 +8,7 @@ import net.minestom.server.ServerProcess;

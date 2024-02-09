@@ -5,10 +5,10 @@ Subject: [PATCH] Fix switching of entity metadata
 
 
 diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
-index a9cead5ecd4de413dbec469b4e3e2fa340e2d2e1..7bf0107a82837be2771804e59dd8cac2f2e85231 100644
+index 35ffb819279d3c4586a0b699bd2843912a828661..cfec621e570fa159b94e3e1dcecd8b250559e0cc 100644
 --- a/src/main/java/net/minestom/server/entity/Entity.java
 +++ b/src/main/java/net/minestom/server/entity/Entity.java
-@@ -1252,7 +1252,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
+@@ -1237,7 +1237,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
              setPose(Pose.FALL_FLYING);
          } else if (entityMeta.isSwimming()) {
              setPose(Pose.SWIMMING);

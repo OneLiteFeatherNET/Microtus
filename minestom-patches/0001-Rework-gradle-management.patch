@@ -98,7 +98,7 @@ index 0000000000000000000000000000000000000000..d9af25dd00549449f429e79af70a431f
 +}
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 1b5833ba09710b36b67003494130537a42f32a5d..22f62e8000f5417a8e22ab8d5591ca5f613c3323 100644
+index ee2561e2520a2659a959dbee3f6a15b84e80f254..78a66c810c634236afd593f0fc6c645f292fbff8 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,90 +1,50 @@
@@ -221,7 +221,7 @@ index 1b5833ba09710b36b67003494130537a42f32a5d..22f62e8000f5417a8e22ab8d5591ca5f
  }
  
  tasks {
-@@ -97,101 +57,54 @@ tasks {
+@@ -102,101 +62,54 @@ tasks {
              addStringOption("-release", "17")
              // Links to external javadocs
              links("https://docs.oracle.com/en/java/javase/17/docs/api/")
