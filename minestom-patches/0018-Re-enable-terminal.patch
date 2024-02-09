@@ -33,6 +33,48 @@ index 0f23b3348fd84f82485be7f61e15ff7f4a7b4378..253c601939232d8acad6e109a5aef79e
              MinestomTerminal.start();
          }
          if (bstatsEnabled) {
+diff --git a/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java b/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..738c3d0ba9bcb52ae16cca3656cd49f45b499db0
+--- /dev/null
++++ b/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java
+@@ -0,0 +1,36 @@
++package net.minestom.server.terminal;
++
++import org.fusesource.jansi.AnsiConsole;
++import org.tinylog.core.LogEntry;
++import org.tinylog.writers.AbstractFormatPatternWriter;
++
++import java.util.Map;
++
++import static net.minestom.server.terminal.MinestomTerminal.reader;
++
++public final class MinestomConsoleWriter extends AbstractFormatPatternWriter {
++    public MinestomConsoleWriter(Map<String, String> properties) {
++        super(properties);
++    }
++
++    @Override
++    public void write(LogEntry logEntry) throws Exception {
++        String rendered = render(logEntry);
++        String formatted = TerminalColorConverter.format(rendered);
++        if (reader != null) {
++            reader.printAbove(formatted);
++        } else {
++            AnsiConsole.out().print(formatted);
++        }
++    }
++
++    @Override
++    public void flush() {
++        // EMPTY
++    }
++
++    @Override
++    public void close() {
++        // EMPTY
++    }
++}
 diff --git a/src/main/java/net/minestom/server/terminal/MinestomTerminal.java b/src/main/java/net/minestom/server/terminal/MinestomTerminal.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..7ae82f27e6b0b88f538a454dc248b6e6a409118b

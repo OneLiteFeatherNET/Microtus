@@ -389,7 +389,7 @@ index 0000000000000000000000000000000000000000..dd96f46af262dcbf96ac69967fdd71b2
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03 100644
+index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..95efa48f41ed3a694babc4d3993750c38900eeaa 100644
 --- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 +++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 @@ -4,6 +4,7 @@ import com.google.gson.Gson;
@@ -400,20 +400,19 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..caa744364c8de2c0dfd5a31e3ca58c7d
  import net.minestom.server.ServerProcess;
  import net.minestom.server.utils.validate.Check;
  import org.jetbrains.annotations.ApiStatus;
-@@ -23,19 +24,18 @@ import java.util.zip.ZipEntry;
+@@ -23,19 +24,20 @@ import java.util.zip.ZipEntry;
  import java.util.zip.ZipFile;
  
  public class ExtensionManager {
 -    //Microtus start - update java keyword usage
 -    public static final Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
--    public static final String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
--    public static final String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
--    private static final Gson GSON = new Gson();
--    //Microtus end - update java keyword usage
 +
 +    public final static Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
 +
-+    private final static Gson GSON = new Gson();
+     public static final String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
+     public static final String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
+     private static final Gson GSON = new Gson();
+-    //Microtus end - update java keyword usage
 +
      private final ServerProcess serverProcess;
  
@@ -426,7 +425,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..caa744364c8de2c0dfd5a31e3ca58c7d
      private final File dependenciesFolder = new File(extensionFolder, ".libs");
      private Path extensionDataRoot = extensionFolder.toPath();
  
-@@ -370,14 +370,13 @@ public class ExtensionManager {
+@@ -370,14 +372,13 @@ public class ExtensionManager {
          //TODO(mattw): Should show a warning if one is set and not the other. It is most likely a mistake.
  
          // this allows developers to have their extension discovered while working on it, without having to build a jar and put in the extension folder

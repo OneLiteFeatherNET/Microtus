@@ -324,6 +324,27 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..54582df4b92d073c3bf0bf0169b13627
 -        return clampedAttributeClass.build();
 -    }
  }
+diff --git a/demo/src/main/java/net/minestom/demo/entity/ChickenCreature.java b/demo/src/main/java/net/minestom/demo/entity/ChickenCreature.java
+index 6f241e422c37dd72e19b25ac10f7928411c94211..328a9d855e8b4bb4eed8ac988dac8e8615163bc3 100644
+--- a/demo/src/main/java/net/minestom/demo/entity/ChickenCreature.java
++++ b/demo/src/main/java/net/minestom/demo/entity/ChickenCreature.java
+@@ -1,6 +1,7 @@
+ package net.minestom.demo.entity;
+ 
+ import net.minestom.server.attribute.Attribute;
++import net.minestom.server.attribute.Attributes;
+ import net.minestom.server.entity.EntityCreature;
+ import net.minestom.server.entity.EntityType;
+ import net.minestom.server.entity.ai.goal.RandomStrollGoal;
+@@ -35,7 +36,7 @@ public class ChickenCreature extends EntityCreature {
+ //                        .build()
+ //        );
+ 
+-        getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f);
++        getAttribute(Attributes.GENERIC_MOVEMENT_SPEED.attribute()).setBaseValue(0.1f);
+     }
+ 
+     @Override
 diff --git a/settings.gradle.kts b/settings.gradle.kts
 index 581eaf10350e0f6591d5f04f1f39b988edb72f3b..e864775ff279f12115618a3c7c79438c34fae0a3 100644
 --- a/settings.gradle.kts
@@ -491,7 +512,7 @@ index 368f9188233768ee68125c253c394fee90eab778..459edc248d91d3b49b3bc40fd9eba18f
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 5cca3698d7a2c9a50c835f852ce17f2019e53100..a45f83a4ca8b4159c4a614ee3567c2349f4ae364 100644
+index 5cca3698d7a2c9a50c835f852ce17f2019e53100..57b5287970f5255bebfb7757c5ad3e14f6c056e2 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -25,7 +25,7 @@ import net.minestom.server.advancements.AdvancementTab;
@@ -508,7 +529,7 @@ index 5cca3698d7a2c9a50c835f852ce17f2019e53100..a45f83a4ca8b4159c4a614ee3567c234
          this.dimensionType = DimensionType.OVERWORLD; // Default dimension
          this.levelFlat = true;
 -        getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f);
-+        getAttribute(Attributes.GENERIC_MOVEMENT_SPEED.attribute());
++        getAttribute(Attributes.GENERIC_MOVEMENT_SPEED.attribute()).setBaseValue(0.1f);
  
          // FakePlayer init its connection there
          playerConnectionInit();
