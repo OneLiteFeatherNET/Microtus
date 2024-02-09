@@ -32,12 +32,14 @@ index 607fec9a560670c728ef3208d3987901b28a5dbf..75d209cc051e6512deea86bbc77f47ad
  //        new VillagerProfessionGenerator(
  //                new File(inputFolder, targetVersion + "_villager_professions.json"),
 diff --git a/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
-index 618040b6ff868f2327c641ed3e5c205c8a00344f..d446b208f333027faa9bfdd885f928d115ac05e4 100644
+index 618040b6ff868f2327c641ed3e5c205c8a00344f..54582df4b92d073c3bf0bf0169b1362792843a83 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
-@@ -3,22 +3,12 @@ package net.minestom.codegen.attribute;
- import com.google.gson.JsonArray;
- import com.google.gson.JsonElement;
+@@ -1,43 +1,30 @@
+ package net.minestom.codegen.attribute;
+ 
+-import com.google.gson.JsonArray;
+-import com.google.gson.JsonElement;
  import com.google.gson.JsonObject;
 -import com.squareup.javapoet.CodeBlock;
 -import com.squareup.javapoet.ClassName;
@@ -59,20 +61,29 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..d446b208f333027faa9bfdd885f928d1
  
  import javax.lang.model.element.Modifier;
  import java.io.File;
-@@ -26,11 +16,8 @@ import java.io.InputStream;
+ import java.io.InputStream;
  import java.io.InputStreamReader;
  import java.util.ArrayList;
++import java.util.HashMap;
  import java.util.List;
-+import java.util.Locale;
++import java.util.Map;
  
--import static net.minestom.codegen.util.GenerationHelper.VARIABLE_SETTER;
--
+ import static net.minestom.codegen.util.GenerationHelper.VARIABLE_SETTER;
+ 
 -@ApiStatus.NonExtendable
 -@ApiStatus.Internal
  public final class AttributeGenerator extends MinestomCodeGenerator {
      private static final Logger LOGGER = LoggerFactory.getLogger(AttributeGenerator.class);
-     private static final String MIN_VALUE = "minValue";
-@@ -59,135 +46,71 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
+-    private static final String MIN_VALUE = "minValue";
+     private static final String MAX_VALUE = "maxValue";
+     private static final String DEFAULT_VALUE = "defaultValue";
+-    private static final String CLIENT_SYNCABLE = "clientSyncable";
+     private static final String LITERAL_RETURN = "return this.$L";
++    private static final String ATTRIBUTE_KEY = "attribute";
+     private final InputStream attributesFile;
+     private final File outputFolder;
+ 
+@@ -59,125 +46,69 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
              return;
          }
  
@@ -139,7 +150,14 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..d446b208f333027faa9bfdd885f928d1
 -                        .addStatement(LITERAL_RETURN, CLIENT_SYNCABLE)
 -                        .addModifiers(Modifier.PUBLIC)
 -                        .build()
--        );
++
++        // Fields
++        attributeClass.addFields(
++                List.of(
++                        FieldSpec.builder(className, ATTRIBUTE_KEY, Modifier.PRIVATE, Modifier.FINAL).build(),
++                        FieldSpec.builder(ArrayTypeName.of(attributeClassName), "VALUES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer("values()").build()  // Microtus - Banner and shield meta
++                )
+         );
 -        // values method
 -        attributeClass.addMethod(
 -                MethodSpec.methodBuilder("values")
@@ -149,11 +167,33 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..d446b208f333027faa9bfdd885f928d1
 -                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
 -                        .build()
 +
-+        // Fields
-+        attributeClass.addFields(
++        attributeClass.addMethods(
 +                List.of(
-+                        FieldSpec.builder(className, "attribute", Modifier.PRIVATE, Modifier.FINAL).build(),
-+                        FieldSpec.builder(ArrayTypeName.of(attributeClassName), "VALUES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer("values()").build()  // Microtus - Banner and shield meta
++                        // Constructor
++                        MethodSpec.constructorBuilder()
++                                .addParameter(
++                                        ParameterSpec.builder(className, ATTRIBUTE_KEY).addAnnotation(NotNull.class).build()
++                                )
++                                .addStatement(VARIABLE_SETTER, ATTRIBUTE_KEY)
++                                .build(),
++                        MethodSpec.methodBuilder(ATTRIBUTE_KEY)
++                                .addModifiers(Modifier.PUBLIC)
++                                .returns(className.annotated(AnnotationSpec.builder(NotNull.class).build()))
++                                .addStatement(LITERAL_RETURN, ATTRIBUTE_KEY)
++                                .build(),
++                        MethodSpec.methodBuilder("getValue")
++                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
++                                .addParameter(ParameterSpec.builder(TypeName.INT, "id").build())
++                                .addAnnotation(Nullable.class)
++                                .returns(className)
++                                .addCode("return VALUES[$L].$L;", "id", ATTRIBUTE_KEY)
++                                .build(),
++                        MethodSpec.methodBuilder("registerAttributes")
++                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
++                                .beginControlFlow("for (var $L : VALUES)", "v")
++                                .addStatement("$L.$L.register()", "v", ATTRIBUTE_KEY)
++                                .endControlFlow()
++                                .build()
 +                )
          );
 -        // toString method
@@ -161,35 +201,9 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..d446b208f333027faa9bfdd885f928d1
  
 -        // Creating ClampedAttribute
 -        TypeSpec clampedAttributeClass = generateClampedAttributeClass(attributeClassName);
-+        attributeClass.addMethods(
-+                List.of(
-+                        // Constructor
-+                        MethodSpec.constructorBuilder()
-+                                .addParameter(
-+                                        ParameterSpec.builder(className, "attribute").addAnnotation(NotNull.class).build()
-+                                )
-+                                .addStatement("this.$1L = $1L", "attribute")
-+                                .build(),
-+                        MethodSpec.methodBuilder("attribute")
-+                                .addModifiers(Modifier.PUBLIC)
-+                                .returns(className.annotated(AnnotationSpec.builder(NotNull.class).build()))
-+                                .addStatement("return this.$L", "attribute")
-+                                .build(),
-+                        MethodSpec.methodBuilder("getValue")
-+                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-+                                .addParameter(ParameterSpec.builder(TypeName.INT, "id").build())
-+                                .addAnnotation(Nullable.class)
-+                                .returns(className)
-+                                .addCode("return VALUES[$L].attribute;", "id")
-+                                .build(),
-+                        MethodSpec.methodBuilder("registerAttributes")
-+                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-+                                .beginControlFlow("for (var $L : VALUES)", "v")
-+                                .addStatement("$L.attribute.register()", "v")
-+                                .endControlFlow()
-+                                .build()
-+                )
-+        );
++        Map<String, String> extractData = new HashMap<>();
++        extractData.put("minecraft:", "");
++        extractData.put(".", "_");
  
 -        CodeBlock.Builder staticBlock = CodeBlock.builder();
          // Use data
@@ -199,9 +213,7 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..d446b208f333027faa9bfdd885f928d1
 -
 +        for (String key : attributes.keySet()) {
 +            JsonObject attribute = attributes.getAsJsonObject(key);
-+            String attributeName = key .replace("minecraft:", "")
-+                    .replace(".", "_")
-+                    .toUpperCase(Locale.ROOT);
++            String attributeName = extractNamespaces(key, extractData);
              JsonObject range = attribute.getAsJsonObject("range");
 -            if (range == null) {
 -                // Normal attribute
@@ -249,18 +261,20 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..d446b208f333027faa9bfdd885f928d1
  
          filesToWrite.add(
                  JavaFile.builder(packageName, attributeClass.build())
--                        .indent(DEFAULT_INDENT)
--                        .skipJavaLangImports(true)
--                        .build()
--        );
--        filesToWrite.add(
--                JavaFile.builder(packageName, clampedAttributeClass)
--                        .indent(DEFAULT_VALUE)
-+                        .indent("    ")
+@@ -185,12 +116,6 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
                          .skipJavaLangImports(true)
                          .build()
          );
-@@ -198,49 +121,4 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
+-        filesToWrite.add(
+-                JavaFile.builder(packageName, clampedAttributeClass)
+-                        .indent(DEFAULT_VALUE)
+-                        .skipJavaLangImports(true)
+-                        .build()
+-        );
+ 
+         // Write files to outputFolder
+         writeFiles(
+@@ -198,49 +123,4 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
                  outputFolder
          );
      }
