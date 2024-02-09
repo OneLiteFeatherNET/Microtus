@@ -29,6 +29,27 @@ index 0000000000000000000000000000000000000000..1ee73c65139fd730df4f868d8a443320
 +    implementation("io.github.gradle-nexus", "publish-plugin", "2.0.0-rc-1")
 +}
 \ No newline at end of file
+diff --git a/build-logic/src/main/kotlin/minestom.native-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.native-conventions.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..4a873e818bb2488c32ceb57155e48e15c648125f
+--- /dev/null
++++ b/build-logic/src/main/kotlin/minestom.native-conventions.gradle.kts
+@@ -0,0 +1,14 @@
++plugins {
++    id("minestom.common-conventions")
++    id("org.graalvm.buildtools.native")
++}
++
++graalvmNative {
++    binaries {
++        named("main") {
++            buildArgs.add("--allow-incomplete-classpath")
++            // One day toolchains will support getting this automagically, but that day is not today.
++            toolchainDetection.set(false)
++        }
++    }
++}
+\ No newline at end of file
 diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
 new file mode 100644
 index 0000000000000000000000000000000000000000..d9af25dd00549449f429e79af70a431fefb86b8e
@@ -2461,10 +2482,10 @@ index 1e41e00b7d128df8b59dd63ee059d93146567c14..00000000000000000000000000000000
 -  - openjdk17
 \ No newline at end of file
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..aab481e32f70c1ee82444c5e6eca51183acef95a 100644
+index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..298e4714fb81cdf2cd1e7ab6157a88a2c45500af 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -1,8 +1,137 @@
+@@ -1,8 +1,144 @@
 -rootProject.name = "minestom"
 +enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
  
@@ -2487,6 +2508,8 @@ index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..aab481e32f70c1ee82444c5e6eca5118
 +            version("data", "1.20-rv1")
 +            version("hephaistos", "2.6.1")
 +            version("jetbrainsAnnotations", "24.1.0")
++            version("logback", "1.4.5")
++            version("slf4j", "2.0.7")
 +
 +            // Terminal / Logging
 +            version("tinylog", "2.6.2")
@@ -2544,6 +2567,9 @@ index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..aab481e32f70c1ee82444c5e6eca5118
 +            library("tinylog-api", "org.tinylog", "tinylog-api").versionRef("tinylog")
 +            library("tinylog-impl", "org.tinylog", "tinylog-impl").versionRef("tinylog")
 +            library("tinylog-slf4j", "org.tinylog", "slf4j-tinylog").versionRef("tinylog")
++            library("slf4j", "org.slf4j", "slf4j-api").versionRef("slf4j")
++            library("logback-core", "ch.qos.logback", "logback-core").versionRef("logback")
++            library("logback-classic", "ch.qos.logback", "logback-classic").versionRef("logback")
  
 +            // Terminal
 +            library("jline", "org.jline", "jline").versionRef("jline")
@@ -2586,6 +2612,8 @@ index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..aab481e32f70c1ee82444c5e6eca5118
 +            bundle("adventure", listOf("adventure-api", "adventure-mini-message", "adventure-serializer-gson", "adventure-serializer-legacy", "adventure-serializer-plain", "adventure-text-logger-slf4j"))
 +            bundle("logging", listOf("tinylog-api", "tinylog-impl", "tinylog-slf4j"))
 +            bundle("terminal", listOf("jline", "jline-jansi"))
++            bundle("logback", listOf("logback-core", "logback-classic"))
++            bundle("junit", listOf("junit-api", "junit-engine", "junit-params", "junit-suite-api", "junit-suite-engine"))
 +
 +            plugin("blossom", "net.kyori.blossom").versionRef("blossom")
 +

@@ -325,7 +325,7 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..54582df4b92d073c3bf0bf0169b13627
 -    }
  }
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 8ab4bf2c0ecb2453556ea622861036c1fe96994f..dc2e17058c8380aeb0cafb0afb1ceae293a8e0c0 100644
+index 581eaf10350e0f6591d5f04f1f39b988edb72f3b..e864775ff279f12115618a3c7c79438c34fae0a3 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
 @@ -3,6 +3,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
@@ -344,8 +344,8 @@ index 8ab4bf2c0ecb2453556ea622861036c1fe96994f..dc2e17058c8380aeb0cafb0afb1ceae2
 +            version("data", "1.20-SNAPSHOT")
              version("hephaistos", "2.6.1")
              version("jetbrainsAnnotations", "24.1.0")
- 
-@@ -65,7 +66,7 @@ dependencyResolutionManagement {
+             version("logback", "1.4.5")
+@@ -67,7 +68,7 @@ dependencyResolutionManagement {
              // Miscellaneous
              library("hydrazine", "com.github.MadMartian", "hydrazine-path-finding").versionRef("hydrazine")
              library("dependencyGetter", "com.github.Minestom", "DependencyGetter").versionRef("dependencyGetter")
