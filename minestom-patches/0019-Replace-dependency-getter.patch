@@ -46,7 +46,7 @@ index e864775ff279f12115618a3c7c79438c34fae0a3..1246f3f575f212a047336b8d3f24f74f
              library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
              library("kotlin-stdlib-jdk8", "org.jetbrains.kotlin", "kotlin-stdlib-jdk8").versionRef("kotlin")
 diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4c5ce0aef 100644
+index 95efa48f41ed3a694babc4d3993750c38900eeaa..6985fb8baa689c6df489d1e9812c1b5ee0dd26ad 100644
 --- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 +++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 @@ -1,12 +1,28 @@
@@ -91,7 +91,7 @@ index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4
  import java.nio.file.Path;
  import java.util.*;
  import java.util.stream.Collectors;
-@@ -35,15 +51,36 @@ public class ExtensionManager {
+@@ -37,15 +53,36 @@ public class ExtensionManager {
      private final Map<String, Extension> extensions = new LinkedHashMap<>();
      private final Map<String, Extension> immutableExtensions = Collections.unmodifiableMap(extensions);
  
@@ -130,7 +130,7 @@ index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4
      }
  
      /**
-@@ -182,25 +219,6 @@ public class ExtensionManager {
+@@ -184,25 +221,6 @@ public class ExtensionManager {
       * And finally make a scheduler to clean observers per extension.
       */
      private void loadExtensions() {
@@ -156,7 +156,7 @@ index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4
          // Load extensions
          {
              // Get all extensions and order them accordingly.
-@@ -370,13 +388,14 @@ public class ExtensionManager {
+@@ -372,13 +390,14 @@ public class ExtensionManager {
          //TODO(mattw): Should show a warning if one is set and not the other. It is most likely a mistake.
  
          // this allows developers to have their extension discovered while working on it, without having to build a jar and put in the extension folder
@@ -176,7 +176,7 @@ index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4
                  extension.setDataDirectory(getExtensionDataRoot().resolve(extension.getName()));
  
                  // Verify integrity and ensure defaults
-@@ -539,6 +558,7 @@ public class ExtensionManager {
+@@ -541,6 +560,7 @@ public class ExtensionManager {
      }
  
      private void loadDependencies(@NotNull List<DiscoveredExtension> extensions) {
@@ -184,7 +184,7 @@ index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4
          List<DiscoveredExtension> allLoadedExtensions = new LinkedList<>(extensions);
  
          for (Extension extension : immutableExtensions.values())
-@@ -546,9 +566,8 @@ public class ExtensionManager {
+@@ -548,9 +568,8 @@ public class ExtensionManager {
  
          for (DiscoveredExtension discoveredExtension : extensions) {
              try {
@@ -195,7 +195,7 @@ index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4
                  for (var repository : externalDependencies.repositories) {
  
                      if (repository.name == null || repository.name.isEmpty()) {
-@@ -558,18 +577,28 @@ public class ExtensionManager {
+@@ -560,18 +579,28 @@ public class ExtensionManager {
                      if (repository.url == null || repository.url.isEmpty()) {
                          throw new IllegalStateException("Missing 'url' element in repository object.");
                      }
@@ -231,7 +231,7 @@ index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4
                  ExtensionClassLoader extensionClassLoader = discoveredExtension.getClassLoader();
                  for (String dependencyName : discoveredExtension.getDependencies()) {
                      var resolved = extensions.stream()
-@@ -591,22 +620,6 @@ public class ExtensionManager {
+@@ -593,22 +622,6 @@ public class ExtensionManager {
          }
      }
  
