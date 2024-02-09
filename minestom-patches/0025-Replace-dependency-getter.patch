@@ -21,11 +21,11 @@ index 5afbe3d8420c9c82b81443748ea39328ed135e4e..748adce4c9ed306f25c1b038e5812058
      // Minestom Data (From MinestomDataGenerator)
      implementation(libs.minestomData)
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 8ab4bf2c0ecb2453556ea622861036c1fe96994f..93975fff492a12223aec8ec7d4bb48748ad02b3b 100644
+index dc2e17058c8380aeb0cafb0afb1ceae293a8e0c0..4875d6ec3098a3206cdb90706e2519d592ad0112 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -15,6 +15,8 @@ dependencyResolutionManagement {
-             version("data", "1.20-rv1")
+@@ -16,6 +16,8 @@ dependencyResolutionManagement {
+             version("data", "1.20-SNAPSHOT")
              version("hephaistos", "2.6.1")
              version("jetbrainsAnnotations", "24.1.0")
 +            version("maven-resolver", "1.9.18")
@@ -33,7 +33,7 @@ index 8ab4bf2c0ecb2453556ea622861036c1fe96994f..93975fff492a12223aec8ec7d4bb4874
  
              // Terminal / Logging
              version("tinylog", "2.6.2")
-@@ -58,6 +60,11 @@ dependencyResolutionManagement {
+@@ -59,6 +61,11 @@ dependencyResolutionManagement {
              library("adventure-text-logger-slf4j", "net.kyori", "adventure-text-logger-slf4j").versionRef("adventure")
              library("adventure-mini-message", "net.kyori", "adventure-text-minimessage").versionRef("adventure")
  
