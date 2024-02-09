@@ -590,3 +590,15 @@ index f8ea7c7d8c1b68b1914732c290f6936a318a12ee..0adf09c71b2d9d9009e95b5bb722836b
                                  AttributeOperation.ADDITION, 2, AttributeSlot.MAINHAND))))
                  .build();
          assertEqualsSNBT("""
+diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
+index 8a80d6d01b8023caac54c4af5f21d8020f3f016d..9af960eebc4d556f9345b72fec18064a971825db 100644
+--- a/testing/build.gradle.kts
++++ b/testing/build.gradle.kts
+@@ -10,6 +10,7 @@ group = "net.onelitefeather.microtus.testing"
+ 
+ repositories {
+     mavenCentral()
++    maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
+     maven(url = "https://jitpack.io")
+ }
+ 
