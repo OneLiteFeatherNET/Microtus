@@ -5,10 +5,10 @@ Subject: [PATCH] Replace dependency getter
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 5afbe3d8420c9c82b81443748ea39328ed135e4e..748adce4c9ed306f25c1b038e58120584ab1245d 100644
+index 8ea894f1b1819289d1f7c94b44234f06e67d0152..10129a4eef328da62609331986c44d38bbcc0e70 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -97,8 +97,9 @@ dependencies {
+@@ -102,8 +102,9 @@ dependencies {
      // Kotlin Libraries
      api(libs.bundles.kotlin)
  
@@ -21,19 +21,19 @@ index 5afbe3d8420c9c82b81443748ea39328ed135e4e..748adce4c9ed306f25c1b038e5812058
      // Minestom Data (From MinestomDataGenerator)
      implementation(libs.minestomData)
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index dc2e17058c8380aeb0cafb0afb1ceae293a8e0c0..4875d6ec3098a3206cdb90706e2519d592ad0112 100644
+index e864775ff279f12115618a3c7c79438c34fae0a3..1246f3f575f212a047336b8d3f24f74ff8706fed 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -16,6 +16,8 @@ dependencyResolutionManagement {
-             version("data", "1.20-SNAPSHOT")
-             version("hephaistos", "2.6.1")
+@@ -18,6 +18,8 @@ dependencyResolutionManagement {
              version("jetbrainsAnnotations", "24.1.0")
+             version("logback", "1.4.5")
+             version("slf4j", "2.0.7")
 +            version("maven-resolver", "1.9.18")
 +            version("maven-resolver-provider", "3.9.6")
  
              // Terminal / Logging
              version("tinylog", "2.6.2")
-@@ -59,6 +61,11 @@ dependencyResolutionManagement {
+@@ -61,6 +63,11 @@ dependencyResolutionManagement {
              library("adventure-text-logger-slf4j", "net.kyori", "adventure-text-logger-slf4j").versionRef("adventure")
              library("adventure-mini-message", "net.kyori", "adventure-text-minimessage").versionRef("adventure")
  
@@ -46,16 +46,17 @@ index dc2e17058c8380aeb0cafb0afb1ceae293a8e0c0..4875d6ec3098a3206cdb90706e2519d5
              library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
              library("kotlin-stdlib-jdk8", "org.jetbrains.kotlin", "kotlin-stdlib-jdk8").versionRef("kotlin")
 diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..5d6456aaa7b4ba0a088e8729debf3ac8af01e0d2 100644
+index caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03..d3100d541300e3d82fe9a3b7647e42e4c5ce0aef 100644
 --- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 +++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-@@ -1,11 +1,28 @@
+@@ -1,12 +1,28 @@
  package net.minestom.server.extensions;
  
  import com.google.gson.Gson;
 -import net.minestom.dependencies.DependencyGetter;
 -import net.minestom.dependencies.ResolvedDependency;
 -import net.minestom.dependencies.maven.MavenRepository;
+-import net.minestom.server.ServerFlag;
  import net.minestom.server.ServerProcess;
  import net.minestom.server.utils.validate.Check;
 +import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
@@ -81,7 +82,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..5d6456aaa7b4ba0a088e8729debf3ac8
  import org.jetbrains.annotations.ApiStatus;
  import org.jetbrains.annotations.NotNull;
  import org.jetbrains.annotations.Nullable;
-@@ -15,7 +32,7 @@ import org.slf4j.LoggerFactory;
+@@ -16,7 +32,7 @@ import org.slf4j.LoggerFactory;
  import java.io.*;
  import java.lang.reflect.Constructor;
  import java.lang.reflect.InvocationTargetException;
@@ -90,11 +91,13 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..5d6456aaa7b4ba0a088e8729debf3ac8
  import java.nio.file.Path;
  import java.util.*;
  import java.util.stream.Collectors;
-@@ -36,14 +53,35 @@ public class ExtensionManager {
+@@ -35,15 +51,36 @@ public class ExtensionManager {
+     private final Map<String, Extension> extensions = new LinkedHashMap<>();
      private final Map<String, Extension> immutableExtensions = Collections.unmodifiableMap(extensions);
  
-     private final File extensionFolder = new File(System.getProperty("minestom.extension.folder", "extensions"));
+-    private final File extensionFolder = new File(ServerFlag.EXTENSIONS_FOLDER);
 -    private final File dependenciesFolder = new File(extensionFolder, ".libs");
++    private final File extensionFolder = new File(System.getProperty("minestom.extension.folder", "extensions"));
      private Path extensionDataRoot = extensionFolder.toPath();
  
      private enum State {DO_NOT_START, NOT_STARTED, STARTED, PRE_INIT, INIT, POST_INIT}
@@ -127,7 +130,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..5d6456aaa7b4ba0a088e8729debf3ac8
      }
  
      /**
-@@ -182,25 +220,6 @@ public class ExtensionManager {
+@@ -182,25 +219,6 @@ public class ExtensionManager {
       * And finally make a scheduler to clean observers per extension.
       */
      private void loadExtensions() {
@@ -153,7 +156,27 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..5d6456aaa7b4ba0a088e8729debf3ac8
          // Load extensions
          {
              // Get all extensions and order them accordingly.
-@@ -540,6 +559,7 @@ public class ExtensionManager {
+@@ -370,13 +388,14 @@ public class ExtensionManager {
+         //TODO(mattw): Should show a warning if one is set and not the other. It is most likely a mistake.
+ 
+         // this allows developers to have their extension discovered while working on it, without having to build a jar and put in the extension folder
+-        if (ServerFlag.EXTENSIONS_DEV_CLASSES != null && ServerFlag.EXTENSIONS_DEV_RESOURCES != null) {
++        if (System.getProperty(INDEV_CLASSES_FOLDER) != null && System.getProperty(INDEV_RESOURCES_FOLDER) != null) {
+             LOGGER.info("Found indev folders for extension. Adding to list of discovered extensions.");
+-            final File extensionJsonFile = new File(ServerFlag.EXTENSIONS_DEV_RESOURCES, "extension.json");
+-            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(extensionJsonFile))) {
++            final String extensionClasses = System.getProperty(INDEV_CLASSES_FOLDER);
++            final String extensionResources = System.getProperty(INDEV_RESOURCES_FOLDER);
++            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(extensionResources, "extension.json")))) {
+                 DiscoveredExtension extension = GSON.fromJson(reader, DiscoveredExtension.class);
+-                extension.files.add(new File(ServerFlag.EXTENSIONS_DEV_CLASSES).toURI().toURL());
+-                extension.files.add(new File(ServerFlag.EXTENSIONS_DEV_RESOURCES).toURI().toURL());
++                extension.files.add(new File(extensionClasses).toURI().toURL());
++                extension.files.add(new File(extensionResources).toURI().toURL());
+                 extension.setDataDirectory(getExtensionDataRoot().resolve(extension.getName()));
+ 
+                 // Verify integrity and ensure defaults
+@@ -539,6 +558,7 @@ public class ExtensionManager {
      }
  
      private void loadDependencies(@NotNull List<DiscoveredExtension> extensions) {
@@ -161,7 +184,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..5d6456aaa7b4ba0a088e8729debf3ac8
          List<DiscoveredExtension> allLoadedExtensions = new LinkedList<>(extensions);
  
          for (Extension extension : immutableExtensions.values())
-@@ -547,9 +567,8 @@ public class ExtensionManager {
+@@ -546,9 +566,8 @@ public class ExtensionManager {
  
          for (DiscoveredExtension discoveredExtension : extensions) {
              try {
@@ -172,7 +195,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..5d6456aaa7b4ba0a088e8729debf3ac8
                  for (var repository : externalDependencies.repositories) {
  
                      if (repository.name == null || repository.name.isEmpty()) {
-@@ -559,18 +578,28 @@ public class ExtensionManager {
+@@ -558,18 +577,28 @@ public class ExtensionManager {
                      if (repository.url == null || repository.url.isEmpty()) {
                          throw new IllegalStateException("Missing 'url' element in repository object.");
                      }
@@ -208,7 +231,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..5d6456aaa7b4ba0a088e8729debf3ac8
                  ExtensionClassLoader extensionClassLoader = discoveredExtension.getClassLoader();
                  for (String dependencyName : discoveredExtension.getDependencies()) {
                      var resolved = extensions.stream()
-@@ -592,22 +621,6 @@ public class ExtensionManager {
+@@ -591,22 +620,6 @@ public class ExtensionManager {
          }
      }
  
