@@ -1,0 +1,201 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Phillipp Glanz <6745190+TheMeinerLP@users.noreply.github.com>
+Date: Fri, 9 Feb 2024 12:41:59 +0100
+Subject: [PATCH] Replace dependency getter
+
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 5afbe3d8420c9c82b81443748ea39328ed135e4e..748adce4c9ed306f25c1b038e58120584ab1245d 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -97,8 +97,9 @@ dependencies {
+     // Kotlin Libraries
+     api(libs.bundles.kotlin)
+ 
+-    // Extension Management System dependency handler.
+-    api(libs.dependencyGetter)
++    api(libs.maven.resolver)
++    api(libs.maven.connector)
++    api(libs.maven.transport.http)
+ 
+     // Minestom Data (From MinestomDataGenerator)
+     implementation(libs.minestomData)
+diff --git a/settings.gradle.kts b/settings.gradle.kts
+index 8ab4bf2c0ecb2453556ea622861036c1fe96994f..93975fff492a12223aec8ec7d4bb48748ad02b3b 100644
+--- a/settings.gradle.kts
++++ b/settings.gradle.kts
+@@ -15,6 +15,8 @@ dependencyResolutionManagement {
+             version("data", "1.20-rv1")
+             version("hephaistos", "2.6.1")
+             version("jetbrainsAnnotations", "24.1.0")
++            version("maven-resolver", "1.9.18")
++            version("maven-resolver-provider", "3.9.6")
+ 
+             // Terminal / Logging
+             version("tinylog", "2.6.2")
+@@ -58,6 +60,11 @@ dependencyResolutionManagement {
+             library("adventure-text-logger-slf4j", "net.kyori", "adventure-text-logger-slf4j").versionRef("adventure")
+             library("adventure-mini-message", "net.kyori", "adventure-text-minimessage").versionRef("adventure")
+ 
++            // Maven
++            library("maven.connector", "org.apache.maven.resolver", "maven-resolver-connector-basic").versionRef("maven-resolver")
++            library("maven.transport.http", "org.apache.maven.resolver", "maven-resolver-transport-http").versionRef("maven-resolver")
++            library("maven.resolver", "org.apache.maven", "maven-resolver-provider").versionRef("maven-resolver-provider")
++
+             // Kotlin
+             library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
+             library("kotlin-stdlib-jdk8", "org.jetbrains.kotlin", "kotlin-stdlib-jdk8").versionRef("kotlin")
+diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
+index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..411f0a2a3fb8e4eeae1db5a34ea673db12ed1055 100644
+--- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
++++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
+@@ -1,11 +1,28 @@
+ package net.minestom.server.extensions;
+ 
+ import com.google.gson.Gson;
+-import net.minestom.dependencies.DependencyGetter;
+-import net.minestom.dependencies.ResolvedDependency;
+-import net.minestom.dependencies.maven.MavenRepository;
+ import net.minestom.server.ServerProcess;
+ import net.minestom.server.utils.validate.Check;
++import org.apache.maven.repository.internal.MavenRepositorySystemUtils;
++import org.eclipse.aether.DefaultRepositorySystemSession;
++import org.eclipse.aether.RepositorySystem;
++import org.eclipse.aether.artifact.DefaultArtifact;
++import org.eclipse.aether.collection.CollectRequest;
++import org.eclipse.aether.connector.basic.BasicRepositoryConnectorFactory;
++import org.eclipse.aether.graph.Dependency;
++import org.eclipse.aether.impl.DefaultServiceLocator;
++import org.eclipse.aether.repository.LocalRepository;
++import org.eclipse.aether.repository.RemoteRepository;
++import org.eclipse.aether.repository.RepositoryPolicy;
++import org.eclipse.aether.resolution.DependencyRequest;
++import org.eclipse.aether.resolution.DependencyResolutionException;
++import org.eclipse.aether.resolution.DependencyResult;
++import org.eclipse.aether.spi.connector.RepositoryConnectorFactory;
++import org.eclipse.aether.spi.connector.transport.TransporterFactory;
++import org.eclipse.aether.transfer.AbstractTransferListener;
++import org.eclipse.aether.transfer.TransferCancelledException;
++import org.eclipse.aether.transfer.TransferEvent;
++import org.eclipse.aether.transport.http.HttpTransporterFactory;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+@@ -15,6 +32,7 @@ import org.slf4j.LoggerFactory;
+ import java.io.*;
+ import java.lang.reflect.Constructor;
+ import java.lang.reflect.InvocationTargetException;
++import java.net.MalformedURLException;
+ import java.net.URL;
+ import java.nio.file.Path;
+ import java.util.*;
+@@ -42,8 +60,30 @@ public class ExtensionManager {
+     private enum State {DO_NOT_START, NOT_STARTED, STARTED, PRE_INIT, INIT, POST_INIT}
+     private State state = State.NOT_STARTED;
+ 
++    private final RepositorySystem repository;
++    private final DefaultRepositorySystemSession session;
++    private final List<RemoteRepository> repositories = new ArrayList<>();
++    private final List<Dependency> dependencies = new ArrayList<>();
++
++
+     public ExtensionManager(ServerProcess serverProcess) {
+         this.serverProcess = serverProcess;
++        DefaultServiceLocator locator = MavenRepositorySystemUtils.newServiceLocator();
++        locator.addService(RepositoryConnectorFactory.class, BasicRepositoryConnectorFactory.class);
++        locator.addService(TransporterFactory.class, HttpTransporterFactory.class);
++        this.repository = locator.getService(RepositorySystem.class);
++        this.session = MavenRepositorySystemUtils.newSession();
++
++        this.session.setSystemProperties(System.getProperties());
++        this.session.setChecksumPolicy(RepositoryPolicy.CHECKSUM_POLICY_FAIL);
++        this.session.setLocalRepositoryManager(this.repository.newLocalRepositoryManager(this.session, new LocalRepository("libraries")));
++        this.session.setTransferListener(new AbstractTransferListener() {
++            @Override
++            public void transferInitiated(@NotNull TransferEvent event) throws TransferCancelledException {
++                LOGGER.info("Downloading {}", event.getResource().getRepositoryUrl() + event.getResource().getResourceName());
++            }
++        });
++        this.session.setReadOnly();
+     }
+ 
+     /**
+@@ -540,6 +580,7 @@ public class ExtensionManager {
+     }
+ 
+     private void loadDependencies(@NotNull List<DiscoveredExtension> extensions) {
++        List<RemoteRepository> repos = this.repository.newResolutionRepositories(this.session, this.repositories);
+         List<DiscoveredExtension> allLoadedExtensions = new LinkedList<>(extensions);
+ 
+         for (Extension extension : immutableExtensions.values())
+@@ -547,9 +588,8 @@ public class ExtensionManager {
+ 
+         for (DiscoveredExtension discoveredExtension : extensions) {
+             try {
+-                DependencyGetter getter = new DependencyGetter();
++
+                 DiscoveredExtension.ExternalDependencies externalDependencies = discoveredExtension.getExternalDependencies();
+-                List<MavenRepository> repoList = new LinkedList<>();
+                 for (var repository : externalDependencies.repositories) {
+ 
+                     if (repository.name == null || repository.name.isEmpty()) {
+@@ -559,18 +599,29 @@ public class ExtensionManager {
+                     if (repository.url == null || repository.url.isEmpty()) {
+                         throw new IllegalStateException("Missing 'url' element in repository object.");
+                     }
+-
+-                    repoList.add(new MavenRepository(repository.name, repository.url));
++                    repos.add(new RemoteRepository.Builder(repository.name, "default", repository.url).build());
+                 }
+ 
+-                getter.addMavenResolver(repoList);
+-
+                 for (String artifact : externalDependencies.artifacts) {
+-                    var resolved = getter.get(artifact, dependenciesFolder);
+-                    addDependencyFile(resolved, discoveredExtension);
+-                    LOGGER.trace("Dependency of extension {}: {}", discoveredExtension.getName(), resolved);
++                    this.dependencies.add(new Dependency(new DefaultArtifact(artifact), null));
+                 }
+ 
++                DependencyResult result;
++                try {
++                    result = this.repository.resolveDependencies(this.session, new DependencyRequest(new CollectRequest((Dependency) null, this.dependencies, repos), null));
++                } catch (DependencyResolutionException ex) {
++                    throw new IllegalStateException("Error resolving libraries", ex);
++                }
++                LOGGER.trace("Dependency of extension {}: {}", discoveredExtension.getName(), result.toString());
++                result.getArtifactResults().forEach(artifactResult -> {
++                    var local = artifactResult.getLocalArtifactResult();
++                    try {
++                        discoveredExtension.files.add(local.getFile().toURI().toURL());
++                    discoveredExtension.getClassLoader().addURL(local.getFile().toURI().toURL());
++                    } catch (MalformedURLException e) {
++                        throw new RuntimeException(e);
++                    }
++                });
+                 ExtensionClassLoader extensionClassLoader = discoveredExtension.getClassLoader();
+                 for (String dependencyName : discoveredExtension.getDependencies()) {
+                     var resolved = extensions.stream()
+@@ -592,22 +643,6 @@ public class ExtensionManager {
+         }
+     }
+ 
+-    private void addDependencyFile(@NotNull ResolvedDependency dependency, @NotNull DiscoveredExtension extension) {
+-        URL location = dependency.getContentsLocation();
+-        extension.files.add(location);
+-        extension.getClassLoader().addURL(location);
+-        LOGGER.trace("Added dependency {} to extension {} classpath", location.toExternalForm(), extension.getName());
+-
+-        // recurse to add full dependency tree
+-        if (!dependency.getSubdependencies().isEmpty()) {
+-            LOGGER.trace("Dependency {} has subdependencies, adding...", location.toExternalForm());
+-            for (ResolvedDependency sub : dependency.getSubdependencies()) {
+-                addDependencyFile(sub, extension);
+-            }
+-            LOGGER.trace("Dependency {} has had its subdependencies added.", location.toExternalForm());
+-        }
+-    }
+-
+     private boolean loadExtensionList(@NotNull List<DiscoveredExtension> extensionsToLoad) {
+         // ensure correct order of dependencies
+         LOGGER.debug("Reorder extensions to ensure proper load order");
