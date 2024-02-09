@@ -6837,7 +6837,7 @@ index 7c7356a37748c2e41fd76037b1abe1fb3599a386..b4119ecef691f558ae96aa685d8c9171
  
          var buffer = ObjectPool.PACKET_POOL.get();
 diff --git a/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java b/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
-index e3d5357e8128c46c764c331ba430f8c8a9f47295..f2fdf4ca86fd6dfed7e6e6a48cffd10d1864c633 100644
+index e3d5357e8128c46c764c331ba430f8c8a9f47295..49dec17a054a8cd969a42eefa549b3878d1171d8 100644
 --- a/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
 +++ b/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
 @@ -11,11 +11,12 @@ import java.nio.file.Files;
@@ -6873,17 +6873,15 @@ index e3d5357e8128c46c764c331ba430f8c8a9f47295..f2fdf4ca86fd6dfed7e6e6a48cffd10d
          // These like to fail on github actions
          assumeTrue(System.getenv("GITHUB_ACTIONS") == null);
  
-@@ -65,8 +66,8 @@ public class ServerAddressTest {
+@@ -65,7 +66,7 @@ public class ServerAddressTest {
      }
  
      @Test
 -    public void noAddressTest() throws IOException {
--        var server = new Server(new PacketProcessor(new PacketListenerManager()));
 +    void noAddressTest() throws IOException {
-+        var server = new Server(new PacketProcessor());
+         var server = new Server(new PacketProcessor(new PacketListenerManager()));
          assertDoesNotThrow(server::stop);
      }
- }
 diff --git a/src/test/java/net/minestom/server/permission/TestPermissions.java b/src/test/java/net/minestom/server/permission/TestPermissions.java
 index c5604540d92ca2b579b79a8b2f1c33c89d5efe80..38c785b7dcf897634932897a538de40534b2f529 100644
 --- a/src/test/java/net/minestom/server/permission/TestPermissions.java

@@ -1,0 +1,448 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Phillipp Glanz <6745190+TheMeinerLP@users.noreply.github.com>
+Date: Fri, 9 Feb 2024 22:26:47 +0100
+Subject: [PATCH] Re-enable extensions
+
+
+diff --git a/src/main/java/net/minestom/server/MinecraftServer.java b/src/main/java/net/minestom/server/MinecraftServer.java
+index d8ffa960217a739ef5edd4f554459a9d92efea65..4bfe33d3b964f23ca60cb002f808d01aed1d138c 100644
+--- a/src/main/java/net/minestom/server/MinecraftServer.java
++++ b/src/main/java/net/minestom/server/MinecraftServer.java
+@@ -6,6 +6,7 @@ import net.minestom.server.adventure.bossbar.BossBarManager;
+ import net.minestom.server.command.CommandManager;
+ import net.minestom.server.event.GlobalEventHandler;
+ import net.minestom.server.exception.ExceptionManager;
++import net.minestom.server.extensions.ExtensionManager;
+ import net.minestom.server.gamedata.tags.TagManager;
+ import net.minestom.server.instance.InstanceManager;
+ import net.minestom.server.instance.block.BlockManager;
+@@ -21,6 +22,7 @@ import net.minestom.server.recipe.RecipeManager;
+ import net.minestom.server.scoreboard.TeamManager;
+ import net.minestom.server.thread.TickSchedulerThread;
+ import net.minestom.server.timer.SchedulerManager;
++import net.minestom.server.utils.MathUtils;
+ import net.minestom.server.utils.PacketUtils;
+ import net.minestom.server.utils.validate.Check;
+ import net.minestom.server.world.Difficulty;
+@@ -28,6 +30,7 @@ import net.minestom.server.world.DimensionTypeManager;
+ import net.minestom.server.world.biomes.BiomeManager;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ import org.jetbrains.annotations.UnknownNullability;
+ 
+ import java.io.IOException;
+@@ -252,6 +255,10 @@ public final class MinecraftServer {
+         return serverProcess.advancement();
+     }
+ 
++    public static @Nullable ExtensionManager getExtensionManager() {
++        return serverProcess.extension();
++    }
++
+     public static TagManager getTagManager() {
+         return serverProcess.tag();
+     }
+diff --git a/src/main/java/net/minestom/server/ServerFlag.java b/src/main/java/net/minestom/server/ServerFlag.java
+index ea61869059d877f59ac9c613891c5c502c603198..3ce29e9070f940fd9ababe7d0d917c416caca082 100644
+--- a/src/main/java/net/minestom/server/ServerFlag.java
++++ b/src/main/java/net/minestom/server/ServerFlag.java
+@@ -39,6 +39,12 @@ public final class ServerFlag {
+     public static final @Nullable String STACKING_RULE = System.getProperty("minestom.stacking-rule");
+     public static final int WORLD_BORDER_SIZE = Integer.getInteger("minestom.world-border-size", 29999984);
+ 
++    // Extensions todo use enabled flag
++    public static final boolean EXTENSIONS_ENABLED = PropertyUtils.getBoolean("minestom.extension.enabled", false);
++    public static final @NotNull String EXTENSIONS_FOLDER = System.getProperty("minestom.extension.folder", "extensions");
++    public static final @Nullable String EXTENSIONS_DEV_CLASSES = System.getProperty("minestom.extension.indevfolder.classes");
++    public static final @Nullable String EXTENSIONS_DEV_RESOURCES = System.getProperty("minestom.extension.indevfolder.resources");
++
+     // Maps
+     public static final @NotNull String MAP_RGB_MAPPING = System.getProperty("minestom.map.rgbmapping", "lazy");
+     public static final @Nullable String MAP_RGB_REDUCTION = System.getProperty("minestom.map.rgbreduction"); // Only used if rgb mapping is "approximate"
+diff --git a/src/main/java/net/minestom/server/ServerProcess.java b/src/main/java/net/minestom/server/ServerProcess.java
+index 7c1002cab0f8fca3c0bc1c859b0737e708ae6892..5ebf5f9e50d003623da191cff9f6df9e7bfedeed 100644
+--- a/src/main/java/net/minestom/server/ServerProcess.java
++++ b/src/main/java/net/minestom/server/ServerProcess.java
+@@ -5,6 +5,7 @@ import net.minestom.server.adventure.bossbar.BossBarManager;
+ import net.minestom.server.command.CommandManager;
+ import net.minestom.server.event.GlobalEventHandler;
+ import net.minestom.server.exception.ExceptionManager;
++import net.minestom.server.extensions.ExtensionManager;
+ import net.minestom.server.gamedata.tags.TagManager;
+ import net.minestom.server.instance.Chunk;
+ import net.minestom.server.instance.InstanceManager;
+@@ -25,6 +26,7 @@ import net.minestom.server.world.DimensionTypeManager;
+ import net.minestom.server.world.biomes.BiomeManager;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
+ 
+ import java.net.SocketAddress;
+ 
+@@ -96,6 +98,11 @@ public interface ServerProcess extends Snapshotable {
+      */
+     @NotNull BossBarManager bossBar();
+ 
++    /**
++     * Loads and handle extensions.
++     */
++    @Nullable ExtensionManager extension();
++
+     /**
+      * Handles registry tags.
+      */
+diff --git a/src/main/java/net/minestom/server/extensions/Extension.java b/src/main/java/net/minestom/server/extensions/Extension.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..020f229cb228f4726bcff4fee1aa223100147073
+--- /dev/null
++++ b/src/main/java/net/minestom/server/extensions/Extension.java
+@@ -0,0 +1,193 @@
++package net.minestom.server.extensions;
++
++import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
++import net.minestom.server.event.Event;
++import net.minestom.server.event.EventNode;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++import java.io.IOException;
++import java.io.InputStream;
++import java.net.URL;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import java.nio.file.Paths;
++import java.nio.file.StandardCopyOption;
++import java.util.HashSet;
++import java.util.Set;
++
++public abstract class Extension {
++    /**
++     * List of extensions that depend on this extension.
++     */
++    protected final Set<String> dependents = new HashSet<>();
++
++    protected Extension() {
++
++    }
++
++    public void preInitialize() {
++
++    }
++
++    public abstract void initialize();
++
++    public void postInitialize() {
++
++    }
++
++    public void preTerminate() {
++
++    }
++
++    public abstract void terminate();
++
++    public void postTerminate() {
++
++    }
++
++    ExtensionClassLoader getExtensionClassLoader() {
++        if (getClass().getClassLoader() instanceof ExtensionClassLoader extensionClassLoader) {
++            return extensionClassLoader;
++        }
++        throw new IllegalStateException("Extension class loader is not an ExtensionClassLoader");
++    }
++
++    @NotNull
++    public DiscoveredExtension getOrigin() {
++        return getExtensionClassLoader().getDiscoveredExtension();
++    }
++
++    /**
++     * Gets the logger for the extension
++     *
++     * @return The logger for the extension
++     */
++    @NotNull
++    public ComponentLogger getLogger() {
++        return getExtensionClassLoader().getLogger();
++    }
++
++    public @NotNull EventNode<Event> getEventNode() {
++        return getExtensionClassLoader().getEventNode();
++    }
++
++    public @NotNull Path getDataDirectory() {
++        return getOrigin().getDataDirectory();
++    }
++
++    /**
++     * Gets a resource from the extension directory, or from inside the jar if it does not
++     * exist in the extension directory.
++     * <p>
++     * If it does not exist in the extension directory, it will be copied from inside the jar.
++     * <p>
++     * The caller is responsible for closing the returned {@link InputStream}.
++     *
++     * @param fileName The file to read
++     * @return The file contents, or null if there was an issue reading the file.
++     */
++    public @Nullable InputStream getResource(@NotNull String fileName) {
++        return getResource(Paths.get(fileName));
++    }
++
++    /**
++     * Gets a resource from the extension directory, or from inside the jar if it does not
++     * exist in the extension directory.
++     * <p>
++     * If it does not exist in the extension directory, it will be copied from inside the jar.
++     * <p>
++     * The caller is responsible for closing the returned {@link InputStream}.
++     *
++     * @param target The file to read
++     * @return The file contents, or null if there was an issue reading the file.
++     */
++    public @Nullable InputStream getResource(@NotNull Path target) {
++        final Path targetFile = getDataDirectory().resolve(target);
++        try {
++            // Copy from jar if the file does not exist in the extension data directory.
++            if (!Files.exists(targetFile)) {
++                savePackagedResource(target);
++            }
++
++            return Files.newInputStream(targetFile);
++        } catch (IOException ex) {
++            getLogger().info("Failed to read resource {}.", target, ex);
++            return null;
++        }
++    }
++
++    /**
++     * Gets a resource from inside the extension jar.
++     * <p>
++     * The caller is responsible for closing the returned {@link InputStream}.
++     *
++     * @param fileName The file to read
++     * @return The file contents, or null if there was an issue reading the file.
++     */
++    public @Nullable InputStream getPackagedResource(@NotNull String fileName) {
++        try {
++            final URL url = getOrigin().getClassLoader().getResource(fileName);
++            if (url == null) {
++                getLogger().debug("Resource not found: {}", fileName);
++                return null;
++            }
++
++            return url.openConnection().getInputStream();
++        } catch (IOException ex) {
++            getLogger().debug("Failed to load resource {}.", fileName, ex);
++            return null;
++        }
++    }
++
++    /**
++     * Gets a resource from inside the extension jar.
++     * <p>
++     * The caller is responsible for closing the returned {@link InputStream}.
++     *
++     * @param target The file to read
++     * @return The file contents, or null if there was an issue reading the file.
++     */
++    public @Nullable InputStream getPackagedResource(@NotNull Path target) {
++        return getPackagedResource(target.toString().replace('\\', '/'));
++    }
++
++    /**
++     * Copies a resource file to the extension directory, replacing any existing copy.
++     *
++     * @param fileName The resource to save
++     * @return True if the resource was saved successfully, null otherwise
++     */
++    public boolean savePackagedResource(@NotNull String fileName) {
++        return savePackagedResource(Paths.get(fileName));
++    }
++
++    /**
++     * Copies a resource file to the extension directory, replacing any existing copy.
++     *
++     * @param target The resource to save
++     * @return True if the resource was saved successfully, null otherwise
++     */
++    public boolean savePackagedResource(@NotNull Path target) {
++        final Path targetFile = getDataDirectory().resolve(target);
++        try (InputStream is = getPackagedResource(target)) {
++            if (is == null) {
++                return false;
++            }
++
++            Files.createDirectories(targetFile.getParent());
++            Files.copy(is, targetFile, StandardCopyOption.REPLACE_EXISTING);
++            return true;
++        } catch (IOException ex) {
++            getLogger().debug("Failed to save resource {}.", target, ex);
++            return false;
++        }
++    }
++
++    /**
++     * @return A modifiable list of dependents.
++     */
++    public Set<String> getDependents() {
++        return dependents;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/extensions/ExtensionClassLoader.java b/src/main/java/net/minestom/server/extensions/ExtensionClassLoader.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..dd96f46af262dcbf96ac69967fdd71b2680eab4c
+--- /dev/null
++++ b/src/main/java/net/minestom/server/extensions/ExtensionClassLoader.java
+@@ -0,0 +1,91 @@
++package net.minestom.server.extensions;
++
++import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
++import net.minestom.server.MinecraftServer;
++import net.minestom.server.event.Event;
++import net.minestom.server.event.EventNode;
++import org.jetbrains.annotations.NotNull;
++
++import java.io.InputStream;
++import java.net.URL;
++import java.net.URLClassLoader;
++import java.util.ArrayList;
++import java.util.List;
++
++public final class ExtensionClassLoader extends URLClassLoader {
++    private final List<ExtensionClassLoader> children = new ArrayList<>();
++    private final DiscoveredExtension discoveredExtension;
++    private EventNode<Event> eventNode;
++    private ComponentLogger logger;
++
++    public ExtensionClassLoader(String name, URL[] urls, DiscoveredExtension discoveredExtension) {
++        super("Ext_" + name, urls, MinecraftServer.class.getClassLoader());
++        this.discoveredExtension = discoveredExtension;
++    }
++
++    public ExtensionClassLoader(String name, URL[] urls, ClassLoader parent, DiscoveredExtension discoveredExtension) {
++        super("Ext_" + name, urls, parent);
++        this.discoveredExtension = discoveredExtension;
++    }
++
++    @Override
++    public void addURL(@NotNull URL url) {
++        super.addURL(url);
++    }
++
++    public void addChild(@NotNull ExtensionClassLoader loader) {
++        children.add(loader);
++    }
++
++    @Override
++    protected Class<?> loadClass(String name, boolean resolve) throws ClassNotFoundException {
++        try {
++            return super.loadClass(name, resolve);
++        } catch (ClassNotFoundException e) {
++            for (ExtensionClassLoader child : children) {
++                try {
++                    return child.loadClass(name, resolve);
++                } catch (ClassNotFoundException ignored) {}
++            }
++            throw e;
++        }
++    }
++
++    public InputStream getResourceAsStreamWithChildren(@NotNull String name) {
++        InputStream in = getResourceAsStream(name);
++        if (in != null) return in;
++
++        for (ExtensionClassLoader child : children) {
++            InputStream childInput = child.getResourceAsStreamWithChildren(name);
++            if (childInput != null)
++                return childInput;
++        }
++
++        return null;
++    }
++
++    public DiscoveredExtension getDiscoveredExtension() {
++        return discoveredExtension;
++    }
++
++    public EventNode<Event> getEventNode() {
++        if (eventNode == null) {
++            eventNode = EventNode.all(discoveredExtension.getName());
++            MinecraftServer.getGlobalEventHandler().addChild(eventNode);
++        }
++        return eventNode;
++    }
++
++    public ComponentLogger getLogger() {
++        if (logger == null) {
++            logger = ComponentLogger.logger(discoveredExtension.getName());
++        }
++        return logger;
++    }
++
++    void terminate() {
++        if (eventNode != null) {
++            MinecraftServer.getGlobalEventHandler().removeChild(eventNode);
++        }
++    }
++}
+diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
+index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..caa744364c8de2c0dfd5a31e3ca58c7d64ea3d03 100644
+--- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
++++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
+@@ -4,6 +4,7 @@ import com.google.gson.Gson;
+ import net.minestom.dependencies.DependencyGetter;
+ import net.minestom.dependencies.ResolvedDependency;
+ import net.minestom.dependencies.maven.MavenRepository;
++import net.minestom.server.ServerFlag;
+ import net.minestom.server.ServerProcess;
+ import net.minestom.server.utils.validate.Check;
+ import org.jetbrains.annotations.ApiStatus;
+@@ -23,19 +24,18 @@ import java.util.zip.ZipEntry;
+ import java.util.zip.ZipFile;
+ 
+ public class ExtensionManager {
+-    //Microtus start - update java keyword usage
+-    public static final Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
+-    public static final String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
+-    public static final String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
+-    private static final Gson GSON = new Gson();
+-    //Microtus end - update java keyword usage
++
++    public final static Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
++
++    private final static Gson GSON = new Gson();
++
+     private final ServerProcess serverProcess;
+ 
+     // LinkedHashMaps are HashMaps that preserve order
+     private final Map<String, Extension> extensions = new LinkedHashMap<>();
+     private final Map<String, Extension> immutableExtensions = Collections.unmodifiableMap(extensions);
+ 
+-    private final File extensionFolder = new File(System.getProperty("minestom.extension.folder", "extensions"));
++    private final File extensionFolder = new File(ServerFlag.EXTENSIONS_FOLDER);
+     private final File dependenciesFolder = new File(extensionFolder, ".libs");
+     private Path extensionDataRoot = extensionFolder.toPath();
+ 
+@@ -370,14 +370,13 @@ public class ExtensionManager {
+         //TODO(mattw): Should show a warning if one is set and not the other. It is most likely a mistake.
+ 
+         // this allows developers to have their extension discovered while working on it, without having to build a jar and put in the extension folder
+-        if (System.getProperty(INDEV_CLASSES_FOLDER) != null && System.getProperty(INDEV_RESOURCES_FOLDER) != null) {
++        if (ServerFlag.EXTENSIONS_DEV_CLASSES != null && ServerFlag.EXTENSIONS_DEV_RESOURCES != null) {
+             LOGGER.info("Found indev folders for extension. Adding to list of discovered extensions.");
+-            final String extensionClasses = System.getProperty(INDEV_CLASSES_FOLDER);
+-            final String extensionResources = System.getProperty(INDEV_RESOURCES_FOLDER);
+-            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(extensionResources, "extension.json")))) {
++            final File extensionJsonFile = new File(ServerFlag.EXTENSIONS_DEV_RESOURCES, "extension.json");
++            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(extensionJsonFile))) {
+                 DiscoveredExtension extension = GSON.fromJson(reader, DiscoveredExtension.class);
+-                extension.files.add(new File(extensionClasses).toURI().toURL());
+-                extension.files.add(new File(extensionResources).toURI().toURL());
++                extension.files.add(new File(ServerFlag.EXTENSIONS_DEV_CLASSES).toURI().toURL());
++                extension.files.add(new File(ServerFlag.EXTENSIONS_DEV_RESOURCES).toURI().toURL());
+                 extension.setDataDirectory(getExtensionDataRoot().resolve(extension.getName()));
+ 
+                 // Verify integrity and ensure defaults
