@@ -429,3 +429,149 @@ index ed97a493c48bc213077bababac2723562b53dc6f..629a18cf2cf73cf303bde57e61a74211
      public Attribute {
          if (defaultValue > maxValue) {
              throw new IllegalArgumentException("Default value cannot be greater than the maximum allowed");
+diff --git a/src/main/java/net/minestom/server/entity/LivingEntity.java b/src/main/java/net/minestom/server/entity/LivingEntity.java
+index 0db3dcae55c313e3ccb0707ca996783fd0b7b0f3..5df2ce73d2e54d5522d4fc0d30b84a9313c20e70 100644
+--- a/src/main/java/net/minestom/server/entity/LivingEntity.java
++++ b/src/main/java/net/minestom/server/entity/LivingEntity.java
+@@ -3,6 +3,7 @@ package net.minestom.server.entity;
+ import net.kyori.adventure.sound.Sound.Source;
+ import net.minestom.server.attribute.Attribute;
+ import net.minestom.server.attribute.AttributeInstance;
++import net.minestom.server.attribute.Attributes;
+ import net.minestom.server.collision.BoundingBox;
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Vec;
+@@ -439,21 +440,21 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+     }
+ 
+     /**
+-     * Gets the entity max health from {@link #getAttributeValue(Attribute)} {@link Attribute#MAX_HEALTH}.
++     * Gets the entity max health from {@link #getAttributeValue(Attribute)} {@link Attributes#GENERIC_MAX_HEALTH}.
+      *
+      * @return the entity max health
+      */
+     public float getMaxHealth() {
+-        return getAttributeValue(Attribute.MAX_HEALTH);
++        return getAttributeValue(Attributes.GENERIC_MAX_HEALTH.attribute());
+     }
+ 
+     /**
+      * Sets the heal of the entity as its max health.
+      * <p>
+-     * Retrieved from {@link #getAttributeValue(Attribute)} with the attribute {@link Attribute#MAX_HEALTH}.
++     * Retrieved from {@link #getAttributeValue(Attribute)} with the attribute {@link Attributes#GENERIC_MAX_HEALTH}.
+      */
+     public void heal() {
+-        setHealth(getAttributeValue(Attribute.MAX_HEALTH));
++        setHealth(getAttributeValue(Attributes.GENERIC_MAX_HEALTH.attribute()));
+     }
+ 
+     /**
+@@ -696,7 +697,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+      */
+     @Override
+     public void takeKnockback(float strength, final double x, final double z) {
+-        strength *= 1 - getAttributeValue(Attribute.KNOCKBACK_RESISTANCE);
++        strength *= 1 - getAttributeValue(Attributes.GENERIC_KNOCKBACK_RESISTANCE.attribute());
+         super.takeKnockback(strength, x, z);
+     }
+ }
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index e59b452a0b9e08e084e2e1ce2f0b55d3022e6758..3ade9e81568dc480baaa2682589f8f1de7d9a9b2 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -20,6 +20,7 @@ import net.minestom.server.adventure.AdventurePacketConvertor;
+ import net.minestom.server.adventure.Localizable;
+ import net.minestom.server.adventure.audience.Audiences;
+ import net.minestom.server.attribute.Attribute;
++import net.minestom.server.attribute.Attributes;
+ import net.minestom.server.command.CommandSender;
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Pos;
+@@ -227,7 +228,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         this.gameMode = GameMode.SURVIVAL;
+         this.dimensionType = DimensionType.OVERWORLD; // Default dimension
+         this.levelFlat = true;
+-        getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f);
++        getAttribute(Attributes.GENERIC_MOVEMENT_SPEED.attribute()).setBaseValue(0.1f);
+ 
+         // FakePlayer init its connection there
+         playerConnectionInit();
+diff --git a/src/main/java/net/minestom/server/entity/pathfinding/PFPathingEntity.java b/src/main/java/net/minestom/server/entity/pathfinding/PFPathingEntity.java
+index a8e6a7422af7479d057f091a7189c557dd05100b..7fc994cd76b81d9268bdc643fce7273e46e8228b 100644
+--- a/src/main/java/net/minestom/server/entity/pathfinding/PFPathingEntity.java
++++ b/src/main/java/net/minestom/server/entity/pathfinding/PFPathingEntity.java
+@@ -5,6 +5,7 @@ import com.extollit.gaming.ai.path.model.IPathingEntity;
+ import com.extollit.gaming.ai.path.model.Passibility;
+ import com.extollit.linalg.immutable.Vec3d;
+ import net.minestom.server.attribute.Attribute;
++import net.minestom.server.attribute.Attributes;
+ import net.minestom.server.coordinate.Point;
+ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.entity.Entity;
+@@ -34,7 +35,7 @@ public final class PFPathingEntity implements IPathingEntity {
+         this.navigator = navigator;
+         this.entity = navigator.getEntity();
+ 
+-        this.searchRange = getAttributeValue(Attribute.FOLLOW_RANGE);
++        this.searchRange = getAttributeValue(Attributes.GENERIC_FOLLOW_RANGE.attribute());
+     }
+ 
+     @Override
+@@ -138,7 +139,7 @@ public final class PFPathingEntity implements IPathingEntity {
+         return new Capabilities() {
+             @Override
+             public float speed() {
+-                return getAttributeValue(Attribute.MOVEMENT_SPEED);
++                return getAttributeValue(Attributes.GENERIC_MOVEMENT_SPEED.attribute());
+             }
+ 
+             @Override
+@@ -191,7 +192,7 @@ public final class PFPathingEntity implements IPathingEntity {
+     @Override
+     public void moveTo(Vec3d position, Passibility passibility, Gravitation gravitation) {
+         final Point targetPosition = new Vec(position.x, position.y, position.z);
+-        this.navigator.moveTowards(targetPosition, getAttributeValue(Attribute.MOVEMENT_SPEED));
++        this.navigator.moveTowards(targetPosition, getAttributeValue(Attributes.GENERIC_MOVEMENT_SPEED.attribute()));
+         final double entityY = entity.getPosition().y() + 0.00001D; // After any negative y movement, entities will always be extremely
+                                                                     // slightly below floor level. This +0.00001D is here to offset this
+                                                                     // error and stop the entity from permanently jumping.
+diff --git a/src/test/java/net/minestom/server/item/ItemAttributeTest.java b/src/test/java/net/minestom/server/item/ItemAttributeTest.java
+index f8ea7c7d8c1b68b1914732c290f6936a318a12ee..0adf09c71b2d9d9009e95b5bb722836b9d278ff1 100644
+--- a/src/test/java/net/minestom/server/item/ItemAttributeTest.java
++++ b/src/test/java/net/minestom/server/item/ItemAttributeTest.java
+@@ -2,6 +2,7 @@ package net.minestom.server.item;
+ 
+ import net.minestom.server.attribute.Attribute;
+ import net.minestom.server.attribute.AttributeOperation;
++import net.minestom.server.attribute.Attributes;
+ import net.minestom.server.item.attribute.AttributeSlot;
+ import net.minestom.server.item.attribute.ItemAttribute;
+ import net.minestom.server.tag.TagHandler;
+@@ -18,7 +19,7 @@ class ItemAttributeTest {
+     @Test
+     void attribute() {
+         var attributes = List.of(new ItemAttribute(
+-                new UUID(0, 0), "generic.attack_damage", Attribute.ATTACK_DAMAGE,
++                new UUID(0, 0), "generic.attack_damage", Attributes.GENERIC_ATTACK_DAMAGE.attribute(),
+                 AttributeOperation.ADDITION, 2, AttributeSlot.MAINHAND));
+         var item = ItemStack.builder(Material.STICK)
+                 .meta(builder -> builder.attributes(attributes))
+@@ -29,7 +30,7 @@ class ItemAttributeTest {
+     @Test
+     void attributeReader() {
+         var attributes = List.of(new ItemAttribute(
+-                new UUID(0, 0), "generic.attack_damage", Attribute.ATTACK_DAMAGE,
++                new UUID(0, 0), "generic.attack_damage", Attributes.GENERIC_ATTACK_DAMAGE.attribute(),
+                 AttributeOperation.ADDITION, 2, AttributeSlot.MAINHAND));
+ 
+         TagHandler handler = TagHandler.newHandler();
+@@ -44,7 +45,7 @@ class ItemAttributeTest {
+         var item = ItemStack.builder(Material.STICK)
+                 .meta(builder -> builder.attributes(
+                         List.of(new ItemAttribute(
+-                                new UUID(0, 0), "generic.attack_damage", Attribute.ATTACK_DAMAGE,
++                                new UUID(0, 0), "generic.attack_damage", Attributes.GENERIC_ATTACK_DAMAGE.attribute(),
+                                 AttributeOperation.ADDITION, 2, AttributeSlot.MAINHAND))))
+                 .build();
+         assertEqualsSNBT("""
