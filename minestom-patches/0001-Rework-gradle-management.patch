@@ -5,109 +5,159 @@ Subject: [PATCH] Rework gradle management
 
 
 diff --git a/build-logic/build.gradle.kts b/build-logic/build.gradle.kts
-index 8f641d076bc2853a2a53009d6b92288d532cb42b..1ee73c65139fd730df4f868d8a443320b6be307b 100644
---- a/build-logic/build.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..1ee73c65139fd730df4f868d8a443320b6be307b
+--- /dev/null
 +++ b/build-logic/build.gradle.kts
-@@ -8,9 +8,11 @@ repositories {
- }
- 
- dependencies {
--    val indraVersion = "2.0.6"
+@@ -0,0 +1,18 @@
++plugins {
++    `kotlin-dsl`
++}
++
++repositories {
++    mavenCentral()
++    gradlePluginPortal()
++}
++
++dependencies {
 +    val indraVersion = "3.1.3"
-     implementation("org.jetbrains.kotlin", "kotlin-gradle-plugin", "1.6.10")
-     implementation("net.kyori", "indra-common", indraVersion)
++    implementation("org.jetbrains.kotlin", "kotlin-gradle-plugin", "1.6.10")
 +    implementation("net.kyori", "indra-common", indraVersion)
-     implementation("net.kyori", "indra-publishing-sonatype", indraVersion)
-     implementation("org.graalvm.buildtools", "native-gradle-plugin", "0.9.9")
++    implementation("net.kyori", "indra-common", indraVersion)
++    implementation("net.kyori", "indra-publishing-sonatype", indraVersion)
++    implementation("org.graalvm.buildtools", "native-gradle-plugin", "0.9.9")
 +    implementation("io.github.gradle-nexus", "publish-plugin", "2.0.0-rc-1")
- }
++}
 \ No newline at end of file
 diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-index b63a95323b4e20af1c36f29f24c623d978016696..d9af25dd00549449f429e79af70a431fefb86b8e 100644
---- a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..d9af25dd00549449f429e79af70a431fefb86b8e
+--- /dev/null
 +++ b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
-@@ -2,6 +2,7 @@ plugins {
-     id("net.kyori.indra")
-     id("net.kyori.indra.publishing")
-     id("net.kyori.indra.publishing.sonatype")
+@@ -0,0 +1,40 @@
++plugins {
++    id("net.kyori.indra")
++    id("net.kyori.indra.publishing")
++    id("net.kyori.indra.publishing.sonatype")
 +    id("io.github.gradle-nexus.publish-plugin")
- }
- 
- indra {
-@@ -10,23 +11,30 @@ indra {
-         testWith(17)
-     }
- 
--    github("Minestom", "Minestom") {
++}
++
++indra {
++    javaVersions {
++        target(17)
++        testWith(17)
++    }
++
 +    github("OneLiteFeatherNET", "Microtus") {
-         ci(true)
++        ci(true)
 +        publishing(false)
-     }
--    apache2License()
--
++    }
 +    mitLicense()
 +    signWithKeyFromPrefixedProperties("onelitefeather")
-     configurePublications {
-         pom {
-             developers {
-                 developer {
--                    id.set("TheMode")
--                    name.set("TheMode")
++    configurePublications {
++        pom {
++            developers {
++                developer {
 +                    id.set("themeinerlp")
 +                    name.set("Phillipp Glanz")
 +                    email.set("p.glanz@madfix.me")
-                 }
-                 developer {
--                    id.set("jglrxavpok")
--                    name.set("jglrxavpok")
++                }
++                developer {
 +                    id.set("theEvilReaper")
 +                    name.set("Steffen Wonning")
 +                    email.set("steffenwx@gmail.com")
-                 }
-             }
-         }
-     }
++                }
++            }
++        }
++    }
 +}
 +
 +indraSonatype {
 +    useAlternateSonatypeOSSHost("s01")
- }
++}
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..22f62e8000f5417a8e22ab8d5591ca5f613c3323 100644
+index 1b5833ba09710b36b67003494130537a42f32a5d..22f62e8000f5417a8e22ab8d5591ca5f613c3323 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -1,13 +1,24 @@
+@@ -1,90 +1,50 @@
+-import java.time.Duration
 +import java.util.*
-+
+ 
  plugins {
      `java-library`
-     id("minestom.publishing-conventions")
-     id("minestom.native-conventions")
++    id("minestom.publishing-conventions")
++    id("minestom.native-conventions")
      alias(libs.plugins.blossom)
-+    signing
+-
+-    `maven-publish`
+     signing
+-    alias(libs.plugins.nexuspublish)
  }
  
+-// Read env vars (used for publishing generally)
+-version = System.getenv("MINESTOM_VERSION") ?: "dev"
+-val channel = System.getenv("MINESTOM_CHANNEL") ?: "local" // local, snapshot, release
+-
+-val shortDescription = "1.20.4 Lightweight Minecraft server"
+-
+-allprojects {
+-    apply(plugin = "java")
+-
+-    group = "net.minestom"
+-    version = rootProject.version
+-    description = shortDescription
+-
+-    repositories {
+-        mavenCentral()
+-        maven(url = "https://jitpack.io")
+-    }
+-
+-    configurations.all {
+-        // We only use Jetbrains Annotations
+-        exclude("org.checkerframework", "checker-qual")
+-    }
+-
+-    java {
+-        withSourcesJar()
+-        withJavadocJar()
+-
+-        sourceCompatibility = JavaVersion.VERSION_17
+-        targetCompatibility = JavaVersion.VERSION_17
+-    }
 +var baseVersion by extra("1.1.4")
 +var snapshot by extra("-SNAPSHOT")
-+
+ 
+-    tasks.withType<Zip> {
+-        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+-    }
 +group = "net.onelitefeather.microtus"
-+
-+
+ 
+-    tasks.withType<Test> {
+-        useJUnitPlatform()
+ 
+-        // Viewable packets make tracking harder. Could be re-enabled later.
+-        jvmArgs("-Dminestom.viewable-packet=false")
+-        jvmArgs("-Dminestom.inside-test=true")
+-    }
 +version = "%s%s".format(Locale.ROOT, baseVersion, snapshot)
-+
- allprojects {
--    group = "net.minestom.server"
--    version = "1.0"
+ 
+-    tasks.withType<JavaCompile> {
+-        options.encoding = "UTF-8"
+-    }
++allprojects {
 +    group = "net.onelitefeather.microtus"
 +    version = "%s%s".format(Locale.ROOT, baseVersion, snapshot)
-     description = "Lightweight and multi-threaded Minecraft server implementation"
++    description = "Lightweight and multi-threaded Minecraft server implementation"
  }
  
-@@ -16,6 +27,18 @@ sourceSets {
-         java {
-             srcDir(file("src/autogenerated/java"))
-         }
+ sourceSets {
+     main {
+-        java.srcDir(file("src/main/java"))
+-        java.srcDir(file("src/autogenerated/java"))
++        java {
++            srcDir(file("src/autogenerated/java"))
++        }
 +        blossom {
 +            javaSources {
 +                val gitCommit = System.getenv("GIT_COMMIT")
@@ -123,7 +173,34 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..22f62e8000f5417a8e22ab8d5591ca5f
      }
  }
  
-@@ -34,26 +57,14 @@ tasks {
+-dependencies {
+-    // Core dependencies
+-    api(libs.slf4j)
+-    api(libs.jetbrainsAnnotations)
+-    api(libs.bundles.adventure)
+-    api(libs.hydrazine)
+-    api(libs.bundles.kotlin)
+-    api(libs.bundles.hephaistos)
+-    implementation(libs.minestomData)
+-    implementation(libs.dependencyGetter)
+-
+-    // Performance/data structures
+-    implementation(libs.caffeine)
+-    api(libs.fastutil)
+-    implementation(libs.bundles.flare)
+-    api(libs.gson)
+-    implementation(libs.jcTools)
+-
+-    // Testing
+-    testImplementation(libs.bundles.junit)
+-    testImplementation(project(":testing"))
++java {
++    withJavadocJar()
++    withSourcesJar()
+ }
+ 
+ tasks {
+@@ -97,101 +57,54 @@ tasks {
              addStringOption("-release", "17")
              // Links to external javadocs
              links("https://docs.oracle.com/en/java/javase/17/docs/api/")
@@ -131,94 +208,214 @@ index 32f8a037754849d3ad31e4cab64b5f9ff57e9ce9..22f62e8000f5417a8e22ab8d5591ca5f
 +            // links("https://jd.adventure.kyori.net/api/${libs.versions.adventure.get()}/")
          }
      }
-     withType<Zip> {
-         duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-     }
- 
+-
 -    blossom {
--        val git = "src/main/java/net/minestom/server/Git.java"
- 
+-        val gitFile = "src/main/java/net/minestom/server/Git.java"
+-
 -        val gitCommit = System.getenv("GIT_COMMIT")
 -        val gitBranch = System.getenv("GIT_BRANCH")
 -        val group = System.getenv("GROUP")
 -        val artifact = System.getenv("ARTIFACT")
 -
--        replaceToken("\"&COMMIT\"", if (gitCommit == null) "null" else "\"${gitCommit}\"", git)
--        replaceToken("\"&BRANCH\"", if (gitBranch == null) "null" else "\"${gitBranch}\"", git)
--        replaceToken("\"&GROUP\"", if (group == null) "null" else "\"${group}\"", git)
--        replaceToken("\"&ARTIFACT\"", if (artifact == null) "null" else "\"${artifact}\"", git)
+-        replaceToken("\"&COMMIT\"", if (gitCommit == null) "null" else "\"${gitCommit}\"", gitFile)
+-        replaceToken("\"&BRANCH\"", if (gitBranch == null) "null" else "\"${gitBranch}\"", gitFile)
+-        replaceToken("\"&GROUP\"", if (group == null) "null" else "\"${group}\"", gitFile)
+-        replaceToken("\"&ARTIFACT\"", if (artifact == null) "null" else "\"${artifact}\"", gitFile)
++    withType<Zip> {
++        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+     }
+ 
+-    nexusPublishing{
+-        useStaging.set(true)
+-        this.packageGroup.set("net.minestom")
+-
+-        transitionCheckOptions {
+-            maxRetries.set(360) // 1 hour
+-            delayBetween.set(Duration.ofSeconds(10))
+-        }
+-
+-        repositories.sonatype {
+-            nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
+-            snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
+ 
+-            if (System.getenv("SONATYPE_USERNAME") != null) {
+-                username.set(System.getenv("SONATYPE_USERNAME"))
+-                password.set(System.getenv("SONATYPE_PASSWORD"))
+-            }
+-        }
 -    }
  
- }
+-    publishing.publications.create<MavenPublication>("maven") {
+-        groupId = "net.minestom"
+-        // todo: decide on publishing scheme
+-        artifactId = if (channel == "snapshot") "minestom-snapshots" else "minestom-snapshots"
+-        version = project.version.toString()
++}
  
+-        from(project.components["java"])
++dependencies {
++    // Testing Framework
++    testImplementation(project(mapOf("path" to ":testing")))
++    // Only here to ensure J9 module support for extensions and our classloaders
++    testCompileOnly(libs.mockito.core)
+ 
+-        pom {
+-            name.set(this@create.artifactId)
+-            description.set(shortDescription)
+-            url.set("https://github.com/minestom/minestom")
+ 
+-            licenses {
+-                license {
+-                    name.set("Apache 2.0")
+-                    url.set("https://github.com/minestom/minestom/blob/main/LICENSE")
+-                }
+-            }
++    // Logging
++    implementation(libs.bundles.logging)
++    // Libraries required for the terminal
++    implementation(libs.bundles.terminal)
+ 
+-            developers {
+-                developer {
+-                    id.set("TheMode")
+-                }
+-                developer {
+-                    id.set("mworzala")
+-                    name.set("Matt Worzala")
+-                    email.set("matt@hollowcube.dev")
+-                }
+-            }
++    // Performance improving libraries
++    implementation(libs.caffeine)
++    api(libs.fastutil)
++    implementation(libs.bundles.flare)
+ 
+-            issueManagement {
+-                system.set("GitHub")
+-                url.set("https://github.com/minestom/minestom/issues")
+-            }
++    // Libraries
++    api(libs.gson)
++    implementation(libs.jcTools)
++    // Path finding
++    api(libs.hydrazine)
+ 
+-            scm {
+-                connection.set("scm:git:git://github.com/minestom/minestom.git")
+-                developerConnection.set("scm:git:git@github.com:minestom/minestom.git")
+-                url.set("https://github.com/minestom/minestom")
+-                tag.set("HEAD")
+-            }
++    // Adventure, for user-interface
++    api(libs.bundles.adventure)
+ 
+-            ciManagement {
+-                system.set("Github Actions")
+-                url.set("https://github.com/minestom/minestom/actions")
+-            }
+-        }
+-    }
++    // Kotlin Libraries
++    api(libs.bundles.kotlin)
+ 
+-    signing {
+-        isRequired = System.getenv("CI") != null
++    // Extension Management System dependency handler.
++    api(libs.dependencyGetter)
+ 
+-        val privateKey = System.getenv("GPG_PRIVATE_KEY")
+-        val keyPassphrase = System.getenv()["GPG_PASSPHRASE"]
+-        useInMemoryPgpKeys(privateKey, keyPassphrase)
++    // Minestom Data (From MinestomDataGenerator)
++    implementation(libs.minestomData)
+ 
+-        sign(publishing.publications)
+-    }
++    // NBT parsing/manipulation/saving
++    api("io.github.jglrxavpok.hephaistos:common:${libs.versions.hephaistos.get()}")
++    api("io.github.jglrxavpok.hephaistos:gson:${libs.versions.hephaistos.get()}")
+ }
++
 diff --git a/demo/build.gradle.kts b/demo/build.gradle.kts
-index 60b18683dd01e7f349f7f22465db2bde969c9690..5f8acd515579c6356296929cbe512ed14049741e 100644
+index 2e5671e61f4d6f749b5ac343625d7f05538b5c42..5f8acd515579c6356296929cbe512ed14049741e 100644
 --- a/demo/build.gradle.kts
 +++ b/demo/build.gradle.kts
-@@ -4,14 +4,12 @@ plugins {
-     application
-     id("minestom.common-conventions")
-     id("minestom.native-conventions")
--    id("com.github.johnrengelman.shadow") version ("7.1.1")
-+    id("com.github.johnrengelman.shadow") version ("7.1.2")
- }
+@@ -2,21 +2,21 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
  
- application {
-     mainClass.set("net.minestom.demo.Main")
-     // This is included because Shadow is buggy. Wait for https://github.com/johnrengelman/shadow/issues/613 to befixed.
--    @Suppress("DEPRECATION")
--    mainClassName = "net.minestom.demo.Main"
+ plugins {
+     application
+-    alias(libs.plugins.shadow)
++    id("minestom.common-conventions")
++    id("minestom.native-conventions")
++    id("com.github.johnrengelman.shadow") version ("7.1.2")
++}
++
++application {
++    mainClass.set("net.minestom.demo.Main")
++    // This is included because Shadow is buggy. Wait for https://github.com/johnrengelman/shadow/issues/613 to befixed.
  }
  
  dependencies {
+     implementation(rootProject)
+-
+-    runtimeOnly(libs.bundles.logback)
++    implementation(libs.jNoise)
+ }
+ 
+-tasks {
+-    application {
+-        mainClass.set("net.minestom.demo.Main")
+-    }
+-
+-    withType<ShadowJar> {
+-        archiveFileName.set("minestom-demo.jar")
+-    }
++tasks.withType<ShadowJar> {
++    archiveFileName.set("minestom-demo.jar")
+ }
+\ No newline at end of file
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index b3da234609fcb6f3ab1866a2fc806719b29f97f2..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 100644
+index b864046a4f27036b98b55701cff680ae0d03b940..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
-@@ -1,113 +0,0 @@
+@@ -1,100 +0,0 @@
 -metadata.format.version = "1.1"
 -
 -[versions]
 -
 -# Important dependencies
--adventure = "4.12.0"
+-data = "1.20.4-rv2"
+-adventure = "4.15.0"
 -kotlin = "1.7.22"
--hydrazine = "1.7.2"
 -dependencyGetter = "v1.0.1"
--minestomData = "ddde11056e"
+-hydrazine = "1.7.2"
 -hephaistos = "2.6.1"
 -jetbrainsAnnotations = "23.0.0"
--
--# Terminal / Logging
--tinylog = "2.5.0"
--jline = "3.21.0"
+-slf4j = "2.0.7"
 -
 -# Performance / Data Structures
--caffeine = "3.1.2"
--fastutil = "8.5.9"
+-caffeine = "3.1.6"
+-fastutil = "8.5.12"
 -flare = "2.0.1"
--gson = "2.9.1"
+-gson = "2.10.1"
 -jcTools = "4.0.1"
 -
--# Test
--junit-jupiter = "5.8.2"
--junit-platform = "1.8.2"
--mockito = "4.2.0"
+-# Quality
+-junit-jupiter = "5.9.3"
+-junit-platform = "1.9.3"
+-jmh = "1.36"
+-jcstress = "0.16"
 -
 -# Code Generation
 -javaPoet = "1.13.0"
 -
--# Demo
--jNoise = "b93008e35e"
--
--# JMH
--jmh = "1.35"
--
--# JCStress
--jcstress = "0.8"
+-# Log impl (for demo & codegen)
+-logback = "1.4.5"
 -
 -# Gradle plugins
 -blossom = "1.3.0"
+-shadow = "8.1.1"
+-nexuspublish = "1.3.0"
 -
 -[libraries]
 -
@@ -236,18 +433,12 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..e69de29bb2d1d6434b8b29ae775ad8c2
 -
 -# Miscellaneous
 -hydrazine = { group = "com.github.MadMartian", name = "hydrazine-path-finding", version.ref = "hydrazine" }
+-minestomData = { group = "net.minestom", name = "data", version.ref = "data" }
 -dependencyGetter = { group = "com.github.Minestom", name = "DependencyGetter", version.ref = "dependencyGetter" }
--minestomData = { group = "com.github.Minestom", name = "MinestomDataGenerator", version.ref = "minestomData" }
 -jetbrainsAnnotations = { group = "org.jetbrains", name = "annotations", version.ref = "jetbrainsAnnotations" }
--
--# Logging
--tinylog-api = { group = "org.tinylog", name = "tinylog-api", version.ref = "tinylog" }
--tinylog-impl = { group = "org.tinylog", name = "tinylog-impl", version.ref = "tinylog" }
--tinylog-slf4j = { group = "org.tinylog", name = "slf4j-tinylog", version.ref = "tinylog" }
--
--# Terminal
--jline = { group = "org.jline", name = "jline", version.ref = "jline" }
--jline-jansi = { group = "org.jline", name = "jline-terminal-jansi", version.ref = "jline" }
+-hephaistos-common = { group = "io.github.jglrxavpok.hephaistos", name = "common", version.ref = "hephaistos" }
+-hephaistos-gson = { group = "io.github.jglrxavpok.hephaistos", name = "gson", version.ref = "hephaistos" }
+-slf4j = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j"}
 -
 -# Performance / Data Structures
 -caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
@@ -257,38 +448,37 @@ index b3da234609fcb6f3ab1866a2fc806719b29f97f2..e69de29bb2d1d6434b8b29ae775ad8c2
 -gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 -jcTools = { group = "org.jctools", name = "jctools-core", version.ref = "jcTools" }
 -
--# Test
+-# Code quality
 -junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit-jupiter" }
 -junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit-jupiter" }
 -junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit-jupiter" }
 -junit-suite-api = { group = "org.junit.platform", name = "junit-platform-suite-api", version.ref = "junit-platform" }
 -junit-suite-engine = { group = "org.junit.platform", name = "junit-platform-suite-engine", version.ref = "junit-platform" }
--mockito-core = { group = "org.mockito", name = "mockito-core", version.ref = "mockito" }
+-jmh-core = { group = "org.openjdk.jmh", name = "jmh-core", version.ref = "jmh" }
+-jmh-annotationprocessor = { group = "org.openjdk.jmh", name = "jmh-generator-annprocess", version.ref = "jmh" }
+-jcstress-core = { group = "org.openjdk.jcstress", name = "jcstress-core", version.ref = "jcstress" }
 -
 -# Code Generation
 -javaPoet = { group = "com.squareup", name = "javapoet", version.ref = "javaPoet" }
 -
--# Demo
--jNoise = { group = "com.github.Articdive.JNoise", name = "jnoise-pipeline", version.ref = "jNoise" }
--
--# JMH
--jmh-core = { group = "org.openjdk.jmh", name = "jmh-core", version.ref = "jmh" }
--jmh-annotationprocessor = { group = "org.openjdk.jmh", name = "jmh-generator-annprocess", version.ref = "jmh" }
--
--# JCStress
--jcstress-core = { group = "org.openjdk.jcstress", name = "jcstress-core", version.ref = "jcstress" }
+-# Log impl (for demo & codegen)
+-logback-core = { group = "ch.qos.logback", name = "logback-core", version.ref = "logback" }
+-logback-classic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 -
 -[bundles]
 -
 -kotlin = ["kotlin-stdlib-jdk8", "kotlin-reflect"]
 -flare = ["flare", "flare-fastutil"]
 -adventure = ["adventure-api", "adventure-serializer-gson", "adventure-serializer-legacy", "adventure-serializer-plain", "adventure-text-logger-slf4j"]
--logging = ["tinylog-api", "tinylog-impl", "tinylog-slf4j"]
--terminal = ["jline", "jline-jansi"]
+-junit = ["junit-api", "junit-engine", "junit-params", "junit-suite-api", "junit-suite-engine"]
+-hephaistos = ["hephaistos-common", "hephaistos-gson"]
+-logback = ["logback-core", "logback-classic"]
 -
 -[plugins]
 -
 -blossom = { id = "net.kyori.blossom", version.ref = "blossom" }
+-shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+-nexuspublish = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "nexuspublish" }
 diff --git a/gradle/wrapper/gradle-wrapper.jar b/gradle/wrapper/gradle-wrapper.jar
 index 41d9927a4d4fb3f96a785543079b8df6723c946b..d64cd4917707c1f8861d8cb53dd15194d4248596 100644
 GIT binary patch
@@ -2091,13 +2281,13 @@ zz(9jF2x7ZR{w+p)ETCW06PVt0YnZ>gW9^sr&~`%a_7j-Ful~*4=o|&TM@k@Px2z>^
 t{*Ed16F~3V5p+(suF-++X8+nHtT~NSfJ>UC3v)>lEpV}<+rIR_{{yMcG_L>v
 
 diff --git a/gradle/wrapper/gradle-wrapper.properties b/gradle/wrapper/gradle-wrapper.properties
-index aa991fceae6e464c320a107e4b337daf48c0d7ab..1af9e0930b89b3294ea6a195f0808aafd36fafe8 100644
+index fae08049a6f0b348887286874d6669e9d5ffcc06..1af9e0930b89b3294ea6a195f0808aafd36fafe8 100644
 --- a/gradle/wrapper/gradle-wrapper.properties
 +++ b/gradle/wrapper/gradle-wrapper.properties
 @@ -1,5 +1,7 @@
  distributionBase=GRADLE_USER_HOME
  distributionPath=wrapper/dists
--distributionUrl=https\://services.gradle.org/distributions/gradle-7.4.2-bin.zip
+-distributionUrl=https\://services.gradle.org/distributions/gradle-8.1.1-bin.zip
 +distributionUrl=https\://services.gradle.org/distributions/gradle-8.5-bin.zip
 +networkTimeout=10000
 +validateDistributionUrl=true
@@ -2271,18 +2461,22 @@ index 1e41e00b7d128df8b59dd63ee059d93146567c14..00000000000000000000000000000000
 -  - openjdk17
 \ No newline at end of file
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 2230bb02892d10d6756722105337ae6434cc8a35..aab481e32f70c1ee82444c5e6eca51183acef95a 100644
+index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..aab481e32f70c1ee82444c5e6eca51183acef95a 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -1,11 +1,124 @@
- enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
--enableFeaturePreview("VERSION_CATALOGS")
+@@ -1,8 +1,137 @@
+-rootProject.name = "minestom"
++enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
  
- dependencyResolutionManagement {
-     repositories {
-         maven("https://jitpack.io")
-         mavenCentral()
-     }
+-include("testing")
+-include("code-generators")
+-//include("jmh-benchmarks")
+-//include("jcstress-tests")
++dependencyResolutionManagement {
++    repositories {
++        maven("https://jitpack.io")
++        mavenCentral()
++    }
 +    versionCatalogs {
 +        create("libs") {
 +            // Important dependencies
@@ -2350,7 +2544,7 @@ index 2230bb02892d10d6756722105337ae6434cc8a35..aab481e32f70c1ee82444c5e6eca5118
 +            library("tinylog-api", "org.tinylog", "tinylog-api").versionRef("tinylog")
 +            library("tinylog-impl", "org.tinylog", "tinylog-impl").versionRef("tinylog")
 +            library("tinylog-slf4j", "org.tinylog", "slf4j-tinylog").versionRef("tinylog")
-+
+ 
 +            // Terminal
 +            library("jline", "org.jline", "jline").versionRef("jline")
 +            library("jline-jansi", "org.jline", "jline-terminal-jansi").versionRef("jline")
@@ -2397,44 +2591,72 @@ index 2230bb02892d10d6756722105337ae6434cc8a35..aab481e32f70c1ee82444c5e6eca5118
 +
 +        }
 +    }
- }
- 
- pluginManagement {
++}
++
++pluginManagement {
++    repositories {
++        mavenCentral()
++        gradlePluginPortal()
++    }
++    includeBuild("build-logic")
++}
++
++rootProject.name = "Minestom"
++include("code-generators")
++include("jmh-benchmarks")
++include("jcstress-tests")
+ include("demo")
++include("testing")
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..c9c68b0066296e89eb59324373fd50125c5c2f9f 100644
+index 8926b63c3c75d84040262229f77d14e68e1ee4a5..c9c68b0066296e89eb59324373fd50125c5c2f9f 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
-@@ -1,22 +1,12 @@
+@@ -1,14 +1,22 @@
  plugins {
-     id("java-library")
--    `maven-publish`
+-    `java-library`
+-//    `maven-publish`
++    id("java-library")
 +    id("net.kyori.indra")
 +    id("net.kyori.indra.publishing")
 +    signing
  }
  
--publishing {
--    publications {
--        create<MavenPublication>("maven") {
--            groupId = "net.minestom.testing"
--            artifactId = "testing"
--            version = "1.0"
+-group = "net.minestom.testing"
+-// version declared by root project
 +group = "net.onelitefeather.microtus.testing"
  
--            from(components["java"])
--        }
--    }
--}
--
--group = "net.minestom.testing"
--version = "1.0"
+-dependencies {
+-    api(rootProject)
  
- repositories {
-     mavenCentral()
-@@ -36,4 +26,34 @@ dependencies {
++repositories {
++    mavenCentral()
++    maven(url = "https://jitpack.io")
++}
++
++dependencies {
++    // Minestom API
++    api(project(mapOf("path" to ":")))
++    // Junit Testing Framework
+     api(libs.junit.api)
+     api(libs.junit.params)
+     api(libs.junit.suite.api)
+@@ -16,14 +24,36 @@ dependencies {
+     runtimeOnly(libs.junit.suite.engine)
+ }
  
- tasks.getByName<Test>("test") {
-     useJUnitPlatform()
+-//publishing {
+-//    publications {
+-//        create<MavenPublication>("maven") {
+-//            groupId = "net.minestom.testing"
+-//            artifactId = "testing"
+-//            version = "1.0"
+-//
+-//            from(components["java"])
+-//        }
+-//    }
+-//}
++tasks.getByName<Test>("test") {
++    useJUnitPlatform()
 +}
 +
 +indra {
@@ -2465,5 +2687,5 @@ index 4ea0e6bc68bea05e0345261a861fc9fcae9461fe..c9c68b0066296e89eb59324373fd5012
 +            }
 +        }
 +    }
- }
++}
 \ No newline at end of file

@@ -167,10 +167,10 @@ index ae427644f16ed3c6d99d07ba071cb0c1ebe776d4..e1d2d6277a74c731e3366a77ef9d95b2
      }
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 07dfb812a5dc4e10944545d4e19e00a125490d31..607fec9a560670c728ef3208d3987901b28a5dbf 100644
+index e885c445a6ceeb38bbd6dd296dcbc212723a12b6..0cc92fccdb44dd06edd6ff1b5d8dffbf1145bf16 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-@@ -44,7 +44,7 @@ public class Generators {
+@@ -48,7 +48,7 @@ public class Generators {
  //        new AttributeGenerator(
  //                new File(inputFolder, targetVersion + "_attributes.json"),
  //                outputFolder

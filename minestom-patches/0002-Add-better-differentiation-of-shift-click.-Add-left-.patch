@@ -128,10 +128,10 @@ index 634a9ef2aa4e1a05f7ed28f756db12ff3d24077b..ead4ef6fed576403e9368f23ffe39366
          clickResult.setClicked(itemResult);
          return clickResult;
 diff --git a/src/main/java/net/minestom/server/listener/WindowListener.java b/src/main/java/net/minestom/server/listener/WindowListener.java
-index de406579b9518f5783b355941240522202480949..beb392fac7d6816a465601d0c009901e02bb3eb1 100644
+index dfdf2e6751fc14b110b4c1a9f293bfe26ee3d9f0..10b139213594c420b01a65fe731396303b81da65 100644
 --- a/src/main/java/net/minestom/server/listener/WindowListener.java
 +++ b/src/main/java/net/minestom/server/listener/WindowListener.java
-@@ -50,7 +50,7 @@ public class WindowListener {
+@@ -48,7 +48,7 @@ public class WindowListener {
                  }
              }
          } else if (clickType == ClientClickWindowPacket.ClickType.QUICK_MOVE) {

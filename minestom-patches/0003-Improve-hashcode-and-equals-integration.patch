@@ -5,10 +5,10 @@ Subject: [PATCH] Improve hashcode and equals integration
 
 
 diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
-index daf0ece5bc96be7862d265f89ae8edee6958fc13..ff0b45ffe8ac3ce607de0c4312b11451014a11a5 100644
+index 4eeb6d3a018ffb6a91deb21a752d83bdb6cd9b27..a9cead5ecd4de413dbec469b4e3e2fa340e2d2e1 100644
 --- a/src/main/java/net/minestom/server/entity/Entity.java
 +++ b/src/main/java/net/minestom/server/entity/Entity.java
-@@ -477,6 +477,21 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
+@@ -500,6 +500,21 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
          return viewers;
      }
  
@@ -31,10 +31,10 @@ index daf0ece5bc96be7862d265f89ae8edee6958fc13..ff0b45ffe8ac3ce607de0c4312b11451
       * Gets if this entity's viewers (surrounding players) can be predicted from surrounding chunks.
       */
 diff --git a/src/main/java/net/minestom/server/instance/Instance.java b/src/main/java/net/minestom/server/instance/Instance.java
-index b7c5affa63ebe29d30996718c3402d8348137f7d..d6dd0549db22ee58c4057012fcc46a3aba8f087b 100644
+index ec148cc302a79e5757f46383fe876056e8bb9612..f1d5182af481ce9f0ec86e7fcba0460d87431eec 100644
 --- a/src/main/java/net/minestom/server/instance/Instance.java
 +++ b/src/main/java/net/minestom/server/instance/Instance.java
-@@ -451,6 +451,21 @@ public abstract class Instance implements Block.Getter, Block.Setter,
+@@ -509,6 +509,21 @@ public abstract class Instance implements Block.Getter, Block.Setter,
          return new TimeUpdatePacket(worldAge, time);
      }
  

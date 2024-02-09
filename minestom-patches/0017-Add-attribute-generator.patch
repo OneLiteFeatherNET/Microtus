@@ -5,7 +5,7 @@ Subject: [PATCH] Add attribute generator
 
 
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 607fec9a560670c728ef3208d3987901b28a5dbf..75d209cc051e6512deea86bbc77f47ad654621e6 100644
+index 0cc92fccdb44dd06edd6ff1b5d8dffbf1145bf16..704e927dbec1e68a52dab6238dcc279b55b9b7c4 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
 @@ -1,5 +1,6 @@
@@ -15,7 +15,7 @@ index 607fec9a560670c728ef3208d3987901b28a5dbf..75d209cc051e6512deea86bbc77f47ad
  import net.minestom.codegen.biome.BiomeGenerator;
  import net.minestom.codegen.color.DyeColorGenerator;
  import net.minestom.codegen.fluid.FluidGenerator;
-@@ -40,11 +41,10 @@ public class Generators {
+@@ -44,11 +45,10 @@ public class Generators {
          // Generate fluids
          new FluidGenerator(resource("fluids.json"), outputFolder).generate();
  
@@ -444,7 +444,7 @@ index ed97a493c48bc213077bababac2723562b53dc6f..629a18cf2cf73cf303bde57e61a74211
          if (defaultValue > maxValue) {
              throw new IllegalArgumentException("Default value cannot be greater than the maximum allowed");
 diff --git a/src/main/java/net/minestom/server/entity/LivingEntity.java b/src/main/java/net/minestom/server/entity/LivingEntity.java
-index 0db3dcae55c313e3ccb0707ca996783fd0b7b0f3..5df2ce73d2e54d5522d4fc0d30b84a9313c20e70 100644
+index 368f9188233768ee68125c253c394fee90eab778..459edc248d91d3b49b3bc40fd9eba18f261cba30 100644
 --- a/src/main/java/net/minestom/server/entity/LivingEntity.java
 +++ b/src/main/java/net/minestom/server/entity/LivingEntity.java
 @@ -3,6 +3,7 @@ package net.minestom.server.entity;
@@ -455,7 +455,7 @@ index 0db3dcae55c313e3ccb0707ca996783fd0b7b0f3..5df2ce73d2e54d5522d4fc0d30b84a93
  import net.minestom.server.collision.BoundingBox;
  import net.minestom.server.coordinate.Point;
  import net.minestom.server.coordinate.Vec;
-@@ -439,21 +440,21 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+@@ -419,21 +420,21 @@ public class LivingEntity extends Entity implements EquipmentHandler {
      }
  
      /**
@@ -481,7 +481,7 @@ index 0db3dcae55c313e3ccb0707ca996783fd0b7b0f3..5df2ce73d2e54d5522d4fc0d30b84a93
      }
  
      /**
-@@ -696,7 +697,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+@@ -667,7 +668,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
       */
      @Override
      public void takeKnockback(float strength, final double x, final double z) {
@@ -491,19 +491,19 @@ index 0db3dcae55c313e3ccb0707ca996783fd0b7b0f3..5df2ce73d2e54d5522d4fc0d30b84a93
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index e59b452a0b9e08e084e2e1ce2f0b55d3022e6758..3e55a774cc18d3233f10d1d83799a4415047f6ad 100644
+index 5cca3698d7a2c9a50c835f852ce17f2019e53100..a45f83a4ca8b4159c4a614ee3567c2349f4ae364 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
-@@ -19,7 +19,7 @@ import net.minestom.server.advancements.AdvancementTab;
+@@ -25,7 +25,7 @@ import net.minestom.server.advancements.AdvancementTab;
  import net.minestom.server.adventure.AdventurePacketConvertor;
  import net.minestom.server.adventure.Localizable;
  import net.minestom.server.adventure.audience.Audiences;
 -import net.minestom.server.attribute.Attribute;
 +import net.minestom.server.attribute.Attributes;
+ import net.minestom.server.collision.BoundingBox;
  import net.minestom.server.command.CommandSender;
  import net.minestom.server.coordinate.Point;
- import net.minestom.server.coordinate.Pos;
-@@ -227,7 +227,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -247,7 +247,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          this.gameMode = GameMode.SURVIVAL;
          this.dimensionType = DimensionType.OVERWORLD; // Default dimension
          this.levelFlat = true;

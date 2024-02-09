@@ -5,18 +5,17 @@ Subject: [PATCH] Add banner pattern generator
 
 
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index e31b4006fbfdf830a94ee4e8fbb6959b6dcaddbf..2f143b9d196670b7f62d128222674624efe7c38f 100644
+index 911e2b59e3f9f6dbad3987372ca67f5a311ca324..55dbe2abb16c7a3673c34ab530603ebeb3450d7c 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-@@ -34,7 +34,7 @@ public class Generators {
-         generator.generate(resource("sounds.json"), "net.minestom.server.sound", "SoundEvent", "SoundEventImpl", "SoundEvents");
-         generator.generate(resource("custom_statistics.json"), "net.minestom.server.statistic", "StatisticType", "StatisticTypeImpl", "StatisticTypes");
-         generator.generate(resource("damage_types.json"), "net.minestom.server.entity.damage", "DamageType", "DamageTypeImpl", "DamageTypes"); // Microtus - 1.19.4 update
--
+@@ -36,6 +36,7 @@ public class Generators {
+         generator.generate(resource("damage_types.json"), "net.minestom.server.entity.damage", "DamageType", "DamageTypeImpl", "DamageTypes");
+         generator.generate(resource("trim_materials.json"), "net.minestom.server.item.armor", "TrimMaterial", "TrimMaterialImpl", "TrimMaterials");
+         generator.generate(resource("trim_patterns.json"), "net.minestom.server.item.armor", "TrimPattern", "TrimPatternImpl", "TrimPatterns");
 +        generator.generate(resource("banner_patterns.json"), "net.minestom.server.item.banner", "BannerPattern", "BannerPatternImpl", "BannerPatterns"); // Microtus - Banner and Shield Meta
-         // Generate fluids
-         new FluidGenerator(resource("fluids.json"), outputFolder).generate();
  
+ 
+         // Generate fluids
 diff --git a/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java b/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
 index 6e2721a275dff7552e2a67bd3d6decc8c569bf9e..cbb759818ed4a7d61769bafaf4bc3fb24776ecbc 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
@@ -637,17 +636,17 @@ index 0000000000000000000000000000000000000000..56a864253f2b2508a9c91239e1664534
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
-index 10a4f7d615927a6a0ee958abc4009174f83d53e0..5bc28a08cd7cb5b57fb90965b33550b0c7675afb 100644
+index e29de8d4d049c489d4bde72c61bed18ba229d59f..6945755e3e6f0739e59934995097a97e7829340e 100644
 --- a/src/main/java/net/minestom/server/registry/Registry.java
 +++ b/src/main/java/net/minestom/server/registry/Registry.java
-@@ -150,6 +150,7 @@ public final class Registry {
-         POTION_EFFECTS("potion_effects.json"),
-         POTION_TYPES("potions.json"),
-         PARTICLES("particles.json"),
+@@ -164,6 +164,7 @@ public final class Registry {
+         DAMAGE_TYPES("damage_types.json"),
+         TRIM_MATERIALS("trim_materials.json"),
+         TRIM_PATTERNS("trim_patterns.json"),
 +        BANNER_PATTERNS("banner_patterns.json"), // Microtus -  Banner and Shield Meta
-         DAMAGE_TYPES("damage_types.json"), // Microtus - 1.19.4 update
- 
          BLOCK_TAGS("tags/block_tags.json"),
+         ENTITY_TYPE_TAGS("tags/entity_type_tags.json"),
+         FLUID_TAGS("tags/fluid_tags.json"),
 diff --git a/src/test/java/net/minestom/server/item/ItemMetaTest.java b/src/test/java/net/minestom/server/item/ItemMetaTest.java
 index 30ee3dd2d0585a1490ec5c81acecb46cff792405..fc8d2b7faf989c1e5003e3fc24de98ef25151430 100644
 --- a/src/test/java/net/minestom/server/item/ItemMetaTest.java

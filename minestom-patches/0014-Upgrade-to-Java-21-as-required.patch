@@ -23,18 +23,40 @@ index 1ee73c65139fd730df4f868d8a443320b6be307b..26bb5009e0340347f45900ee3935434f
  }
 \ No newline at end of file
 diff --git a/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts
-index 4065014d4c051dccac13b21722a1eccd91f21c04..6c56062ffab38b37367015eddd75a5fdc8f9b93a 100644
---- a/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts
+new file mode 100644
+index 0000000000000000000000000000000000000000..6c56062ffab38b37367015eddd75a5fdc8f9b93a
+--- /dev/null
 +++ b/build-logic/src/main/kotlin/minestom.common-conventions.gradle.kts
-@@ -10,7 +10,7 @@ configurations.all {
- 
- java {
-     toolchain {
--        languageVersion.set(JavaLanguageVersion.of(17))
+@@ -0,0 +1,28 @@
++plugins {
++    java
++}
++
++// Always exclude checker-qual. This is the single most annoying thing that always reappears.
++configurations.all {
++    // We only use Jetbrains Annotations
++    exclude("org.checkerframework", "checker-qual")
++}
++
++java {
++    toolchain {
 +        languageVersion.set(JavaLanguageVersion.of(21))
-     }
- }
- 
++    }
++}
++
++tasks {
++    withType<JavaCompile> {
++        // We are fully aware, that we should be suppressing these instead of ignoring them here, but man keep my terminal clean.
++        options.compilerArgs.addAll(listOf("-Xlint:none", "-Xlint:-deprecation", "-Xlint:-unchecked"))
++    }
++    withType<Test> {
++        useJUnitPlatform()
++        // Viewable packets make tracking harder. Could be re-enabled later.
++        jvmArgs("-Dminestom.viewable-packet=false")
++        jvmArgs("-Dminestom.inside-test=true")
++    }
++}
+\ No newline at end of file
 diff --git a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts b/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts
 index d9af25dd00549449f429e79af70a431fefb86b8e..305dd158be3325000a668159a39f05e79f4f00d9 100644
 --- a/build-logic/src/main/kotlin/minestom.publishing-conventions.gradle.kts

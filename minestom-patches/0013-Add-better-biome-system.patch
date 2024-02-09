@@ -5,7 +5,7 @@ Subject: [PATCH] Add better biome system
 
 
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 2f143b9d196670b7f62d128222674624efe7c38f..07dfb812a5dc4e10944545d4e19e00a125490d31 100644
+index 55dbe2abb16c7a3673c34ab530603ebeb3450d7c..e885c445a6ceeb38bbd6dd296dcbc212723a12b6 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
 @@ -1,5 +1,6 @@
@@ -212,92 +212,6 @@ index 0000000000000000000000000000000000000000..3c125bfa40ac413f79d8d17318de1236
 +        );
 +    }
 +}
-diff --git a/demo/src/main/java/net/minestom/demo/Main.java b/demo/src/main/java/net/minestom/demo/Main.java
-index c9ac500c4626b6d9a6c2f77c020553b9e5b3dfc2..977d1435323be6c0abb12d904f733496c31088ee 100644
---- a/demo/src/main/java/net/minestom/demo/Main.java
-+++ b/demo/src/main/java/net/minestom/demo/Main.java
-@@ -11,7 +11,6 @@ import net.minestom.server.command.CommandManager;
- import net.minestom.server.event.server.ServerListPingEvent;
- import net.minestom.server.extras.lan.OpenToLAN;
- import net.minestom.server.extras.lan.OpenToLANConfig;
--import net.minestom.server.extras.optifine.OptifineSupport;
- import net.minestom.server.instance.block.BlockManager;
- import net.minestom.server.instance.block.rule.vanilla.RedstonePlacementRule;
- import net.minestom.server.ping.ResponseData;
-@@ -98,8 +97,6 @@ public class Main {
- 
-         PlayerInit.init();
- 
--        OptifineSupport.enable();
--
-         //VelocityProxy.enable("rBeJJ79W4MVU");
-         //BungeeCordProxy.enable();
- 
-@@ -109,6 +106,44 @@ public class Main {
-         OpenToLAN.open(new OpenToLANConfig().eventCallDelay(Duration.of(1, TimeUnit.DAY)));
- 
-         minecraftServer.start("0.0.0.0", 25565);
-+        /* var oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:crimson_forest"));
-+        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
-+        var newBiome = Biome.builder().name(NamespaceID.from("minecraft:crimson_forest"))
-+                .category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f)
-+                .showPrecipitation(false)
-+                .effects(BiomeEffects.builder().fogColor(0x330303).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff)
-+                        .biomeParticle(new BiomeParticle(0.025f, new DefaultOption(Particle.CRIMSON_SPORE)))
-+                        .build()).build();
-+        MinecraftServer.getBiomeManager().addBiome(newBiome);
-+
-+        oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:warped_forest"));
-+        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
-+        newBiome = Biome.builder().name(NamespaceID.from("minecraft:warped_forest")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x1a051a).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff)
-+                        .biomeParticle(new BiomeParticle(0.01428f, new DefaultOption(Particle.WARPED_SPORE)))
-+                        .build()).build();
-+        MinecraftServer.getBiomeManager().addBiome(newBiome);
-+
-+        oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:basalt_deltas"));
-+        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
-+        newBiome = Biome.builder().name(NamespaceID.from("minecraft:basalt_deltas")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x685f70).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff)
-+                .biomeParticle(new BiomeParticle(0.118093334f, new DefaultOption(Particle.WHITE_ASH)))
-+                .build()).build();
-+        MinecraftServer.getBiomeManager().addBiome(newBiome);
-+
-+        oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:soul_sand_valley"));
-+        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
-+        newBiome = Biome.builder().name(NamespaceID.from("minecraft:soul_sand_valley")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(2.0f).downfall(0.0f).showPrecipitation(false).effects(BiomeEffects.builder().fogColor(0x1b4745).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x6eb1ff)
-+                .biomeParticle(new BiomeParticle(0.00625f, new DefaultOption(Particle.ASH)))
-+                .build()).build();
-+        MinecraftServer.getBiomeManager().addBiome(newBiome);
-+
-+        oldBiome = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:river"));
-+        MinecraftServer.getBiomeManager().removeBiome(oldBiome);
-+        newBiome = Biome.builder().name(NamespaceID.from("minecraft:river")).category(Biome.Category.NONE).depth(0.125F).scale(0.05F).temperature(0.5f).downfall(0.5f).showPrecipitation(true).effects(BiomeEffects.builder().fogColor(0xc0d8ff).waterColor(0x3f76e4).waterFogColor(0x050533).skyColor(0x7ba4ff)
-+                // .biomeParticle(new BiomeParticle(0.118093334f, new DefaultOption(Particle.DRAGON_BREATH)))
-+                .biomeParticle(new BiomeParticle(1f, new DustOption(1f,0f,0f, 1f)))
-+                .build()).build();
-+        MinecraftServer.getBiomeManager().addBiome(newBiome);*/
- //        minecraftServer.start(java.net.UnixDomainSocketAddress.of("minestom-demo.sock"));
-         //Runtime.getRuntime().addShutdownHook(new Thread(MinecraftServer::stopCleanly));
-     }
-diff --git a/demo/src/main/resources/extension.json b/demo/src/main/resources/extension.json
-deleted file mode 100644
-index efb46608f1c0ea0ab08486a554040c71e5341391..0000000000000000000000000000000000000000
---- a/demo/src/main/resources/extension.json
-+++ /dev/null
-@@ -1,13 +0,0 @@
--{
--  "entrypoint": "net.minestom.demo.extension.TestExtension",
--  "name": "TestExtension",
--  "version": "1.0.0",
--  "externalDependencies": {
--    "repositories": [
--      { "name": "Central", "url": "https://repo1.maven.org/maven2/" }
--    ],
--    "artifacts": [
--      "mysql:mysql-connector-java:8.0.26"
--    ]
--  }
--}
-\ No newline at end of file
 diff --git a/src/autogenerated/java/net/minestom/server/world/biomes/Biomes.java b/src/autogenerated/java/net/minestom/server/world/biomes/Biomes.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..a11ba6e607e5c2e224632c10a258a647231f9722
@@ -467,10 +381,10 @@ index 0000000000000000000000000000000000000000..a11ba6e607e5c2e224632c10a258a647
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
-index e160c7e81791c5c270ec342b32c8b6c60f590cba..f046dc6ad23381ea683e11d7bbc0d3d73958538b 100644
+index fd5af2b71286497addf6a41f3df8d151dfb6720e..0f23b3348fd84f82485be7f61e15ff7f4a7b4378 100644
 --- a/src/main/java/net/minestom/server/ServerProcessImpl.java
 +++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
-@@ -42,6 +42,7 @@ import net.minestom.server.utils.PacketUtils;
+@@ -44,6 +44,7 @@ import net.minestom.server.utils.PropertyUtils;
  import net.minestom.server.utils.collection.MappedCollection;
  import net.minestom.server.world.DimensionTypeManager;
  import net.minestom.server.world.biomes.BiomeManager;
@@ -478,7 +392,7 @@ index e160c7e81791c5c270ec342b32c8b6c60f590cba..f046dc6ad23381ea683e11d7bbc0d3d7
  import org.jetbrains.annotations.NotNull;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
-@@ -238,6 +239,9 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -248,6 +249,9 @@ final class ServerProcessImpl implements ServerProcess {
  
          LOGGER.info(MinecraftServer.getBrandName() + " server started successfully.");
  
@@ -488,50 +402,8 @@ index e160c7e81791c5c270ec342b32c8b6c60f590cba..f046dc6ad23381ea683e11d7bbc0d3d7
          if (MinecraftServer.isTerminalEnabled()) {
              MinestomTerminal.start();
          }
-diff --git a/src/main/java/net/minestom/server/extras/optifine/OptifineSupport.java b/src/main/java/net/minestom/server/extras/optifine/OptifineSupport.java
-deleted file mode 100644
-index 9f2a9584a32025b937d8b27187c1ed3b1688e973..0000000000000000000000000000000000000000
---- a/src/main/java/net/minestom/server/extras/optifine/OptifineSupport.java
-+++ /dev/null
-@@ -1,36 +0,0 @@
--package net.minestom.server.extras.optifine;
--
--import net.minestom.server.MinecraftServer;
--import net.minestom.server.utils.NamespaceID;
--import net.minestom.server.utils.validate.Check;
--import net.minestom.server.world.biomes.Biome;
--import net.minestom.server.world.biomes.BiomeManager;
--
--/**
-- * Hacky class for Optifine because of an issue making the client crash if biomes 'swamp' and 'swamp_hills'
-- * are not registered.
-- * <p>
-- * Can be removed anytime, hope that it will be fixed.
-- */
--public final class OptifineSupport {
--
--    private static volatile boolean enabled;
--
--    /**
--     * Enables optifine support by registering the required biomes.
--     *
--     * @throws IllegalStateException if optifine support is already enabled
--     */
--    public static void enable() {
--        Check.stateCondition(enabled, "Optifine support is already enabled!");
--        OptifineSupport.enabled = true;
--
--        BiomeManager biomeManager = MinecraftServer.getBiomeManager();
--        biomeManager.addBiome(Biome.builder().name(NamespaceID.from("minecraft:swamp")).build());
--        biomeManager.addBiome(Biome.builder().name(NamespaceID.from("minecraft:swamp_hills")).build());
--    }
--
--    public static boolean isEnabled() {
--        return enabled;
--    }
--}
 diff --git a/src/main/java/net/minestom/server/instance/AnvilLoader.java b/src/main/java/net/minestom/server/instance/AnvilLoader.java
-index 9111770d834c98d3c31a60207d57462381f61177..6873897aef672fdd78e8f154427465809bf5c81c 100644
+index e7af40f3e0a05aea32f1ad36c76ed2d3563c214f..7535c393f3dd0269a766389dbccdf03163013d45 100644
 --- a/src/main/java/net/minestom/server/instance/AnvilLoader.java
 +++ b/src/main/java/net/minestom/server/instance/AnvilLoader.java
 @@ -9,6 +9,7 @@ import net.minestom.server.instance.block.BlockHandler;
@@ -552,7 +424,7 @@ index 9111770d834c98d3c31a60207d57462381f61177..6873897aef672fdd78e8f15442746580
      private final Map<String, RegionFile> alreadyLoaded = new ConcurrentHashMap<>();
      private final Path path;
 diff --git a/src/main/java/net/minestom/server/world/biomes/Biome.java b/src/main/java/net/minestom/server/world/biomes/Biome.java
-index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4f6174498 100644
+index c8142703f54973d046fc2a45a608f8998171b1fa..8ceadbf3b891f883f19a0f68c4ce22e4f6174498 100644
 --- a/src/main/java/net/minestom/server/world/biomes/Biome.java
 +++ b/src/main/java/net/minestom/server/world/biomes/Biome.java
 @@ -1,5 +1,6 @@
@@ -625,12 +497,11 @@ index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4
      public static Builder builder() {
          return new Builder();
      }
-@@ -72,8 +64,11 @@ public final class Biome {
+@@ -72,7 +64,11 @@ public final class Biome {
                  element.setFloat("scale", scale);
                  element.setFloat("downfall", downfall);
                  element.setString("category", category.name().toLowerCase(Locale.ROOT));
--                // Todo: Bad fix
--                element.setByte("has_precipitation", (byte) 1); // Microtus - 1.19.4 update
+-                element.setByte("has_precipitation", (byte) (precipitation == Precipitation.NONE ? 0 : 1));
 +                if (isHasPrecipitation()) {
 +                    element.setByte("has_precipitation", (byte) 1); // Microtus - 1.19.4 update
 +                } else {
@@ -639,7 +510,7 @@ index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4
                  element.setString("precipitation", precipitation.name().toLowerCase(Locale.ROOT));
                  if (temperatureModifier != TemperatureModifier.NONE)
                      element.setString("temperature_modifier", temperatureModifier.name().toLowerCase(Locale.ROOT));
-@@ -90,6 +85,10 @@ public final class Biome {
+@@ -89,6 +85,10 @@ public final class Biome {
          return this.name;
      }
  
@@ -650,7 +521,7 @@ index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4
      public float depth() {
          return this.depth;
      }
-@@ -143,6 +142,7 @@ public final class Biome {
+@@ -142,6 +142,7 @@ public final class Biome {
          private float temperature = 0.25f;
          private float scale = 0.2f;
          private float downfall = 0.8f;
@@ -658,7 +529,7 @@ index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4
          private Category category = Category.NONE;
          private BiomeEffects effects = DEFAULT_EFFECTS;
          private Precipitation precipitation = Precipitation.RAIN;
-@@ -156,6 +156,11 @@ public final class Biome {
+@@ -155,6 +156,11 @@ public final class Biome {
              return this;
          }
  
@@ -670,7 +541,7 @@ index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4
          public Builder depth(float depth) {
              this.depth = depth;
              return this;
-@@ -197,7 +202,8 @@ public final class Biome {
+@@ -196,7 +202,8 @@ public final class Biome {
          }
  
          public Biome build() {
@@ -681,15 +552,10 @@ index b58c200c1fb4787c6c383782426cf5f97b1d0943..8ceadbf3b891f883f19a0f68c4ce22e4
      }
  
 diff --git a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
-index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..8532902956806455dbbb378ba56e08ffb43ecf2d 100644
+index 3c7ffdbe624c6d0ff0b52940d8a63fb9b1fae750..8532902956806455dbbb378ba56e08ffb43ecf2d 100644
 --- a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
 +++ b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
-@@ -1,27 +1,30 @@
- package net.minestom.server.world.biomes;
- 
--import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
--import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
- import net.minestom.server.utils.NamespaceID;
+@@ -4,23 +4,27 @@ import net.minestom.server.utils.NamespaceID;
  import org.jglrxavpok.hephaistos.nbt.NBT;
  import org.jglrxavpok.hephaistos.nbt.NBTCompound;
  import org.jglrxavpok.hephaistos.nbt.NBTType;
@@ -699,6 +565,7 @@ index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..8532902956806455dbbb378ba56e08ff
  import java.util.Collection;
  import java.util.Collections;
  import java.util.Map;
+-import java.util.concurrent.ConcurrentHashMap;
 +import java.util.List;
 +import java.util.ArrayList;
 +import java.util.stream.IntStream;
@@ -711,7 +578,7 @@ index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..8532902956806455dbbb378ba56e08ff
 + * Contains {@link Biomes#PLAINS} by default but can be removed.
   */
  public final class BiomeManager {
--    private final Int2ObjectMap<Biome> biomes = new Int2ObjectOpenHashMap<>();
+-    private final Map<Integer, Biome> biomes = new ConcurrentHashMap<>();
 +    private final List<Biome> biomes = new ArrayList<>();
 +    private final static Logger LOGGER = LoggerFactory.getLogger(BiomeManager.class);
  
@@ -720,11 +587,13 @@ index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..8532902956806455dbbb378ba56e08ff
      }
  
      /**
-@@ -30,7 +33,11 @@ public final class BiomeManager {
+@@ -28,8 +32,12 @@ public final class BiomeManager {
+      *
       * @param biome the biome to add
       */
-     public synchronized void addBiome(Biome biome) {
+-    public void addBiome(Biome biome) {
 -        this.biomes.put(biome.id(), biome);
++    public synchronized void addBiome(Biome biome) {
 +        if (biomes.stream().anyMatch(listBiome -> listBiome.name().equals(biome.name()))) {
 +            LOGGER.error("You cannot register the biome because it is already registered. Please remove the biome to overwrite it");
 +            return;
@@ -733,37 +602,51 @@ index 61c63ecf1235b8ae94d8e0c0700bd9beebdda681..8532902956806455dbbb378ba56e08ff
      }
  
      /**
-@@ -39,7 +46,7 @@ public final class BiomeManager {
+@@ -37,8 +45,8 @@ public final class BiomeManager {
+      *
       * @param biome the biome to remove
       */
-     public synchronized void removeBiome(Biome biome) {
+-    public void removeBiome(Biome biome) {
 -        this.biomes.remove(biome.id());
++    public synchronized void removeBiome(Biome biome) {
 +        this.biomes.remove(biome);
      }
  
      /**
-@@ -48,7 +55,7 @@ public final class BiomeManager {
+@@ -46,8 +54,8 @@ public final class BiomeManager {
+      *
       * @return an immutable copy of the biomes already registered
       */
-     public synchronized Collection<Biome> unmodifiableCollection() {
+-    public Collection<Biome> unmodifiableCollection() {
 -        return Collections.unmodifiableCollection(biomes.values());
++    public synchronized Collection<Biome> unmodifiableCollection() {
 +        return Collections.unmodifiableCollection(biomes);
      }
  
      /**
-@@ -63,7 +70,7 @@ public final class BiomeManager {
+@@ -56,13 +64,13 @@ public final class BiomeManager {
+      * @param id the id of the biome
+      * @return the {@link Biome} linked to this id
+      */
+-    public Biome getById(int id) {
++    public synchronized Biome getById(int id) {
+         return biomes.get(id);
+     }
  
-     public synchronized Biome getByName(NamespaceID namespaceID) {
+-    public Biome getByName(NamespaceID namespaceID) {
++    public synchronized Biome getByName(NamespaceID namespaceID) {
          Biome biome = null;
 -        for (final Biome biomeT : biomes.values()) {
 +        for (final Biome biomeT : biomes) {
              if (biomeT.name().equals(namespaceID)) {
                  biome = biomeT;
                  break;
-@@ -73,8 +80,16 @@ public final class BiomeManager {
+@@ -71,9 +79,17 @@ public final class BiomeManager {
+         return biome;
      }
  
-     public synchronized NBTCompound toNBT() {
+-    public NBTCompound toNBT() {
++    public synchronized NBTCompound toNBT() {
 +        var biomes = new ArrayList<>(unmodifiableCollection());
 +        List<NBTCompound> nbtCompounds = IntStream
 +                .range(0, biomes.size())
