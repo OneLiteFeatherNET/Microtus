@@ -243,6 +243,236 @@ index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..b046349be27298a819f37905254ffd7a
      /**
       * @param entityCreature  the entity (self)
       * @param range           the maximum range the entity can target others within
+diff --git a/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayer.java b/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayer.java
+index 8d85a70cb3e2dc8bba7f388b2e7bf06f68031433..4608ab415409d9b4226e6c645d34dbb157c997d5 100644
+--- a/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayer.java
++++ b/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayer.java
+@@ -29,6 +29,7 @@ import java.util.function.Consumer;
+  * You can create one using {@link #initPlayer(UUID, String, Consumer)}. Be aware that this really behave exactly like a player
+  * and this is a feature not a bug, you will need to check at some place if the player is a fake one or not (instanceof) if you want to change it.
+  */
++@Deprecated(forRemoval = true, since = "Will be removed when 1.20.4 is released")
+ public class FakePlayer extends Player implements NavigableEntity {
+ 
+     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
+diff --git a/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerController.java b/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerController.java
+index 841e274ae10f56f58511f8e4c7d32c87e2d202bb..2626f51cab8257e9c35b40ac4cc2462459b494f3 100644
+--- a/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerController.java
++++ b/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerController.java
+@@ -27,6 +27,7 @@ import java.util.List;
+  * <p>
+  * The main use is to simulate the receiving of {@link ClientPacket}
+  */
++@Deprecated(forRemoval = true, since = "Will be removed when 1.20.4 is released")
+ public class FakePlayerController {
+ 
+     private final FakePlayer fakePlayer;
+diff --git a/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerOption.java b/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerOption.java
+index eacc54218a37806a76293e01637d2d29c49b9505..2996d3128fa70ca7a4ab45f4509dcdad58ed2ef3 100644
+--- a/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerOption.java
++++ b/src/main/java/net/minestom/server/entity/fakeplayer/FakePlayerOption.java
+@@ -5,6 +5,7 @@ import net.minestom.server.network.ConnectionManager;
+ /**
+  * Represents any options for a {@link FakePlayer}.
+  */
++@Deprecated(forRemoval = true, since = "Will be removed when 1.20.4 is released")
+ public class FakePlayerOption {
+ 
+     private boolean registered = false;
+diff --git a/src/main/java/net/minestom/server/entity/hologram/Hologram.java b/src/main/java/net/minestom/server/entity/hologram/Hologram.java
+deleted file mode 100644
+index c0467499b9f7969ee944ad9d597ac478dc713126..0000000000000000000000000000000000000000
+--- a/src/main/java/net/minestom/server/entity/hologram/Hologram.java
++++ /dev/null
+@@ -1,188 +0,0 @@
+-package net.minestom.server.entity.hologram;
+-
+-import net.kyori.adventure.text.Component;
+-import net.minestom.server.Viewable;
+-import net.minestom.server.coordinate.Pos;
+-import net.minestom.server.entity.Entity;
+-import net.minestom.server.entity.EntityType;
+-import net.minestom.server.entity.Player;
+-import net.minestom.server.entity.metadata.other.ArmorStandMeta;
+-import net.minestom.server.instance.Instance;
+-import net.minestom.server.utils.validate.Check;
+-import org.jetbrains.annotations.NotNull;
+-
+-import java.util.Set;
+-
+-/**
+- * Represents an invisible armor stand showing a {@link Component}.
+- */
+-public class Hologram implements Viewable {
+-
+-    private static final float OFFSET_Y = -0.9875f;
+-    private static final float MARKER_OFFSET_Y = -0.40625f;
+-
+-    private final Entity entity;
+-    private final float yOffset;
+-
+-    private Pos position;
+-    private Component text;
+-
+-    private boolean removed;
+-
+-    /**
+-     * Constructs a new {@link Hologram} with the given parameters.
+-     *
+-     * @param instance      The instance where the hologram should be spawned.
+-     * @param spawnPosition The spawn position of this hologram.
+-     * @param text          The text of this hologram.
+-     */
+-    public Hologram(Instance instance, Pos spawnPosition, Component text) {
+-        this(instance, spawnPosition, text, true);
+-    }
+-
+-    /**
+-     * Constructs a new {@link Hologram} with the given parameters.
+-     *
+-     * @param instance      The instance where the hologram should be spawned.
+-     * @param spawnPosition The spawn position of this hologram.
+-     * @param text          The text of this hologram.
+-     * @param autoViewable  {@code true}if the hologram should be visible automatically, otherwise {@code false}.
+-     */
+-    public Hologram(Instance instance, Pos spawnPosition, Component text, boolean autoViewable) {
+-        this(instance, spawnPosition, text, autoViewable, false);
+-    }
+-
+-    /**
+-     * Constructs a new {@link Hologram} with the given parameters.
+-     *
+-     * @param instance      The instance where the hologram should be spawned.
+-     * @param spawnPosition The spawn position of this hologram.
+-     * @param text          The text of this hologram.
+-     * @param autoViewable  {@code true}if the hologram should be visible automatically, otherwise {@code false}.
+-     */
+-    public Hologram(Instance instance, Pos spawnPosition, Component text, boolean autoViewable, boolean marker) {
+-        this.entity = new Entity(EntityType.ARMOR_STAND);
+-
+-        ArmorStandMeta armorStandMeta = (ArmorStandMeta) entity.getEntityMeta();
+-
+-        armorStandMeta.setNotifyAboutChanges(false);
+-
+-        if (marker) {
+-            this.yOffset = MARKER_OFFSET_Y;
+-            armorStandMeta.setMarker(true);
+-        } else {
+-            this.yOffset = OFFSET_Y;
+-            armorStandMeta.setSmall(true);
+-        }
+-        armorStandMeta.setHasNoGravity(true);
+-        armorStandMeta.setCustomName(Component.empty());
+-        armorStandMeta.setCustomNameVisible(true);
+-        armorStandMeta.setInvisible(true);
+-
+-        armorStandMeta.setNotifyAboutChanges(true);
+-
+-        this.entity.setInstance(instance, spawnPosition.add(0, this.yOffset, 0));
+-        this.entity.setAutoViewable(autoViewable);
+-
+-        this.position = spawnPosition;
+-        setText(text);
+-    }
+-
+-    /**
+-     * Gets the position of the hologram.
+-     *
+-     * @return the hologram's position
+-     */
+-    public Pos getPosition() {
+-        return position;
+-    }
+-
+-    /**
+-     * Changes the position of the hologram.
+-     *
+-     * @param position the new hologram's position
+-     */
+-    public void setPosition(Pos position) {
+-        checkRemoved();
+-        this.position = position.add(0, this.yOffset, 0);
+-        this.entity.teleport(this.position);
+-    }
+-
+-    /**
+-     * Gets the hologram text.
+-     *
+-     * @return the hologram text
+-     */
+-    public Component getText() {
+-        return text;
+-    }
+-
+-    /**
+-     * Changes the hologram text.
+-     *
+-     * @param text the new hologram text
+-     */
+-    public void setText(Component text) {
+-        checkRemoved();
+-        this.text = text;
+-        this.entity.setCustomName(text);
+-    }
+-
+-    /**
+-     * Removes the hologram.
+-     */
+-    public void remove() {
+-        this.removed = true;
+-        this.entity.remove();
+-    }
+-
+-    /**
+-     * Checks if the hologram is still present.
+-     *
+-     * @return true if the hologram is present, false otherwise
+-     */
+-    public boolean isRemoved() {
+-        return removed;
+-    }
+-
+-    /**
+-     * Gets the hologram entity (armor stand).
+-     *
+-     * @return the hologram entity
+-     */
+-    public Entity getEntity() {
+-        return entity;
+-    }
+-
+-    /**
+-     * {@inheritDoc}
+-     */
+-    @Override
+-    public boolean addViewer(@NotNull Player player) {
+-        return entity.addViewer(player);
+-    }
+-
+-    /**
+-     * {@inheritDoc}
+-     */
+-    @Override
+-    public boolean removeViewer(@NotNull Player player) {
+-        return entity.removeViewer(player);
+-    }
+-
+-    /**
+-     * {@inheritDoc}
+-     */
+-    @NotNull
+-    @Override
+-    public Set<Player> getViewers() {
+-        return entity.getViewers();
+-    }
+-
+-    /**
+-     * @see #isRemoved()
+-     */
+-    private void checkRemoved() {
+-        Check.stateCondition(isRemoved(), "You cannot interact with a removed Hologram");
+-    }
+-}
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
 index b45665fb719606ade2bc83318ba25866487a6dc4..71d3c37edba5b2be3324afc4f8b27aa15bfcc805 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
