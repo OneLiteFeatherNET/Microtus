@@ -5,7 +5,7 @@ Subject: [PATCH] Add attribute generator
 
 
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 07dfb812a5dc4e10944545d4e19e00a125490d31..75d209cc051e6512deea86bbc77f47ad654621e6 100644
+index 607fec9a560670c728ef3208d3987901b28a5dbf..75d209cc051e6512deea86bbc77f47ad654621e6 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
 @@ -1,5 +1,6 @@
@@ -23,7 +23,7 @@ index 07dfb812a5dc4e10944545d4e19e00a125490d31..75d209cc051e6512deea86bbc77f47ad
 -//        new AttributeGenerator(
 -//                new File(inputFolder, targetVersion + "_attributes.json"),
 -//                outputFolder
--//        ).generate();
+-//        2).generate();
 +        new AttributeGenerator(
 +                resource("attributes.json"),
 +                outputFolder
@@ -32,113 +32,94 @@ index 07dfb812a5dc4e10944545d4e19e00a125490d31..75d209cc051e6512deea86bbc77f47ad
  //        new VillagerProfessionGenerator(
  //                new File(inputFolder, targetVersion + "_villager_professions.json"),
 diff --git a/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
-index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f3dbac15b 100644
+index 618040b6ff868f2327c641ed3e5c205c8a00344f..d446b208f333027faa9bfdd885f928d115ac05e4 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
-@@ -1,9 +1,15 @@
- package net.minestom.codegen.attribute;
- 
--import com.google.gson.JsonArray;
--import com.google.gson.JsonElement;
+@@ -3,22 +3,12 @@ package net.minestom.codegen.attribute;
+ import com.google.gson.JsonArray;
+ import com.google.gson.JsonElement;
  import com.google.gson.JsonObject;
--import com.squareup.javapoet.*;
-+import com.squareup.javapoet.AnnotationSpec;
-+import com.squareup.javapoet.ArrayTypeName;
-+import com.squareup.javapoet.ClassName;
-+import com.squareup.javapoet.FieldSpec;
-+import com.squareup.javapoet.JavaFile;
-+import com.squareup.javapoet.TypeSpec;
-+import com.squareup.javapoet.TypeName;
-+import com.squareup.javapoet.MethodSpec;
-+import com.squareup.javapoet.ParameterSpec;
+-import com.squareup.javapoet.CodeBlock;
+-import com.squareup.javapoet.ClassName;
+-import com.squareup.javapoet.FieldSpec;
+-import com.squareup.javapoet.JavaFile;
+-import com.squareup.javapoet.TypeSpec;
+-import com.squareup.javapoet.TypeName;
+-import com.squareup.javapoet.ParameterizedTypeName;
+-import com.squareup.javapoet.MethodSpec;
+-import com.squareup.javapoet.ParameterSpec;
++import com.squareup.javapoet.*;
  import net.minestom.codegen.MinestomCodeGenerator;
+-import org.jetbrains.annotations.ApiStatus;
  import org.jetbrains.annotations.NotNull;
  import org.jetbrains.annotations.Nullable;
-@@ -16,9 +22,16 @@ import java.io.InputStream;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+-import net.minestom.codegen.util.GenerationHelper;
+ 
+ import javax.lang.model.element.Modifier;
+ import java.io.File;
+@@ -26,11 +16,8 @@ import java.io.InputStream;
  import java.io.InputStreamReader;
  import java.util.ArrayList;
  import java.util.List;
 +import java.util.Locale;
  
+-import static net.minestom.codegen.util.GenerationHelper.VARIABLE_SETTER;
+-
+-@ApiStatus.NonExtendable
+-@ApiStatus.Internal
  public final class AttributeGenerator extends MinestomCodeGenerator {
      private static final Logger LOGGER = LoggerFactory.getLogger(AttributeGenerator.class);
-+    private static final String PACKAGE_NAME = "net.minestom.server.attribute"; // Microtus - Biomes
-+    private static final String MIN_VALUE = "minValue";
-+    private static final String MAX_VALUE = "maxValue";
-+    private static final String DEFAULT_VALUE = "defaultValue";
-+    private static final String CLIENT_SYNCABLE = "clientSyncable";
-+    private static final String LITERAL_RETURN = "return this.$L";
-     private final InputStream attributesFile;
-     private final File outputFolder;
- 
-@@ -38,203 +51,71 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
-             LOGGER.error("Output folder for code generation does not exist and could not be created.");
+     private static final String MIN_VALUE = "minValue";
+@@ -59,135 +46,71 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
              return;
          }
--        // Important classes we use alot
--        ClassName namespaceIDClassName = ClassName.get("net.minestom.server.utils", "NamespaceID");
--        ClassName registryClassName = ClassName.get("net.minestom.server.registry", "Registry");
  
 -        JsonArray attributes = GSON.fromJson(new InputStreamReader(attributesFile), JsonArray.class);
 +        JsonObject attributes = GSON.fromJson(new InputStreamReader(attributesFile), JsonObject.class);
          List<JavaFile> filesToWrite = new ArrayList<>();
  
--        ClassName attributeClassName = ClassName.get("net.minestom.server.attribute", "Attribute");
--
-+        ClassName attributeClassName = ClassName.get(PACKAGE_NAME, "Attributes");
-+        ClassName className = ClassName.get(PACKAGE_NAME, "Attribute");
+-        ClassName attributeClassName = ClassName.get(packageName, "Attribute");
++        ClassName attributeClassName = ClassName.get(packageName, "Attributes");
++        ClassName className = ClassName.get(packageName, "Attribute");
          // Attribute
 -        TypeSpec.Builder attributeClass = TypeSpec.classBuilder(attributeClassName)
--                .addSuperinterface(ClassName.get("net.kyori.adventure.key", "Keyed"))
+-                .addSuperinterface(KEYORI_ADVENTURE_KEY)
 +        TypeSpec.Builder attributeClass = TypeSpec.enumBuilder(attributeClassName)
                  .addModifiers(Modifier.PUBLIC).addJavadoc("AUTOGENERATED by " + getClass().getSimpleName());
 -        attributeClass.addField(
--                FieldSpec.builder(namespaceIDClassName, "id")
--                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL).addAnnotation(NotNull.class).build()
+-                FieldSpec.builder(NAMESPACE_ID_CLASS, "id")
+-                        .addModifiers(PRIVATE_FINAL_MODIFIERS).addAnnotation(NotNull.class).build()
 -        );
 -        attributeClass.addField(
--                FieldSpec.builder(TypeName.DOUBLE, "defaultValue")
--                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL).build()
+-                FieldSpec.builder(TypeName.DOUBLE, DEFAULT_VALUE)
+-                        .addModifiers(PRIVATE_FINAL_MODIFIERS).build()
 -        );
 -        attributeClass.addField(
--                FieldSpec.builder(TypeName.BOOLEAN, "clientSyncable")
--                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL).build()
+-                FieldSpec.builder(TypeName.BOOLEAN, CLIENT_SYNCABLE)
+-                        .addModifiers(PRIVATE_FINAL_MODIFIERS).build()
 -        );
 -        attributeClass.addMethod(
 -                MethodSpec.constructorBuilder()
--                        .addParameter(ParameterSpec.builder(namespaceIDClassName, "id").addAnnotation(NotNull.class).build())
--                        .addParameter(ParameterSpec.builder(TypeName.BOOLEAN, "clientSyncable").build())
--                        .addParameter(ParameterSpec.builder(TypeName.DOUBLE, "defaultValue").build())
--                        .addStatement("this.id = id")
--                        .addStatement("this.clientSyncable = clientSyncable")
--                        .addStatement("this.defaultValue = defaultValue")
+-                        .addParameter(ParameterSpec.builder(NAMESPACE_ID_CLASS, "id").addAnnotation(NotNull.class).build())
+-                        .addParameter(ParameterSpec.builder(TypeName.BOOLEAN, CLIENT_SYNCABLE).build())
+-                        .addParameter(ParameterSpec.builder(TypeName.DOUBLE, DEFAULT_VALUE).build())
+-                        .addStatement(VARIABLE_SETTER, "id")
+-                        .addStatement(VARIABLE_SETTER, CLIENT_SYNCABLE)
+-                        .addStatement(VARIABLE_SETTER, DEFAULT_VALUE)
 -                        .addModifiers(Modifier.PROTECTED)
 -                        .build()
 -        );
 -        // Override key method (adventure)
--        attributeClass.addMethod(
--                MethodSpec.methodBuilder("key")
--                        .returns(ClassName.get("net.kyori.adventure.key", "Key"))
--                        .addAnnotation(Override.class)
--                        .addAnnotation(NotNull.class)
--                        .addStatement("return this.id")
--                        .addModifiers(Modifier.PUBLIC)
--                        .build()
--        );
+-        attributeClass.addMethod(GenerationHelper.ADVENTURE_KEY_METHOD);
 -        // getId method
--        attributeClass.addMethod(
--                MethodSpec.methodBuilder("getId")
--                        .returns(namespaceIDClassName)
--                        .addAnnotation(NotNull.class)
--                        .addStatement("return this.id")
--                        .addModifiers(Modifier.PUBLIC)
--                        .build()
--        );
+-        attributeClass.addMethod(GenerationHelper.ID_GETTER);
 -        // getDefaultValue
 -        attributeClass.addMethod(
 -                MethodSpec.methodBuilder("getDefaultValue")
 -                        .returns(TypeName.DOUBLE)
--                        .addStatement("return this.defaultValue")
+-                        .addStatement("return this.%L", DEFAULT_VALUE)
 -                        .addModifiers(Modifier.PUBLIC)
 -                        .build()
 -        );
@@ -146,7 +127,7 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f
 -        attributeClass.addMethod(
 -                MethodSpec.methodBuilder("isClientSyncable")
 -                        .returns(TypeName.BOOLEAN)
--                        .addStatement("return this.clientSyncable")
+-                        .addStatement(LITERAL_RETURN, CLIENT_SYNCABLE)
 -                        .addModifiers(Modifier.PUBLIC)
 -                        .build()
 -        );
@@ -155,7 +136,7 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f
 -                MethodSpec.methodBuilder("isShared")
 -                        .addAnnotation(Deprecated.class)
 -                        .returns(TypeName.BOOLEAN)
--                        .addStatement("return this.clientSyncable")
+-                        .addStatement(LITERAL_RETURN, CLIENT_SYNCABLE)
 -                        .addModifiers(Modifier.PUBLIC)
 -                        .build()
 -        );
@@ -164,30 +145,10 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f
 -                MethodSpec.methodBuilder("values")
 -                        .addAnnotation(NotNull.class)
 -                        .returns(ParameterizedTypeName.get(ClassName.get(List.class), attributeClassName))
--                        .addStatement("return $T.ATTRIBUTE_REGISTRY.values()", registryClassName)
+-                        .addStatement("return $T.ATTRIBUTE_REGISTRY.values()", REGISTRY_CLASS)
 -                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
 -                        .build()
--        );
--        // toString method
--        attributeClass.addMethod(
--                MethodSpec.methodBuilder("toString")
--                        .addAnnotation(NotNull.class)
--                        .addAnnotation(Override.class)
--                        .returns(String.class)
--                        // this resolves to [Namespace]
--                        .addStatement("return \"[\" + this.id + \"]\"")
--                        .addModifiers(Modifier.PUBLIC)
--                        .build()
--        );
--        // Creating ClampedAttribute
--        ClassName clampedAttributeClassName = ClassName.get("net.minestom.server.attribute", "ClampedAttribute");
- 
--        TypeSpec.Builder clampedAttributeClass = TypeSpec.classBuilder(clampedAttributeClassName)
--                .superclass(attributeClassName)
--                .addModifiers(Modifier.PUBLIC).addJavadoc("AUTOGENERATED by " + getClass().getSimpleName());
--        clampedAttributeClass.addField(
--                FieldSpec.builder(TypeName.DOUBLE, "minValue")
--                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL).build()
++
 +        // Fields
 +        attributeClass.addFields(
 +                List.of(
@@ -195,39 +156,11 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f
 +                        FieldSpec.builder(ArrayTypeName.of(attributeClassName), "VALUES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer("values()").build()  // Microtus - Banner and shield meta
 +                )
          );
--        clampedAttributeClass.addField(
--                FieldSpec.builder(TypeName.DOUBLE, "maxValue")
--                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL).build()
--        );
--        clampedAttributeClass.addMethod(
--                MethodSpec.constructorBuilder()
--                        .addParameter(ParameterSpec.builder(namespaceIDClassName, "id").addAnnotation(NotNull.class).build())
--                        .addParameter(ParameterSpec.builder(TypeName.BOOLEAN, "clientSyncable").build())
--                        .addParameter(ParameterSpec.builder(TypeName.DOUBLE, "defaultValue").build())
--                        .addParameter(ParameterSpec.builder(TypeName.DOUBLE, "minValue").build())
--                        .addParameter(ParameterSpec.builder(TypeName.DOUBLE, "maxValue").build())
--                        .addStatement("super(id, clientSyncable, defaultValue)")
--                        .addStatement("this.minValue = minValue")
--                        .addStatement("this.maxValue = maxValue")
--                        .addModifiers(Modifier.PROTECTED)
--                        .build()
--        );
--        // getMinValue
--        clampedAttributeClass.addMethod(
--                MethodSpec.methodBuilder("getMinValue")
--                        .returns(TypeName.DOUBLE)
--                        .addStatement("return this.minValue")
--                        .addModifiers(Modifier.PUBLIC)
--                        .build()
--        );
--        // getMaxValue
--        clampedAttributeClass.addMethod(
--                MethodSpec.methodBuilder("getMaxValue")
--                        .returns(TypeName.DOUBLE)
--                        .addStatement("return this.maxValue")
--                        .addModifiers(Modifier.PUBLIC)
--                        .build()
-+
+-        // toString method
+-        attributeClass.addMethod(GenerationHelper.TO_STRING);
+ 
+-        // Creating ClampedAttribute
+-        TypeSpec clampedAttributeClass = generateClampedAttributeClass(attributeClassName);
 +        attributeClass.addMethods(
 +                List.of(
 +                        // Constructor
@@ -256,7 +189,7 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f
 +                                .endControlFlow()
 +                                .build()
 +                )
-         );
++        );
  
 -        CodeBlock.Builder staticBlock = CodeBlock.builder();
          // Use data
@@ -279,11 +212,11 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f
 -                        ).initializer(
 -                                "new $T($T.from($S), $L, $L)",
 -                                attributeClassName,
--                                namespaceIDClassName,
+-                                NAMESPACE_ID_CLASS,
 -                                attribute.get("id").getAsString(),
 -                                attribute.get("clientSync").getAsBoolean(),
--                                attribute.get("defaultValue").getAsDouble()
--                        ).addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL).build()
+-                                attribute.get(DEFAULT_VALUE).getAsDouble()
+-                        ).addModifiers(CONSTANT_MODIFIERS).build()
 -                );
 -            } else {
 -                // ClampedAttribute
@@ -293,18 +226,18 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f
 -                                attributeName
 -                        ).initializer(
 -                                "new $T($T.from($S), $L, $L, $L, $L)",
--                                clampedAttributeClassName,
--                                namespaceIDClassName,
+-                                clampedAttributeClass,
+-                                NAMESPACE_ID_CLASS,
 -                                attribute.get("id").getAsString(),
 -                                attribute.get("clientSync").getAsBoolean(),
--                                attribute.get("defaultValue").getAsDouble(),
--                                range.get("minValue").getAsDouble(),
--                                range.get("maxValue").getAsDouble()
--                        ).addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL).build()
+-                                attribute.get(DEFAULT_VALUE).getAsDouble(),
+-                                range.get(MIN_VALUE).getAsDouble(),
+-                                range.get(MAX_VALUE).getAsDouble()
+-                        ).addModifiers(CONSTANT_MODIFIERS).build()
 -                );
 -            }
 -            // Add to static init.
--            staticBlock.addStatement("$T.ATTRIBUTE_REGISTRY.register($N)", registryClassName, attributeName);
+-            staticBlock.addStatement("$T.ATTRIBUTE_REGISTRY.register($N)", REGISTRY_CLASS, attributeName);
 +            attributeClass.addEnumConstant(attributeName, TypeSpec.anonymousClassBuilder(
 +                            "new $T($S, $Lf, $Lf)",
 +                    className, key, attribute.get(DEFAULT_VALUE).getAsFloat(), range.get(MAX_VALUE).getAsFloat()
@@ -315,17 +248,68 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..891cd8e88200a44aaf6c852276a21c8f
 +
  
          filesToWrite.add(
--                JavaFile.builder("net.minestom.server.attribute", attributeClass.build())
--                        .indent("    ")
+                 JavaFile.builder(packageName, attributeClass.build())
+-                        .indent(DEFAULT_INDENT)
 -                        .skipJavaLangImports(true)
 -                        .build()
 -        );
 -        filesToWrite.add(
--                JavaFile.builder("net.minestom.server.attribute", clampedAttributeClass.build())
-+                JavaFile.builder(PACKAGE_NAME, attributeClass.build())
-                         .indent("    ")
+-                JavaFile.builder(packageName, clampedAttributeClass)
+-                        .indent(DEFAULT_VALUE)
++                        .indent("    ")
                          .skipJavaLangImports(true)
                          .build()
+         );
+@@ -198,49 +121,4 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
+                 outputFolder
+         );
+     }
+-
+-    private @NotNull TypeSpec generateClampedAttributeClass(@NotNull ClassName attributeClassName) {
+-        ClassName clampedAttributeClassName = ClassName.get(packageName, "ClampedAttribute");
+-        TypeSpec.Builder clampedAttributeClass = TypeSpec.classBuilder(clampedAttributeClassName)
+-                .superclass(attributeClassName)
+-                .addModifiers(Modifier.PUBLIC).addJavadoc("AUTOGENERATED by " + getClass().getSimpleName());
+-        clampedAttributeClass.addField(
+-                FieldSpec.builder(TypeName.DOUBLE, MIN_VALUE)
+-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL).build()
+-        );
+-        clampedAttributeClass.addField(
+-                FieldSpec.builder(TypeName.DOUBLE, MAX_VALUE)
+-                        .addModifiers(Modifier.PRIVATE, Modifier.FINAL).build()
+-        );
+-        clampedAttributeClass.addMethod(
+-                MethodSpec.constructorBuilder()
+-                        .addParameter(ParameterSpec.builder(NAMESPACE_ID_CLASS, "id").addAnnotation(NotNull.class).build())
+-                        .addParameter(ParameterSpec.builder(TypeName.BOOLEAN, CLIENT_SYNCABLE).build())
+-                        .addParameter(ParameterSpec.builder(TypeName.DOUBLE, DEFAULT_VALUE).build())
+-                        .addParameter(ParameterSpec.builder(TypeName.DOUBLE, MIN_VALUE).build())
+-                        .addParameter(ParameterSpec.builder(TypeName.DOUBLE, MAX_VALUE).build())
+-                        .addStatement("super(id, $L, $L)", CLIENT_SYNCABLE, DEFAULT_VALUE)
+-                        .addStatement(VARIABLE_SETTER, MIN_VALUE)
+-                        .addStatement(VARIABLE_SETTER, MAX_VALUE)
+-                        .addModifiers(Modifier.PROTECTED)
+-                        .build()
+-        );
+-        // getMinValue
+-        clampedAttributeClass.addMethod(
+-                MethodSpec.methodBuilder("getMinValue")
+-                        .returns(TypeName.DOUBLE)
+-                        .addStatement(LITERAL_RETURN, MIN_VALUE)
+-                        .addModifiers(Modifier.PUBLIC)
+-                        .build()
+-        );
+-        // getMaxValue
+-        clampedAttributeClass.addMethod(
+-                MethodSpec.methodBuilder("getMaxValue")
+-                        .returns(TypeName.DOUBLE)
+-                        .addStatement(LITERAL_RETURN, MAX_VALUE)
+-                        .addModifiers(Modifier.PUBLIC)
+-                        .build()
+-        );
+-        return clampedAttributeClass.build();
+-    }
+ }
 diff --git a/src/autogenerated/java/net/minestom/server/attribute/Attributes.java b/src/autogenerated/java/net/minestom/server/attribute/Attributes.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..479e12f703b9f201347f8b607469834c4e21a539
