@@ -477,23 +477,24 @@ index 0db3dcae55c313e3ccb0707ca996783fd0b7b0f3..5df2ce73d2e54d5522d4fc0d30b84a93
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index e59b452a0b9e08e084e2e1ce2f0b55d3022e6758..3ade9e81568dc480baaa2682589f8f1de7d9a9b2 100644
+index e59b452a0b9e08e084e2e1ce2f0b55d3022e6758..3e55a774cc18d3233f10d1d83799a4415047f6ad 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
-@@ -20,6 +20,7 @@ import net.minestom.server.adventure.AdventurePacketConvertor;
+@@ -19,7 +19,7 @@ import net.minestom.server.advancements.AdvancementTab;
+ import net.minestom.server.adventure.AdventurePacketConvertor;
  import net.minestom.server.adventure.Localizable;
  import net.minestom.server.adventure.audience.Audiences;
- import net.minestom.server.attribute.Attribute;
+-import net.minestom.server.attribute.Attribute;
 +import net.minestom.server.attribute.Attributes;
  import net.minestom.server.command.CommandSender;
  import net.minestom.server.coordinate.Point;
  import net.minestom.server.coordinate.Pos;
-@@ -227,7 +228,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -227,7 +227,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          this.gameMode = GameMode.SURVIVAL;
          this.dimensionType = DimensionType.OVERWORLD; // Default dimension
          this.levelFlat = true;
 -        getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f);
-+        getAttribute(Attributes.GENERIC_MOVEMENT_SPEED.attribute()).setBaseValue(0.1f);
++        getAttribute(Attributes.GENERIC_MOVEMENT_SPEED.attribute());
  
          // FakePlayer init its connection there
          playerConnectionInit();
