@@ -46,7 +46,7 @@ index 8ab4bf2c0ecb2453556ea622861036c1fe96994f..93975fff492a12223aec8ec7d4bb4874
              library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
              library("kotlin-stdlib-jdk8", "org.jetbrains.kotlin", "kotlin-stdlib-jdk8").versionRef("kotlin")
 diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..69e996b5462dd2ac1d3e12aef72048074d7802f5 100644
+index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..628a86529cae1a0d444a74cf1287b23a87a16ce7 100644
 --- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 +++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 @@ -1,11 +1,28 @@
@@ -81,15 +81,22 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..69e996b5462dd2ac1d3e12aef7204807
  import org.jetbrains.annotations.ApiStatus;
  import org.jetbrains.annotations.NotNull;
  import org.jetbrains.annotations.Nullable;
-@@ -15,6 +32,7 @@ import org.slf4j.LoggerFactory;
+@@ -15,7 +32,7 @@ import org.slf4j.LoggerFactory;
  import java.io.*;
  import java.lang.reflect.Constructor;
  import java.lang.reflect.InvocationTargetException;
+-import java.net.URL;
 +import java.net.MalformedURLException;
- import java.net.URL;
  import java.nio.file.Path;
  import java.util.*;
-@@ -42,8 +60,30 @@ public class ExtensionManager {
+ import java.util.stream.Collectors;
+@@ -36,14 +53,35 @@ public class ExtensionManager {
+     private final Map<String, Extension> immutableExtensions = Collections.unmodifiableMap(extensions);
+ 
+     private final File extensionFolder = new File(System.getProperty("minestom.extension.folder", "extensions"));
+-    private final File dependenciesFolder = new File(extensionFolder, ".libs");
+     private Path extensionDataRoot = extensionFolder.toPath();
+ 
      private enum State {DO_NOT_START, NOT_STARTED, STARTED, PRE_INIT, INIT, POST_INIT}
      private State state = State.NOT_STARTED;
  
@@ -120,7 +127,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..69e996b5462dd2ac1d3e12aef7204807
      }
  
      /**
-@@ -182,25 +222,6 @@ public class ExtensionManager {
+@@ -182,25 +220,6 @@ public class ExtensionManager {
       * And finally make a scheduler to clean observers per extension.
       */
      private void loadExtensions() {
@@ -146,7 +153,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..69e996b5462dd2ac1d3e12aef7204807
          // Load extensions
          {
              // Get all extensions and order them accordingly.
-@@ -540,6 +561,7 @@ public class ExtensionManager {
+@@ -540,6 +559,7 @@ public class ExtensionManager {
      }
  
      private void loadDependencies(@NotNull List<DiscoveredExtension> extensions) {
@@ -154,7 +161,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..69e996b5462dd2ac1d3e12aef7204807
          List<DiscoveredExtension> allLoadedExtensions = new LinkedList<>(extensions);
  
          for (Extension extension : immutableExtensions.values())
-@@ -547,9 +569,8 @@ public class ExtensionManager {
+@@ -547,9 +567,8 @@ public class ExtensionManager {
  
          for (DiscoveredExtension discoveredExtension : extensions) {
              try {
@@ -165,7 +172,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..69e996b5462dd2ac1d3e12aef7204807
                  for (var repository : externalDependencies.repositories) {
  
                      if (repository.name == null || repository.name.isEmpty()) {
-@@ -559,18 +580,29 @@ public class ExtensionManager {
+@@ -559,18 +578,29 @@ public class ExtensionManager {
                      if (repository.url == null || repository.url.isEmpty()) {
                          throw new IllegalStateException("Missing 'url' element in repository object.");
                      }
@@ -202,7 +209,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..69e996b5462dd2ac1d3e12aef7204807
                  ExtensionClassLoader extensionClassLoader = discoveredExtension.getClassLoader();
                  for (String dependencyName : discoveredExtension.getDependencies()) {
                      var resolved = extensions.stream()
-@@ -592,22 +624,6 @@ public class ExtensionManager {
+@@ -592,22 +622,6 @@ public class ExtensionManager {
          }
      }
  
