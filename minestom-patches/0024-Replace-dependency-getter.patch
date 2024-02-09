@@ -46,7 +46,7 @@ index 8ab4bf2c0ecb2453556ea622861036c1fe96994f..93975fff492a12223aec8ec7d4bb4874
              library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
              library("kotlin-stdlib-jdk8", "org.jetbrains.kotlin", "kotlin-stdlib-jdk8").versionRef("kotlin")
 diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..411f0a2a3fb8e4eeae1db5a34ea673db12ed1055 100644
+index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..69e996b5462dd2ac1d3e12aef72048074d7802f5 100644
 --- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 +++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
 @@ -1,11 +1,28 @@
@@ -120,7 +120,33 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..411f0a2a3fb8e4eeae1db5a34ea673db
      }
  
      /**
-@@ -540,6 +580,7 @@ public class ExtensionManager {
+@@ -182,25 +222,6 @@ public class ExtensionManager {
+      * And finally make a scheduler to clean observers per extension.
+      */
+     private void loadExtensions() {
+-        // Initialize folders
+-        {
+-            // Make extensions folder if necessary
+-            if (!extensionFolder.exists()) {
+-                if (!extensionFolder.mkdirs()) {
+-                    LOGGER.error("Could not find or create the extension folder, extensions will not be loaded!");
+-                    return;
+-                }
+-            }
+-
+-            // Make dependencies folder if necessary
+-            if (!dependenciesFolder.exists()) {
+-                if (!dependenciesFolder.mkdirs()) {
+-                    LOGGER.error("Could not find nor create the extension dependencies folder, extensions will not be loaded!");
+-                    return;
+-                }
+-            }
+-        }
+-
+         // Load extensions
+         {
+             // Get all extensions and order them accordingly.
+@@ -540,6 +561,7 @@ public class ExtensionManager {
      }
  
      private void loadDependencies(@NotNull List<DiscoveredExtension> extensions) {
@@ -128,7 +154,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..411f0a2a3fb8e4eeae1db5a34ea673db
          List<DiscoveredExtension> allLoadedExtensions = new LinkedList<>(extensions);
  
          for (Extension extension : immutableExtensions.values())
-@@ -547,9 +588,8 @@ public class ExtensionManager {
+@@ -547,9 +569,8 @@ public class ExtensionManager {
  
          for (DiscoveredExtension discoveredExtension : extensions) {
              try {
@@ -139,7 +165,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..411f0a2a3fb8e4eeae1db5a34ea673db
                  for (var repository : externalDependencies.repositories) {
  
                      if (repository.name == null || repository.name.isEmpty()) {
-@@ -559,18 +599,29 @@ public class ExtensionManager {
+@@ -559,18 +580,29 @@ public class ExtensionManager {
                      if (repository.url == null || repository.url.isEmpty()) {
                          throw new IllegalStateException("Missing 'url' element in repository object.");
                      }
@@ -176,7 +202,7 @@ index 5d33898b0d7d1666fa6cc93fec0fbfe6014427df..411f0a2a3fb8e4eeae1db5a34ea673db
                  ExtensionClassLoader extensionClassLoader = discoveredExtension.getClassLoader();
                  for (String dependencyName : discoveredExtension.getDependencies()) {
                      var resolved = extensions.stream()
-@@ -592,22 +643,6 @@ public class ExtensionManager {
+@@ -592,22 +624,6 @@ public class ExtensionManager {
          }
      }
  
