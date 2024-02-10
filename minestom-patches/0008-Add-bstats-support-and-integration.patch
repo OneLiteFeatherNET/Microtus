@@ -5,7 +5,7 @@ Subject: [PATCH] Add bstats support and integration
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index d8c8caa880983bcb367d70917cd7da20265e0e34..8be81dcbe29ac577b627d0d55aaa060d3b7d993a 100644
+index b7476ee6c642d5a68391907be7866d53d386f7c2..cc3298c0a87f48ffffffc6e751ed564c623fdf1b 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -111,5 +111,8 @@ dependencies {
