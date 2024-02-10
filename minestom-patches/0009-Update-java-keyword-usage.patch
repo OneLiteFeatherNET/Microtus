@@ -1551,6 +1551,25 @@ index 42e249c73869e7c819a177f3144869c10bbe820a..11186e9470d129fefed2fb5f47dc736d
      public static void animationListener(ClientAnimationPacket packet, Player player) {
          final Player.Hand hand = packet.hand();
          final ItemStack itemStack = player.getItemInHand(hand);
+diff --git a/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java b/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
+index 13ea23024e7e637c551ace33aac5118ee384d456..0cf0b869b50b4df7c87322c4153d0865ce959084 100644
+--- a/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
++++ b/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
+@@ -25,7 +25,7 @@ import java.util.UUID;
+ 
+ public final class HandshakeListener {
+ 
+-    private final static Logger LOGGER = LoggerFactory.getLogger(HandshakeListener.class);
++    private static final Logger LOGGER = LoggerFactory.getLogger(HandshakeListener.class);
+ 
+     /**
+      * Text sent if a player tries to connect with an invalid version of the client
+@@ -135,4 +135,5 @@ public final class HandshakeListener {
+         disconnect(connection, INVALID_BUNGEE_FORWARDING);
+     }
+ 
++    private HandshakeListener() { }
+ }
 diff --git a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java b/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
 index 84c502629a38bc45f60dbf650eaf1b094d1d0df0..50053284b349355092b9cc3f431ea08eb005751f 100644
 --- a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
@@ -2362,6 +2381,19 @@ index 27a2f36c19fd8c2dce75f1bd1ff514dadd027b8a..f3e90e530f4b3487e50d83634b3e0351
          var instance = env.createFlatInstance();
          env.createPlayer(instance, new Pos(5.7, -8, 6.389));
          assertNull(BlockCollision.canPlaceBlockAt(instance, new Vec(5, -9, 6), Block.STONE));
+diff --git a/src/test/java/net/minestom/server/collision/TestShape.java b/src/test/java/net/minestom/server/collision/TestShape.java
+index 080d0d0e7bc3def9304b33e50e7d8220691e353b..c0983210faff93e879f5573fa6832502a11dac18 100644
+--- a/src/test/java/net/minestom/server/collision/TestShape.java
++++ b/src/test/java/net/minestom/server/collision/TestShape.java
+@@ -11,7 +11,7 @@ import java.util.stream.Stream;
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+-public class TestShape {
++class TestShape {
+ 
+     private static @NotNull Stream<Arguments> isFullFaceCases() {
+         return Stream.of(
 diff --git a/src/test/java/net/minestom/server/command/ArgumentParserTest.java b/src/test/java/net/minestom/server/command/ArgumentParserTest.java
 index 232d55948303a74d35724c2d601ace10a8d98811..844f846afe976a4667a2743957d19b155a7d7a3f 100644
 --- a/src/test/java/net/minestom/server/command/ArgumentParserTest.java
@@ -2422,7 +2454,7 @@ index f31ba6fb020461885cf993ec01aaadb7db973656..6b8846ed7c69d1354d6d7708af8074ba
  
          assertFalse(arg.hasSuggestion());
 diff --git a/src/test/java/net/minestom/server/command/ArgumentTypeTest.java b/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
-index edc08e4f40d7b4542a11a9550c3a131459bcc110..fc31931a937349185175d485d5b27efcc1eb7f12 100644
+index edc08e4f40d7b4542a11a9550c3a131459bcc110..bf6e0c40a83ea645f025f342cae044c0cfcb90ff 100644
 --- a/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
 +++ b/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
 @@ -16,7 +16,6 @@ import net.minestom.server.item.Enchantment;
@@ -2722,6 +2754,15 @@ index edc08e4f40d7b4542a11a9550c3a131459bcc110..fc31931a937349185175d485d5b27efc
          var arg = ArgumentType.Word("word").from("word1", "word2", "word3");
  
          assertArg(arg, "word1", "word1");
+@@ -451,7 +450,7 @@ public class ArgumentTypeTest {
+     }
+ 
+     @Test
+-    public void testArgumentMapWithSender() {
++    void testArgumentMapWithSender() {
+         var serverSender = new ServerSender();
+ 
+         var arg = ArgumentType.Word("word").from("word1", "word2", "word3")
 diff --git a/src/test/java/net/minestom/server/command/CommandConditionTest.java b/src/test/java/net/minestom/server/command/CommandConditionTest.java
 index f7450b020c91807984e83b004774c916621d152f..f76f113a161c315badfdec9ef5932dbf4a461e40 100644
 --- a/src/test/java/net/minestom/server/command/CommandConditionTest.java
@@ -2758,7 +2799,7 @@ index f7450b020c91807984e83b004774c916621d152f..f76f113a161c315badfdec9ef5932dbf
          assertNull(dispatcher.findCommand("name"));
          var sender = new Sender();
 diff --git a/src/test/java/net/minestom/server/command/CommandManagerTest.java b/src/test/java/net/minestom/server/command/CommandManagerTest.java
-index 5d9b24d4afc30d7ec0b0d41c1ede1f493a8de787..215a4adc24286160a29538f19524adfbddaa4ab5 100644
+index 5d9b24d4afc30d7ec0b0d41c1ede1f493a8de787..99cb85e31778d62352d2ef1c94951e33c1be86a8 100644
 --- a/src/test/java/net/minestom/server/command/CommandManagerTest.java
 +++ b/src/test/java/net/minestom/server/command/CommandManagerTest.java
 @@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
@@ -2783,6 +2824,24 @@ index 5d9b24d4afc30d7ec0b0d41c1ede1f493a8de787..215a4adc24286160a29538f19524adfb
          var manager = new CommandManager();
  
          AtomicBoolean check = new AtomicBoolean(false);
+@@ -49,7 +49,7 @@ public class CommandManagerTest {
+     }
+ 
+     @Test
+-    public void testSharedArgumentSyntaxABFirst() {
++    void testSharedArgumentSyntaxABFirst() {
+         var manager = new CommandManager();
+ 
+         var checkA = new AtomicBoolean(false);
+@@ -77,7 +77,7 @@ public class CommandManagerTest {
+     }
+ 
+     @Test
+-    public void testSharedArgumentSyntaxAFirst() {
++    void testSharedArgumentSyntaxAFirst() {
+         var manager = new CommandManager();
+ 
+         var checkA = new AtomicBoolean(false);
 diff --git a/src/test/java/net/minestom/server/command/CommandPacketFilteringTest.java b/src/test/java/net/minestom/server/command/CommandPacketFilteringTest.java
 index 0ce8a207fba69c94ddeeb75696eb3c8a23e3eada..f1723d9525bbb6f7af06fe948efde4edeffc17aa 100644
 --- a/src/test/java/net/minestom/server/command/CommandPacketFilteringTest.java
@@ -4878,6 +4937,176 @@ index 400271ef5d61a29cb34b1e191d3570d2ff2d4d09..0fe69fd6447431152a65c02dbf893604
          var handler = new BlockHandler() {
              @Override
              public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+diff --git a/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java b/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
+index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d719c0dba 100644
+--- a/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
+@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
+ @EnvTest
+ public class BlockLightMergeIntegrationTest {
+     @Test
+-    public void testPropagationAir(Env env) {
++    void testPropagationAir(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -39,7 +39,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testTorch(Env env) {
++    void testTorch(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         instance.setGenerator(unit -> {
+@@ -65,7 +65,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testTorch2(Env env) {
++    void testTorch2(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+ 
+@@ -91,7 +91,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testPropagationAir2(Env env) {
++    void testPropagationAir2(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -116,7 +116,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testPropagationAirRemoval(Env env) {
++    void testPropagationAirRemoval(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -145,7 +145,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderOcclusion(Env env) {
++    void testBorderOcclusion(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -178,7 +178,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderOcclusion2(Env env) {
++    void testBorderOcclusion2(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -210,7 +210,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderOcclusion3(Env env) {
++    void testBorderOcclusion3(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -241,7 +241,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderCrossing(Env env) {
++    void testBorderCrossing(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -293,7 +293,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderOcclusionRemoval(Env env) {
++    void testBorderOcclusionRemoval(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -332,7 +332,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void chunkIntersection(Env env) {
++    void chunkIntersection(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = 4; x <= 7; x++) {
+@@ -353,7 +353,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void skylight(Env env) {
++    void skylight(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = 4; x <= 7; x++) {
+@@ -371,7 +371,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void skylightContained(Env env) {
++    void skylightContained(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = 4; x <= 7; x++) {
+@@ -397,7 +397,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testDiagonalRemoval(Env env) {
++    void testDiagonalRemoval(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -431,7 +431,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testDiagonalRemoval2(Env env) {
++    void testDiagonalRemoval2(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -457,7 +457,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testDouble(Env env) {
++    void testDouble(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -491,7 +491,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBlockRemoval(Env env) {
++    void testBlockRemoval(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+diff --git a/src/test/java/net/minestom/server/instance/BlockPlaceIntegrationTest.java b/src/test/java/net/minestom/server/instance/BlockPlaceIntegrationTest.java
+index 423a2a4ec658d0333e861a778e1bb21eb2c65d93..a5e0b90bcdc25a3011d4b60ecb6f0b191d1925fc 100644
+--- a/src/test/java/net/minestom/server/instance/BlockPlaceIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/BlockPlaceIntegrationTest.java
+@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.*;
+ 
+ @EnvTest
+-public class BlockPlaceIntegrationTest {
++class BlockPlaceIntegrationTest {
+ 
+     @Test
+     void testPlacementOutOfLimit(Env env) {
 diff --git a/src/test/java/net/minestom/server/instance/BlockPropertiesTest.java b/src/test/java/net/minestom/server/instance/BlockPropertiesTest.java
 index 3fbe44370df7d98fa432de3a9d6eb95e2cc3fbbc..ca0bf1cf03eb11e1a9efe9e29a4464ca59a33c95 100644
 --- a/src/test/java/net/minestom/server/instance/BlockPropertiesTest.java
@@ -5583,6 +5812,27 @@ index 32e9b8703842e4e46428f99dc9fed81071e0743d..8b1d5556d34625eaa516499b1c9a7029
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          connection.connect(instance, new Pos(0, 40, 0)).join();
+diff --git a/src/test/java/net/minestom/server/instance/InstanceContainerTest.java b/src/test/java/net/minestom/server/instance/InstanceContainerTest.java
+index cddafc32a966b71c87f237bb1c1b5def9a3de8ec..443a44fbef6cdecb1faee28abb899c6234734e7c 100644
+--- a/src/test/java/net/minestom/server/instance/InstanceContainerTest.java
++++ b/src/test/java/net/minestom/server/instance/InstanceContainerTest.java
+@@ -9,14 +9,14 @@ import java.util.UUID;
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+-public class InstanceContainerTest {
++class InstanceContainerTest {
+ 
+     static {
+         new DimensionTypeManager().addDimension(DimensionType.OVERWORLD);
+     }
+ 
+     @Test
+-    public void copyPreservesTag() {
++    void copyPreservesTag() {
+         var tag = Tag.String("test");
+         var instance = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD);
+         instance.setTag(tag, "123");
 diff --git a/src/test/java/net/minestom/server/instance/InstanceEventsIntegrationTest.java b/src/test/java/net/minestom/server/instance/InstanceEventsIntegrationTest.java
 index 8f2404e5a4c06d98955ac7e2218ceb203f8b4fe5..7fd9f89ee545d55b58c35135ca502cdccadd9cac 100644
 --- a/src/test/java/net/minestom/server/instance/InstanceEventsIntegrationTest.java
@@ -5678,6 +5928,295 @@ index 01c4c935fec5e312f6043106acac4d16520a3b9a..01c68deb717f2ce5f43406c93adda353
          Instance instance = env.createFlatInstance();
  
          instance.getWorldBorder().setDiameter(50.0);
+diff --git a/src/test/java/net/minestom/server/instance/light/BlockIsOccludedTest.java b/src/test/java/net/minestom/server/instance/light/BlockIsOccludedTest.java
+index 5cded9c29fb6b09ffe0c4462fa37987d5b7525d5..0160c5315719648d4952cc2abf37df0549a5b86e 100644
+--- a/src/test/java/net/minestom/server/instance/light/BlockIsOccludedTest.java
++++ b/src/test/java/net/minestom/server/instance/light/BlockIsOccludedTest.java
+@@ -10,9 +10,9 @@ import java.util.Map;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+ 
+-public class BlockIsOccludedTest {
++class BlockIsOccludedTest {
+     @Test
+-    public void blockAir() {
++    void blockAir() {
+         Shape airBlock = Block.AIR.registry().collisionShape();
+         
+         for (BlockFace face : BlockFace.values()) {
+@@ -21,7 +21,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockLantern() {
++    void blockLantern() {
+         Shape shape = Block.LANTERN.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -31,7 +31,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSpruceLeaves() {
++    void blockSpruceLeaves() {
+         Shape shape = Block.SPRUCE_LEAVES.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -41,7 +41,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockCauldron() {
++    void blockCauldron() {
+         Shape shape = Block.CAULDRON.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -51,7 +51,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabBottomAir() {
++    void blockSlabBottomAir() {
+         Shape shape = Block.SANDSTONE_SLAB.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -65,7 +65,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabTopEnchantingTable() {
++    void blockSlabTopEnchantingTable() {
+         Shape shape1 = Block.SANDSTONE_SLAB.withProperty("type", "top").registry().collisionShape();
+         Shape shape2 = Block.ENCHANTING_TABLE.registry().collisionShape();
+ 
+@@ -79,7 +79,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStairWest() {
++    void blockStairWest() {
+         Shape shape = Block.SANDSTONE_STAIRS.withProperties(Map.of(
+                 "facing", "west",
+                 "half", "bottom",
+@@ -97,7 +97,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabBottomStone() {
++    void blockSlabBottomStone() {
+         Shape shape = Block.SANDSTONE_SLAB.registry().collisionShape();
+         Shape stoneBlock = Block.STONE.registry().collisionShape();
+ 
+@@ -110,7 +110,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStone() {
++    void blockStone() {
+         Shape shape = Block.STONE.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -120,7 +120,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStair() {
++    void blockStair() {
+         Shape shape = Block.SANDSTONE_STAIRS.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -134,7 +134,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlab() {
++    void blockSlab() {
+         Shape shape = Block.SANDSTONE_SLAB.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -148,7 +148,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabBottomAndSlabTop() {
++    void blockSlabBottomAndSlabTop() {
+         Shape shape1 = Block.SANDSTONE_SLAB.registry().collisionShape();
+         Shape shape2 = Block.SANDSTONE_SLAB.withProperty("type", "top").registry().collisionShape();
+ 
+@@ -162,7 +162,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabBottomAndSlabBottom() {
++    void blockSlabBottomAndSlabBottom() {
+         Shape shape = Block.SANDSTONE_SLAB.registry().collisionShape();
+ 
+         assertTrue(shape.isOccluded(shape, BlockFace.BOTTOM));
+@@ -175,7 +175,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStairAndSlabBottom() {
++    void blockStairAndSlabBottom() {
+         Shape shape1 = Block.STONE_STAIRS.registry().collisionShape();
+         Shape shape2 = Block.SANDSTONE_SLAB.registry().collisionShape();
+ 
+@@ -189,7 +189,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStairAndSlabTop() {
++    void blockStairAndSlabTop() {
+         Shape shape1 = Block.STONE_STAIRS.registry().collisionShape();
+         Shape shape2 = Block.SANDSTONE_SLAB.withProperty("type", "top").registry().collisionShape();
+ 
+diff --git a/src/test/java/net/minestom/server/instance/light/BlockLightTest.java b/src/test/java/net/minestom/server/instance/light/BlockLightTest.java
+index 3f6e054985e3463d8e52bb00f09790e57e0559be..25067e049d10a3411b7bd9d949d8925ffc337e52 100644
+--- a/src/test/java/net/minestom/server/instance/light/BlockLightTest.java
++++ b/src/test/java/net/minestom/server/instance/light/BlockLightTest.java
+@@ -13,10 +13,10 @@ import static java.util.Map.entry;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.fail;
+ 
+-public class BlockLightTest {
++class BlockLightTest {
+ 
+     @Test
+-    public void empty() {
++    void empty() {
+         var palette = Palette.blocks();
+         var result = LightCompute.compute(palette);
+         for (byte light : result.light()) {
+@@ -25,7 +25,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void glowstone() {
++    void glowstone() {
+         var palette = Palette.blocks();
+         palette.set(0, 1, 0, Block.GLOWSTONE.stateId());
+         var result = LightCompute.compute(palette);
+@@ -36,7 +36,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void doubleGlowstone() {
++    void doubleGlowstone() {
+         var palette = Palette.blocks();
+         palette.set(0, 1, 0, Block.GLOWSTONE.stateId());
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+@@ -50,7 +50,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void glowstoneBorder() {
++    void glowstoneBorder() {
+         var palette = Palette.blocks();
+         palette.set(0, 1, 0, Block.GLOWSTONE.stateId());
+         var result = LightCompute.compute(palette);
+@@ -68,7 +68,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void glowstoneBlock() {
++    void glowstoneBlock() {
+         var palette = Palette.blocks();
+         palette.set(0, 1, 0, Block.GLOWSTONE.stateId());
+         palette.set(0, 1, 1, Block.STONE.stateId());
+@@ -80,7 +80,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolated() {
++    void isolated() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+ 
+@@ -107,7 +107,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolatedStair() {
++    void isolatedStair() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+         palette.set(3, 1, 4, Block.OAK_STAIRS.withProperties(Map.of(
+@@ -129,7 +129,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolatedStairOpposite() {
++    void isolatedStairOpposite() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+         palette.set(3, 1, 4, Block.OAK_STAIRS.withProperties(Map.of(
+@@ -156,7 +156,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolatedStairWest() {
++    void isolatedStairWest() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+         palette.set(3, 1, 4, Block.OAK_STAIRS.withProperties(Map.of(
+@@ -186,7 +186,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolatedStairSouth() {
++    void isolatedStairSouth() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+         palette.set(3, 1, 4, Block.OAK_STAIRS.withProperties(Map.of(
+diff --git a/src/test/java/net/minestom/server/instance/light/LightParityIntegrationTest.java b/src/test/java/net/minestom/server/instance/light/LightParityIntegrationTest.java
+index cae1ba4c6b5fa90b31a92cc3682440bd22cd9c69..c5495685478911be3b423fc6e5c54ce8e9e8ac2c 100644
+--- a/src/test/java/net/minestom/server/instance/light/LightParityIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/light/LightParityIntegrationTest.java
+@@ -24,11 +24,11 @@ import java.util.concurrent.CompletableFuture;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+ @EnvTest
+-public class LightParityIntegrationTest {
++class LightParityIntegrationTest {
+     private static final int REGION_SIZE = 3;
+ 
+     @Test
+-    public void test(Env env) throws URISyntaxException, IOException, AnvilException {
++    void test(Env env) throws URISyntaxException, IOException, AnvilException {
+         Map<Vec, SectionEntry> sections = retrieveSections();
+         // Generate our own light
+ 
+diff --git a/src/test/java/net/minestom/server/instance/light/WorldRelightIntegrationTest.java b/src/test/java/net/minestom/server/instance/light/WorldRelightIntegrationTest.java
+index a3147e5b0141d08367521f60aa2b67340cb2ffc4..10b5a53014e50dec633b1362a65ce606042825fc 100644
+--- a/src/test/java/net/minestom/server/instance/light/WorldRelightIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/light/WorldRelightIntegrationTest.java
+@@ -16,7 +16,7 @@ import static java.util.Map.entry;
+ import static net.minestom.server.instance.BlockLightMergeIntegrationTest.assertLightInstance;
+ 
+ @EnvTest
+-public class WorldRelightIntegrationTest {
++class WorldRelightIntegrationTest {
+     private @NotNull Instance createLightingInstance(@NotNull ServerProcess process) {
+         var instance = process.instance().createInstanceContainer();
+         instance.setGenerator(unit -> {
+@@ -28,7 +28,7 @@ public class WorldRelightIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderLava(Env env) {
++    void testBorderLava(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         instance.loadChunk(6, 16).join();
+@@ -46,7 +46,7 @@ public class WorldRelightIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBlockRemoval(Env env) {
++    void testBlockRemoval(Env env) {
+         Instance instance = createLightingInstance(env.process());
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
 diff --git a/src/test/java/net/minestom/server/instance/palette/PaletteOptimizationTest.java b/src/test/java/net/minestom/server/instance/palette/PaletteOptimizationTest.java
 index 9916d52ab23c645388ed4c6c215bf7203fb4bdc0..877f265955d81dba590da8166e994c0e4ec8854a 100644
 --- a/src/test/java/net/minestom/server/instance/palette/PaletteOptimizationTest.java
@@ -5861,6 +6400,24 @@ index 3372ade456530be692de5f74e8c9515d32614df2..583214ea6d1a4bb59956ee727644f571
          assertThrows(Exception.class, () -> Palette.newPalette(-4, 5, 3));
          assertThrows(Exception.class, () -> Palette.newPalette(0, 5, 3));
          assertThrows(Exception.class, () -> Palette.newPalette(1, 5, 3));
+diff --git a/src/test/java/net/minestom/server/inventory/InventoryCloseStateTest.java b/src/test/java/net/minestom/server/inventory/InventoryCloseStateTest.java
+index 21d92088f43e0216b07c4389e25da16d2740d8e4..cdae802c5b007e8c499f561e0ec76cdd7b6a4a52 100644
+--- a/src/test/java/net/minestom/server/inventory/InventoryCloseStateTest.java
++++ b/src/test/java/net/minestom/server/inventory/InventoryCloseStateTest.java
+@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+ @EnvTest
+-public class InventoryCloseStateTest {
++class InventoryCloseStateTest {
+ 
+ 
+     @Test
+-    public void doNotReceiveClosePacketFromServerWhenSendingClientCloseWindowPacket(Env env) {
++    void doNotReceiveClosePacketFromServerWhenSendingClientCloseWindowPacket(Env env) {
+         var instance = env.createFlatInstance();
+         var connection = env.createConnection();
+         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
 diff --git a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java b/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
 index 924bd641f7c293894be4514d035c3306bec4e321..b4a5813ecc407959a7ca222c69fb4527e17658a9 100644
 --- a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
@@ -5918,7 +6475,7 @@ index 924bd641f7c293894be4514d035c3306bec4e321..b4a5813ecc407959a7ca222c69fb4527
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
 diff --git a/src/test/java/net/minestom/server/inventory/InventoryTest.java b/src/test/java/net/minestom/server/inventory/InventoryTest.java
-index be239c29fa9966b6407edb4eb2902f4c613af172..57c9c9f2ebce8790e2982b3c3156081a71c50ec7 100644
+index be239c29fa9966b6407edb4eb2902f4c613af172..3829591ee5491ca9b5cb67b5619d51b755f226cf 100644
 --- a/src/test/java/net/minestom/server/inventory/InventoryTest.java
 +++ b/src/test/java/net/minestom/server/inventory/InventoryTest.java
 @@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
@@ -5948,6 +6505,15 @@ index be239c29fa9966b6407edb4eb2902f4c613af172..57c9c9f2ebce8790e2982b3c3156081a
          ItemStack item = ItemStack.of(Material.DIAMOND, 32);
          Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
          inventory.setItemStack(0, item);
+@@ -68,7 +68,7 @@ public class InventoryTest {
+     }
+ 
+     @Test
+-    public void testAdd() {
++    void testAdd() {
+         Inventory inventory = new Inventory(InventoryType.HOPPER, TITLE);
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.DIAMOND, 32), TransactionOption.ALL_OR_NOTHING));
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.GOLD_BLOCK, 32), TransactionOption.ALL_OR_NOTHING));
 @@ -79,7 +79,7 @@ public class InventoryTest {
      }
  
@@ -8069,6 +8635,50 @@ index d1376f66c9eb7b586a7e6c066ca2adf3fe1b146d..ba4ff92e14b8c3dfb486d47ab53ab38f
          var handler = TagHandler.newHandler();
          for (int i = 0; i < 1000; i++) {
              handler.setTag(Tag.Integer("rehashing" + i), i);
+diff --git a/src/test/java/net/minestom/server/tag/TagTransientTest.java b/src/test/java/net/minestom/server/tag/TagTransientTest.java
+index 1dce03d1305c31c0019fa5d5df225c260500225c..e8fc926f3e36a4f7b8fdecb50e55b4c75992e8b7 100644
+--- a/src/test/java/net/minestom/server/tag/TagTransientTest.java
++++ b/src/test/java/net/minestom/server/tag/TagTransientTest.java
+@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ 
+-public class TagTransientTest {
++class TagTransientTest {
+ 
+     @Test
+-    public void twoTransientTags() {
++    void twoTransientTags() {
+         var tagHandler = TagHandler.newHandler();
+         Tag<String> tag1 = Tag.Transient("a");
+         Tag<String> tag2 = Tag.Transient("b");
+@@ -19,7 +19,7 @@ public class TagTransientTest {
+     }
+ 
+     @Test
+-    public void twoTransientTagsEqual() {
++    void twoTransientTagsEqual() {
+         var tagHandler = TagHandler.newHandler();
+         Tag<String> tag1 = Tag.Transient("a");
+         Tag<String> tag2 = Tag.Transient("a");
+@@ -30,7 +30,7 @@ public class TagTransientTest {
+     }
+ 
+     @Test
+-    public void tagHandlerCopyPreservesTransient() {
++    void tagHandlerCopyPreservesTransient() {
+         var tagHandler = TagHandler.newHandler();
+         Tag<String> tag = Tag.Transient("a");
+         tagHandler.setTag(tag, "abcdef");
+@@ -41,7 +41,7 @@ public class TagTransientTest {
+     }
+ 
+     @Test
+-    public void asCompoundDoesNotPreserveTransient() {
++    void asCompoundDoesNotPreserveTransient() {
+         var tagHandler = TagHandler.newHandler();
+         Tag<String> tag = Tag.Transient("a");
+         tagHandler.setTag(tag, "abcdef");
 diff --git a/src/test/java/net/minestom/server/tag/TagUpdateTest.java b/src/test/java/net/minestom/server/tag/TagUpdateTest.java
 index 222b875de2388871adbf7c0f84affa60481f992a..59a64d77c7cc4a5a40b569897cf6131060bc4902 100644
 --- a/src/test/java/net/minestom/server/tag/TagUpdateTest.java
