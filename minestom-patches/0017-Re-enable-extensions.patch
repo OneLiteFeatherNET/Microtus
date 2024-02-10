@@ -5,10 +5,10 @@ Subject: [PATCH] Re-enable extensions
 
 
 diff --git a/src/main/java/net/minestom/server/MinecraftServer.java b/src/main/java/net/minestom/server/MinecraftServer.java
-index d8ffa960217a739ef5edd4f554459a9d92efea65..4bfe33d3b964f23ca60cb002f808d01aed1d138c 100644
+index ec2f8fe6b49fb317c707819e85998667e0d274a9..e19a6cfca2a1eadb868f19040bad93ef47859c1d 100644
 --- a/src/main/java/net/minestom/server/MinecraftServer.java
 +++ b/src/main/java/net/minestom/server/MinecraftServer.java
-@@ -6,6 +6,7 @@ import net.minestom.server.adventure.bossbar.BossBarManager;
+@@ -7,6 +7,7 @@ import net.minestom.server.attribute.AttributeManager;
  import net.minestom.server.command.CommandManager;
  import net.minestom.server.event.GlobalEventHandler;
  import net.minestom.server.exception.ExceptionManager;
@@ -16,7 +16,7 @@ index d8ffa960217a739ef5edd4f554459a9d92efea65..4bfe33d3b964f23ca60cb002f808d01a
  import net.minestom.server.gamedata.tags.TagManager;
  import net.minestom.server.instance.InstanceManager;
  import net.minestom.server.instance.block.BlockManager;
-@@ -21,6 +22,7 @@ import net.minestom.server.recipe.RecipeManager;
+@@ -22,6 +23,7 @@ import net.minestom.server.recipe.RecipeManager;
  import net.minestom.server.scoreboard.TeamManager;
  import net.minestom.server.thread.TickSchedulerThread;
  import net.minestom.server.timer.SchedulerManager;
@@ -24,7 +24,7 @@ index d8ffa960217a739ef5edd4f554459a9d92efea65..4bfe33d3b964f23ca60cb002f808d01a
  import net.minestom.server.utils.PacketUtils;
  import net.minestom.server.utils.validate.Check;
  import net.minestom.server.world.Difficulty;
-@@ -28,6 +30,7 @@ import net.minestom.server.world.DimensionTypeManager;
+@@ -29,6 +31,7 @@ import net.minestom.server.world.DimensionTypeManager;
  import net.minestom.server.world.biomes.BiomeManager;
  import org.jetbrains.annotations.ApiStatus;
  import org.jetbrains.annotations.NotNull;
@@ -32,7 +32,7 @@ index d8ffa960217a739ef5edd4f554459a9d92efea65..4bfe33d3b964f23ca60cb002f808d01a
  import org.jetbrains.annotations.UnknownNullability;
  
  import java.io.IOException;
-@@ -252,6 +255,10 @@ public final class MinecraftServer {
+@@ -257,6 +260,10 @@ public final class MinecraftServer {
          return serverProcess.advancement();
      }
  
@@ -43,28 +43,11 @@ index d8ffa960217a739ef5edd4f554459a9d92efea65..4bfe33d3b964f23ca60cb002f808d01a
      public static TagManager getTagManager() {
          return serverProcess.tag();
      }
-diff --git a/src/main/java/net/minestom/server/ServerFlag.java b/src/main/java/net/minestom/server/ServerFlag.java
-index ea61869059d877f59ac9c613891c5c502c603198..3ce29e9070f940fd9ababe7d0d917c416caca082 100644
---- a/src/main/java/net/minestom/server/ServerFlag.java
-+++ b/src/main/java/net/minestom/server/ServerFlag.java
-@@ -39,6 +39,12 @@ public final class ServerFlag {
-     public static final @Nullable String STACKING_RULE = System.getProperty("minestom.stacking-rule");
-     public static final int WORLD_BORDER_SIZE = Integer.getInteger("minestom.world-border-size", 29999984);
- 
-+    // Extensions todo use enabled flag
-+    public static final boolean EXTENSIONS_ENABLED = PropertyUtils.getBoolean("minestom.extension.enabled", false);
-+    public static final @NotNull String EXTENSIONS_FOLDER = System.getProperty("minestom.extension.folder", "extensions");
-+    public static final @Nullable String EXTENSIONS_DEV_CLASSES = System.getProperty("minestom.extension.indevfolder.classes");
-+    public static final @Nullable String EXTENSIONS_DEV_RESOURCES = System.getProperty("minestom.extension.indevfolder.resources");
-+
-     // Maps
-     public static final @NotNull String MAP_RGB_MAPPING = System.getProperty("minestom.map.rgbmapping", "lazy");
-     public static final @Nullable String MAP_RGB_REDUCTION = System.getProperty("minestom.map.rgbreduction"); // Only used if rgb mapping is "approximate"
 diff --git a/src/main/java/net/minestom/server/ServerProcess.java b/src/main/java/net/minestom/server/ServerProcess.java
-index 7c1002cab0f8fca3c0bc1c859b0737e708ae6892..5ebf5f9e50d003623da191cff9f6df9e7bfedeed 100644
+index f6998c2f9c10750047d5acd64c02ed6e452c0f4d..401745f5d0814dbd673ce762b2406c2b6c7ed490 100644
 --- a/src/main/java/net/minestom/server/ServerProcess.java
 +++ b/src/main/java/net/minestom/server/ServerProcess.java
-@@ -5,6 +5,7 @@ import net.minestom.server.adventure.bossbar.BossBarManager;
+@@ -6,6 +6,7 @@ import net.minestom.server.attribute.AttributeManager;
  import net.minestom.server.command.CommandManager;
  import net.minestom.server.event.GlobalEventHandler;
  import net.minestom.server.exception.ExceptionManager;
@@ -72,7 +55,7 @@ index 7c1002cab0f8fca3c0bc1c859b0737e708ae6892..5ebf5f9e50d003623da191cff9f6df9e
  import net.minestom.server.gamedata.tags.TagManager;
  import net.minestom.server.instance.Chunk;
  import net.minestom.server.instance.InstanceManager;
-@@ -25,6 +26,7 @@ import net.minestom.server.world.DimensionTypeManager;
+@@ -26,6 +27,7 @@ import net.minestom.server.world.DimensionTypeManager;
  import net.minestom.server.world.biomes.BiomeManager;
  import org.jetbrains.annotations.ApiStatus;
  import org.jetbrains.annotations.NotNull;
@@ -80,7 +63,7 @@ index 7c1002cab0f8fca3c0bc1c859b0737e708ae6892..5ebf5f9e50d003623da191cff9f6df9e
  
  import java.net.SocketAddress;
  
-@@ -96,6 +98,11 @@ public interface ServerProcess extends Snapshotable {
+@@ -102,6 +104,11 @@ public interface ServerProcess extends Snapshotable {
       */
      @NotNull BossBarManager bossBar();
  
