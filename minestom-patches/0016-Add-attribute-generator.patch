@@ -535,10 +535,20 @@ index aac3f8749abfd970760049e81861bf29643c4608..2fb1f5ee76ad6cc390a2c1b056f57ec4
          }
          if (bstatsEnabled) {
 diff --git a/src/main/java/net/minestom/server/attribute/Attribute.java b/src/main/java/net/minestom/server/attribute/Attribute.java
-index ed97a493c48bc213077bababac2723562b53dc6f..c6e28059e3b117f83ac3caccb68f95da72fb425e 100644
+index ed97a493c48bc213077bababac2723562b53dc6f..0b1a3ceb6e6f8fab6c7b66e34b8254803e41dadb 100644
 --- a/src/main/java/net/minestom/server/attribute/Attribute.java
 +++ b/src/main/java/net/minestom/server/attribute/Attribute.java
-@@ -11,21 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
+@@ -1,66 +1,13 @@
+ package net.minestom.server.attribute;
+ 
+-import org.jetbrains.annotations.NotNull;
+-import org.jetbrains.annotations.Nullable;
+-
+-import java.util.Collection;
+-import java.util.Map;
+-import java.util.concurrent.ConcurrentHashMap;
+-
+ /**
   * Represents a {@link net.minestom.server.entity.LivingEntity living entity} attribute.
   */
  public record Attribute(String key, float defaultValue, float maxValue) {
@@ -560,10 +570,10 @@ index ed97a493c48bc213077bababac2723562b53dc6f..c6e28059e3b117f83ac3caccb68f95da
  
      public Attribute {
          if (defaultValue > maxValue) {
-@@ -33,34 +18,5 @@ public record Attribute(String key, float defaultValue, float maxValue) {
+             throw new IllegalArgumentException("Default value cannot be greater than the maximum allowed");
          }
      }
- 
+-
 -    /**
 -     * Register this attribute.
 -     *
@@ -575,7 +585,7 @@ index ed97a493c48bc213077bababac2723562b53dc6f..c6e28059e3b117f83ac3caccb68f95da
 -        ATTRIBUTES.put(key, this);
 -        return this;
 -    }
- 
+-
 -    /**
 -     * Retrieves an attribute by its key.
 -     *
