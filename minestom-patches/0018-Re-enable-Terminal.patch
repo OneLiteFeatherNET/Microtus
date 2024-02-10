@@ -1,54 +1,30 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: Phillipp Glanz <6745190+TheMeinerLP@users.noreply.github.com>
-Date: Fri, 9 Feb 2024 22:30:51 +0100
-Subject: [PATCH] Re-enable terminal
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Sat, 10 Feb 2024 22:03:08 +0100
+Subject: [PATCH] Re-enable Terminal
 
 
 diff --git a/src/main/java/net/minestom/server/ServerFlag.java b/src/main/java/net/minestom/server/ServerFlag.java
-index a510f74bb2c4b553b68c8923e94f553fae879e82..926489bec1850af81b8063db9a78ae934cfeda0c 100644
+index a510f74bb2c4b553b68c8923e94f553fae879e82..a5b0330e9ea4ea4ac8ea44c38c72f4ce6a5205b0 100644
 --- a/src/main/java/net/minestom/server/ServerFlag.java
 +++ b/src/main/java/net/minestom/server/ServerFlag.java
-@@ -39,6 +39,17 @@ public final class ServerFlag {
-     public static final @Nullable String STACKING_RULE = System.getProperty("minestom.stacking-rule");
-     public static final int WORLD_BORDER_SIZE = Integer.getInteger("minestom.world-border-size", 29999984);
+@@ -45,6 +45,16 @@ public final class ServerFlag {
+     // Attributes
+     public static final boolean ATTRIBUTES_ENABLED = System.getProperty("minestom.attributes.disabled") == null;
  
 +    // Terminal
 +    public static final boolean TERMINAL_ENABLED = System.getProperty("minestom.terminal.disabled") == null;
 +    public static final boolean TERMINAL_SUPPORT_HEX_COLOR = PropertyUtils.getBoolean("minestom.terminal.support-hex-color", true);
 +    public static final boolean TERMINAL_SUPPORT_COLOR = PropertyUtils.getBoolean("minestom.terminal.support-color", true);
-+
 +    // Extensions todo use enabled flag
 +    public static final boolean EXTENSIONS_ENABLED = PropertyUtils.getBoolean("minestom.extension.enabled", false);
 +    public static final @NotNull String EXTENSIONS_FOLDER = System.getProperty("minestom.extension.folder", "extensions");
 +    public static final @Nullable String EXTENSIONS_DEV_CLASSES = System.getProperty("minestom.extension.indevfolder.classes");
 +    public static final @Nullable String EXTENSIONS_DEV_RESOURCES = System.getProperty("minestom.extension.indevfolder.resources");
 +
-     // Biomes
-     public static final boolean BIOMES_ENABLED = System.getProperty("minestom.attributes.disabled") == null;
- 
-diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
-index 51d0273b940f9febdf9cdfbec20ea59bcbdbf653..27c94a0359cf475d5c3841b24546600ceb61d273 100644
---- a/src/main/java/net/minestom/server/ServerProcessImpl.java
-+++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
-@@ -37,6 +37,7 @@ import net.minestom.server.snapshot.InstanceSnapshot;
- import net.minestom.server.snapshot.ServerSnapshot;
- import net.minestom.server.snapshot.SnapshotImpl;
- import net.minestom.server.snapshot.SnapshotUpdater;
-+import net.minestom.server.terminal.MinestomTerminal;
- import net.minestom.server.thread.Acquirable;
- import net.minestom.server.thread.ThreadDispatcher;
- import net.minestom.server.timer.SchedulerManager;
-@@ -270,6 +271,10 @@ final class ServerProcessImpl implements ServerProcess {
-         if (bstatsEnabled) {
-             this.metrics.start();
-         }
-+
-+        if (ServerFlag.TERMINAL_ENABLED) {
-+            MinestomTerminal.start();
-+        }
-         // Stop the server on SIGINT
-         if (SHUTDOWN_ON_SIGNAL) Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
-     }
+     // Maps
+     public static final @NotNull String MAP_RGB_MAPPING = System.getProperty("minestom.map.rgbmapping", "lazy");
+     public static final @Nullable String MAP_RGB_REDUCTION = System.getProperty("minestom.map.rgbreduction"); // Only used if rgb mapping is "approximate"
 diff --git a/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java b/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..738c3d0ba9bcb52ae16cca3656cd49f45b499db0
