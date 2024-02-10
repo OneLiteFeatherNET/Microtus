@@ -5,10 +5,10 @@ Subject: [PATCH] Re-enable terminal
 
 
 diff --git a/src/main/java/net/minestom/server/ServerFlag.java b/src/main/java/net/minestom/server/ServerFlag.java
-index 3ce29e9070f940fd9ababe7d0d917c416caca082..0fec6c7cfd1ead5852108b935fdad6ba657a8716 100644
+index a510f74bb2c4b553b68c8923e94f553fae879e82..926489bec1850af81b8063db9a78ae934cfeda0c 100644
 --- a/src/main/java/net/minestom/server/ServerFlag.java
 +++ b/src/main/java/net/minestom/server/ServerFlag.java
-@@ -39,6 +39,11 @@ public final class ServerFlag {
+@@ -39,6 +39,17 @@ public final class ServerFlag {
      public static final @Nullable String STACKING_RULE = System.getProperty("minestom.stacking-rule");
      public static final int WORLD_BORDER_SIZE = Integer.getInteger("minestom.world-border-size", 29999984);
  
@@ -17,22 +17,38 @@ index 3ce29e9070f940fd9ababe7d0d917c416caca082..0fec6c7cfd1ead5852108b935fdad6ba
 +    public static final boolean TERMINAL_SUPPORT_HEX_COLOR = PropertyUtils.getBoolean("minestom.terminal.support-hex-color", true);
 +    public static final boolean TERMINAL_SUPPORT_COLOR = PropertyUtils.getBoolean("minestom.terminal.support-color", true);
 +
-     // Extensions todo use enabled flag
-     public static final boolean EXTENSIONS_ENABLED = PropertyUtils.getBoolean("minestom.extension.enabled", false);
-     public static final @NotNull String EXTENSIONS_FOLDER = System.getProperty("minestom.extension.folder", "extensions");
++    // Extensions todo use enabled flag
++    public static final boolean EXTENSIONS_ENABLED = PropertyUtils.getBoolean("minestom.extension.enabled", false);
++    public static final @NotNull String EXTENSIONS_FOLDER = System.getProperty("minestom.extension.folder", "extensions");
++    public static final @Nullable String EXTENSIONS_DEV_CLASSES = System.getProperty("minestom.extension.indevfolder.classes");
++    public static final @Nullable String EXTENSIONS_DEV_RESOURCES = System.getProperty("minestom.extension.indevfolder.resources");
++
+     // Biomes
+     public static final boolean BIOMES_ENABLED = System.getProperty("minestom.attributes.disabled") == null;
+ 
 diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
-index 0f23b3348fd84f82485be7f61e15ff7f4a7b4378..253c601939232d8acad6e109a5aef79e13c448c1 100644
+index 51d0273b940f9febdf9cdfbec20ea59bcbdbf653..27c94a0359cf475d5c3841b24546600ceb61d273 100644
 --- a/src/main/java/net/minestom/server/ServerProcessImpl.java
 +++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
-@@ -252,7 +252,7 @@ final class ServerProcessImpl implements ServerProcess {
-         Biomes.registerBiomes();
-         LOGGER.info("Register Biomes({})", biome.unmodifiableCollection().size());
- 
--        if (MinecraftServer.isTerminalEnabled()) {
-+        if (ServerFlag.TERMINAL_ENABLED) {
-             MinestomTerminal.start();
-         }
+@@ -37,6 +37,7 @@ import net.minestom.server.snapshot.InstanceSnapshot;
+ import net.minestom.server.snapshot.ServerSnapshot;
+ import net.minestom.server.snapshot.SnapshotImpl;
+ import net.minestom.server.snapshot.SnapshotUpdater;
++import net.minestom.server.terminal.MinestomTerminal;
+ import net.minestom.server.thread.Acquirable;
+ import net.minestom.server.thread.ThreadDispatcher;
+ import net.minestom.server.timer.SchedulerManager;
+@@ -270,6 +271,10 @@ final class ServerProcessImpl implements ServerProcess {
          if (bstatsEnabled) {
+             this.metrics.start();
+         }
++
++        if (ServerFlag.TERMINAL_ENABLED) {
++            MinestomTerminal.start();
++        }
+         // Stop the server on SIGINT
+         if (SHUTDOWN_ON_SIGNAL) Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+     }
 diff --git a/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java b/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..738c3d0ba9bcb52ae16cca3656cd49f45b499db0
