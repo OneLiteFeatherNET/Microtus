@@ -1,0 +1,282 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Sat, 10 Feb 2024 22:03:08 +0100
+Subject: [PATCH] Re-enable Terminal
+
+
+diff --git a/src/main/java/net/minestom/server/ServerFlag.java b/src/main/java/net/minestom/server/ServerFlag.java
+index a510f74bb2c4b553b68c8923e94f553fae879e82..a5b0330e9ea4ea4ac8ea44c38c72f4ce6a5205b0 100644
+--- a/src/main/java/net/minestom/server/ServerFlag.java
++++ b/src/main/java/net/minestom/server/ServerFlag.java
+@@ -45,6 +45,16 @@ public final class ServerFlag {
+     // Attributes
+     public static final boolean ATTRIBUTES_ENABLED = System.getProperty("minestom.attributes.disabled") == null;
+ 
++    // Terminal
++    public static final boolean TERMINAL_ENABLED = System.getProperty("minestom.terminal.disabled") == null;
++    public static final boolean TERMINAL_SUPPORT_HEX_COLOR = PropertyUtils.getBoolean("minestom.terminal.support-hex-color", true);
++    public static final boolean TERMINAL_SUPPORT_COLOR = PropertyUtils.getBoolean("minestom.terminal.support-color", true);
++    // Extensions todo use enabled flag
++    public static final boolean EXTENSIONS_ENABLED = PropertyUtils.getBoolean("minestom.extension.enabled", false);
++    public static final @NotNull String EXTENSIONS_FOLDER = System.getProperty("minestom.extension.folder", "extensions");
++    public static final @Nullable String EXTENSIONS_DEV_CLASSES = System.getProperty("minestom.extension.indevfolder.classes");
++    public static final @Nullable String EXTENSIONS_DEV_RESOURCES = System.getProperty("minestom.extension.indevfolder.resources");
++
+     // Maps
+     public static final @NotNull String MAP_RGB_MAPPING = System.getProperty("minestom.map.rgbmapping", "lazy");
+     public static final @Nullable String MAP_RGB_REDUCTION = System.getProperty("minestom.map.rgbreduction"); // Only used if rgb mapping is "approximate"
+diff --git a/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java b/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..738c3d0ba9bcb52ae16cca3656cd49f45b499db0
+--- /dev/null
++++ b/src/main/java/net/minestom/server/terminal/MinestomConsoleWriter.java
+@@ -0,0 +1,36 @@
++package net.minestom.server.terminal;
++
++import org.fusesource.jansi.AnsiConsole;
++import org.tinylog.core.LogEntry;
++import org.tinylog.writers.AbstractFormatPatternWriter;
++
++import java.util.Map;
++
++import static net.minestom.server.terminal.MinestomTerminal.reader;
++
++public final class MinestomConsoleWriter extends AbstractFormatPatternWriter {
++    public MinestomConsoleWriter(Map<String, String> properties) {
++        super(properties);
++    }
++
++    @Override
++    public void write(LogEntry logEntry) throws Exception {
++        String rendered = render(logEntry);
++        String formatted = TerminalColorConverter.format(rendered);
++        if (reader != null) {
++            reader.printAbove(formatted);
++        } else {
++            AnsiConsole.out().print(formatted);
++        }
++    }
++
++    @Override
++    public void flush() {
++        // EMPTY
++    }
++
++    @Override
++    public void close() {
++        // EMPTY
++    }
++}
+diff --git a/src/main/java/net/minestom/server/terminal/MinestomTerminal.java b/src/main/java/net/minestom/server/terminal/MinestomTerminal.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..7ae82f27e6b0b88f538a454dc248b6e6a409118b
+--- /dev/null
++++ b/src/main/java/net/minestom/server/terminal/MinestomTerminal.java
+@@ -0,0 +1,100 @@
++package net.minestom.server.terminal;
++
++import net.minestom.server.MinecraftServer;
++import net.minestom.server.command.builder.Command;
++import net.minestom.server.command.builder.suggestion.Suggestion;
++import net.minestom.server.command.builder.suggestion.SuggestionEntry;
++import net.minestom.server.listener.TabCompleteListener;
++import org.jetbrains.annotations.ApiStatus;
++import org.jline.reader.Candidate;
++import org.jline.reader.Completer;
++import org.jline.reader.EndOfFileException;
++import org.jline.reader.LineReader;
++import org.jline.reader.LineReaderBuilder;
++import org.jline.reader.ParsedLine;
++import org.jline.reader.UserInterruptException;
++import org.jline.terminal.Terminal;
++import org.jline.terminal.TerminalBuilder;
++
++import java.io.IOException;
++import java.util.List;
++
++public class MinestomTerminal {
++    private static final String PROMPT = "> ";
++    private static volatile Terminal terminal;
++    static volatile LineReader reader;
++    private static volatile boolean running = false;
++
++    @ApiStatus.Internal
++    public static void start() {
++        final Thread thread = new Thread(null, () -> {
++            try {
++                terminal = TerminalBuilder.terminal();
++            } catch (IOException e) {
++                e.printStackTrace();
++            }
++            reader = LineReaderBuilder.builder()
++                    .completer(new MinestomCompleter())
++                    .terminal(terminal)
++                    .build();
++            running = true;
++
++            while (running) {
++                String command;
++                try {
++                    command = reader.readLine(PROMPT);
++                    var commandManager = MinecraftServer.getCommandManager();
++                    commandManager.execute(commandManager.getConsoleSender(), command);
++                } catch (UserInterruptException e) {
++                    // Handle Ctrl + C
++                    System.exit(0);
++                    return;
++                } catch (EndOfFileException e) {
++                    return;
++                }
++            }
++        }, "Jline");
++        thread.setDaemon(true);
++        thread.start();
++    }
++
++    @ApiStatus.Internal
++    public static void stop() {
++        running = false;
++        if (terminal != null) {
++            try {
++                terminal.close();
++            } catch (IOException e) {
++                e.printStackTrace();
++            }
++            reader = null;
++        }
++    }
++
++    private static final class MinestomCompleter implements Completer {
++        @Override
++        public void complete(LineReader reader, ParsedLine line, List<Candidate> candidates) {
++            final var commandManager = MinecraftServer.getCommandManager();
++            final var consoleSender = commandManager.getConsoleSender();
++            if (line.wordIndex() == 0) {
++                final String commandString = line.word().toLowerCase();
++                candidates.addAll(
++                        commandManager.getDispatcher().getCommands().stream()
++                                .map(Command::getName)
++                                .filter(name -> commandString.isBlank() || name.toLowerCase().startsWith(commandString))
++                                .map(Candidate::new)
++                                .toList()
++                );
++            } else {
++                final String text = line.line();
++                final Suggestion suggestion = TabCompleteListener.getSuggestion(consoleSender, text);
++                if (suggestion != null) {
++                    suggestion.getEntries().stream()
++                            .map(SuggestionEntry::getEntry)
++                            .map(Candidate::new)
++                            .forEach(candidates::add);
++                }
++            }
++        }
++    }
++}
+diff --git a/src/main/java/net/minestom/server/terminal/TerminalColorConverter.java b/src/main/java/net/minestom/server/terminal/TerminalColorConverter.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..845542cd13f9b44365abefcaee27a6fb74defe69
+--- /dev/null
++++ b/src/main/java/net/minestom/server/terminal/TerminalColorConverter.java
+@@ -0,0 +1,101 @@
++package net.minestom.server.terminal;
++
++import net.kyori.adventure.text.format.NamedTextColor;
++import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
++import net.minestom.server.ServerFlag;
++import net.minestom.server.utils.PropertyUtils;
++
++import java.util.regex.Matcher;
++import java.util.regex.Pattern;
++
++/**
++ * A string converter to convert a string to an ansi-colored one.
++ *
++ * @see <a href="https://github.com/Minecrell/TerminalConsoleAppender/blob/master/src/main/java/net/minecrell/terminalconsole/MinecraftFormattingConverter.java">TerminalConsoleAppender</a>
++ * @see <a href="https://github.com/PaperMC/Paper/blob/41647af74caed955c1fd5b38d458ee59298ae5d4/patches/server/0591-Add-support-for-hex-color-codes-in-console.patch">Paper</a>
++ */
++final class TerminalColorConverter {
++
++    private static final String RGB_ANSI = "\u001B[38;2;%d;%d;%dm";
++    private static final String ANSI_RESET = "\u001B[m";
++    private static final String LOOKUP = "0123456789abcdefklmnor";
++    private static final String[] ANSI_CODES = new String[]{
++            getAnsiColor(NamedTextColor.BLACK, "\u001B[0;30m"), // Black §0
++            getAnsiColor(NamedTextColor.DARK_BLUE, "\u001B[0;34m"), // Dark Blue §1
++            getAnsiColor(NamedTextColor.DARK_GREEN, "\u001B[0;32m"), // Dark Green §2
++            getAnsiColor(NamedTextColor.DARK_AQUA, "\u001B[0;36m"), // Dark Aqua §3
++            getAnsiColor(NamedTextColor.DARK_RED, "\u001B[0;31m"), // Dark Red §4
++            getAnsiColor(NamedTextColor.DARK_PURPLE, "\u001B[0;35m"), // Dark Purple §5
++            getAnsiColor(NamedTextColor.GOLD, "\u001B[0;33m"), // Gold §6
++            getAnsiColor(NamedTextColor.GRAY, "\u001B[0;37m"), // Gray §7
++            getAnsiColor(NamedTextColor.DARK_GRAY, "\u001B[0;30;1m"),  // Dark Gray §8
++            getAnsiColor(NamedTextColor.BLUE, "\u001B[0;34;1m"),  // Blue §9
++            getAnsiColor(NamedTextColor.GREEN, "\u001B[0;32;1m"),  // Green §a
++            getAnsiColor(NamedTextColor.AQUA, "\u001B[0;36;1m"),  // Aqua §b
++            getAnsiColor(NamedTextColor.RED, "\u001B[0;31;1m"),  // Red §c
++            getAnsiColor(NamedTextColor.LIGHT_PURPLE, "\u001B[0;35;1m"),  // Light Purple §d
++            getAnsiColor(NamedTextColor.YELLOW, "\u001B[0;33;1m"),  // Yellow §e
++            getAnsiColor(NamedTextColor.WHITE, "\u001B[0;37;1m"),  // White §f
++            "\u001B[5m", // Obfuscated §k
++            "\u001B[1m", // Bold §l
++            "\u001B[9m", // Strikethrough §m
++            "\u001B[4m", // Underline §n
++            "\u001B[3m", // Italic §o
++            ANSI_RESET, // Reset §r
++    };
++    private static final Pattern RGB_PATTERN = Pattern.compile(LegacyComponentSerializer.SECTION_CHAR + "#([\\da-fA-F]{6})");
++    private static final Pattern NAMED_PATTERN = Pattern.compile(LegacyComponentSerializer.SECTION_CHAR + "([\\da-fk-orA-FK-OR])");
++
++    private TerminalColorConverter() {
++    }
++
++    private static String getAnsiColor(NamedTextColor color, String fallback) {
++        return getAnsiColorFromHexColor(color.value(), fallback);
++    }
++
++    private static String getAnsiColorFromHexColor(int color, String fallback) {
++        return ServerFlag.TERMINAL_SUPPORT_HEX_COLOR ? String.format(RGB_ANSI, (color >> 16) & 0xFF, (color >> 8) & 0xFF, color & 0xFF) : fallback;
++    }
++
++    private static String getAnsiColorFromHexColor(int color) {
++        return getAnsiColorFromHexColor(color, "");
++    }
++
++    /**
++     * Format the colored string to an ansi-colored one.
++     *
++     * @param string the string to format
++     * @return the formatted string
++     */
++    public static String format(String string) {
++        if (string.indexOf(LegacyComponentSerializer.SECTION_CHAR) == -1) {
++            return string;
++        }
++
++        string = RGB_PATTERN.matcher(string).replaceAll(match -> {
++            if (ServerFlag.TERMINAL_SUPPORT_COLOR) {
++                String hex = match.group(1);
++                return getAnsiColorFromHexColor(Integer.parseInt(hex, 16));
++            } else {
++                return "";
++            }
++        });
++
++        Matcher matcher = NAMED_PATTERN.matcher(string);
++        StringBuilder builder = new StringBuilder();
++        while (matcher.find()) {
++            int format = LOOKUP.indexOf(Character.toLowerCase(matcher.group().charAt(1)));
++            if (format != -1) {
++                matcher.appendReplacement(builder, ServerFlag.TERMINAL_SUPPORT_COLOR ? ANSI_CODES[format] : "");
++            } else {
++                matcher.appendReplacement(builder, matcher.group());
++            }
++        }
++        matcher.appendTail(builder);
++
++        if (ServerFlag.TERMINAL_SUPPORT_COLOR) {
++            builder.append(ANSI_RESET);
++        }
++        return builder.toString();
++    }
++}

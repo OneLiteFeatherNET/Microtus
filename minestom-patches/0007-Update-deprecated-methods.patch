@@ -12,6 +12,29 @@ index 0000000000000000000000000000000000000000..699b1c32b83add65f7087600c1eeec56
 @@ -0,0 +1 @@
 +64e6262b-983b-4ef3-85f0-3b91a81f391c
 \ No newline at end of file
+diff --git a/demo/src/main/java/net/minestom/demo/commands/TestCommand.java b/demo/src/main/java/net/minestom/demo/commands/TestCommand.java
+index 75482a6787f08e9bb15d85821a56a643b037ee93..185a8d4d31a28551fc7de3830533a91d5702f91a 100644
+--- a/demo/src/main/java/net/minestom/demo/commands/TestCommand.java
++++ b/demo/src/main/java/net/minestom/demo/commands/TestCommand.java
+@@ -8,6 +8,7 @@ import net.minestom.server.command.CommandSender;
+ import net.minestom.server.command.builder.Command;
+ import net.minestom.server.command.builder.CommandContext;
+ import net.minestom.server.command.builder.arguments.ArgumentType;
++import net.minestom.server.entity.Player;
+ import net.minestom.server.sound.SoundEvent;
+ 
+ public class TestCommand extends Command {
+@@ -21,7 +22,9 @@ public class TestCommand extends Command {
+ 
+         setDefaultExecutor((sender, context) -> {
+             sender.playSound(Sound.sound(Key.key("item.trumpet.doot"), Sound.Source.PLAYER, 1, 1));
+-            AdventurePacketConvertor.createSoundPacket(Sound.sound(Key.key(SoundEvent.BLOCK_ANVIL_HIT.name()), Sound.Source.HOSTILE, 1, 1), sender.asPlayer());
++            if (sender instanceof Player player) {
++                AdventurePacketConvertor.createSoundPacket(Sound.sound(Key.key(SoundEvent.BLOCK_ANVIL_HIT.name()), Sound.Source.HOSTILE, 1, 1), player);
++            }
+         });
+         addSyntax((sender, context) -> System.out.println("executed"), block);
+ 
 diff --git a/src/main/java/net/minestom/server/advancements/notifications/Notification.java b/src/main/java/net/minestom/server/advancements/notifications/Notification.java
 index 90660466e837326cb98d26032dd04b4f19247295..4d543a0aae99c1df10c6e72d1f4ad16b8a5a9ebe 100644
 --- a/src/main/java/net/minestom/server/advancements/notifications/Notification.java
@@ -32,18 +55,10 @@ index 90660466e837326cb98d26032dd04b4f19247295..4d543a0aae99c1df10c6e72d1f4ad16b
 -    }
  }
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 04244d43a556e33b5ce9cb4cf727433f976af35b..22887d997f8375309e5a687db051e68fa2b6a5f8 100644
+index 4b7e3fd8e61987d0da531e702f696d4acf2c53dd..d20ff761285c4307d16b6ad278585a54cb613767 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-@@ -10,7 +10,6 @@ import net.kyori.adventure.text.Component;
- import net.kyori.adventure.text.format.NamedTextColor;
- import net.kyori.adventure.title.Title;
- import net.kyori.adventure.title.TitlePart;
--import net.minestom.server.coordinate.Pos;
- import net.minestom.server.coordinate.Vec;
- import net.minestom.server.entity.Entity;
- import net.minestom.server.network.packet.server.ServerPacket;
-@@ -142,19 +141,6 @@ public class AdventurePacketConvertor {
+@@ -146,19 +146,6 @@ public class AdventurePacketConvertor {
          }
      }
  
@@ -166,10 +181,10 @@ index d97bc82ae1cd4f52268d16b394274d6a31b31656..c8f7392ec3fc95af089be33ff6761822
      public @NotNull TagHandler tagHandler() {
          return tagHandler;
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 2b810253fc8992c659d306de2848df739cca432f..49bdbbfe174381fb8a7e468b8a24a1910b687e4b 100644
+index a195dd79e45b561df6eef65385fc9778dab83e2a..d805fa467a06772dbb60c785e6cdad0a0962ebe7 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
-@@ -2115,16 +2115,6 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+@@ -2342,16 +2342,6 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          this.identity = Identity.identity(uuid);
      }
  
@@ -312,10 +327,10 @@ index 9d80f6331c1320603680411d1eff3d710c38e6c3..a267f72163368fbd3526cb17fb2e5b14
          return (byte) ID_COUNTER.updateAndGet(i -> i + 1 >= 128 ? 1 : i + 1);
      }
 diff --git a/src/main/java/net/minestom/server/inventory/InventoryType.java b/src/main/java/net/minestom/server/inventory/InventoryType.java
-index 6108c4283fc1128fddd208914095cd7739524f0f..085443a31c64d32cb22ef05cc630553a0ba2d471 100644
+index 9b77808c066615b09c98c79019d2c4678511c04b..9b4c1effd91d85cf56af5039438a24bbf3560b80 100644
 --- a/src/main/java/net/minestom/server/inventory/InventoryType.java
 +++ b/src/main/java/net/minestom/server/inventory/InventoryType.java
-@@ -43,13 +43,4 @@ public enum InventoryType {
+@@ -44,13 +44,4 @@ public enum InventoryType {
      public int getSize() {
          return size;
      }
@@ -468,7 +483,7 @@ index 1642dbf93669d5c2b54bfb03741b4186ce5ff057..fdb4b4b32afc5459f1cb9f5cd87b6ab2
              permits ItemStackImpl.Builder {
          @Contract(value = "_ -> this")
 diff --git a/src/main/java/net/minestom/server/ping/ResponseData.java b/src/main/java/net/minestom/server/ping/ResponseData.java
-index 706d9a7579f7da51ff0de98829c69d8b0534cd89..c222fc8e20af0bc750f0c4ca6c167df22269fc5a 100644
+index 885d850b0203d08c27dda0f84298c8e4cc22de3f..e3c644f0826eae99cac285fccbd872f22da3cade 100644
 --- a/src/main/java/net/minestom/server/ping/ResponseData.java
 +++ b/src/main/java/net/minestom/server/ping/ResponseData.java
 @@ -1,11 +1,7 @@
@@ -481,9 +496,9 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..c222fc8e20af0bc750f0c4ca6c167df2
  import net.minestom.server.MinecraftServer;
 -import net.minestom.server.entity.Player;
  import net.minestom.server.event.server.ServerListPingEvent;
- import net.minestom.server.utils.identity.NamedAndIdentified;
- import org.jetbrains.annotations.NotNull;
-@@ -19,9 +15,7 @@ import java.util.*;
+ import net.minestom.server.network.ConnectionManager;
+ import net.minestom.server.network.ConnectionState;
+@@ -21,9 +17,7 @@ import java.util.*;
   */
  public class ResponseData {
      private static final Component DEFAULT_DESCRIPTION = Component.text("Minestom Server");
@@ -493,7 +508,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..c222fc8e20af0bc750f0c4ca6c167df2
      private String version;
      private int protocol;
      private int maxPlayer;
-@@ -44,17 +38,6 @@ public class ResponseData {
+@@ -46,17 +40,6 @@ public class ResponseData {
          this.playersHidden = false;
      }
  
@@ -511,7 +526,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..c222fc8e20af0bc750f0c4ca6c167df2
      /**
       * Sets the version name for the response.
       *
-@@ -127,88 +110,6 @@ public class ResponseData {
+@@ -129,88 +112,6 @@ public class ResponseData {
          return online;
      }
  
@@ -600,7 +615,7 @@ index 706d9a7579f7da51ff0de98829c69d8b0534cd89..c222fc8e20af0bc750f0c4ca6c167df2
  
      /**
       * Sets the response description.
-@@ -312,44 +213,4 @@ public class ResponseData {
+@@ -314,44 +215,4 @@ public class ResponseData {
      public boolean arePlayersHidden() {
          return playersHidden;
      }
@@ -669,10 +684,10 @@ index b5817c96772fd399320bc61cafecf2101a55e867..5e85964a52764b6bf4e8251cbdefd41c
       * Creates a new below name scoreboard.
       *
 diff --git a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
-index b14aebca46465331160051e55ceaab6439999ce4..6ace12483758c3fa992a8e15e6a9a1bc692a45a0 100644
+index ca3faecdd7ad9369c96a2e5a8d88f2eb9bfba0a6..ddc42f51f489ccd0ef53467c8469de70f29d3929 100644
 --- a/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
 +++ b/src/main/java/net/minestom/server/scoreboard/Scoreboard.java
-@@ -16,20 +16,6 @@ import java.util.Collection;
+@@ -15,20 +15,6 @@ import java.util.Collection;
   */
  public interface Scoreboard extends Viewable, PacketGroupingAudience {
  
@@ -694,10 +709,10 @@ index b14aebca46465331160051e55ceaab6439999ce4..6ace12483758c3fa992a8e15e6a9a1bc
       * Creates a creation objective packet.
       *
 diff --git a/src/main/java/net/minestom/server/scoreboard/Sidebar.java b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
-index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..4eec1c589eae1799205b2f192a685a5836767c01 100644
+index 73adccbd40f67bc7768f3c9fd2b475b00c06bde4..9c0aa45cf13b618268df90f7497aeb720901485c 100644
 --- a/src/main/java/net/minestom/server/scoreboard/Sidebar.java
 +++ b/src/main/java/net/minestom/server/scoreboard/Sidebar.java
-@@ -21,7 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
+@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  /**
   * Represents a sidebar which can contain up to 16 {@link ScoreboardLine}.
   * <p>
@@ -706,7 +721,7 @@ index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..4eec1c589eae1799205b2f192a685a58
   * with {@link #createLine(ScoreboardLine)}. You can then add a {@link Player} to the viewing list using {@link #addViewer(Player)}
   * and remove him later with {@link #removeViewer(Player)}.
   * <p>
-@@ -52,17 +52,6 @@ public class Sidebar implements Scoreboard {
+@@ -50,17 +50,6 @@ public class Sidebar implements Scoreboard {
  
      private Component title;
  
@@ -724,7 +739,7 @@ index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..4eec1c589eae1799205b2f192a685a58
      /**
       * Creates a new sidebar
       *
-@@ -79,17 +68,6 @@ public class Sidebar implements Scoreboard {
+@@ -77,17 +66,6 @@ public class Sidebar implements Scoreboard {
          }
      }
  
@@ -743,7 +758,7 @@ index 09f1a7d2332a0eaf243c54f96d1e6c94b276e57c..4eec1c589eae1799205b2f192a685a58
       * Changes the {@link Sidebar} title
       *
 diff --git a/src/main/java/net/minestom/server/utils/NamespaceID.java b/src/main/java/net/minestom/server/utils/NamespaceID.java
-index e68ff90079bea1debfa543b14f6df39396359234..f6f0c593802eaed5bfa5b06f0df5a60226542075 100644
+index bd547661889e72fdea01eb1a13199ca469d82c96..7fe76bc41bce24f092fc343883f8667f6b0e0890 100644
 --- a/src/main/java/net/minestom/server/utils/NamespaceID.java
 +++ b/src/main/java/net/minestom/server/utils/NamespaceID.java
 @@ -112,14 +112,4 @@ public final class NamespaceID implements CharSequence, Key {
@@ -876,16 +891,27 @@ index 612e3b162f38d6367dc016530270e38d46913281..be239c29fa9966b6407edb4eb2902f4c
          }
      }
 diff --git a/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
-index 93069a5a925fda0d289e03b72281b92d795ac4c2..3262b08e463feb4dcfd49fbf34b8f3e0be4f37e8 100644
+index 18ac2c3261b7afcf81deba547fde88462aec3a2f..3262b08e463feb4dcfd49fbf34b8f3e0be4f37e8 100644
 --- a/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/inventory/click/integration/HeldClickIntegrationTest.java
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,8 @@
  package net.minestom.server.inventory.click.integration;
  
 +import net.kyori.adventure.text.Component;
- import net.minestom.testing.Env;
- import net.minestom.testing.EnvTest;
++import net.minestom.testing.Env;
++import net.minestom.testing.EnvTest;
  import net.minestom.server.coordinate.Pos;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.event.inventory.InventoryPreClickEvent;
+@@ -10,8 +13,6 @@ import net.minestom.server.item.ItemStack;
+ import net.minestom.server.item.Material;
+ import net.minestom.server.network.packet.client.play.ClientClickWindowPacket;
+ import net.minestom.server.utils.inventory.PlayerInventoryUtils;
+-import net.minestom.testing.Env;
+-import net.minestom.testing.EnvTest;
+ import org.junit.jupiter.api.Test;
+ 
+ import java.util.List;
 @@ -99,7 +100,7 @@ public class HeldClickIntegrationTest {
      public void heldExternal(Env env) {
          var instance = env.createFlatInstance();
@@ -896,17 +922,28 @@ index 93069a5a925fda0d289e03b72281b92d795ac4c2..3262b08e463feb4dcfd49fbf34b8f3e0
          player.openInventory(inventory);
          var listener = env.listen(InventoryPreClickEvent.class);
 diff --git a/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
-index 87a81674699095298ef8614417497025bb70b479..87d2b8b17fb77c48206b32bb6b5dbc10d29a5d6f 100644
+index af9d31a48dd6776c809fe371bd5f5989f73d4ab1..87d2b8b17fb77c48206b32bb6b5dbc10d29a5d6f 100644
 --- a/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/inventory/click/integration/LeftClickIntegrationTest.java
-@@ -1,6 +1,7 @@
+@@ -1,6 +1,9 @@
  package net.minestom.server.inventory.click.integration;
  
  
 +import net.kyori.adventure.text.Component;
- import net.minestom.testing.Env;
- import net.minestom.testing.EnvTest;
++import net.minestom.testing.Env;
++import net.minestom.testing.EnvTest;
  import net.minestom.server.coordinate.Pos;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.event.inventory.InventoryPreClickEvent;
+@@ -11,8 +14,6 @@ import net.minestom.server.item.ItemStack;
+ import net.minestom.server.item.Material;
+ import net.minestom.server.network.packet.client.play.ClientClickWindowPacket;
+ import net.minestom.server.utils.inventory.PlayerInventoryUtils;
+-import net.minestom.testing.Env;
+-import net.minestom.testing.EnvTest;
+ import org.junit.jupiter.api.Test;
+ 
+ import java.util.List;
 @@ -85,7 +86,7 @@ public class LeftClickIntegrationTest {
      public void leftExternal(Env env) {
          var instance = env.createFlatInstance();
@@ -917,16 +954,27 @@ index 87a81674699095298ef8614417497025bb70b479..87d2b8b17fb77c48206b32bb6b5dbc10
          var listener = env.listen(InventoryPreClickEvent.class);
          inventory.setItemStack(1, ItemStack.of(Material.DIAMOND));
 diff --git a/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java b/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
-index c4e4b6e403c628346273597f87507870e62860d3..9fc358b8ff4fd6c0f7f4cd86b2a7484a060450a5 100644
+index 98d2be50417fcbcf665b80852b118e6ce917ac4f..9fc358b8ff4fd6c0f7f4cd86b2a7484a060450a5 100644
 --- a/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/inventory/click/integration/RightClickIntegrationTest.java
-@@ -1,5 +1,6 @@
+@@ -1,5 +1,8 @@
  package net.minestom.server.inventory.click.integration;
  
 +import net.kyori.adventure.text.Component;
- import net.minestom.testing.Env;
- import net.minestom.testing.EnvTest;
++import net.minestom.testing.Env;
++import net.minestom.testing.EnvTest;
  import net.minestom.server.coordinate.Pos;
+ import net.minestom.server.entity.Player;
+ import net.minestom.server.event.inventory.InventoryPreClickEvent;
+@@ -10,8 +13,6 @@ import net.minestom.server.item.ItemStack;
+ import net.minestom.server.item.Material;
+ import net.minestom.server.network.packet.client.play.ClientClickWindowPacket;
+ import net.minestom.server.utils.inventory.PlayerInventoryUtils;
+-import net.minestom.testing.Env;
+-import net.minestom.testing.EnvTest;
+ import org.junit.jupiter.api.Test;
+ 
+ import java.util.List;
 @@ -107,7 +108,7 @@ public class RightClickIntegrationTest {
      public void rightExternal(Env env) {
          var instance = env.createFlatInstance();

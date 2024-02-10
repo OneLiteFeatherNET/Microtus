@@ -5,10 +5,10 @@ Subject: [PATCH] Add bstats support and integration
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 22f62e8000f5417a8e22ab8d5591ca5f613c3323..5afbe3d8420c9c82b81443748ea39328ed135e4e 100644
+index d8c8caa880983bcb367d70917cd7da20265e0e34..8be81dcbe29ac577b627d0d55aaa060d3b7d993a 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
-@@ -106,5 +106,8 @@ dependencies {
+@@ -111,5 +111,8 @@ dependencies {
      // NBT parsing/manipulation/saving
      api("io.github.jglrxavpok.hephaistos:common:${libs.versions.hephaistos.get()}")
      api("io.github.jglrxavpok.hephaistos:gson:${libs.versions.hephaistos.get()}")
@@ -171,7 +171,7 @@ index 0000000000000000000000000000000000000000..fb4b59f4f0740729d5d77d837736ef84
 +
 +}
 diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
-index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c60f590cba 100644
+index 1b9f713ba70231efefc5c83543581dffdb0ab40e..fd5af2b71286497addf6a41f3df8d151dfb6720e 100644
 --- a/src/main/java/net/minestom/server/ServerProcessImpl.java
 +++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
 @@ -1,6 +1,12 @@
@@ -187,7 +187,15 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
  import net.minestom.server.advancements.AdvancementManager;
  import net.minestom.server.adventure.bossbar.BossBarManager;
  import net.minestom.server.command.CommandManager;
-@@ -23,7 +29,11 @@ import net.minestom.server.network.PacketProcessor;
+@@ -9,6 +15,7 @@ import net.minestom.server.event.EventDispatcher;
+ import net.minestom.server.event.GlobalEventHandler;
+ import net.minestom.server.event.server.ServerTickMonitorEvent;
+ import net.minestom.server.exception.ExceptionManager;
++import net.minestom.server.extensions.ExtensionManager;
+ import net.minestom.server.gamedata.tags.TagManager;
+ import net.minestom.server.instance.Chunk;
+ import net.minestom.server.instance.Instance;
+@@ -23,7 +30,12 @@ import net.minestom.server.network.PacketProcessor;
  import net.minestom.server.network.socket.Server;
  import net.minestom.server.recipe.RecipeManager;
  import net.minestom.server.scoreboard.TeamManager;
@@ -197,10 +205,11 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
 +import net.minestom.server.snapshot.ServerSnapshot;
 +import net.minestom.server.snapshot.SnapshotImpl;
 +import net.minestom.server.snapshot.SnapshotUpdater;
- import net.minestom.server.terminal.MinestomTerminal;
++import net.minestom.server.terminal.MinestomTerminal;
  import net.minestom.server.thread.Acquirable;
  import net.minestom.server.thread.ThreadDispatcher;
-@@ -36,13 +46,6 @@ import org.jetbrains.annotations.NotNull;
+ import net.minestom.server.timer.SchedulerManager;
+@@ -36,18 +48,12 @@ import org.jetbrains.annotations.NotNull;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
  
@@ -212,17 +221,23 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
 -import java.util.concurrent.atomic.AtomicReference;
 -
  final class ServerProcessImpl implements ServerProcess {
-     private final static Logger LOGGER = LoggerFactory.getLogger(ServerProcessImpl.class);
+     private static final Logger LOGGER = LoggerFactory.getLogger(ServerProcessImpl.class);
+     private static final Boolean SHUTDOWN_ON_SIGNAL = PropertyUtils.getBoolean("minestom.shutdown-on-signal", true);
  
-@@ -65,6 +68,7 @@ final class ServerProcessImpl implements ServerProcess {
-     private final BossBarManager bossBar;
+     private final ExceptionManager exception;
++    private final ExtensionManager extension;
+     private final ConnectionManager connection;
+     private final PacketListenerManager packetListener;
+     private final PacketProcessor packetProcessor;
+@@ -66,6 +72,7 @@ final class ServerProcessImpl implements ServerProcess {
      private final TagManager tag;
+     private final TrimManager trim;
      private final Server server;
 +    private final Metrics metrics;
  
      private final ThreadDispatcher<Chunk> dispatcher;
      private final Ticker ticker;
-@@ -72,6 +76,9 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -73,8 +80,12 @@ final class ServerProcessImpl implements ServerProcess {
      private final AtomicBoolean started = new AtomicBoolean();
      private final AtomicBoolean stopped = new AtomicBoolean();
  
@@ -231,8 +246,11 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
 +
      public ServerProcessImpl() throws IOException {
          this.exception = new ExceptionManager();
-         this.extension = new ExtensionManager(this);
-@@ -95,6 +102,7 @@ final class ServerProcessImpl implements ServerProcess {
++        this.extension = new ExtensionManager(this);
+         this.connection = new ConnectionManager();
+         this.packetListener = new PacketListenerManager();
+         this.packetProcessor = new PacketProcessor(packetListener);
+@@ -96,6 +107,7 @@ final class ServerProcessImpl implements ServerProcess {
  
          this.dispatcher = ThreadDispatcher.singleThread();
          this.ticker = new TickerImpl();
@@ -240,19 +258,61 @@ index 761fef7e5bd507adf4417109e922031dec42c37d..e160c7e81791c5c270ec342b32c8b6c6
      }
  
      @Override
-@@ -233,6 +241,9 @@ final class ServerProcessImpl implements ServerProcess {
-         if (MinecraftServer.isTerminalEnabled()) {
-             MinestomTerminal.start();
+@@ -163,6 +175,11 @@ final class ServerProcessImpl implements ServerProcess {
+         return bossBar;
+     }
+ 
++    @Override
++    public @NotNull ExtensionManager extension() {
++        return extension;
++    }
++
+     @Override
+     public @NotNull TagManager tag() {
+         return tag;
+@@ -209,8 +226,13 @@ final class ServerProcessImpl implements ServerProcess {
+             throw new IllegalStateException("Server already started");
          }
+ 
++        extension.start();
++        extension.gotoPreInit();
++
+         LOGGER.info("Starting " + MinecraftServer.getBrandName() + " server.");
+ 
++        extension.gotoInit();
++
+         // Init server
+         try {
+             server.init(socketAddress);
+@@ -222,8 +244,16 @@ final class ServerProcessImpl implements ServerProcess {
+         // Start server
+         server.start();
+ 
++        extension.gotoPostInit();
++
+         LOGGER.info(MinecraftServer.getBrandName() + " server started successfully.");
+ 
++        if (MinecraftServer.isTerminalEnabled()) {
++            MinestomTerminal.start();
++        }
 +        if (bstatsEnabled) {
 +            this.metrics.start();
 +        }
          // Stop the server on SIGINT
-         Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
+         if (SHUTDOWN_ON_SIGNAL) Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
      }
-@@ -251,6 +262,7 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -233,12 +263,16 @@ final class ServerProcessImpl implements ServerProcess {
+         if (!stopped.compareAndSet(false, true))
+             return;
+         LOGGER.info("Stopping " + MinecraftServer.getBrandName() + " server.");
++        LOGGER.info("Unloading all extensions.");
++        extension.shutdown();
+         scheduler.shutdown();
+         connection.shutdown();
+         server.stop();
+         LOGGER.info("Shutting down all thread pools.");
          benchmark.disable();
-         MinestomTerminal.stop();
++        MinestomTerminal.stop();
          dispatcher.shutdown();
 +        this.metrics.shutdown();
          LOGGER.info(MinecraftServer.getBrandName() + " server stopped successfully.");

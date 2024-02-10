@@ -4,83 +4,11 @@ Date: Thu, 30 Nov 2023 12:52:30 +0100
 Subject: [PATCH] Improve entity metadata handling
 
 
-diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
-index ff0b45ffe8ac3ce607de0c4312b11451014a11a5..8e7ad8420da6168ea2444dae90e5bc68bb32c176 100644
---- a/src/main/java/net/minestom/server/entity/Entity.java
-+++ b/src/main/java/net/minestom/server/entity/Entity.java
-@@ -1747,6 +1747,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
-         DYING,
-         CROAKING,
-         USING_TONGUE,
-+        SITTING, // Microtus - Add missing entity pose
-         ROARING,
-         SNIFFING,
-         EMERGING,
-diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-index 45db42b49012a49901ca25fba753d9ab94483bfe..1bad471ee2fda90766e11ba3ab1f8ee9445bcbeb 100644
---- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-+++ b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-@@ -33,10 +33,7 @@ import net.minestom.server.entity.metadata.water.AxolotlMeta;
- import net.minestom.server.entity.metadata.water.DolphinMeta;
- import net.minestom.server.entity.metadata.water.GlowSquidMeta;
- import net.minestom.server.entity.metadata.water.SquidMeta;
--import net.minestom.server.entity.metadata.water.fish.CodMeta;
--import net.minestom.server.entity.metadata.water.fish.PufferfishMeta;
--import net.minestom.server.entity.metadata.water.fish.SalmonMeta;
--import net.minestom.server.entity.metadata.water.fish.TropicalFishMeta;
-+import net.minestom.server.entity.metadata.water.fish.*;
- import net.minestom.server.registry.Registry;
- import org.jetbrains.annotations.NotNull;
- 
-@@ -87,7 +84,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
-                 entry("minecraft:bee", BeeMeta::new),
-                 entry("minecraft:blaze", BlazeMeta::new),
-                 entry("minecraft:boat", BoatMeta::new),
--                entry("minecraft:chest_boat", EntityMeta::new), // TODO dedicated metadata
-+                entry("minecraft:chest_boat", BoatMeta::new), // Microtus - entity meta update
-                 entry("minecraft:cat", CatMeta::new),
-                 entry("minecraft:block_display", BlockDisplayMeta::new), // Microtus - 1.19.4 update
-                 entry("minecraft:cave_spider", CaveSpiderMeta::new),
-@@ -175,7 +172,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
-                 entry("minecraft:squid", SquidMeta::new),
-                 entry("minecraft:stray", StrayMeta::new),
-                 entry("minecraft:strider", StriderMeta::new),
--                entry("minecraft:tadpole", EntityMeta::new), // TODO dedicated metadata
-+                entry("minecraft:tadpole", TadpoleMeta::new), // Microtus - entity meta update
-                 entry("minecraft:egg", ThrownEggMeta::new),
-                 entry("minecraft:ender_pearl", ThrownEnderPearlMeta::new),
-                 entry("minecraft:experience_bottle", ThrownExperienceBottleMeta::new),
-@@ -188,7 +185,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
-                 entry("minecraft:villager", VillagerMeta::new),
-                 entry("minecraft:vindicator", VindicatorMeta::new),
-                 entry("minecraft:wandering_trader", WanderingTraderMeta::new),
--                entry("minecraft:warden", EntityMeta::new), // TODO dedicated metadata
-+                entry("minecraft:warden", WardenMeta::new), // Microtus - entity meta update
-                 entry("minecraft:witch", WitchMeta::new),
-                 entry("minecraft:wither", WitherMeta::new),
-                 entry("minecraft:wither_skeleton", WitherSkeletonMeta::new),
-@@ -202,7 +199,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
-                 entry("minecraft:player", PlayerMeta::new),
-                 entry("minecraft:fishing_bobber", FishingHookMeta::new),
-                 // Microtus start - 1.20 update
--                entry("minecraft:camel", EntityMeta::new) // TODO dedicated metadata
-+                entry("minecraft:camel", CamelMeta::new) // Microtus - entity meta update
-                 // Microtus end - 1.20 update
-         );
-     }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/FrogMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/FrogMeta.java
-index a98c919b7939627199f292f63061baefea70f591..f8ebe95a2eb670337d47180a8943217efbaad292 100644
+index cfb2914cea7591a1d69ab6b1e147bafbacc7671b..f8ebe95a2eb670337d47180a8943217efbaad292 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/FrogMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/FrogMeta.java
-@@ -3,6 +3,7 @@ package net.minestom.server.entity.metadata.animal;
- import net.minestom.server.entity.Entity;
- import net.minestom.server.entity.Metadata;
- import org.jetbrains.annotations.NotNull;
-+import org.jetbrains.annotations.Nullable;
- 
- public class FrogMeta extends AnimalMeta {
-     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
-@@ -12,27 +13,64 @@ public class FrogMeta extends AnimalMeta {
+@@ -13,29 +13,64 @@ public class FrogMeta extends AnimalMeta {
          super(entity, metadata);
      }
  
@@ -101,12 +29,14 @@ index a98c919b7939627199f292f63061baefea70f591..f8ebe95a2eb670337d47180a8943217e
          super.metadata.setIndex(OFFSET, Metadata.FrogVariant(value));
      }
  
+-    public @Nullable Integer getTongueTarget() {
+-        return super.metadata.getIndex(OFFSET + 1, null);
 +    /**
 +     * Get the current tongue target value.
 +     * @return the given value
 +     */
-     public int getTongueTarget() {
-         return super.metadata.getIndex(OFFSET + 1, 0);
++    public int getTongueTarget() {
++        return super.metadata.getIndex(OFFSET + 1, 0);
      }
  
 +    /**
@@ -115,15 +45,17 @@ index a98c919b7939627199f292f63061baefea70f591..f8ebe95a2eb670337d47180a8943217e
 +    public void resetTongueTarget() {
 +        super.metadata.setIndex(OFFSET + 1, Metadata.VarInt(0));
 +    }
-+
+ 
+-    public void setTongueTarget(@Nullable Integer value) {
 +    /**
 +     * Set the target value for a tongue.
 +     * @param value the target to set
 +     */
-     public void setTongueTarget(int value) {
++    public void setTongueTarget(int value) {
          super.metadata.setIndex(OFFSET + 1, Metadata.OptVarInt(value));
      }
  
+-
 +    /**
 +     * The enum contains all variants from a frog which are currently implemented in the game.
 +     */
@@ -148,53 +80,31 @@ index a98c919b7939627199f292f63061baefea70f591..f8ebe95a2eb670337d47180a8943217e
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java
-index f830d79b46083bd671eaee0ba964c3d483f1b48f..6d78f6cf69a410d58317945439070c7a9b7dac85 100644
+index de2a71b81a4b9787ec31b5213d0c00bc1befdb6b..6d78f6cf69a410d58317945439070c7a9b7dac85 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/GoatMeta.java
-@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
- 
- public class GoatMeta extends AnimalMeta {
-     public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
--    public static final byte MAX_OFFSET = OFFSET + 1;
-+    public static final byte MAX_OFFSET = OFFSET + 3;
- 
-     public GoatMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
-         super(entity, metadata);
-@@ -19,4 +19,22 @@ public class GoatMeta extends AnimalMeta {
-     public void setScreaming(boolean screaming) {
+@@ -20,6 +20,7 @@ public class GoatMeta extends AnimalMeta {
          metadata.setIndex(OFFSET, Metadata.Boolean(screaming));
      }
-+
+ 
 +    // Microtus start - meta update
-+    public boolean hasLeftHorn() {
-+        return metadata.getIndex(OFFSET + 1, true);
-+    }
-+
-+    public void setLeftHorn(boolean leftHorn) {
-+        metadata.setIndex(OFFSET + 1, Metadata.Boolean(leftHorn));
-+    }
-+
-+    public boolean hasRightHorn() {
-+        return metadata.getIndex(OFFSET + 2, true);
-+    }
-+
-+    public void setRightHorn(boolean rightHorn) {
-+        metadata.setIndex(OFFSET + 2, Metadata.Boolean(rightHorn));
-+    }
+     public boolean hasLeftHorn() {
+         return metadata.getIndex(OFFSET + 1, true);
+     }
+@@ -35,4 +36,5 @@ public class GoatMeta extends AnimalMeta {
+     public void setRightHorn(boolean rightHorn) {
+         metadata.setIndex(OFFSET + 2, Metadata.Boolean(rightHorn));
+     }
 +    // Microtus end - meta update
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/WardenMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/WardenMeta.java
-new file mode 100644
-index 0000000000000000000000000000000000000000..4354c9ce62a2a9053ed880d094134cdae4357cd9
---- /dev/null
+index 261f6b584d5db0fe60c9e4774860736b35d5163c..4354c9ce62a2a9053ed880d094134cdae4357cd9 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/monster/WardenMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/monster/WardenMeta.java
-@@ -0,0 +1,43 @@
-+package net.minestom.server.entity.metadata.monster;
-+
-+import net.minestom.server.entity.Entity;
-+import net.minestom.server.entity.Metadata;
-+import org.jetbrains.annotations.NotNull;
-+
+@@ -4,21 +4,40 @@ import net.minestom.server.entity.Entity;
+ import net.minestom.server.entity.Metadata;
+ import org.jetbrains.annotations.NotNull;
+ 
 +// Microtus - entity meta update
 +/**
 + * This metadata implementation can be used for a warden entity.
@@ -202,28 +112,32 @@ index 0000000000000000000000000000000000000000..4354c9ce62a2a9053ed880d094134cda
 + * @version 1.0.0
 + * @since 1.0.0
 + **/
-+public class WardenMeta extends MonsterMeta {
-+
-+    public static final byte OFFSET = MonsterMeta.MAX_OFFSET;
-+    public static final byte MAX_OFFSET = OFFSET + 1;
-+
+ public class WardenMeta extends MonsterMeta {
+ 
+     public static final byte OFFSET = MonsterMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 1;
+ 
 +    /**
 +     * Creates a new metadata which can be set to a warden entity.
 +     * @param entity the warden entity reference
 +     * @param metadata the reference to a {@link Metadata}
 +     */
-+    public WardenMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
-+        super(entity, metadata);
-+    }
-+
+     public WardenMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+     }
+ 
+-    public int getAngerLevel() {
+-        return super.metadata.getIndex(OFFSET, 0);
+-    }
+-
 +    /**
 +     * Set the anger level for a warden.
 +     * @param value the level to set
 +     */
-+    public void setAngerLevel(int value) {
-+        super.metadata.setIndex(OFFSET, Metadata.VarInt(value));
-+    }
-+
+     public void setAngerLevel(int value) {
+         super.metadata.setIndex(OFFSET, Metadata.VarInt(value));
+     }
+ 
 +    /**
 +     * Returns the given anger level from the meta or zero as default value if no value is set.
 +     * @return the given level
@@ -231,31 +145,28 @@ index 0000000000000000000000000000000000000000..4354c9ce62a2a9053ed880d094134cda
 +    public int getAngerLevel() {
 +        return super.metadata.getIndex(OFFSET, 0);
 +    }
-+}
+ }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/raider/PillagerMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/raider/PillagerMeta.java
-index 5755ed4b1f6f1073698856bdc565b3e7943f1044..1cf1168ecd108e70e3bc827c4a6aa244897ae8e8 100644
+index 8096e5e2ab77e099192e49cde16eafce6a745eb9..1cf1168ecd108e70e3bc827c4a6aa244897ae8e8 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/monster/raider/PillagerMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/monster/raider/PillagerMeta.java
-@@ -6,10 +6,27 @@ import org.jetbrains.annotations.NotNull;
- 
- public class PillagerMeta extends AbstractIllagerMeta {
-     public static final byte OFFSET = AbstractIllagerMeta.MAX_OFFSET;
--    public static final byte MAX_OFFSET = OFFSET + 0;
-+    public static final byte MAX_OFFSET = OFFSET + 1;
- 
-     public PillagerMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+@@ -12,12 +12,21 @@ public class PillagerMeta extends AbstractIllagerMeta {
          super(entity, metadata);
      }
  
+-    public boolean isChargingCrossbow() {
+-        return super.metadata.getIndex(OFFSET, false);
+-    }
+-
 +    // Microtus start - meta update
 +    /**
 +     * Set the state if a Pillager charge his crossbow.
 +     * @param value the value to set
 +     */
-+    public void setChargingCrossbow(boolean value) {
-+        super.metadata.setIndex(OFFSET, Metadata.Boolean(value));
-+    }
-+
+     public void setChargingCrossbow(boolean value) {
+         super.metadata.setIndex(OFFSET, Metadata.Boolean(value));
+     }
+ 
 +    /**
 +     * Returns a boolean value if a Pillager is charging his crossbow.
 +     * @return true when yes otherwise false
@@ -266,31 +177,23 @@ index 5755ed4b1f6f1073698856bdc565b3e7943f1044..1cf1168ecd108e70e3bc827c4a6aa244
 +    // Microtus end - meta update
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/other/BoatMeta.java b/src/main/java/net/minestom/server/entity/metadata/other/BoatMeta.java
-index 6be4483182ed904913c9e76c8cf58baa733db9a0..313774679c7c4921bf89216c23a31cc30dc92a7b 100644
+index 57e3e40ec7d89c5484e02f3d17b1d255fb24b986..84a81a7b326efed0b37f244cadb8b5d6c117ae98 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/other/BoatMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/other/BoatMeta.java
-@@ -76,9 +76,13 @@ public class BoatMeta extends EntityMeta {
-         BIRCH,
-         JUNGLE,
-         ACACIA,
--        DARK_OAK;
-+        // Microtus start - meta update
-+        CHERRY,
-+        DARK_OAK,
-+        MANGROVE,
-+        BAMBOO;
-+        // Microtus end - meta update
+@@ -81,7 +81,7 @@ public class BoatMeta extends EntityMeta {
+         MANGROVE,
+         BAMBOO;
  
 -        private final static Type[] VALUES = values();
 +        private static final Type[] VALUES = values();
      }
--
+ 
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/water/DolphinMeta.java b/src/main/java/net/minestom/server/entity/metadata/water/DolphinMeta.java
-index 54902744760ff77762bfdab3f5a71cf9117b35fa..1e39f9b4c70bbaa74b7aec1769619a2ab46948c4 100644
+index 6dca1c672effa503e3a7ba81b9da84001126cd45..1e39f9b4c70bbaa74b7aec1769619a2ab46948c4 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/water/DolphinMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/water/DolphinMeta.java
-@@ -6,37 +6,66 @@ import net.minestom.server.entity.Entity;
+@@ -6,36 +6,66 @@ import net.minestom.server.entity.Entity;
  import net.minestom.server.entity.Metadata;
  import org.jetbrains.annotations.NotNull;
  
@@ -327,7 +230,7 @@ index 54902744760ff77762bfdab3f5a71cf9117b35fa..1e39f9b4c70bbaa74b7aec1769619a2a
          super.metadata.setIndex(OFFSET, Metadata.Position(value));
      }
  
--    public boolean isCanFindTreasure() {
+-    public boolean isHasFish() {
 +    /**
 +     * Returns an indicator if a Dolphin received a fish from a player.
 +     * @return true when yes otherwise false
@@ -336,27 +239,24 @@ index 54902744760ff77762bfdab3f5a71cf9117b35fa..1e39f9b4c70bbaa74b7aec1769619a2a
          return super.metadata.getIndex(OFFSET + 1, false);
      }
  
--    public void setCanFindTreasure(boolean value) {
 +    /**
 +     * Set the indicator if a Dolphin got a fish from a player.
 +     * @param value the value to set
 +     */
-+    public void setHasFish(boolean value) {
+     public void setHasFish(boolean value) {
          super.metadata.setIndex(OFFSET + 1, Metadata.Boolean(value));
      }
  
--    public boolean isHasFish() {
--        return super.metadata.getIndex(OFFSET + 2, false);
 +    /**
 +     * Get the current moisture level.
 +     * @return the given level
 +     */
-+    public int getMoistureLevel() {
-+        return super.metadata.getIndex(OFFSET + 2, 2400);
+     public int getMoistureLevel() {
+         return super.metadata.getIndex(OFFSET + 2, 2400);
      }
  
--    public void setHasFish(boolean value) {
--        super.metadata.setIndex(OFFSET + 2, Metadata.Boolean(value));
+-    public void setMoistureLevel(int value) {
+-        super.metadata.setIndex(OFFSET + 2, Metadata.VarInt(value));
 +    /**
 +     * Updates the given moisture level.
 +     * @param level the level to set
@@ -364,48 +264,47 @@ index 54902744760ff77762bfdab3f5a71cf9117b35fa..1e39f9b4c70bbaa74b7aec1769619a2a
 +    public void setMoistureLevel(int level) {
 +        super.metadata.setIndex(OFFSET + 2, Metadata.VarInt(level));
      }
--
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/water/fish/TadpoleMeta.java b/src/main/java/net/minestom/server/entity/metadata/water/fish/TadpoleMeta.java
-new file mode 100644
-index 0000000000000000000000000000000000000000..ad9152ca44eb6521458aa20a4484278c9334614e
---- /dev/null
+index 8cf3e9c86854ae20115dc05d54a619e418e850da..ad9152ca44eb6521458aa20a4484278c9334614e 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/water/fish/TadpoleMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/water/fish/TadpoleMeta.java
-@@ -0,0 +1,21 @@
-+package net.minestom.server.entity.metadata.water.fish;
-+
-+import net.minestom.server.entity.Entity;
-+import net.minestom.server.entity.Metadata;
-+import org.jetbrains.annotations.NotNull;
-+
+@@ -4,12 +4,18 @@ import net.minestom.server.entity.Entity;
+ import net.minestom.server.entity.Metadata;
+ import org.jetbrains.annotations.NotNull;
+ 
+-public class TadpoleMeta extends AbstractFishMeta {
+-    public static final byte OFFSET = AbstractFishMeta.MAX_OFFSET;
+-    public static final byte MAX_OFFSET = OFFSET + 0;
 +// Microtus - entity meta update
 +/**
 + * Metadata implementation for a Tadpole entity.
 + */
 +public final class TadpoleMeta extends AbstractFishMeta {
-+
+ 
 +    /**
 +     * Creates a new reference from this meta.
 +     * @param entity the involved entity
 +     * @param metadata the involved metadata
 +     */
-+    public TadpoleMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
-+        super(entity, metadata);
-+    }
-+}
+     public TadpoleMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
+     }
+-
+ }
 diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-index 90e2bd8d5a3503796d3450b2d01ee62968d8492c..8f7b9c9c47bf3eedc0143ca2cfc824e9dbc8104a 100644
+index d86c8fb731eccb95cf60cf45fc28dd2f18d8c19c..13cc9079a34832e9bae32d275b0e9842bd761164 100644
 --- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
 +++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
-@@ -549,7 +549,7 @@ final class NetworkBufferTypes {
+@@ -571,7 +571,7 @@ final class NetworkBufferTypes {
              },
              buffer -> {
                  final int ordinal = buffer.read(VAR_INT);
 -                return FrogMeta.Variant.values()[ordinal];
 +                return FrogMeta.Variant.getVariant(ordinal); // Microtus - meta update
              });
-     // Microtus start - 1.19.4 update
      static final TypeImpl<SnifferMeta.State> SNIFFER_STATE = new TypeImpl<>(SnifferMeta.State.class,
+             (buffer, value) -> {
 diff --git a/src/test/java/net/minestom/server/entity/metadata/animal/FrogMetaTest.java b/src/test/java/net/minestom/server/entity/metadata/animal/FrogMetaTest.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..dff4f20dac5cfb5dc02c815ef381f91fc093fa97

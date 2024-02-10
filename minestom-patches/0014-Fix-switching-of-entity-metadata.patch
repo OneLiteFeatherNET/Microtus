@@ -1,0 +1,50 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Phillipp Glanz <6745190+TheMeinerLP@users.noreply.github.com>
+Date: Wed, 10 Jan 2024 21:48:06 +0100
+Subject: [PATCH] Fix switching of entity metadata
+
+
+diff --git a/src/main/java/net/minestom/server/entity/Entity.java b/src/main/java/net/minestom/server/entity/Entity.java
+index 35ffb819279d3c4586a0b699bd2843912a828661..cfec621e570fa159b94e3e1dcecd8b250559e0cc 100644
+--- a/src/main/java/net/minestom/server/entity/Entity.java
++++ b/src/main/java/net/minestom/server/entity/Entity.java
+@@ -1237,7 +1237,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
+             setPose(Pose.FALL_FLYING);
+         } else if (entityMeta.isSwimming()) {
+             setPose(Pose.SWIMMING);
+-        } else if (entityMeta instanceof LivingEntityMeta livingMeta && livingMeta.isInRiptideSpinAttack()) {
++        } else if (this instanceof LivingEntity && entityMeta instanceof LivingEntityMeta && ((LivingEntityMeta) entityMeta).isInRiptideSpinAttack()) {
+             setPose(Pose.SPIN_ATTACK);
+         } else if (entityMeta.isSneaking()) {
+             setPose(Pose.SNEAKING);
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index d805fa467a06772dbb60c785e6cdad0a0962ebe7..90eac58addf8912cf296fe417eabf448bd5bf0fc 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -1022,7 +1022,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+      * been changed with {@link #switchEntityType(EntityType)}. It is wise to check
+      * {@link #getEntityType()} first.</p>
+      */
+-    public @NotNull PlayerMeta getPlayerMeta() {
++    public @NotNull PlayerMeta getUnsafeEntityMeta() {
+         return (PlayerMeta) super.getEntityMeta();
+     }
+ 
+@@ -1035,7 +1035,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+      * @return the player additional hearts
+      */
+     public float getAdditionalHearts() {
+-        return getPlayerMeta().getAdditionalHearts();
++        return getUnsafeEntityMeta().getAdditionalHearts();
+     }
+ 
+     /**
+@@ -1047,7 +1047,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+      * @param additionalHearts the count of additional hearts
+      */
+     public void setAdditionalHearts(float additionalHearts) {
+-        getPlayerMeta().setAdditionalHearts(additionalHearts);
++        getUnsafeEntityMeta().setAdditionalHearts(additionalHearts);
+     }
+ 
+     /**

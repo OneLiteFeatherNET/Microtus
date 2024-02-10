@@ -5,10 +5,10 @@ Subject: [PATCH] Update java keyword usage
 
 
 diff --git a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-index 22887d997f8375309e5a687db051e68fa2b6a5f8..de8968352c61f51907691be8cf9e9f391406ccb3 100644
+index d20ff761285c4307d16b6ad278585a54cb613767..2cf3005dfff422796be4ee62c3b4119899181f2d 100644
 --- a/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
 +++ b/src/main/java/net/minestom/server/adventure/AdventurePacketConvertor.java
-@@ -45,6 +45,8 @@ public class AdventurePacketConvertor {
+@@ -46,6 +46,8 @@ public class AdventurePacketConvertor {
          NAMED_TEXT_COLOR_ID_MAP.put(NamedTextColor.WHITE, 15);
      }
  
@@ -18,10 +18,10 @@ index 22887d997f8375309e5a687db051e68fa2b6a5f8..de8968352c61f51907691be8cf9e9f39
       * Gets the int value of a boss bar overlay.
       *
 diff --git a/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java b/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
-index 3ac12d8d67644ef8fdbfe7fb0fbbd442907c04db..a4e0a096160198af918559875a55a31b8a6afcf7 100644
+index da100c8c5b878fc197fb5cdb3f6fd2a8b6db0e70..b849ef7bee53080faed89f77e6ab0aecdd8fa122 100644
 --- a/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
 +++ b/src/main/java/net/minestom/server/command/builder/arguments/ArgumentEnum.java
-@@ -11,7 +11,7 @@ import java.util.function.UnaryOperator;
+@@ -12,7 +12,7 @@ import java.util.function.UnaryOperator;
  @SuppressWarnings("rawtypes")
  public class ArgumentEnum<E extends Enum> extends Argument<E> {
  
@@ -31,10 +31,10 @@ index 3ac12d8d67644ef8fdbfe7fb0fbbd442907c04db..a4e0a096160198af918559875a55a31b
      private final Class<E> enumClass;
      private final E[] values;
 diff --git a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/ArgumentRange.java b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/ArgumentRange.java
-index cd15c02a785b35c3ef4f387958fd6cd80aea2e43..aaf19016451bf8ae361c7eded9f608b00e1fb229 100644
+index 5f53f6e814693e33c02f679b112308b1d49b927b..5316768207c30659ae237a724e7044901f90122e 100644
 --- a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/ArgumentRange.java
 +++ b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/ArgumentRange.java
-@@ -22,7 +22,7 @@ public abstract class ArgumentRange<T extends Range<N>, N extends Number> extend
+@@ -23,7 +23,7 @@ public abstract class ArgumentRange<T extends Range<N>, N extends Number> extend
      private final Function<String, N> parser;
      private final BiFunction<N, N, T> rangeConstructor;
  
@@ -44,10 +44,10 @@ index cd15c02a785b35c3ef4f387958fd6cd80aea2e43..aaf19016451bf8ae361c7eded9f608b0
          this.min = min;
          this.max = max;
 diff --git a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
-index 83570542f3bce400238b45d067aad19444669b36..7c776a72a551667f6945b73e11256ac161a5a665 100644
+index 00dd4a9af15dc57de4b434363976d5d05bcc4a2e..3b39ee675051c53062485f8a99f1976d8fc80292 100644
 --- a/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
 +++ b/src/main/java/net/minestom/server/command/builder/arguments/minecraft/registry/ArgumentRegistry.java
-@@ -8,9 +8,9 @@ public abstract class ArgumentRegistry<T> extends Argument<T> {
+@@ -9,9 +9,9 @@ public abstract class ArgumentRegistry<T> extends Argument<T> {
  
      public static final int INVALID_NAME = -2;
  
@@ -60,10 +60,10 @@ index 83570542f3bce400238b45d067aad19444669b36..7c776a72a551667f6945b73e11256ac1
      public abstract T getRegistry(@NotNull String value);
  
 diff --git a/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java b/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
-index 66400d55272e182692398aec8d509ce51f782744..f891222f28b6bd2a13d16706030164126ff725f5 100644
+index 08374caa1ba2399bfbcffabdda826974f341e792..2e76a2bafd81ccc75d696b7f1c7972cec8e471cc 100644
 --- a/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
 +++ b/src/main/java/net/minestom/server/command/builder/arguments/relative/ArgumentRelativeVec.java
-@@ -27,7 +27,7 @@ abstract class ArgumentRelativeVec extends Argument<RelativeVec> {
+@@ -28,7 +28,7 @@ abstract class ArgumentRelativeVec extends Argument<RelativeVec> {
  
      private final int numberCount;
  
@@ -73,7 +73,7 @@ index 66400d55272e182692398aec8d509ce51f782744..f891222f28b6bd2a13d1670603016412
          this.numberCount = numberCount;
      }
 diff --git a/src/main/java/net/minestom/server/entity/EntityProjectile.java b/src/main/java/net/minestom/server/entity/EntityProjectile.java
-index 82685ae08e5806f749995e293b63e7ac7f7223b7..37e645005bcef8dd8f663eeb709c73da0722ed31 100644
+index eda26624a04e9e04c029d933ed755739c38797e2..8042b4a5532ed8dfffbcbe3c6fd8c1efb03bcce3 100644
 --- a/src/main/java/net/minestom/server/entity/EntityProjectile.java
 +++ b/src/main/java/net/minestom/server/entity/EntityProjectile.java
 @@ -157,8 +157,8 @@ public class EntityProjectile extends Entity {
@@ -214,12 +214,12 @@ index badb44eb42716e011af4005841e4728f43f43ab0..e722b13e9900206bef438cf31f46ee97
      public BatMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
-index 4524ce8517ce4e28a75c7044cc9b956fbb6ef6a1..bc2b06fb6652b8de3e9357bec939d62082319998 100644
+index 808d26ec1b721d4e9337988182f05508e1689313..dea9ed51f05f6f96ebf65bde0318f567c7cd1d62 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/animal/AbstractHorseMeta.java
-@@ -10,12 +10,14 @@ public class AbstractHorseMeta extends AnimalMeta {
+@@ -8,12 +8,14 @@ public class AbstractHorseMeta extends AnimalMeta {
      public static final byte OFFSET = AnimalMeta.MAX_OFFSET;
-     public static final byte MAX_OFFSET = OFFSET + 1; // Microtus - 1.19.4 update
+     public static final byte MAX_OFFSET = OFFSET + 1;
  
 -    private final static byte TAMED_BIT = 0x02;
 -    private final static byte SADDLED_BIT = 0x04;
@@ -238,20 +238,6 @@ index 4524ce8517ce4e28a75c7044cc9b956fbb6ef6a1..bc2b06fb6652b8de3e9357bec939d620
  
      protected AbstractHorseMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
-@@ -68,13 +70,5 @@ public class AbstractHorseMeta extends AnimalMeta {
-     public void setMouthOpen(boolean value) {
-         setMaskBit(OFFSET, MOUTH_OPEN_BIT, value);
-     }
--    /* Microtus - 1.19.4 update
--    public UUID getOwner() {
--        return super.metadata.getIndex(OFFSET + 1, null);
--    }
- 
--    public void setOwner(UUID value) {
--        super.metadata.setIndex(OFFSET + 1, Metadata.OptUUID(value));
--    }
--    */
- }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java b/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java
 index ff56fa14539db30131f595d12cdce19b0dad7515..957f5dd479b8b13f21c24d7045dcde8078cb23b8 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/animal/BeeMeta.java
@@ -380,28 +366,11 @@ index f256a3a44b189299b4608fe4c447290203f55b68..bc6bd54c017665e52a63b87ed30c1ca9
  
      public SheepMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
          super(entity, metadata);
-diff --git a/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java b/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
-index d2115dfb2371d79fe16e907a5a2e19ed7b27d73b..28571c9e1ad982e0baa8b13f18f778ccfc43aa79 100644
---- a/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
-+++ b/src/main/java/net/minestom/server/entity/metadata/arrow/AbstractArrowMeta.java
-@@ -9,8 +9,10 @@ public class AbstractArrowMeta extends EntityMeta {
-     public static final byte OFFSET = EntityMeta.MAX_OFFSET;
-     public static final byte MAX_OFFSET = OFFSET + 2;
- 
--    private final static byte CRITICAL_BIT = 0x01;
--    private final static byte NO_CLIP_BIT = 0x02;
-+    //Microtus start - update java keyword usage
-+    private static final byte CRITICAL_BIT = 0x01;
-+    private static final byte NO_CLIP_BIT = 0x02;
-+    //Microtus end - update java keyword usage
- 
-     protected AbstractArrowMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
-         super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java b/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
-index fce02b850183964a964b9e342ae5ab0acf4648b0..f04a986b304ec2f38816103d1b516278279cdbf1 100644
+index 113c08deaf4ed0ffde0dcf90cfd17265bfa37176..b007122ad6c8fb80ad836af65d331dfa1025da13 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/display/AbstractDisplayMeta.java
-@@ -137,7 +137,6 @@ public class AbstractDisplayMeta extends EntityMeta {
+@@ -144,7 +144,6 @@ public class AbstractDisplayMeta extends EntityMeta {
          HORIZONTAL,
          CENTER;
  
@@ -411,10 +380,10 @@ index fce02b850183964a964b9e342ae5ab0acf4648b0..f04a986b304ec2f38816103d1b516278
 -
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java b/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
-index f574b37d77df167e5dfebc4eb479ce49dfd049c2..3ba49692a4369eae00749ab2cae146eff14ad686 100644
+index 5a78687ca7f36915a88e5fa379966b266d7014e0..a9453696d45bc673d4574a83ecdac2d703fa4d40 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/display/ItemDisplayMeta.java
-@@ -42,8 +42,7 @@ public class ItemDisplayMeta extends AbstractDisplayMeta {
+@@ -40,7 +40,7 @@ public class ItemDisplayMeta extends AbstractDisplayMeta {
          GROUND,
          FIXED;
  
@@ -422,7 +391,6 @@ index f574b37d77df167e5dfebc4eb479ce49dfd049c2..3ba49692a4369eae00749ab2cae146ef
 +        private static final DisplayContext[] VALUES = values(); //Microtus - update java keyword usage
  
      }
--
  }
 diff --git a/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java b/src/main/java/net/minestom/server/entity/metadata/golem/IronGolemMeta.java
 index 9bbab19dceff737cac3c69738125e5b9d604057c..a6c82357089ed26e6fac40833dfd0912859f2b7c 100644
@@ -514,6 +482,23 @@ index 7a9e49231bfe9b8f576e46f56ba22897a5e9a433..8e6603ef87d58e556f2f1ce508b77b8b
      }
 -
  }
+diff --git a/src/main/java/net/minestom/server/entity/metadata/projectile/AbstractArrowMeta.java b/src/main/java/net/minestom/server/entity/metadata/projectile/AbstractArrowMeta.java
+index 118b2914aff0c65ae636330d4ba3923406149a3b..fb7864ded10a361b16f2ade5dc8acc93893458b3 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/projectile/AbstractArrowMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/projectile/AbstractArrowMeta.java
+@@ -9,8 +9,10 @@ public class AbstractArrowMeta extends EntityMeta {
+     public static final byte OFFSET = EntityMeta.MAX_OFFSET;
+     public static final byte MAX_OFFSET = OFFSET + 2;
+ 
+-    private final static byte CRITICAL_BIT = 0x01;
+-    private final static byte NO_CLIP_BIT = 0x02;
++    //Microtus start - update java keyword usage
++    private static final byte CRITICAL_BIT = 0x01;
++    private static final byte NO_CLIP_BIT = 0x02;
++    //Microtus end - update java keyword usage
+ 
+     protected AbstractArrowMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
+         super(entity, metadata);
 diff --git a/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java b/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java
 index f162eb7de22edc949b17a89fcff4477bf1c3c0cf..83539dd8658c79a7734b4fdbd917d08fda2c8feb 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/water/AxolotlMeta.java
@@ -526,53 +511,6 @@ index f162eb7de22edc949b17a89fcff4477bf1c3c0cf..83539dd8658c79a7734b4fdbd917d08f
 +        private static final AxolotlMeta.Variant[] VALUES = values();  //Microtus - update java keyword usage
      }
  }
-diff --git a/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java b/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
-index 1239990db6444176ad3fd83365e1ad010d367890..ec416c6c80e07ad8b89c97b180e5942f2b2f4ba6 100644
---- a/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
-+++ b/src/main/java/net/minestom/server/extensions/DiscoveredExtension.java
-@@ -58,13 +58,15 @@ public final class DiscoveredExtension {
-     /** The load status of this extension -- LOAD_SUCCESS is the only good one. */
-     transient LoadStatus loadStatus = LoadStatus.LOAD_SUCCESS;
- 
-+    //Microtus start - update java keyword usage
-     /** The original jar this is from. */
--    transient private File originalJar;
-+    private transient File originalJar;
- 
--    transient private Path dataDirectory;
-+    private transient Path dataDirectory;
- 
-     /** The class loader that powers it. */
--    transient private ExtensionClassLoader classLoader;
-+    private transient ExtensionClassLoader classLoader;
-+    //Microtus end - update java keyword usage
- 
-     @NotNull
-     public String getName() {
-diff --git a/src/main/java/net/minestom/server/extensions/ExtensionManager.java b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-index d664544c89eda8f4d4051dceeb7d8ee002ad33ac..5d33898b0d7d1666fa6cc93fec0fbfe6014427df 100644
---- a/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-+++ b/src/main/java/net/minestom/server/extensions/ExtensionManager.java
-@@ -23,13 +23,12 @@ import java.util.zip.ZipEntry;
- import java.util.zip.ZipFile;
- 
- public class ExtensionManager {
--
--    public final static Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
--
--    public final static String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
--    public final static String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
--    private final static Gson GSON = new Gson();
--
-+    //Microtus start - update java keyword usage
-+    public static final Logger LOGGER = LoggerFactory.getLogger(ExtensionManager.class);
-+    public static final String INDEV_CLASSES_FOLDER = "minestom.extension.indevfolder.classes";
-+    public static final String INDEV_RESOURCES_FOLDER = "minestom.extension.indevfolder.resources";
-+    private static final Gson GSON = new Gson();
-+    //Microtus end - update java keyword usage
-     private final ServerProcess serverProcess;
- 
-     // LinkedHashMaps are HashMaps that preserve order
 diff --git a/src/main/java/net/minestom/server/extras/bungee/BungeeCordProxy.java b/src/main/java/net/minestom/server/extras/bungee/BungeeCordProxy.java
 index 82884558daa9497aa4eafd429e053c43867667df..cb3f1333df0b6ef53c1cf0f7563c811beda17ff2 100644
 --- a/src/main/java/net/minestom/server/extras/bungee/BungeeCordProxy.java
@@ -612,12 +550,12 @@ index fd0243002b94167e1ba18c2c13a9705149933754..d19f1c5043208e841be40d1b4cffdcbe
      private final Map<String, Supplier<BlockHandler>> blockHandlerMap = new ConcurrentHashMap<>();
      // block id -> block placement rule
 diff --git a/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java b/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
-index cb354931affb1364983728eb0946124fd390277c..b4a96fd127ff3ed819768c8a52e3f9cd217665ed 100644
+index 68d0275145395a8a296ed3a1e1ad133b2e6dfae1..64351b9767e758be6cfe6b9df4428ea357b9e2e9 100644
 --- a/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
 +++ b/src/main/java/net/minestom/server/instance/block/rule/BlockPlacementRule.java
-@@ -13,7 +13,7 @@ public abstract class BlockPlacementRule {
+@@ -16,7 +16,7 @@ public abstract class BlockPlacementRule {
  
-     public BlockPlacementRule(@NotNull Block block) {
+     protected BlockPlacementRule(@NotNull Block block) {
          this.block = block;
 -    }
 +    }  //Microtus - update java keyword usage
@@ -665,6 +603,25 @@ index 42e249c73869e7c819a177f3144869c10bbe820a..11186e9470d129fefed2fb5f47dc736d
      public static void animationListener(ClientAnimationPacket packet, Player player) {
          final Player.Hand hand = packet.hand();
          final ItemStack itemStack = player.getItemInHand(hand);
+diff --git a/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java b/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
+index 13ea23024e7e637c551ace33aac5118ee384d456..0cf0b869b50b4df7c87322c4153d0865ce959084 100644
+--- a/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
++++ b/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
+@@ -25,7 +25,7 @@ import java.util.UUID;
+ 
+ public final class HandshakeListener {
+ 
+-    private final static Logger LOGGER = LoggerFactory.getLogger(HandshakeListener.class);
++    private static final Logger LOGGER = LoggerFactory.getLogger(HandshakeListener.class);
+ 
+     /**
+      * Text sent if a player tries to connect with an invalid version of the client
+@@ -135,4 +135,5 @@ public final class HandshakeListener {
+         disconnect(connection, INVALID_BUNGEE_FORWARDING);
+     }
+ 
++    private HandshakeListener() { }
+ }
 diff --git a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java b/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
 index 84c502629a38bc45f60dbf650eaf1b094d1d0df0..50053284b349355092b9cc3f431ea08eb005751f 100644
 --- a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
@@ -693,6 +650,20 @@ index 4730006416bd9c4a7f1ff291feddb83c9ffedd6d..00764c03932ecef0e5ac7f68762e4d12
          }
          return Stream.empty();
      }
+diff --git a/src/main/java/net/minestom/server/utils/TickUtils.java b/src/main/java/net/minestom/server/utils/TickUtils.java
+index 84ac9ec1436a9083d8cd6a932f131f498f9458ab..15bdbee85587c85f7d1bb32087e5fa7b0e10c5bb 100644
+--- a/src/main/java/net/minestom/server/utils/TickUtils.java
++++ b/src/main/java/net/minestom/server/utils/TickUtils.java
+@@ -43,4 +43,9 @@ public final class TickUtils {
+         Check.argCondition(duration.isNegative(), "Duration cannot be negative");
+         return (int) (duration.toMillis() / msPerTick);
+     }
++
++    /**
++     * Default private default constructor.
++     */
++    private TickUtils() { }
+ }
 diff --git a/src/test/java/net/minestom/server/InsideTest.java b/src/test/java/net/minestom/server/InsideTest.java
 index 4fd8bc46ba32abc852398872bf8b63a30617408e..33c65cc23c0982d2e37eb12e40d844562bf85380 100644
 --- a/src/test/java/net/minestom/server/InsideTest.java
@@ -710,12 +681,12 @@ index 4fd8bc46ba32abc852398872bf8b63a30617408e..33c65cc23c0982d2e37eb12e40d84456
      }
  }
 diff --git a/src/test/java/net/minestom/server/ServerProcessTest.java b/src/test/java/net/minestom/server/ServerProcessTest.java
-index 96d1264f5efefc33cf125747b591a94dc0f5da57..c0c90d3e6fa722ca5e79d71955965b3f42fea33b 100644
+index 23fc5c7f2ec5bcba347358a824b51b7ab647f352..07bf2a6fbac685b6d5d60f8a449261e283dc15b1 100644
 --- a/src/test/java/net/minestom/server/ServerProcessTest.java
 +++ b/src/test/java/net/minestom/server/ServerProcessTest.java
-@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicReference;
- import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+@@ -9,10 +9,10 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
  import static org.junit.jupiter.api.Assertions.assertThrows;
+ import static org.junit.jupiter.api.Assumptions.assumeTrue;
  
 -public class ServerProcessTest {
 +class ServerProcessTest {
@@ -723,18 +694,18 @@ index 96d1264f5efefc33cf125747b591a94dc0f5da57..c0c90d3e6fa722ca5e79d71955965b3f
      @Test
 -    public void init() {
 +    void init() {
-         AtomicReference<ServerProcess> process = new AtomicReference<>();
-         assertDoesNotThrow(() -> process.set(MinecraftServer.updateProcess()));
-         assertDoesNotThrow(() -> process.get().start(new InetSocketAddress("localhost", 25565)));
-@@ -20,7 +20,7 @@ public class ServerProcessTest {
+         // These like to fail on github actions
+         assumeTrue(System.getenv("GITHUB_ACTIONS") == null);
+ 
+@@ -24,7 +24,7 @@ public class ServerProcessTest {
      }
  
      @Test
 -    public void tick() {
 +    void tick() {
-         var process = MinecraftServer.updateProcess();
-         process.start(new InetSocketAddress("localhost", 25565));
-         var ticker = process.ticker();
+         // These like to fail on github actions
+         assumeTrue(System.getenv("GITHUB_ACTIONS") == null);
+ 
 diff --git a/src/test/java/net/minestom/server/advancements/AdvancementIntegrationTest.java b/src/test/java/net/minestom/server/advancements/AdvancementIntegrationTest.java
 index d74d97e8b826dbca100f31d830bba83b91ced040..2d317516f9e63cd732019b22b39d7c76d5861ec8 100644
 --- a/src/test/java/net/minestom/server/advancements/AdvancementIntegrationTest.java
@@ -779,7 +750,7 @@ index 6754317b80025d68e92e526ba8a4eab9fefbfe6a..fa2ea6380affb15c5e5e4cb94ccb4782
          try {
              MinestomFlattenerProvider.INSTANCE.flatten(Component.translatable("key.unregistered"), text -> {
 diff --git a/src/test/java/net/minestom/server/collision/EntityBlockPhysicsIntegrationTest.java b/src/test/java/net/minestom/server/collision/EntityBlockPhysicsIntegrationTest.java
-index 78e6632635d5c40941cf5e160beb8600a788deec..81e1f37d17e3628837854a86b4d0ae4a3b690598 100644
+index 55dc5ecb27e484c4d4aaac4048b14163243cd57e..14e15899657fb12534f57dbe1617f8c5df242737 100644
 --- a/src/test/java/net/minestom/server/collision/EntityBlockPhysicsIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/collision/EntityBlockPhysicsIntegrationTest.java
 @@ -17,7 +17,7 @@ import java.util.Map;
@@ -1476,6 +1447,19 @@ index 27a2f36c19fd8c2dce75f1bd1ff514dadd027b8a..f3e90e530f4b3487e50d83634b3e0351
          var instance = env.createFlatInstance();
          env.createPlayer(instance, new Pos(5.7, -8, 6.389));
          assertNull(BlockCollision.canPlaceBlockAt(instance, new Vec(5, -9, 6), Block.STONE));
+diff --git a/src/test/java/net/minestom/server/collision/TestShape.java b/src/test/java/net/minestom/server/collision/TestShape.java
+index 080d0d0e7bc3def9304b33e50e7d8220691e353b..c0983210faff93e879f5573fa6832502a11dac18 100644
+--- a/src/test/java/net/minestom/server/collision/TestShape.java
++++ b/src/test/java/net/minestom/server/collision/TestShape.java
+@@ -11,7 +11,7 @@ import java.util.stream.Stream;
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+-public class TestShape {
++class TestShape {
+ 
+     private static @NotNull Stream<Arguments> isFullFaceCases() {
+         return Stream.of(
 diff --git a/src/test/java/net/minestom/server/command/ArgumentParserTest.java b/src/test/java/net/minestom/server/command/ArgumentParserTest.java
 index 232d55948303a74d35724c2d601ace10a8d98811..844f846afe976a4667a2743957d19b155a7d7a3f 100644
 --- a/src/test/java/net/minestom/server/command/ArgumentParserTest.java
@@ -1494,7 +1478,7 @@ index 232d55948303a74d35724c2d601ace10a8d98811..844f846afe976a4667a2743957d19b15
          assertParserEquals("Literal<example>", ArgumentType.Literal("example"));
          assertParserEquals("Boolean<example>", ArgumentType.Boolean("example"));
 diff --git a/src/test/java/net/minestom/server/command/ArgumentTest.java b/src/test/java/net/minestom/server/command/ArgumentTest.java
-index 6aa58875c186549b658ef5a5277dc4fbd378df80..0c438d1230824e25352af1a53534a3b0e97234b3 100644
+index f31ba6fb020461885cf993ec01aaadb7db973656..6b8846ed7c69d1354d6d7708af8074ba5efc8b3f 100644
 --- a/src/test/java/net/minestom/server/command/ArgumentTest.java
 +++ b/src/test/java/net/minestom/server/command/ArgumentTest.java
 @@ -11,16 +11,16 @@ import java.util.List;
@@ -1507,8 +1491,8 @@ index 6aa58875c186549b658ef5a5277dc4fbd378df80..0c438d1230824e25352af1a53534a3b0
      @Test
 -    public void testParseSelf() {
 +    void testParseSelf() {
-         assertEquals("example", Argument.parse(ArgumentType.String("example")));
-         assertEquals(55, Argument.parse(ArgumentType.Integer("55")));
+         assertEquals("example", Argument.parse(new ServerSender(), ArgumentType.String("example")));
+         assertEquals(55, Argument.parse(new ServerSender(), ArgumentType.Integer("55")));
      }
  
      @Test
@@ -1536,7 +1520,7 @@ index 6aa58875c186549b658ef5a5277dc4fbd378df80..0c438d1230824e25352af1a53534a3b0
  
          assertFalse(arg.hasSuggestion());
 diff --git a/src/test/java/net/minestom/server/command/ArgumentTypeTest.java b/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
-index e65c400d089c91d3bdb36a7555da35480b07e529..f224f1128b5667433a1de0fae4cec96243cbb963 100644
+index edc08e4f40d7b4542a11a9550c3a131459bcc110..bf6e0c40a83ea645f025f342cae044c0cfcb90ff 100644
 --- a/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
 +++ b/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
 @@ -16,7 +16,6 @@ import net.minestom.server.item.Enchantment;
@@ -1836,6 +1820,15 @@ index e65c400d089c91d3bdb36a7555da35480b07e529..f224f1128b5667433a1de0fae4cec962
          var arg = ArgumentType.Word("word").from("word1", "word2", "word3");
  
          assertArg(arg, "word1", "word1");
+@@ -451,7 +450,7 @@ public class ArgumentTypeTest {
+     }
+ 
+     @Test
+-    public void testArgumentMapWithSender() {
++    void testArgumentMapWithSender() {
+         var serverSender = new ServerSender();
+ 
+         var arg = ArgumentType.Word("word").from("word1", "word2", "word3")
 diff --git a/src/test/java/net/minestom/server/command/CommandConditionTest.java b/src/test/java/net/minestom/server/command/CommandConditionTest.java
 index f7450b020c91807984e83b004774c916621d152f..f76f113a161c315badfdec9ef5932dbf4a461e40 100644
 --- a/src/test/java/net/minestom/server/command/CommandConditionTest.java
@@ -1872,10 +1865,10 @@ index f7450b020c91807984e83b004774c916621d152f..f76f113a161c315badfdec9ef5932dbf
          assertNull(dispatcher.findCommand("name"));
          var sender = new Sender();
 diff --git a/src/test/java/net/minestom/server/command/CommandManagerTest.java b/src/test/java/net/minestom/server/command/CommandManagerTest.java
-index 0c69902dc9870ed8de36f90955c184f1cfc2b952..8e9cd85c205e12b8d85ddb3d3f01847cb0fdf115 100644
+index 5d9b24d4afc30d7ec0b0d41c1ede1f493a8de787..99cb85e31778d62352d2ef1c94951e33c1be86a8 100644
 --- a/src/test/java/net/minestom/server/command/CommandManagerTest.java
 +++ b/src/test/java/net/minestom/server/command/CommandManagerTest.java
-@@ -8,10 +8,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
+@@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
  
  import static org.junit.jupiter.api.Assertions.*;
  
@@ -1888,7 +1881,7 @@ index 0c69902dc9870ed8de36f90955c184f1cfc2b952..8e9cd85c205e12b8d85ddb3d3f01847c
          var manager = new CommandManager();
  
          var command = new Command("name1", "name2");
-@@ -30,7 +30,7 @@ public class CommandManagerTest {
+@@ -33,7 +33,7 @@ public class CommandManagerTest {
      }
  
      @Test
@@ -1897,6 +1890,24 @@ index 0c69902dc9870ed8de36f90955c184f1cfc2b952..8e9cd85c205e12b8d85ddb3d3f01847c
          var manager = new CommandManager();
  
          AtomicBoolean check = new AtomicBoolean(false);
+@@ -49,7 +49,7 @@ public class CommandManagerTest {
+     }
+ 
+     @Test
+-    public void testSharedArgumentSyntaxABFirst() {
++    void testSharedArgumentSyntaxABFirst() {
+         var manager = new CommandManager();
+ 
+         var checkA = new AtomicBoolean(false);
+@@ -77,7 +77,7 @@ public class CommandManagerTest {
+     }
+ 
+     @Test
+-    public void testSharedArgumentSyntaxAFirst() {
++    void testSharedArgumentSyntaxAFirst() {
+         var manager = new CommandManager();
+ 
+         var checkA = new AtomicBoolean(false);
 diff --git a/src/test/java/net/minestom/server/command/CommandPacketFilteringTest.java b/src/test/java/net/minestom/server/command/CommandPacketFilteringTest.java
 index 0ce8a207fba69c94ddeeb75696eb3c8a23e3eada..f1723d9525bbb6f7af06fe948efde4edeffc17aa 100644
 --- a/src/test/java/net/minestom/server/command/CommandPacketFilteringTest.java
@@ -2174,7 +2185,7 @@ index 512aadd1123ef9db3a5a6f4cd0bcce25ece5fdcd..2b51669947330396da684b251e20e096
                  .append(ArgumentType.String("msg"))
                  .build();
 diff --git a/src/test/java/net/minestom/server/command/CommandParseTest.java b/src/test/java/net/minestom/server/command/CommandParseTest.java
-index d2751fcfd67ca910f59f33e5dcf4bcd9a23f429a..0c5062a628f072d0dc1608d0df533404e79d92cc 100644
+index 5f2a03b5ee165bfd322c26fd17c165543a4750f6..6e9e74f4d8603ae3584e466d7cf7e2d5986c23d2 100644
 --- a/src/test/java/net/minestom/server/command/CommandParseTest.java
 +++ b/src/test/java/net/minestom/server/command/CommandParseTest.java
 @@ -11,16 +11,16 @@ import static net.minestom.server.command.builder.arguments.ArgumentType.Literal
@@ -2278,10 +2289,10 @@ index fe2b5186f3b90d46b465c0ca7fb319020f0b0286..a4ff2e54c1650dae3831c07072c0f54b
  
          assertNull(sender.getMostRecentMessage());
 diff --git a/src/test/java/net/minestom/server/command/CommandSuggestionIntegrationTest.java b/src/test/java/net/minestom/server/command/CommandSuggestionIntegrationTest.java
-index fff2a33d02b9ed1cfe2e320fb1c758e0839da047..c54b9ba92b8576f625a421df8a8073474aec8bea 100644
+index 638842a379e3780f9accb9041d2731eb86240b3f..bb74be0f934ffa578c748c412aaef78a6577248f 100644
 --- a/src/test/java/net/minestom/server/command/CommandSuggestionIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/command/CommandSuggestionIntegrationTest.java
-@@ -18,10 +18,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
+@@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  import static org.junit.jupiter.api.Assertions.assertNull;
  
  @EnvTest
@@ -2294,7 +2305,7 @@ index fff2a33d02b9ed1cfe2e320fb1c758e0839da047..c54b9ba92b8576f625a421df8a807347
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -52,7 +52,7 @@ public class CommandSuggestionIntegrationTest {
+@@ -50,7 +50,7 @@ public class CommandSuggestionIntegrationTest {
      }
  
      @Test
@@ -2303,7 +2314,7 @@ index fff2a33d02b9ed1cfe2e320fb1c758e0839da047..c54b9ba92b8576f625a421df8a807347
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -64,20 +64,20 @@ public class CommandSuggestionIntegrationTest {
+@@ -62,15 +62,15 @@ public class CommandSuggestionIntegrationTest {
  
          var command = new Command("foo");
  
@@ -2322,90 +2333,6 @@ index fff2a33d02b9ed1cfe2e320fb1c758e0839da047..c54b9ba92b8576f625a421df8a807347
 +        listener.assertSingle(tabCompletePacket ->
 +                assertEquals(List.of(new TabCompletePacket.Match("suggestion", null)), tabCompletePacket.matches()));
      }
- 
-     @Test
--    public void suggestionWithSubcommand(Env env) {
-+    void suggestionWithSubcommand(Env env) {
-         var instance = env.createFlatInstance();
-         var connection = env.createConnection();
-         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -86,16 +86,16 @@ public class CommandSuggestionIntegrationTest {
- 
-         var subCommand = new Command("bar");
- 
--        var wordArg1 = Word("wordArg1").setSuggestionCallback((sender, context, suggestion) -> {
--            suggestion.addEntry(new SuggestionEntry("suggestionA"));
--        });
--        var wordArg2 = Word("wordArg2").setSuggestionCallback((sender, context, suggestion) -> {
--                    suggestion.addEntry(new SuggestionEntry("suggestionB"));
--                });
-+        var wordArg1 = Word("wordArg1").setSuggestionCallback((sender, context, suggestion) ->
-+                suggestion.addEntry(new SuggestionEntry("suggestionA")));
-+        var wordArg2 = Word("wordArg2").setSuggestionCallback((sender, context, suggestion) ->
-+                suggestion.addEntry(new SuggestionEntry("suggestionB")));
- 
--        subCommand.addSyntax((sender, context) -> {}, wordArg1, wordArg2);
-+        subCommand.addSyntax((sender, context) -> {
-+        }, wordArg1, wordArg2);
- 
--        command.addSyntax((sender,context)->{}, Literal("literal"), wordArg2);
-+        command.addSyntax((sender, context) -> {
-+        }, Literal("literal"), wordArg2);
- 
-         command.addSubcommand(subCommand);
- 
-@@ -105,29 +105,28 @@ public class CommandSuggestionIntegrationTest {
-         player.addPacketToQueue(new ClientTabCompletePacket(1, "foo bar "));
-         player.interpretPacketQueue();
- 
--        listener.assertSingle(tabCompletePacket -> {
--            assertEquals(List.of(new TabCompletePacket.Match("suggestionA", null)), tabCompletePacket.matches());
--        });
-+        listener.assertSingle(tabCompletePacket ->
-+                assertEquals(List.of(new TabCompletePacket.Match("suggestionA", null)), tabCompletePacket.matches()));
-     }
- 
-     @Test
--    public void suggestionWithTwoLiterals(Env env) {
-+    void suggestionWithTwoLiterals(Env env) {
-         var instance = env.createFlatInstance();
-         var connection = env.createConnection();
-         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
- 
-         var command = new Command("foo");
- 
--        var wordArg1 = Word("wordArg1").setSuggestionCallback((sender, context, suggestion) -> {
--            suggestion.addEntry(new SuggestionEntry("suggestionA"));
--        });
--        var wordArg2 = Word("wordArg2").setSuggestionCallback((sender, context, suggestion) -> {
--            suggestion.addEntry(new SuggestionEntry("suggestionB"));
--        });
-+        var wordArg1 = Word("wordArg1").setSuggestionCallback((sender, context, suggestion) ->
-+                suggestion.addEntry(new SuggestionEntry("suggestionA")));
-+        var wordArg2 = Word("wordArg2").setSuggestionCallback((sender, context, suggestion) ->
-+                suggestion.addEntry(new SuggestionEntry("suggestionB")));
- 
--        command.addSyntax((sender,context)->{}, Literal("literal1"), wordArg1);
-+        command.addSyntax((sender, context) -> {
-+        }, Literal("literal1"), wordArg1);
- 
--        command.addSyntax((sender,context)->{}, Literal("literal2"), wordArg2);
-+        command.addSyntax((sender, context) -> {
-+        }, Literal("literal2"), wordArg2);
- 
-         env.process().command().register(command);
- 
-@@ -135,9 +134,8 @@ public class CommandSuggestionIntegrationTest {
-         player.addPacketToQueue(new ClientTabCompletePacket(1, "foo literal2 "));
-         player.interpretPacketQueue();
- 
--        listener.assertSingle(tabCompletePacket -> {
--            assertEquals(List.of(new TabCompletePacket.Match("suggestionB", null)), tabCompletePacket.matches());
--        });
-+        listener.assertSingle(tabCompletePacket ->
-+                assertEquals(List.of(new TabCompletePacket.Match("suggestionB", null)), tabCompletePacket.matches()));
-     }
- 
  }
 diff --git a/src/test/java/net/minestom/server/command/CommandSyntaxMultiTest.java b/src/test/java/net/minestom/server/command/CommandSyntaxMultiTest.java
 index ca0fec6265f2373a96d63a7b4c402ab35aa0395e..063ad7f76714778b6e459db03e13066bb02bd13c 100644
@@ -2451,7 +2378,7 @@ index ca0fec6265f2373a96d63a7b4c402ab35aa0395e..063ad7f76714778b6e459db03e13066b
                  List.of(Word("a")),
                  List.of(Word("b"), Word("a"))
 diff --git a/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java b/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
-index 42cfa09255a0fb576f5db0edde46233252916f11..1a56d96f878ba6cab7234a7cfbb08f9e11927cf1 100644
+index 381eb2c0c3b7664f06c5a5f214c4a3f29a8a1ed9..153c22d925d443bf8d18fa1382accddaea6d779c 100644
 --- a/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
 +++ b/src/test/java/net/minestom/server/command/CommandSyntaxSingleTest.java
 @@ -18,9 +18,9 @@ import static net.minestom.server.command.builder.arguments.ArgumentType.*;
@@ -3530,7 +3457,7 @@ index 2b9402f1cbf337d38d1cc0d6ae5a68d91050b173..012ac45c68a090b8ca18b7181490313e
          var vehicle = new Entity(EntityType.ZOMBIE);
          var passenger = new Entity(EntityType.ZOMBIE);
 diff --git a/src/test/java/net/minestom/server/entity/PlayerHeldIntegrationTest.java b/src/test/java/net/minestom/server/entity/PlayerHeldIntegrationTest.java
-index efd06b005614c0bc67ed985fa56988139e714f93..feccdb951f27d6e46fe8aa4f18ded7a0d3949d21 100644
+index ecd9a07bdf7cae3ce96aa73cf23f60542737cdd3..e6456108baff0dc215242975610d6568fba1843a 100644
 --- a/src/test/java/net/minestom/server/entity/PlayerHeldIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/entity/PlayerHeldIntegrationTest.java
 @@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
@@ -3597,7 +3524,7 @@ index 5c34c621e1bf3d9a9ec07b927ca8473f05278846..25d78311447f9236c78ae319899c295f
  
          var self = new EntityCreature(EntityType.ZOMBIE);
 diff --git a/src/test/java/net/minestom/server/entity/player/PlayerBlockPlacementIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerBlockPlacementIntegrationTest.java
-index c2bf3603d30cfc95e5d4aa5a9669cb08dca218c6..0566d0edc971797d11df73af3772b504072545da 100644
+index da08fe40cb5d7589e3e69cfc787587c01d111378..8c6dc7549055f0bbc4eba5ba757b50e39aacc4db 100644
 --- a/src/test/java/net/minestom/server/entity/player/PlayerBlockPlacementIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/entity/player/PlayerBlockPlacementIntegrationTest.java
 @@ -19,11 +19,11 @@ import java.util.stream.Stream;
@@ -3615,10 +3542,10 @@ index c2bf3603d30cfc95e5d4aa5a9669cb08dca218c6..0566d0edc971797d11df73af3772b504
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
 diff --git a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
-index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c1b5d7937 100644
+index 833dc5bb9730a49b25f66480584adfeff47df61a..4bbe16d2d86c57bb19ccb3b13707ddea76a68b0e 100644
 --- a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
-@@ -23,13 +23,13 @@ import java.util.List;
+@@ -25,14 +25,14 @@ import java.util.List;
  import static org.junit.jupiter.api.Assertions.*;
  
  @EnvTest
@@ -3626,7 +3553,8 @@ index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c
 +class PlayerIntegrationTest {
  
      /**
-      * Test to see whether player abilities are updated correctly when changing gamemodes
+      * Test to see whether player abilities are updated correctly and events
+      * are handled properly when changing gamemode.
       */
      @Test
 -    public void gamemodeTest(Env env) {
@@ -3634,7 +3562,7 @@ index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -72,7 +72,7 @@ public class PlayerIntegrationTest {
+@@ -73,7 +73,7 @@ public class PlayerIntegrationTest {
      }
  
      @Test
@@ -3643,7 +3571,7 @@ index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c
          ClientSettingsPacket packet = new ClientSettingsPacket("en_us", (byte) 16, ChatMessageType.FULL,
                  true, (byte) 127, Player.MainHand.LEFT, true, true);
  
-@@ -110,7 +110,7 @@ public class PlayerIntegrationTest {
+@@ -111,7 +111,7 @@ public class PlayerIntegrationTest {
      }
  
      @Test
@@ -3652,7 +3580,7 @@ index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
  
-@@ -141,7 +141,7 @@ public class PlayerIntegrationTest {
+@@ -142,7 +142,7 @@ public class PlayerIntegrationTest {
       * when changing dimensions
       */
      @Test
@@ -3661,7 +3589,7 @@ index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c
          final int TEST_PERMISSION_LEVEL = 2;
          final var testDimension = DimensionType.builder(NamespaceID.from("minestom:test_dimension")).build();
          env.process().dimension().addDimension(testDimension);
-@@ -177,7 +177,7 @@ public class PlayerIntegrationTest {
+@@ -178,7 +178,7 @@ public class PlayerIntegrationTest {
      }
  
      @Test
@@ -3670,26 +3598,17 @@ index b36bec3de3026ca3e1b8f7217c05407da073dfe7..8d7be19dd4d72044a99a01af4190fd2c
          String dimensionNamespace = "minestom:test_dimension";
          final var testDimension = DimensionType.builder(NamespaceID.from(dimensionNamespace)).build();
          env.process().dimension().addDimension(testDimension);
-@@ -195,7 +195,7 @@ public class PlayerIntegrationTest {
+@@ -196,7 +196,7 @@ public class PlayerIntegrationTest {
      }
-     // Microtus start - Fix team spam
+ 
      @Test
 -    public void displayNameTest(Env env) {
 +    void displayNameTest(Env env) {
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var tracker = connection.trackIncoming(PlayerInfoUpdatePacket.class);
-@@ -228,7 +228,7 @@ public class PlayerIntegrationTest {
-     }
- 
-     @Test
--    public void teamPacketTest(Env env) {
-+    void teamPacketTest(Env env) {
-         var team = env.process().team().createTeam("minestom");
- 
-         var instance = env.createFlatInstance();
 diff --git a/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
-index 30e9977964d9d0e9732f3b6216cf1c839f7bc63c..1bd8b09c6c8f5c8ae02d398b6d44f88b6f491418 100644
+index 6b4eac36b13a0c2c3e622904cf7d0b549f87469d..23ec730c2ac3e04acfeb60e6b5079da97f95a103 100644
 --- a/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/entity/player/PlayerMovementIntegrationTest.java
 @@ -26,10 +26,10 @@ import java.util.concurrent.CompletableFuture;
@@ -3724,12 +3643,12 @@ index 30e9977964d9d0e9732f3b6216cf1c839f7bc63c..1bd8b09c6c8f5c8ae02d398b6d44f88b
          final int viewDiameter = MinecraftServer.getChunkViewDistance() * 2 + 1;
          // Preload all possible chunks to avoid issues due to async loading
 diff --git a/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
-index 1dac5752d654cf22dc83d02c396dcb2c9be904e7..760f92b1f25da06ef91c08cb91b31b387d8e9edf 100644
+index 9835a2f5d6878f5686b7e453a51920ba006fcb07..887f10a87d7beb4273debe4da48835992945a57b 100644
 --- a/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/entity/player/PlayerRespawnChunkIntegrationTest.java
-@@ -17,12 +17,11 @@ import java.util.Set;
- 
- import static org.junit.jupiter.api.Assertions.*;
+@@ -18,12 +18,11 @@ import java.util.Set;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
  
 -
  @EnvTest
@@ -3742,7 +3661,7 @@ index 1dac5752d654cf22dc83d02c396dcb2c9be904e7..760f92b1f25da06ef91c08cb91b31b38
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          Player player = connection.connect(instance, new Pos(0, 40, 0)).join();
-@@ -36,7 +35,7 @@ public class PlayerRespawnChunkIntegrationTest {
+@@ -37,7 +36,7 @@ public class PlayerRespawnChunkIntegrationTest {
      }
  
      @Test
@@ -3751,7 +3670,7 @@ index 1dac5752d654cf22dc83d02c396dcb2c9be904e7..760f92b1f25da06ef91c08cb91b31b38
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          Player player = connection.connect(instance, new Pos(0, 40, 0)).join();
-@@ -50,7 +49,7 @@ public class PlayerRespawnChunkIntegrationTest {
+@@ -51,7 +50,7 @@ public class PlayerRespawnChunkIntegrationTest {
      }
  
      @Test
@@ -4059,7 +3978,7 @@ index 1e8f352c6dea803bbe9cea8998fb4d03535f6177..7fcb6ffa93f15baf5dc1d77f21a01068
  
              @Override
 diff --git a/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java b/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
-index 837eda9fe513972169ed8d0e528cbcdc387e5401..96522d656031c43dce30959e90a20f6ee82905e3 100644
+index 400271ef5d61a29cb34b1e191d3570d2ff2d4d09..0fe69fd6447431152a65c02dbf8936042a0e877b 100644
 --- a/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
 +++ b/src/test/java/net/minestom/server/instance/BlockClientNbtTest.java
 @@ -17,10 +17,10 @@ import java.util.Map;
@@ -4073,7 +3992,7 @@ index 837eda9fe513972169ed8d0e528cbcdc387e5401..96522d656031c43dce30959e90a20f6e
 -    public void basic() {
 +    void basic() {
          assertNull(BlockUtils.extractClientNbt(Block.STONE));
-         assertNull(BlockUtils.extractClientNbt(Block.GRASS));
+         assertNull(BlockUtils.extractClientNbt(Block.GRASS_BLOCK));
          assertEquals(NBTCompound.EMPTY, BlockUtils.extractClientNbt(Block.CHEST));
 @@ -30,7 +30,7 @@ public class BlockClientNbtTest {
      }
@@ -4084,6 +4003,176 @@ index 837eda9fe513972169ed8d0e528cbcdc387e5401..96522d656031c43dce30959e90a20f6e
          var handler = new BlockHandler() {
              @Override
              public @NotNull Collection<Tag<?>> getBlockEntityTags() {
+diff --git a/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java b/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
+index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d719c0dba 100644
+--- a/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
+@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
+ @EnvTest
+ public class BlockLightMergeIntegrationTest {
+     @Test
+-    public void testPropagationAir(Env env) {
++    void testPropagationAir(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -39,7 +39,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testTorch(Env env) {
++    void testTorch(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         instance.setGenerator(unit -> {
+@@ -65,7 +65,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testTorch2(Env env) {
++    void testTorch2(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+ 
+@@ -91,7 +91,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testPropagationAir2(Env env) {
++    void testPropagationAir2(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -116,7 +116,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testPropagationAirRemoval(Env env) {
++    void testPropagationAirRemoval(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -145,7 +145,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderOcclusion(Env env) {
++    void testBorderOcclusion(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -178,7 +178,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderOcclusion2(Env env) {
++    void testBorderOcclusion2(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -210,7 +210,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderOcclusion3(Env env) {
++    void testBorderOcclusion3(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -241,7 +241,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderCrossing(Env env) {
++    void testBorderCrossing(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -293,7 +293,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderOcclusionRemoval(Env env) {
++    void testBorderOcclusionRemoval(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -332,7 +332,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void chunkIntersection(Env env) {
++    void chunkIntersection(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = 4; x <= 7; x++) {
+@@ -353,7 +353,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void skylight(Env env) {
++    void skylight(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = 4; x <= 7; x++) {
+@@ -371,7 +371,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void skylightContained(Env env) {
++    void skylightContained(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = 4; x <= 7; x++) {
+@@ -397,7 +397,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testDiagonalRemoval(Env env) {
++    void testDiagonalRemoval(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -431,7 +431,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testDiagonalRemoval2(Env env) {
++    void testDiagonalRemoval2(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -457,7 +457,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testDouble(Env env) {
++    void testDouble(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+@@ -491,7 +491,7 @@ public class BlockLightMergeIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBlockRemoval(Env env) {
++    void testBlockRemoval(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
+diff --git a/src/test/java/net/minestom/server/instance/BlockPlaceIntegrationTest.java b/src/test/java/net/minestom/server/instance/BlockPlaceIntegrationTest.java
+index 423a2a4ec658d0333e861a778e1bb21eb2c65d93..a5e0b90bcdc25a3011d4b60ecb6f0b191d1925fc 100644
+--- a/src/test/java/net/minestom/server/instance/BlockPlaceIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/BlockPlaceIntegrationTest.java
+@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.*;
+ 
+ @EnvTest
+-public class BlockPlaceIntegrationTest {
++class BlockPlaceIntegrationTest {
+ 
+     @Test
+     void testPlacementOutOfLimit(Env env) {
 diff --git a/src/test/java/net/minestom/server/instance/BlockPropertiesTest.java b/src/test/java/net/minestom/server/instance/BlockPropertiesTest.java
 index 3fbe44370df7d98fa432de3a9d6eb95e2cc3fbbc..ca0bf1cf03eb11e1a9efe9e29a4464ca59a33c95 100644
 --- a/src/test/java/net/minestom/server/instance/BlockPropertiesTest.java
@@ -4152,7 +4241,7 @@ index 3fbe44370df7d98fa432de3a9d6eb95e2cc3fbbc..ca0bf1cf03eb11e1a9efe9e29a4464ca
          StringBuilder properties = new StringBuilder("[");
          for (int j = 0; j < size; j++) {
 diff --git a/src/test/java/net/minestom/server/instance/BlockTest.java b/src/test/java/net/minestom/server/instance/BlockTest.java
-index 5fa43d5236e483b25b94dc757b98a3a483409c70..3b8ec507d023e4b10085695caf2fcad708e4418c 100644
+index 1f6468b1d2f5e6bf4eb614542faa46743b16402e..2e295447d72671ed42f6a3bea8f5dae0bd00025b 100644
 --- a/src/test/java/net/minestom/server/instance/BlockTest.java
 +++ b/src/test/java/net/minestom/server/instance/BlockTest.java
 @@ -13,10 +13,10 @@ import java.util.Objects;
@@ -4344,7 +4433,7 @@ index 45508ef388c32099b2bdac4a7a75808be3ce6d6c..fa1ed75e21bb788e634b9202605c26b2
          var updater = new EntityTracker.Update<>() {
              @Override
 diff --git a/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java b/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
-index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6a52ea23e 100644
+index 5df0c70b1c6b11fa20181184fe71a6f0e51add70..6655a400483b8b951097f9661f7d172c3620cef1 100644
 --- a/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/instance/GeneratorForkConsumerIntegrationTest.java
 @@ -14,10 +14,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -4360,7 +4449,7 @@ index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
          AtomicReference<Exception> failed = new AtomicReference<>();
-@@ -34,61 +34,55 @@ public class GeneratorForkConsumerIntegrationTest {
+@@ -34,44 +34,40 @@ public class GeneratorForkConsumerIntegrationTest {
      }
  
      @Test
@@ -4423,38 +4512,8 @@ index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6
 +    void neighborZ(Env env) {
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
--        instance.setGenerator(unit -> {
--            unit.fork(setter -> {
--                var dynamic = (GeneratorImpl.DynamicFork) setter;
--                assertNull(dynamic.minSection);
--                assertEquals(0, dynamic.width);
--                assertEquals(0, dynamic.height);
--                assertEquals(0, dynamic.depth);
--                setter.setBlock(unit.absoluteStart(), Block.STONE);
--                setter.setBlock(unit.absoluteStart().add(0, 0, 16), Block.GRASS);
--                assertEquals(unit.absoluteStart(), dynamic.minSection);
--                assertEquals(1, dynamic.width);
--                assertEquals(1, dynamic.height);
--                assertEquals(2, dynamic.depth);
--            });
--        });
-+        instance.setGenerator(unit -> unit.fork(setter -> {
-+            var dynamic = (GeneratorImpl.DynamicFork) setter;
-+            assertNull(dynamic.minSection);
-+            assertEquals(0, dynamic.width);
-+            assertEquals(0, dynamic.height);
-+            assertEquals(0, dynamic.depth);
-+            setter.setBlock(unit.absoluteStart(), Block.STONE);
-+            setter.setBlock(unit.absoluteStart().add(0, 0, 16), Block.GRASS);
-+            assertEquals(unit.absoluteStart(), dynamic.minSection);
-+            assertEquals(1, dynamic.width);
-+            assertEquals(1, dynamic.height);
-+            assertEquals(2, dynamic.depth);
-+        }));
-         instance.loadChunk(0, 0).join();
-         instance.setGenerator(null);
-         instance.loadChunk(0, 1).join();
-@@ -97,24 +91,22 @@ public class GeneratorForkConsumerIntegrationTest {
+         instance.setGenerator(unit -> {
+@@ -97,7 +93,7 @@ public class GeneratorForkConsumerIntegrationTest {
      }
  
      @Test
@@ -4462,38 +4521,8 @@ index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6
 +    void neighborX(Env env) {
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
--        instance.setGenerator(unit -> {
--            unit.fork(setter -> {
--                var dynamic = (GeneratorImpl.DynamicFork) setter;
--                assertNull(dynamic.minSection);
--                assertEquals(0, dynamic.width);
--                assertEquals(0, dynamic.height);
--                assertEquals(0, dynamic.depth);
--                setter.setBlock(unit.absoluteStart(), Block.STONE);
--                setter.setBlock(unit.absoluteStart().add(16, 0, 0), Block.GRASS);
--                assertEquals(unit.absoluteStart(), dynamic.minSection);
--                assertEquals(2, dynamic.width);
--                assertEquals(1, dynamic.height);
--                assertEquals(1, dynamic.depth);
--            });
--        });
-+        instance.setGenerator(unit -> unit.fork(setter -> {
-+            var dynamic = (GeneratorImpl.DynamicFork) setter;
-+            assertNull(dynamic.minSection);
-+            assertEquals(0, dynamic.width);
-+            assertEquals(0, dynamic.height);
-+            assertEquals(0, dynamic.depth);
-+            setter.setBlock(unit.absoluteStart(), Block.STONE);
-+            setter.setBlock(unit.absoluteStart().add(16, 0, 0), Block.GRASS);
-+            assertEquals(unit.absoluteStart(), dynamic.minSection);
-+            assertEquals(2, dynamic.width);
-+            assertEquals(1, dynamic.height);
-+            assertEquals(1, dynamic.depth);
-+        }));
-         instance.loadChunk(0, 0).join();
-         instance.setGenerator(null);
-         instance.loadChunk(1, 0).join();
-@@ -123,31 +115,29 @@ public class GeneratorForkConsumerIntegrationTest {
+         instance.setGenerator(unit -> {
+@@ -123,7 +119,7 @@ public class GeneratorForkConsumerIntegrationTest {
      }
  
      @Test
@@ -4501,37 +4530,8 @@ index d4a50690b4a443799941034fd6124078a9336565..8cdd2f611a9228e3fa50449689625ba6
 +    void neighborY(Env env) {
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
--        instance.setGenerator(unit -> {
--            unit.fork(setter -> {
--                var dynamic = (GeneratorImpl.DynamicFork) setter;
--                assertNull(dynamic.minSection);
--                assertEquals(0, dynamic.width);
--                assertEquals(0, dynamic.height);
--                assertEquals(0, dynamic.depth);
--                setter.setBlock(unit.absoluteStart(), Block.STONE);
--                setter.setBlock(unit.absoluteStart().add(0, 16, 0), Block.GRASS);
--                assertEquals(unit.absoluteStart(), dynamic.minSection);
--                assertEquals(1, dynamic.width);
--                assertEquals(2, dynamic.height);
--                assertEquals(1, dynamic.depth);
--            });
--        });
-+        instance.setGenerator(unit -> unit.fork(setter -> {
-+            var dynamic = (GeneratorImpl.DynamicFork) setter;
-+            assertNull(dynamic.minSection);
-+            assertEquals(0, dynamic.width);
-+            assertEquals(0, dynamic.height);
-+            assertEquals(0, dynamic.depth);
-+            setter.setBlock(unit.absoluteStart(), Block.STONE);
-+            setter.setBlock(unit.absoluteStart().add(0, 16, 0), Block.GRASS);
-+            assertEquals(unit.absoluteStart(), dynamic.minSection);
-+            assertEquals(1, dynamic.width);
-+            assertEquals(2, dynamic.height);
-+            assertEquals(1, dynamic.depth);
-+        }));
-         instance.loadChunk(0, 0).join();
-         assertEquals(Block.STONE, instance.getBlock(0, -64, 0));
-         assertEquals(Block.GRASS, instance.getBlock(0, -48, 0));
+         instance.setGenerator(unit -> {
+@@ -147,7 +143,7 @@ public class GeneratorForkConsumerIntegrationTest {
      }
  
      @Test
@@ -4818,7 +4818,7 @@ index 4a53ede725c99c4448e28d11625476eed34189c5..ad3ba534f6a91b90a713518aba46ac26
          var chunkUnit = GeneratorImpl.section(section, -1, -1, 0);
          Generator generator = chunk -> chunk.modifier().fill(Block.STONE);
 diff --git a/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java b/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
-index 5b0d774bc9d87540382de3b88f48f7542f8f473c..fc21a2c8e00e201b266f6e71d90249dc71b1cce6 100644
+index a2019e8a46f96c6b4fec81bd2f388e9f017c29d4..a4e6a37b559c39d51fa6a49fc3d089d22dbda240 100644
 --- a/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
 @@ -11,10 +11,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -4878,6 +4878,27 @@ index 32e9b8703842e4e46428f99dc9fed81071e0743d..8b1d5556d34625eaa516499b1c9a7029
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          connection.connect(instance, new Pos(0, 40, 0)).join();
+diff --git a/src/test/java/net/minestom/server/instance/InstanceContainerTest.java b/src/test/java/net/minestom/server/instance/InstanceContainerTest.java
+index cddafc32a966b71c87f237bb1c1b5def9a3de8ec..443a44fbef6cdecb1faee28abb899c6234734e7c 100644
+--- a/src/test/java/net/minestom/server/instance/InstanceContainerTest.java
++++ b/src/test/java/net/minestom/server/instance/InstanceContainerTest.java
+@@ -9,14 +9,14 @@ import java.util.UUID;
+ 
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+-public class InstanceContainerTest {
++class InstanceContainerTest {
+ 
+     static {
+         new DimensionTypeManager().addDimension(DimensionType.OVERWORLD);
+     }
+ 
+     @Test
+-    public void copyPreservesTag() {
++    void copyPreservesTag() {
+         var tag = Tag.String("test");
+         var instance = new InstanceContainer(UUID.randomUUID(), DimensionType.OVERWORLD);
+         instance.setTag(tag, "123");
 diff --git a/src/test/java/net/minestom/server/instance/InstanceEventsIntegrationTest.java b/src/test/java/net/minestom/server/instance/InstanceEventsIntegrationTest.java
 index 8f2404e5a4c06d98955ac7e2218ceb203f8b4fe5..7fd9f89ee545d55b58c35135ca502cdccadd9cac 100644
 --- a/src/test/java/net/minestom/server/instance/InstanceEventsIntegrationTest.java
@@ -4973,6 +4994,295 @@ index 01c4c935fec5e312f6043106acac4d16520a3b9a..01c68deb717f2ce5f43406c93adda353
          Instance instance = env.createFlatInstance();
  
          instance.getWorldBorder().setDiameter(50.0);
+diff --git a/src/test/java/net/minestom/server/instance/light/BlockIsOccludedTest.java b/src/test/java/net/minestom/server/instance/light/BlockIsOccludedTest.java
+index 5cded9c29fb6b09ffe0c4462fa37987d5b7525d5..0160c5315719648d4952cc2abf37df0549a5b86e 100644
+--- a/src/test/java/net/minestom/server/instance/light/BlockIsOccludedTest.java
++++ b/src/test/java/net/minestom/server/instance/light/BlockIsOccludedTest.java
+@@ -10,9 +10,9 @@ import java.util.Map;
+ import static org.junit.jupiter.api.Assertions.assertFalse;
+ import static org.junit.jupiter.api.Assertions.assertTrue;
+ 
+-public class BlockIsOccludedTest {
++class BlockIsOccludedTest {
+     @Test
+-    public void blockAir() {
++    void blockAir() {
+         Shape airBlock = Block.AIR.registry().collisionShape();
+         
+         for (BlockFace face : BlockFace.values()) {
+@@ -21,7 +21,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockLantern() {
++    void blockLantern() {
+         Shape shape = Block.LANTERN.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -31,7 +31,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSpruceLeaves() {
++    void blockSpruceLeaves() {
+         Shape shape = Block.SPRUCE_LEAVES.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -41,7 +41,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockCauldron() {
++    void blockCauldron() {
+         Shape shape = Block.CAULDRON.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -51,7 +51,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabBottomAir() {
++    void blockSlabBottomAir() {
+         Shape shape = Block.SANDSTONE_SLAB.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -65,7 +65,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabTopEnchantingTable() {
++    void blockSlabTopEnchantingTable() {
+         Shape shape1 = Block.SANDSTONE_SLAB.withProperty("type", "top").registry().collisionShape();
+         Shape shape2 = Block.ENCHANTING_TABLE.registry().collisionShape();
+ 
+@@ -79,7 +79,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStairWest() {
++    void blockStairWest() {
+         Shape shape = Block.SANDSTONE_STAIRS.withProperties(Map.of(
+                 "facing", "west",
+                 "half", "bottom",
+@@ -97,7 +97,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabBottomStone() {
++    void blockSlabBottomStone() {
+         Shape shape = Block.SANDSTONE_SLAB.registry().collisionShape();
+         Shape stoneBlock = Block.STONE.registry().collisionShape();
+ 
+@@ -110,7 +110,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStone() {
++    void blockStone() {
+         Shape shape = Block.STONE.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -120,7 +120,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStair() {
++    void blockStair() {
+         Shape shape = Block.SANDSTONE_STAIRS.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -134,7 +134,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlab() {
++    void blockSlab() {
+         Shape shape = Block.SANDSTONE_SLAB.registry().collisionShape();
+         Shape airBlock = Block.AIR.registry().collisionShape();
+ 
+@@ -148,7 +148,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabBottomAndSlabTop() {
++    void blockSlabBottomAndSlabTop() {
+         Shape shape1 = Block.SANDSTONE_SLAB.registry().collisionShape();
+         Shape shape2 = Block.SANDSTONE_SLAB.withProperty("type", "top").registry().collisionShape();
+ 
+@@ -162,7 +162,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockSlabBottomAndSlabBottom() {
++    void blockSlabBottomAndSlabBottom() {
+         Shape shape = Block.SANDSTONE_SLAB.registry().collisionShape();
+ 
+         assertTrue(shape.isOccluded(shape, BlockFace.BOTTOM));
+@@ -175,7 +175,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStairAndSlabBottom() {
++    void blockStairAndSlabBottom() {
+         Shape shape1 = Block.STONE_STAIRS.registry().collisionShape();
+         Shape shape2 = Block.SANDSTONE_SLAB.registry().collisionShape();
+ 
+@@ -189,7 +189,7 @@ public class BlockIsOccludedTest {
+     }
+ 
+     @Test
+-    public void blockStairAndSlabTop() {
++    void blockStairAndSlabTop() {
+         Shape shape1 = Block.STONE_STAIRS.registry().collisionShape();
+         Shape shape2 = Block.SANDSTONE_SLAB.withProperty("type", "top").registry().collisionShape();
+ 
+diff --git a/src/test/java/net/minestom/server/instance/light/BlockLightTest.java b/src/test/java/net/minestom/server/instance/light/BlockLightTest.java
+index 3f6e054985e3463d8e52bb00f09790e57e0559be..25067e049d10a3411b7bd9d949d8925ffc337e52 100644
+--- a/src/test/java/net/minestom/server/instance/light/BlockLightTest.java
++++ b/src/test/java/net/minestom/server/instance/light/BlockLightTest.java
+@@ -13,10 +13,10 @@ import static java.util.Map.entry;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.fail;
+ 
+-public class BlockLightTest {
++class BlockLightTest {
+ 
+     @Test
+-    public void empty() {
++    void empty() {
+         var palette = Palette.blocks();
+         var result = LightCompute.compute(palette);
+         for (byte light : result.light()) {
+@@ -25,7 +25,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void glowstone() {
++    void glowstone() {
+         var palette = Palette.blocks();
+         palette.set(0, 1, 0, Block.GLOWSTONE.stateId());
+         var result = LightCompute.compute(palette);
+@@ -36,7 +36,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void doubleGlowstone() {
++    void doubleGlowstone() {
+         var palette = Palette.blocks();
+         palette.set(0, 1, 0, Block.GLOWSTONE.stateId());
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+@@ -50,7 +50,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void glowstoneBorder() {
++    void glowstoneBorder() {
+         var palette = Palette.blocks();
+         palette.set(0, 1, 0, Block.GLOWSTONE.stateId());
+         var result = LightCompute.compute(palette);
+@@ -68,7 +68,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void glowstoneBlock() {
++    void glowstoneBlock() {
+         var palette = Palette.blocks();
+         palette.set(0, 1, 0, Block.GLOWSTONE.stateId());
+         palette.set(0, 1, 1, Block.STONE.stateId());
+@@ -80,7 +80,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolated() {
++    void isolated() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+ 
+@@ -107,7 +107,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolatedStair() {
++    void isolatedStair() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+         palette.set(3, 1, 4, Block.OAK_STAIRS.withProperties(Map.of(
+@@ -129,7 +129,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolatedStairOpposite() {
++    void isolatedStairOpposite() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+         palette.set(3, 1, 4, Block.OAK_STAIRS.withProperties(Map.of(
+@@ -156,7 +156,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolatedStairWest() {
++    void isolatedStairWest() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+         palette.set(3, 1, 4, Block.OAK_STAIRS.withProperties(Map.of(
+@@ -186,7 +186,7 @@ public class BlockLightTest {
+     }
+ 
+     @Test
+-    public void isolatedStairSouth() {
++    void isolatedStairSouth() {
+         var palette = Palette.blocks();
+         palette.set(4, 1, 4, Block.GLOWSTONE.stateId());
+         palette.set(3, 1, 4, Block.OAK_STAIRS.withProperties(Map.of(
+diff --git a/src/test/java/net/minestom/server/instance/light/LightParityIntegrationTest.java b/src/test/java/net/minestom/server/instance/light/LightParityIntegrationTest.java
+index cae1ba4c6b5fa90b31a92cc3682440bd22cd9c69..c5495685478911be3b423fc6e5c54ce8e9e8ac2c 100644
+--- a/src/test/java/net/minestom/server/instance/light/LightParityIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/light/LightParityIntegrationTest.java
+@@ -24,11 +24,11 @@ import java.util.concurrent.CompletableFuture;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+ @EnvTest
+-public class LightParityIntegrationTest {
++class LightParityIntegrationTest {
+     private static final int REGION_SIZE = 3;
+ 
+     @Test
+-    public void test(Env env) throws URISyntaxException, IOException, AnvilException {
++    void test(Env env) throws URISyntaxException, IOException, AnvilException {
+         Map<Vec, SectionEntry> sections = retrieveSections();
+         // Generate our own light
+ 
+diff --git a/src/test/java/net/minestom/server/instance/light/WorldRelightIntegrationTest.java b/src/test/java/net/minestom/server/instance/light/WorldRelightIntegrationTest.java
+index a3147e5b0141d08367521f60aa2b67340cb2ffc4..10b5a53014e50dec633b1362a65ce606042825fc 100644
+--- a/src/test/java/net/minestom/server/instance/light/WorldRelightIntegrationTest.java
++++ b/src/test/java/net/minestom/server/instance/light/WorldRelightIntegrationTest.java
+@@ -16,7 +16,7 @@ import static java.util.Map.entry;
+ import static net.minestom.server.instance.BlockLightMergeIntegrationTest.assertLightInstance;
+ 
+ @EnvTest
+-public class WorldRelightIntegrationTest {
++class WorldRelightIntegrationTest {
+     private @NotNull Instance createLightingInstance(@NotNull ServerProcess process) {
+         var instance = process.instance().createInstanceContainer();
+         instance.setGenerator(unit -> {
+@@ -28,7 +28,7 @@ public class WorldRelightIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBorderLava(Env env) {
++    void testBorderLava(Env env) {
+         Instance instance = env.createFlatInstance();
+         instance.setChunkSupplier(LightingChunk::new);
+         instance.loadChunk(6, 16).join();
+@@ -46,7 +46,7 @@ public class WorldRelightIntegrationTest {
+     }
+ 
+     @Test
+-    public void testBlockRemoval(Env env) {
++    void testBlockRemoval(Env env) {
+         Instance instance = createLightingInstance(env.process());
+         instance.setChunkSupplier(LightingChunk::new);
+         for (int x = -3; x <= 3; x++) {
 diff --git a/src/test/java/net/minestom/server/instance/palette/PaletteOptimizationTest.java b/src/test/java/net/minestom/server/instance/palette/PaletteOptimizationTest.java
 index 9916d52ab23c645388ed4c6c215bf7203fb4bdc0..877f265955d81dba590da8166e994c0e4ec8854a 100644
 --- a/src/test/java/net/minestom/server/instance/palette/PaletteOptimizationTest.java
@@ -5156,6 +5466,24 @@ index 3372ade456530be692de5f74e8c9515d32614df2..583214ea6d1a4bb59956ee727644f571
          assertThrows(Exception.class, () -> Palette.newPalette(-4, 5, 3));
          assertThrows(Exception.class, () -> Palette.newPalette(0, 5, 3));
          assertThrows(Exception.class, () -> Palette.newPalette(1, 5, 3));
+diff --git a/src/test/java/net/minestom/server/inventory/InventoryCloseStateTest.java b/src/test/java/net/minestom/server/inventory/InventoryCloseStateTest.java
+index 21d92088f43e0216b07c4389e25da16d2740d8e4..cdae802c5b007e8c499f561e0ec76cdd7b6a4a52 100644
+--- a/src/test/java/net/minestom/server/inventory/InventoryCloseStateTest.java
++++ b/src/test/java/net/minestom/server/inventory/InventoryCloseStateTest.java
+@@ -11,11 +11,11 @@ import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ 
+ @EnvTest
+-public class InventoryCloseStateTest {
++class InventoryCloseStateTest {
+ 
+ 
+     @Test
+-    public void doNotReceiveClosePacketFromServerWhenSendingClientCloseWindowPacket(Env env) {
++    void doNotReceiveClosePacketFromServerWhenSendingClientCloseWindowPacket(Env env) {
+         var instance = env.createFlatInstance();
+         var connection = env.createConnection();
+         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
 diff --git a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java b/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
 index 924bd641f7c293894be4514d035c3306bec4e321..b4a5813ecc407959a7ca222c69fb4527e17658a9 100644
 --- a/src/test/java/net/minestom/server/inventory/InventoryIntegrationTest.java
@@ -5213,7 +5541,7 @@ index 924bd641f7c293894be4514d035c3306bec4e321..b4a5813ecc407959a7ca222c69fb4527
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
 diff --git a/src/test/java/net/minestom/server/inventory/InventoryTest.java b/src/test/java/net/minestom/server/inventory/InventoryTest.java
-index be239c29fa9966b6407edb4eb2902f4c613af172..57c9c9f2ebce8790e2982b3c3156081a71c50ec7 100644
+index be239c29fa9966b6407edb4eb2902f4c613af172..3829591ee5491ca9b5cb67b5619d51b755f226cf 100644
 --- a/src/test/java/net/minestom/server/inventory/InventoryTest.java
 +++ b/src/test/java/net/minestom/server/inventory/InventoryTest.java
 @@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
@@ -5243,6 +5571,15 @@ index be239c29fa9966b6407edb4eb2902f4c613af172..57c9c9f2ebce8790e2982b3c3156081a
          ItemStack item = ItemStack.of(Material.DIAMOND, 32);
          Inventory inventory = new Inventory(InventoryType.CHEST_1_ROW, TITLE);
          inventory.setItemStack(0, item);
+@@ -68,7 +68,7 @@ public class InventoryTest {
+     }
+ 
+     @Test
+-    public void testAdd() {
++    void testAdd() {
+         Inventory inventory = new Inventory(InventoryType.HOPPER, TITLE);
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.DIAMOND, 32), TransactionOption.ALL_OR_NOTHING));
+         assertTrue(inventory.addItemStack(ItemStack.of(Material.GOLD_BLOCK, 32), TransactionOption.ALL_OR_NOTHING));
 @@ -79,7 +79,7 @@ public class InventoryTest {
      }
  
@@ -5971,10 +6308,10 @@ index 107e1c53a77414a300beb46143875dda25a4503f..ac349777f80d2711dcb120908ea8dd9b
          assertBufferTypeCollection(BOOLEAN, List.of(true), new byte[]{0x01, 0x01});
      }
 diff --git a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
-index 3e424c24f5c7064992c469439a0049f040ef038c..eb265352ab3a27a6bb8fb31df610027789570b83 100644
+index 0e5fe35942f31bd55543aed1c4eb697fcb6a185f..3641ce969c5c1693bc1f92fafebd83449453cc38 100644
 --- a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
 +++ b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
-@@ -1,15 +1,9 @@
+@@ -1,12 +1,8 @@
  package net.minestom.server.network;
  
  import com.google.gson.JsonObject;
@@ -5985,31 +6322,9 @@ index 3e424c24f5c7064992c469439a0049f040ef038c..eb265352ab3a27a6bb8fb31df6100277
  import net.kyori.adventure.text.Component;
 -import net.minestom.server.MinecraftServer;
  import net.minestom.server.coordinate.Vec;
--import net.minestom.server.crypto.ChatSession;
--import net.minestom.server.crypto.PlayerPublicKey;
  import net.minestom.server.entity.EquipmentSlot;
  import net.minestom.server.entity.GameMode;
- import net.minestom.server.entity.Metadata;
-@@ -26,18 +20,11 @@ import net.minestom.server.network.packet.server.login.SetCompressionPacket;
- import net.minestom.server.network.packet.server.play.*;
- import net.minestom.server.network.packet.server.play.DeclareRecipesPacket.Ingredient;
- import net.minestom.server.network.packet.server.status.PongPacket;
--import net.minestom.server.utils.crypto.KeyUtils;
--import org.apache.commons.net.util.Base64;
- import org.jglrxavpok.hephaistos.nbt.NBT;
- import org.junit.jupiter.api.BeforeAll;
- import org.junit.jupiter.api.Test;
- 
- import java.lang.reflect.InvocationTargetException;
--import java.nio.charset.StandardCharsets;
--import java.security.KeyFactory;
--import java.security.PublicKey;
--import java.security.spec.X509EncodedKeySpec;
--import java.time.Instant;
- import java.util.ArrayList;
- import java.util.List;
- import java.util.Map;
-@@ -148,12 +135,12 @@ public class PacketWriteReadTest {
+@@ -165,12 +161,12 @@ public class PacketWriteReadTest {
      }
  
      @Test
@@ -6025,7 +6340,7 @@ index 3e424c24f5c7064992c469439a0049f040ef038c..eb265352ab3a27a6bb8fb31df6100277
      }
  
 diff --git a/src/test/java/net/minestom/server/network/SendablePacketTest.java b/src/test/java/net/minestom/server/network/SendablePacketTest.java
-index e1f05206055e80600e5fc3dcfb45599c081ab337..05527ae21b137891c54990d8a76f577bb47ad91b 100644
+index c7d046a6c5edcbcb04a0038745b3e48888a6036d..c9744ddeb3162b000dad92d281d121ef3edef4de 100644
 --- a/src/test/java/net/minestom/server/network/SendablePacketTest.java
 +++ b/src/test/java/net/minestom/server/network/SendablePacketTest.java
 @@ -11,10 +11,10 @@ import java.util.concurrent.atomic.AtomicBoolean;
@@ -6049,9 +6364,9 @@ index e1f05206055e80600e5fc3dcfb45599c081ab337..05527ae21b137891c54990d8a76f577b
 +    void cached() {
          var packet = new SystemChatPacket(Component.text("Hello World!"), false);
          var cached = new CachedPacket(packet);
-         assertSame(packet, cached.packet());
+         assertSame(packet, cached.packet(ConnectionState.PLAY));
 diff --git a/src/test/java/net/minestom/server/network/SocketReadTest.java b/src/test/java/net/minestom/server/network/SocketReadTest.java
-index 0f168ab61b905901d8aaca71d16526bcd8473d42..b86f9f16335d294f5ab0fe2b8211713aa99ad052 100644
+index 4c8db0970221df2535cbde87e8b3848c318f1cb3..0b97ff1b1ecc71bf5f8a2ccef2c2443277e40b18 100644
 --- a/src/test/java/net/minestom/server/network/SocketReadTest.java
 +++ b/src/test/java/net/minestom/server/network/SocketReadTest.java
 @@ -16,11 +16,11 @@ import java.util.zip.DataFormatException;
@@ -6096,7 +6411,7 @@ index 0f168ab61b905901d8aaca71d16526bcd8473d42..b86f9f16335d294f5ab0fe2b8211713a
  
          var packet = new ClientPluginMessagePacket("channel", new byte[2000]);
 diff --git a/src/test/java/net/minestom/server/network/SocketWriteTest.java b/src/test/java/net/minestom/server/network/SocketWriteTest.java
-index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..8f8aee350f584b5ef886f8529f56f21fa922be12 100644
+index 7c7356a37748c2e41fd76037b1abe1fb3599a386..b4119ecef691f558ae96aa685d8c91714c6384a1 100644
 --- a/src/test/java/net/minestom/server/network/SocketWriteTest.java
 +++ b/src/test/java/net/minestom/server/network/SocketWriteTest.java
 @@ -14,7 +14,7 @@ import static net.minestom.server.network.NetworkBuffer.STRING;
@@ -6154,12 +6469,14 @@ index 1202eeb1f2e1d9d11f82ddd99e9da43dec5d2f96..8f8aee350f584b5ef886f8529f56f21f
  
          var buffer = ObjectPool.PACKET_POOL.get();
 diff --git a/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java b/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
-index 1836cf2b698dbbc8004a3a168448f1e13f3edd92..75680c92345e95f46e0528e618080f3217315381 100644
+index e3d5357e8128c46c764c331ba430f8c8a9f47295..49dec17a054a8cd969a42eefa549b3878d1171d8 100644
 --- a/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
 +++ b/src/test/java/net/minestom/server/network/socket/ServerAddressTest.java
-@@ -10,10 +10,10 @@ import java.nio.file.Files;
+@@ -11,11 +11,12 @@ import java.nio.file.Files;
  
  import static org.junit.jupiter.api.Assertions.*;
+ import static org.junit.jupiter.api.Assumptions.assumeTrue;
++import static org.junit.jupiter.api.Assumptions.assumeTrue;
  
 -public class ServerAddressTest {
 +class ServerAddressTest {
@@ -6167,34 +6484,34 @@ index 1836cf2b698dbbc8004a3a168448f1e13f3edd92..75680c92345e95f46e0528e618080f32
      @Test
 -    public void inetAddressTest() throws IOException {
 +    void inetAddressTest() throws IOException {
-         InetSocketAddress address = new InetSocketAddress("localhost", 25565);
-         var server = new Server(new PacketProcessor());
-         server.init(address);
-@@ -26,7 +26,7 @@ public class ServerAddressTest {
+         // These like to fail on github actions
+         assumeTrue(System.getenv("GITHUB_ACTIONS") == null);
+ 
+@@ -31,7 +32,7 @@ public class ServerAddressTest {
      }
  
      @Test
 -    public void inetAddressDynamicTest() throws IOException {
 +    void inetAddressDynamicTest() throws IOException {
-         InetSocketAddress address = new InetSocketAddress("localhost", 0);
-         var server = new Server(new PacketProcessor());
-         server.init(address);
-@@ -39,7 +39,7 @@ public class ServerAddressTest {
+         // These like to fail on github actions
+         assumeTrue(System.getenv("GITHUB_ACTIONS") == null);
+ 
+@@ -47,7 +48,7 @@ public class ServerAddressTest {
      }
  
      @Test
 -    public void unixAddressTest() throws IOException {
 +    void unixAddressTest() throws IOException {
-         UnixDomainSocketAddress address = UnixDomainSocketAddress.of("minestom.sock");
-         var server = new Server(new PacketProcessor());
-         server.init(address);
-@@ -54,7 +54,7 @@ public class ServerAddressTest {
+         // These like to fail on github actions
+         assumeTrue(System.getenv("GITHUB_ACTIONS") == null);
+ 
+@@ -65,7 +66,7 @@ public class ServerAddressTest {
      }
  
      @Test
 -    public void noAddressTest() throws IOException {
 +    void noAddressTest() throws IOException {
-         var server = new Server(new PacketProcessor());
+         var server = new Server(new PacketProcessor(new PacketListenerManager()));
          assertDoesNotThrow(server::stop);
      }
 diff --git a/src/test/java/net/minestom/server/permission/TestPermissions.java b/src/test/java/net/minestom/server/permission/TestPermissions.java
@@ -7384,6 +7701,50 @@ index d1376f66c9eb7b586a7e6c066ca2adf3fe1b146d..ba4ff92e14b8c3dfb486d47ab53ab38f
          var handler = TagHandler.newHandler();
          for (int i = 0; i < 1000; i++) {
              handler.setTag(Tag.Integer("rehashing" + i), i);
+diff --git a/src/test/java/net/minestom/server/tag/TagTransientTest.java b/src/test/java/net/minestom/server/tag/TagTransientTest.java
+index 1dce03d1305c31c0019fa5d5df225c260500225c..e8fc926f3e36a4f7b8fdecb50e55b4c75992e8b7 100644
+--- a/src/test/java/net/minestom/server/tag/TagTransientTest.java
++++ b/src/test/java/net/minestom/server/tag/TagTransientTest.java
+@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
+ import static org.junit.jupiter.api.Assertions.assertEquals;
+ import static org.junit.jupiter.api.Assertions.assertNull;
+ 
+-public class TagTransientTest {
++class TagTransientTest {
+ 
+     @Test
+-    public void twoTransientTags() {
++    void twoTransientTags() {
+         var tagHandler = TagHandler.newHandler();
+         Tag<String> tag1 = Tag.Transient("a");
+         Tag<String> tag2 = Tag.Transient("b");
+@@ -19,7 +19,7 @@ public class TagTransientTest {
+     }
+ 
+     @Test
+-    public void twoTransientTagsEqual() {
++    void twoTransientTagsEqual() {
+         var tagHandler = TagHandler.newHandler();
+         Tag<String> tag1 = Tag.Transient("a");
+         Tag<String> tag2 = Tag.Transient("a");
+@@ -30,7 +30,7 @@ public class TagTransientTest {
+     }
+ 
+     @Test
+-    public void tagHandlerCopyPreservesTransient() {
++    void tagHandlerCopyPreservesTransient() {
+         var tagHandler = TagHandler.newHandler();
+         Tag<String> tag = Tag.Transient("a");
+         tagHandler.setTag(tag, "abcdef");
+@@ -41,7 +41,7 @@ public class TagTransientTest {
+     }
+ 
+     @Test
+-    public void asCompoundDoesNotPreserveTransient() {
++    void asCompoundDoesNotPreserveTransient() {
+         var tagHandler = TagHandler.newHandler();
+         Tag<String> tag = Tag.Transient("a");
+         tagHandler.setTag(tag, "abcdef");
 diff --git a/src/test/java/net/minestom/server/tag/TagUpdateTest.java b/src/test/java/net/minestom/server/tag/TagUpdateTest.java
 index 222b875de2388871adbf7c0f84affa60481f992a..59a64d77c7cc4a5a40b569897cf6131060bc4902 100644
 --- a/src/test/java/net/minestom/server/tag/TagUpdateTest.java
@@ -7914,7 +8275,7 @@ index 5327ad0533a6262b55575da0e7851d3fe4e77f2b..c6d314ab4f1c99aed9d662432844a0ed
          final Set<ChunkCoordinate> o = new HashSet<>();
          ChunkUtils.forChunksInRange(nx, nz, r, (x, z) -> n.add(new ChunkCoordinate(x, z)));
 diff --git a/src/test/java/net/minestom/server/utils/NamespaceIDTest.java b/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
-index 5bae45cd92299a01210869345899018fa4c646af..07ce514e9d8268495d2e4ee632f6760a81a120e8 100644
+index 01783c5089c9cf7029dcf7b0c3ec766ac45a83c4..6ed987c3947befaaa1978852017a2e28d7911684 100644
 --- a/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
 +++ b/src/test/java/net/minestom/server/utils/NamespaceIDTest.java
 @@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
@@ -7941,15 +8302,15 @@ index 5bae45cd92299a01210869345899018fa4c646af..07ce514e9d8268495d2e4ee632f6760a
          assertNotEquals(namespace, NamespaceID.from("minecraft:any2"));
 @@ -29,7 +29,7 @@ public class NamespaceIDTest {
      }
-     // Microtus start - Fix namespace hashcode and equals
+ 
      @Test
 -    public void hashCodeConsistentWithEquals() {
 +    void hashCodeConsistentWithEquals() {
          var namespace = NamespaceID.from("minecraft:any");
          var key = Key.key("minecraft:any");
  
-@@ -39,50 +39,50 @@ public class NamespaceIDTest {
-     // Microtus end - Fix namespace hashcode and equals
+@@ -38,50 +38,50 @@ public class NamespaceIDTest {
+     }
  
      @Test
 -    public void atMostOneColon() {
@@ -8151,10 +8512,10 @@ index f7bc989b8f89f37798e2645a54d71127fa5a767d..a12b906b9a79cfbb86127776166e3b82
  
      @Test
 diff --git a/src/test/java/net/minestom/server/utils/block/BlockIteratorTest.java b/src/test/java/net/minestom/server/utils/block/BlockIteratorTest.java
-index 12ba498890d53c76c1847fb0df1367943a33b4fe..a944e04ef851f120970e6e12a76a7dd670997c89 100644
+index e62261f05297a08f6c4aa5aa2f014d1fa0f995e4..5dbb67ef374fb8964b4b0509863383180905403f 100644
 --- a/src/test/java/net/minestom/server/utils/block/BlockIteratorTest.java
 +++ b/src/test/java/net/minestom/server/utils/block/BlockIteratorTest.java
-@@ -9,13 +9,13 @@ import java.util.List;
+@@ -9,14 +9,14 @@ import java.util.List;
  
  import static org.junit.jupiter.api.Assertions.*;
  
@@ -8166,47 +8527,56 @@ index 12ba498890d53c76c1847fb0df1367943a33b4fe..a944e04ef851f120970e6e12a76a7dd6
  
      @Test
 -    public void test2dOffsetppp() {
+-        Vec s = new Vec(0, 0.1, 0);
 +    void test2dOffsetppp() {
-         Vec s = new Vec(0,  0.1, 0);
++        Vec s = new Vec(0,  0.1, 0);
          Vec e = new Vec(2, 1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -29,7 +29,7 @@ public class BlockIteratorTest {
+ 
+@@ -29,8 +29,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void test2dOffsetppn() {
+-        Vec s = new Vec(0, 0.1, 0);
 +    void test2dOffsetppn() {
-         Vec s = new Vec(0,  0.1, 0);
++        Vec s = new Vec(0,  0.1, 0);
          Vec e = new Vec(-2, 1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -44,7 +44,7 @@ public class BlockIteratorTest {
+ 
+@@ -44,8 +44,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void test2dOffsetnpp() {
+-        Vec s = new Vec(0, -0.1, 0);
 +    void test2dOffsetnpp() {
-         Vec s = new Vec(0,  -0.1, 0);
++        Vec s = new Vec(0,  -0.1, 0);
          Vec e = new Vec(2, 1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -59,7 +59,7 @@ public class BlockIteratorTest {
+ 
+@@ -59,8 +59,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void test2dOffsetnnp() {
+-        Vec s = new Vec(0, -0.1, 0);
 +    void test2dOffsetnnp() {
-         Vec s = new Vec(0,  -0.1, 0);
++        Vec s = new Vec(0,  -0.1, 0);
          Vec e = new Vec(-2, 1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -75,7 +75,7 @@ public class BlockIteratorTest {
+ 
+@@ -75,15 +75,15 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void testZeroVelocity() {
+-        Vec s = new Vec(0, 0, 0);
 +    void testZeroVelocity() {
-         Vec s = new Vec(0,  0, 0);
++        Vec s = new Vec(0,  0, 0);
          Vec e = new Vec(0, 0, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -83,7 +83,7 @@ public class BlockIteratorTest {
+         assertFalse(iterator.hasNext());
      }
  
      @Test
@@ -8224,69 +8594,83 @@ index 12ba498890d53c76c1847fb0df1367943a33b4fe..a944e04ef851f120970e6e12a76a7dd6
          Vec s = new Vec(0.5, 40, 0.5);
          Vec e = new Vec(27, 0, 21);
          BlockIterator iterator = new BlockIterator(s, e, 0, 34);
-@@ -235,7 +235,7 @@ public class BlockIteratorTest {
+@@ -235,8 +235,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void testExactEnd() {
+-        Vec s = new Vec(0.5, 0, 0.5);
 +    void testExactEnd() {
-         Vec s = new Vec(0.5,  0, 0.5);
++        Vec s = new Vec(0.5,  0, 0.5);
          Vec e = new Vec(0, 1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 1);
-@@ -245,7 +245,7 @@ public class BlockIteratorTest {
+         assertEquals(new Vec(0, 0, 0), iterator.next());
+@@ -245,8 +245,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void testSameEnd() {
+-        Vec s = new Vec(0.5, 0, 0.5);
 +    void testSameEnd() {
-         Vec s = new Vec(0.5,  0, 0.5);
++        Vec s = new Vec(0.5,  0, 0.5);
          Vec e = new Vec(0, 1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 0.5);
-@@ -254,7 +254,7 @@ public class BlockIteratorTest {
+         assertEquals(new Vec(0, 0, 0), iterator.next());
+@@ -254,8 +254,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void test3dExtraCollection() {
+-        Vec s = new Vec(0.1, 0.1, 0.1);
 +    void test3dExtraCollection() {
-         Vec s = new Vec(0.1,  0.1, 0.1);
++        Vec s = new Vec(0.1,  0.1, 0.1);
          Vec e = new Vec(1, 1, 1);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -283,7 +283,7 @@ public class BlockIteratorTest {
+ 
+@@ -291,8 +291,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void test2dpp() {
+-        Vec s = new Vec(0, 0, 0);
 +    void test2dpp() {
-         Vec s = new Vec(0,  0, 0);
++        Vec s = new Vec(0,  0, 0);
          Vec e = new Vec(2, 1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -309,7 +309,7 @@ public class BlockIteratorTest {
+ 
+@@ -317,8 +317,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void test2dpn() {
+-        Vec s = new Vec(0, 0, 0);
 +    void test2dpn() {
-         Vec s = new Vec(0,  0, 0);
++        Vec s = new Vec(0,  0, 0);
          Vec e = new Vec(-2, 1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -336,7 +336,7 @@ public class BlockIteratorTest {
+ 
+@@ -344,8 +344,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void test2dnn() {
+-        Vec s = new Vec(0, 0, 0);
 +    void test2dnn() {
-         Vec s = new Vec(0,  0, 0);
++        Vec s = new Vec(0,  0, 0);
          Vec e = new Vec(-2, -1, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 4);
-@@ -365,7 +365,7 @@ public class BlockIteratorTest {
+ 
+@@ -373,8 +373,8 @@ public class BlockIteratorTest {
      }
  
      @Test
 -    public void falling() {
+-        Vec s = new Vec(0, 42, 0);
 +    void falling() {
-         Vec s = new Vec(0,  42, 0);
++        Vec s = new Vec(0,  42, 0);
          Vec e = new Vec(0, -10, 0);
          BlockIterator iterator = new BlockIterator(s, e, 0, 14.142135623730951);
+ 
 diff --git a/src/test/java/net/minestom/server/utils/collection/AutoIncrementMapTest.java b/src/test/java/net/minestom/server/utils/collection/AutoIncrementMapTest.java
 index b19454170b525977d6a59353a8da6bc70896bad1..04946c4ab86fe6aad9cebcd510f64251af5c8a55 100644
 --- a/src/test/java/net/minestom/server/utils/collection/AutoIncrementMapTest.java
