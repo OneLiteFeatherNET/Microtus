@@ -585,60 +585,19 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..618040b6ff868f2327c641ed3e5c205c
 +    }
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-index 3c125bfa40ac413f79d8d17318de1236ebddc7ae..b0095d0cd6d906bf6a68a586e4eb4c61dae6a3dd 100644
+index f727c433975351a2b30e54ec219038b72ea48c4b..474eabb84bb1409a05b8a2379f90c4c17176b608 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-@@ -2,35 +2,33 @@ package net.minestom.codegen.biome;
- 
- import com.google.gson.JsonElement;
- import com.google.gson.JsonObject;
--
-+import com.squareup.javapoet.AnnotationSpec;
- import com.squareup.javapoet.ArrayTypeName;
- import com.squareup.javapoet.ClassName;
--
-+import com.squareup.javapoet.CodeBlock;
- import com.squareup.javapoet.FieldSpec;
--import com.squareup.javapoet.TypeSpec;
-+import com.squareup.javapoet.JavaFile;
- import com.squareup.javapoet.MethodSpec;
+@@ -12,8 +12,6 @@ import com.squareup.javapoet.MethodSpec;
  import com.squareup.javapoet.ParameterSpec;
--import com.squareup.javapoet.AnnotationSpec;
  import com.squareup.javapoet.TypeName;
--import com.squareup.javapoet.CodeBlock;
--import com.squareup.javapoet.JavaFile;
+ import com.squareup.javapoet.TypeSpec;
 -
--import java.awt.Color;
--
-+import com.squareup.javapoet.TypeSpec;
-+import java.io.File;
-+import java.io.InputStream;
-+import java.io.InputStreamReader;
-+import java.util.List;
-+import javax.lang.model.element.Modifier;
- import net.minestom.codegen.MinestomCodeGenerator;
-+import org.jetbrains.annotations.ApiStatus;
- import org.jetbrains.annotations.NotNull;
- import org.jetbrains.annotations.Nullable;
- import org.slf4j.Logger;
- import org.slf4j.LoggerFactory;
- 
--import javax.lang.model.element.Modifier;
--import java.io.File;
--import java.io.InputStream;
--import java.io.InputStreamReader;
--import java.util.List;
--
--public class BiomeGenerator extends MinestomCodeGenerator {
-+@ApiStatus.Internal
-+@ApiStatus.NonExtendable
-+public final class BiomeGenerator extends MinestomCodeGenerator {
- 
-+    private static final String BIOME_KEY = "biome";
-     private static final String BIOME_FILE_PACKAGE = "net.minestom.server.world.biomes"; // Microtus - Biomes
-     private static final String CLASS_NAME = "Biomes"; // Microtus - Biomes
-     private static final Logger LOGGER = LoggerFactory.getLogger(BiomeGenerator.class);
-@@ -38,6 +36,7 @@ public class BiomeGenerator extends MinestomCodeGenerator {
+-import java.awt.*;
+ import java.io.File;
+ import java.io.InputStream;
+ import java.io.InputStreamReader;
+@@ -38,6 +36,7 @@ public final class BiomeGenerator extends MinestomCodeGenerator {
      private final File outputFolder;
  
      public BiomeGenerator(@Nullable InputStream biomeFile, @NotNull File outputFolder) {
@@ -646,104 +605,16 @@ index 3c125bfa40ac413f79d8d17318de1236ebddc7ae..b0095d0cd6d906bf6a68a586e4eb4c61
          this.biomeFile = biomeFile;
          this.outputFolder = outputFolder;
      }
-@@ -54,7 +53,6 @@ public class BiomeGenerator extends MinestomCodeGenerator {
-             return;
-         }
- 
--
-         JsonElement biomes = GSON.fromJson(new InputStreamReader(biomeFile), JsonElement.class);
-         ClassName biomeCN = ClassName.get(BIOME_FILE_PACKAGE, CLASS_NAME);
-         ClassName biomeCn = ClassName.get(BIOME_FILE_PACKAGE, "Biome");
-@@ -69,7 +67,7 @@ public class BiomeGenerator extends MinestomCodeGenerator {
-         // Fields
-         biomesEnum.addFields(
-                 List.of(
--                        FieldSpec.builder(biomeCn, "biome", Modifier.PRIVATE, Modifier.FINAL).build(),
-+                        FieldSpec.builder(biomeCn, BIOME_KEY, Modifier.PRIVATE, Modifier.FINAL).build(),
-                         FieldSpec.builder(ArrayTypeName.of(biomeCN), "VALUES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer(CLASS_NAME + ".values()").build()  // Microtus - Banner and shield meta
-                 )
-         );
-@@ -79,17 +77,15 @@ public class BiomeGenerator extends MinestomCodeGenerator {
-                 List.of(
-                         // Constructor
-                         MethodSpec.constructorBuilder()
--                                .addParameters(
--                                        List.of(
--                                                ParameterSpec.builder(biomeCn, "biome").addAnnotation(NotNull.class).build()
--                                        )
-+                                .addParameter(
-+                                        ParameterSpec.builder(biomeCn, BIOME_KEY).addAnnotation(NotNull.class).build()
-                                 )
--                                .addStatement("this.biome = biome")
-+                                .addStatement("this.$1L = $1L", BIOME_KEY)
-                                 .build(),
--                        MethodSpec.methodBuilder("biome")
-+                        MethodSpec.methodBuilder(BIOME_KEY)
-                                 .addModifiers(Modifier.PUBLIC)
-                                 .returns(biomeCn.annotated(AnnotationSpec.builder(NotNull.class).build()))
--                                .addStatement("return this.biome")
-+                                .addStatement("return this.$L", BIOME_KEY)
-                                 .build(),
-                         MethodSpec.methodBuilder("getValue")
-                                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-@@ -100,41 +96,38 @@ public class BiomeGenerator extends MinestomCodeGenerator {
-                                 .build(),
-                         MethodSpec.methodBuilder("registerBiomes")
-                                 .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
--                                .beginControlFlow("for (var biome : VALUES)")
--                                .addStatement("$T.getBiomeManager().addBiome(biome.biome())", minecraftServerCn)
-+                                .beginControlFlow("for (var $L : VALUES)", BIOME_KEY)
-+                                .addStatement("$1T.getBiomeManager().addBiome($2L.$2L())", minecraftServerCn, BIOME_KEY)
-                                 .endControlFlow()
-                                 .build()
-                 )
-         );
-         final JsonObject biomesAsJsonObject = biomes.getAsJsonObject();
-         biomesAsJsonObject.keySet().forEach(biome -> {
--
--
-             var biomeObject = biomesAsJsonObject.get(biome).getAsJsonObject();
--            var tempature = biomeObject.get("temperature").getAsFloat();
-+            var temperature = biomeObject.get("temperature").getAsFloat();
-             var downfall = biomeObject.get("downfall").getAsFloat();
-             var hasPrecipitation = biomeObject.get("has_precipitation").getAsBoolean();
--            var fogColor = Integer.toHexString(new Color(biomeObject.get("fogColor").getAsInt()).getRGB()).substring(2);
--            var waterColor = Integer.toHexString(new Color(biomeObject.get("waterColor").getAsInt()).getRGB()).substring(2);
--            var waterFogColor = Integer.toHexString(new Color(biomeObject.get("waterFogColor").getAsInt()).getRGB()).substring(2);
--            var skyColor = Integer.toHexString(new Color(biomeObject.get("skyColor").getAsInt()).getRGB()).substring(2);
-+            var fogColor = biomeObject.get("fogColor").getAsInt();
-+            var waterColor = biomeObject.get("waterColor").getAsInt();
-+            var waterFogColor = biomeObject.get("waterFogColor").getAsInt();
-+            var skyColor = biomeObject.get("skyColor").getAsInt();
-             var effectCodeBlock = CodeBlock.builder();
- 
--            effectCodeBlock = effectCodeBlock.add("$T.builder().fogColor(0x$L).waterColor(0x$L).waterFogColor(0x$L).skyColor(0x$L)", biomeEffectsCn, fogColor, waterColor, waterFogColor, skyColor);
-+            effectCodeBlock.add("$T.builder().fogColor(0x$L).waterColor(0x$L).waterFogColor(0x$L).skyColor(0x$L)", biomeEffectsCn, fogColor, waterColor, waterFogColor, skyColor);
-             if (biomeObject.has("grassColor")) {
--                var grassColor = Integer.toHexString(new Color(biomeObject.get("grassColor").getAsInt()).getRGB()).substring(2);
--                effectCodeBlock = effectCodeBlock.add(".grassColor(0x$L)", grassColor);
-+                var grassColor = biomeObject.get("grassColor").getAsInt();
-+                effectCodeBlock.add(".grassColor(0x$L)", grassColor);
+@@ -125,7 +124,7 @@ public final class BiomeGenerator extends MinestomCodeGenerator {
              }
-             if (biomeObject.has("foliageColor")) {
--                var foliageColor = Integer.toHexString(new Color(biomeObject.get("foliageColor").getAsInt()).getRGB()).substring(2);
--                ;
--                effectCodeBlock = effectCodeBlock.add(".foliageColor(0x$L)", foliageColor);
-+                var foliageColor = biomeObject.get("foliageColor").getAsInt();
-+                effectCodeBlock.add(".foliageColor(0x$L)", foliageColor);
-             }
--            effectCodeBlock = effectCodeBlock.add(".build()");
-+            effectCodeBlock.add(".build()");
+             effectCodeBlock = effectCodeBlock.add(".build()");
              var namespacedCode = CodeBlock.of("$T.from($S)", namespaceIDCn, biome.replaceFirst("minecraft:", ""));
 -            biomesEnum.addEnumConstant(toConstant(biome), TypeSpec.anonymousClassBuilder(
 +            biomesEnum.addEnumConstant(extractNamespace(biome), TypeSpec.anonymousClassBuilder(
                              "$T.builder().name($L).category($T.NONE).depth(0.125F).scale(0.05F).temperature($Lf).downfall($Lf).showPrecipitation($L).effects($L).build()",
--                            biomeCn, namespacedCode, categoryCn, tempature, downfall, hasPrecipitation, effectCodeBlock.build()
-+                            biomeCn, namespacedCode, categoryCn, temperature, downfall, hasPrecipitation, effectCodeBlock.build()
+                             biomeCn, namespacedCode, categoryCn, temperature, downfall, hasPrecipitation, effectCodeBlock.build()
                      ).build()
-             );
-         });
-@@ -143,7 +136,7 @@ public class BiomeGenerator extends MinestomCodeGenerator {
+@@ -136,7 +135,7 @@ public final class BiomeGenerator extends MinestomCodeGenerator {
          writeFiles(
                  List.of(
                          JavaFile.builder(BIOME_FILE_PACKAGE, biomesEnum.build())
