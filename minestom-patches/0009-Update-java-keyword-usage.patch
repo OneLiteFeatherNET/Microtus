@@ -650,6 +650,20 @@ index 4730006416bd9c4a7f1ff291feddb83c9ffedd6d..00764c03932ecef0e5ac7f68762e4d12
          }
          return Stream.empty();
      }
+diff --git a/src/main/java/net/minestom/server/utils/TickUtils.java b/src/main/java/net/minestom/server/utils/TickUtils.java
+index 84ac9ec1436a9083d8cd6a932f131f498f9458ab..15bdbee85587c85f7d1bb32087e5fa7b0e10c5bb 100644
+--- a/src/main/java/net/minestom/server/utils/TickUtils.java
++++ b/src/main/java/net/minestom/server/utils/TickUtils.java
+@@ -43,4 +43,9 @@ public final class TickUtils {
+         Check.argCondition(duration.isNegative(), "Duration cannot be negative");
+         return (int) (duration.toMillis() / msPerTick);
+     }
++
++    /**
++     * Default private default constructor.
++     */
++    private TickUtils() { }
+ }
 diff --git a/src/test/java/net/minestom/server/InsideTest.java b/src/test/java/net/minestom/server/InsideTest.java
 index 4fd8bc46ba32abc852398872bf8b63a30617408e..33c65cc23c0982d2e37eb12e40d844562bf85380 100644
 --- a/src/test/java/net/minestom/server/InsideTest.java
