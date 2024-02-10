@@ -2482,10 +2482,10 @@ index 1e41e00b7d128df8b59dd63ee059d93146567c14..00000000000000000000000000000000
 -  - openjdk17
 \ No newline at end of file
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..298e4714fb81cdf2cd1e7ab6157a88a2c45500af 100644
+index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..bf68b61d8a2483648136e2e8a45c37f761ec9d28 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -1,8 +1,144 @@
+@@ -1,8 +1,145 @@
 -rootProject.name = "minestom"
 +enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
  
@@ -2495,6 +2495,7 @@ index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..298e4714fb81cdf2cd1e7ab6157a88a2
 -//include("jcstress-tests")
 +dependencyResolutionManagement {
 +    repositories {
++        maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
 +        maven("https://jitpack.io")
 +        mavenCentral()
 +    }
@@ -2505,7 +2506,7 @@ index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..298e4714fb81cdf2cd1e7ab6157a88a2
 +            version("kotlin", "1.9.22")
 +            version("hydrazine", "1.7.2")
 +            version("dependencyGetter", "v1.0.1")
-+            version("data", "1.20-rv1")
++            version("data", "1.20.4-SNAPSHOT")
 +            version("hephaistos", "2.6.1")
 +            version("jetbrainsAnnotations", "24.1.0")
 +            version("logback", "1.4.5")
@@ -2560,7 +2561,7 @@ index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..298e4714fb81cdf2cd1e7ab6157a88a2
 +            // Miscellaneous
 +            library("hydrazine", "com.github.MadMartian", "hydrazine-path-finding").versionRef("hydrazine")
 +            library("dependencyGetter", "com.github.Minestom", "DependencyGetter").versionRef("dependencyGetter")
-+            library("minestomData", "net.minestom", "data").versionRef("data")
++            library("minestomData", "net.onelitefeather.microtus", "data").versionRef("data")
 +            library("jetbrainsAnnotations", "org.jetbrains", "annotations").versionRef("jetbrainsAnnotations");
 +
 +            // Logging
@@ -2636,10 +2637,10 @@ index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..298e4714fb81cdf2cd1e7ab6157a88a2
  include("demo")
 +include("testing")
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index 8926b63c3c75d84040262229f77d14e68e1ee4a5..c9c68b0066296e89eb59324373fd50125c5c2f9f 100644
+index 8926b63c3c75d84040262229f77d14e68e1ee4a5..f53a4e3ee2e4936f3883fc1ce9f37489c025f95b 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
-@@ -1,14 +1,22 @@
+@@ -1,14 +1,23 @@
  plugins {
 -    `java-library`
 -//    `maven-publish`
@@ -2657,6 +2658,7 @@ index 8926b63c3c75d84040262229f77d14e68e1ee4a5..c9c68b0066296e89eb59324373fd5012
 -    api(rootProject)
  
 +repositories {
++    maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
 +    mavenCentral()
 +    maven(url = "https://jitpack.io")
 +}
@@ -2668,7 +2670,7 @@ index 8926b63c3c75d84040262229f77d14e68e1ee4a5..c9c68b0066296e89eb59324373fd5012
      api(libs.junit.api)
      api(libs.junit.params)
      api(libs.junit.suite.api)
-@@ -16,14 +24,36 @@ dependencies {
+@@ -16,14 +25,36 @@ dependencies {
      runtimeOnly(libs.junit.suite.engine)
  }
  

@@ -342,10 +342,10 @@ index 0000000000000000000000000000000000000000..3e8976c597067bb93e3fa86ec6c1add1
 +    }
 +}
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 298e4714fb81cdf2cd1e7ab6157a88a2c45500af..581eaf10350e0f6591d5f04f1f39b988edb72f3b 100644
+index bf68b61d8a2483648136e2e8a45c37f761ec9d28..4ec1083ae79b33a50573042bf0f6e3dfb60135eb 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -134,6 +134,7 @@ pluginManagement {
+@@ -135,6 +135,7 @@ pluginManagement {
          gradlePluginPortal()
      }
      includeBuild("build-logic")

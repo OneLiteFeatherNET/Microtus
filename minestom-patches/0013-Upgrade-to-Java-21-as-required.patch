@@ -96,10 +96,10 @@ index f4fbad921d82393c93d92d05913b791742762269..1db800b9a8851daf10495d9cadc18277
      }
  }
 diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
-index c9c68b0066296e89eb59324373fd50125c5c2f9f..8a80d6d01b8023caac54c4af5f21d8020f3f016d 100644
+index f53a4e3ee2e4936f3883fc1ce9f37489c025f95b..34c7ab94613156b9c525c5e79878207a48ab6500 100644
 --- a/testing/build.gradle.kts
 +++ b/testing/build.gradle.kts
-@@ -30,8 +30,8 @@ tasks.getByName<Test>("test") {
+@@ -31,8 +31,8 @@ tasks.getByName<Test>("test") {
  
  indra {
      javaVersions {
