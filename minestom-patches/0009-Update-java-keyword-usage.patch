@@ -1551,6 +1551,25 @@ index 42e249c73869e7c819a177f3144869c10bbe820a..11186e9470d129fefed2fb5f47dc736d
      public static void animationListener(ClientAnimationPacket packet, Player player) {
          final Player.Hand hand = packet.hand();
          final ItemStack itemStack = player.getItemInHand(hand);
+diff --git a/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java b/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
+index 13ea23024e7e637c551ace33aac5118ee384d456..0cf0b869b50b4df7c87322c4153d0865ce959084 100644
+--- a/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
++++ b/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
+@@ -25,7 +25,7 @@ import java.util.UUID;
+ 
+ public final class HandshakeListener {
+ 
+-    private final static Logger LOGGER = LoggerFactory.getLogger(HandshakeListener.class);
++    private static final Logger LOGGER = LoggerFactory.getLogger(HandshakeListener.class);
+ 
+     /**
+      * Text sent if a player tries to connect with an invalid version of the client
+@@ -135,4 +135,5 @@ public final class HandshakeListener {
+         disconnect(connection, INVALID_BUNGEE_FORWARDING);
+     }
+ 
++    private HandshakeListener() { }
+ }
 diff --git a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java b/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
 index 84c502629a38bc45f60dbf650eaf1b094d1d0df0..50053284b349355092b9cc3f431ea08eb005751f 100644
 --- a/src/main/java/net/minestom/server/monitoring/BenchmarkManager.java
