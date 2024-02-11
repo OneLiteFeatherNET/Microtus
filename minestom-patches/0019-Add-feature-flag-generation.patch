@@ -240,7 +240,7 @@ index 9e371032ce414c610dcfe1ec4df6f60fc738648e..37ad4debba36f866c3573ebfefbe0726
 +    }
  }
 diff --git a/src/main/java/net/minestom/server/network/ConnectionManager.java b/src/main/java/net/minestom/server/network/ConnectionManager.java
-index f59f075ce9604f0b06b9df52f5abfbf54d74e4c8..739f50256f3c737c4bcdff5305d41da0df1e7c82 100644
+index f59f075ce9604f0b06b9df52f5abfbf54d74e4c8..ff6c832a7e6c06d20fdf933f78e643c9c315a463 100644
 --- a/src/main/java/net/minestom/server/network/ConnectionManager.java
 +++ b/src/main/java/net/minestom/server/network/ConnectionManager.java
 @@ -16,6 +16,7 @@ import net.minestom.server.network.packet.server.common.PluginMessagePacket;
@@ -251,16 +251,15 @@ index f59f075ce9604f0b06b9df52f5abfbf54d74e4c8..739f50256f3c737c4bcdff5305d41da0
  import net.minestom.server.network.packet.server.login.LoginSuccessPacket;
  import net.minestom.server.network.packet.server.play.StartConfigurationPacket;
  import net.minestom.server.network.player.PlayerConnection;
-@@ -29,7 +30,7 @@ import org.jctools.queues.MpscUnboundedArrayQueue;
- import org.jetbrains.annotations.ApiStatus;
+@@ -30,6 +31,7 @@ import org.jetbrains.annotations.ApiStatus;
  import org.jetbrains.annotations.NotNull;
  import org.jetbrains.annotations.Nullable;
--import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
 +import org.jglrxavpok.hephaistos.nbt.NBTCompound;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
  
-@@ -265,7 +266,7 @@ public final class ConnectionManager {
+@@ -265,7 +267,7 @@ public final class ConnectionManager {
          CompletableFuture<Void> configFuture = AsyncUtils.runAsync(() -> {
              player.sendPacket(PluginMessagePacket.getBrandPacket());
  
@@ -269,7 +268,7 @@ index f59f075ce9604f0b06b9df52f5abfbf54d74e4c8..739f50256f3c737c4bcdff5305d41da0
              EventDispatcher.call(event);
  
              final Instance spawningInstance = event.getSpawningInstance();
-@@ -284,6 +285,7 @@ public final class ConnectionManager {
+@@ -284,6 +286,7 @@ public final class ConnectionManager {
  
                  player.sendPacket(TagsPacket.DEFAULT_TAGS);
              }
