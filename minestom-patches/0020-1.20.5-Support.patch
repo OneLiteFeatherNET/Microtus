@@ -1,0 +1,1338 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: TheMeinerLP <p.glanz@madfix.me>
+Date: Sun, 11 Feb 2024 16:10:15 +0100
+Subject: [PATCH] 1.20.5 Support
+
+
+diff --git a/src/main/java/net/minestom/server/MinecraftServer.java b/src/main/java/net/minestom/server/MinecraftServer.java
+index 165ae34b0e56bc0e99777de8dabb77f7047c1457..2e28f51fc30e1fcf9bdd16059e6606cbd6f63d5a 100644
+--- a/src/main/java/net/minestom/server/MinecraftServer.java
++++ b/src/main/java/net/minestom/server/MinecraftServer.java
+@@ -49,7 +49,7 @@ public final class MinecraftServer {
+     public static final ComponentLogger LOGGER = ComponentLogger.logger(MinecraftServer.class);
+ 
+     public static final String VERSION_NAME = "24w06a";
+-    public static final int PROTOCOL_VERSION = 766;
++    public static final int PROTOCOL_VERSION = 0x400000B0;
+ 
+     // Threads
+     public static final String THREAD_NAME_BENCHMARK = "Ms-Benchmark";
+diff --git a/src/main/java/net/minestom/server/attribute/AttributeManager.java b/src/main/java/net/minestom/server/attribute/AttributeManager.java
+index e9bdc070c8764da03d3baccda41490d8a5f0df0a..dace33a4a60dd8b4f90570b5978978570f039108 100644
+--- a/src/main/java/net/minestom/server/attribute/AttributeManager.java
++++ b/src/main/java/net/minestom/server/attribute/AttributeManager.java
+@@ -1,16 +1,27 @@
+ package net.minestom.server.attribute;
+ 
++import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
++import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
++import it.unimi.dsi.fastutil.objects.Object2IntMap;
++
++import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
++
+ import java.util.Collection;
+ 
+ import java.util.Map;
+ import java.util.concurrent.ConcurrentHashMap;
+ 
++import java.util.concurrent.atomic.AtomicInteger;
++
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ 
+ public final class AttributeManager {
+ 
+     private final Map<String, Attribute> attributes = new ConcurrentHashMap<>();
++    private final Object2IntMap<Attribute> attributeCounts = new Object2IntOpenHashMap<>();
++    private final Int2ObjectMap<Attribute> ID_TO_OBJECT = new Int2ObjectOpenHashMap<>();
++    public static final AtomicInteger ID_COUNTER = new AtomicInteger(0);
+ 
+     /**
+      * Register this attribute.
+@@ -20,6 +31,9 @@ public final class AttributeManager {
+      */
+     public synchronized void register(Attribute attribute) {
+         attributes.put(attribute.key(), attribute);
++        int id = ID_COUNTER.getAndIncrement();
++        attributeCounts.put(attribute, id);
++        ID_TO_OBJECT.put(id, attribute);
+     }
+ 
+     /**
+@@ -32,6 +46,16 @@ public final class AttributeManager {
+         return attributes.get(key);
+     }
+ 
++    /**
++     * Retrieves an attribute by its id.
++     *
++     * @param id the id of the attribute
++     * @return the attribute for the key or null if not any
++     */
++    public synchronized @Nullable Attribute fromId(@NotNull int id) {
++        return ID_TO_OBJECT.get(id);
++    }
++
+     /**
+      * Retrieves all registered attributes.
+      *
+@@ -40,4 +64,8 @@ public final class AttributeManager {
+     public synchronized @NotNull Collection<@NotNull Attribute> values() {
+         return attributes.values();
+     }
++
++    public synchronized int getAttributeCount(Attribute attribute) {
++        return this.attributeCounts.getInt(attribute);
++    }
+ }
+diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
+index a7980f47130dc741c4071f60194b83143e905590..73e764848f23fc4a264592e036f360bc035b811e 100644
+--- a/src/main/java/net/minestom/server/entity/Player.java
++++ b/src/main/java/net/minestom/server/entity/Player.java
+@@ -286,11 +286,11 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         this.removed = false;
+         this.dimensionType = spawnInstance.getDimensionType();
+ 
+-        final JoinGamePacket joinGamePacket = new JoinGamePacket(
++        final LoginPacket joinGamePacket = new LoginPacket(
+                 getEntityId(), this.hardcore, List.of(), 0,
+                 MinecraftServer.getChunkViewDistance(), MinecraftServer.getChunkViewDistance(),
+-                false, true, false, dimensionType.toString(), spawnInstance.getDimensionName(),
+-                0, gameMode, null, false, levelFlat, deathLocation, portalCooldown);
++                false, true, false, dimensionType, spawnInstance.getDimensionName(),
++                0, gameMode, null, false, levelFlat, deathLocation, portalCooldown, false);
+         sendPacket(joinGamePacket);
+ 
+         // Difficulty
+@@ -2474,7 +2474,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
+         public void refresh(String locale, byte viewDistance, ChatMessageType chatMessageType, boolean chatColors,
+                             byte displayedSkinParts, MainHand mainHand, boolean enableTextFiltering, boolean allowServerListings) {
+             this.locale = locale;
+-            // Clamp viewDistance to valid bounds
++            // Clamp chunkRadius to valid bounds
+             this.viewDistance = (byte) MathUtils.clamp(viewDistance, 2, 32);
+             this.chatMessageType = chatMessageType;
+             this.chatColors = chatColors;
+diff --git a/src/main/java/net/minestom/server/entity/damage/DamageType.java b/src/main/java/net/minestom/server/entity/damage/DamageType.java
+index deec1d4db2bea6d6bda45f0aca7b3090b9f6c2af..5a22617b21e3e11708daf4ac74464020a2cf5c59 100644
+--- a/src/main/java/net/minestom/server/entity/damage/DamageType.java
++++ b/src/main/java/net/minestom/server/entity/damage/DamageType.java
+@@ -1,5 +1,8 @@
+ package net.minestom.server.entity.damage;
+ 
++import java.util.List;
++
++import net.minestom.server.network.RegistryEntry;
+ import net.minestom.server.registry.ProtocolObject;
+ import net.minestom.server.registry.Registry;
+ import net.minestom.server.utils.NamespaceID;
+@@ -57,4 +60,8 @@ public sealed interface DamageType extends ProtocolObject, DamageTypes permits D
+     static NBTCompound getNBT() {
+         return DamageTypeImpl.getNBT();
+     }
++
++    static List<RegistryEntry> getRegistryEntries() {
++        return DamageTypeImpl.registryEntries();
++    }
+ }
+\ No newline at end of file
+diff --git a/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java b/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java
+index 2873cad2da680bf4e66d7e3dae0e13f1546294e2..e778d16facf7b6ff98895df6b7f06de1dc833ea2 100644
+--- a/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java
++++ b/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java
+@@ -1,5 +1,8 @@
+ package net.minestom.server.entity.damage;
+ 
++import java.util.List;
++
++import net.minestom.server.network.RegistryEntry;
+ import net.minestom.server.registry.Registry;
+ import org.jetbrains.annotations.NotNull;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+@@ -74,4 +77,15 @@ record DamageTypeImpl(Registry.DamageTypeEntry registry, int id) implements Dama
+         }
+         return lazyNbt;
+     }
++
++    static List<RegistryEntry> registryEntries() {
++        return values().stream()
++                .map((damageType) -> NBT.Compound(Map.of(
++                        "id", NBT.Int(damageType.id()),
++                        "name", NBT.String(damageType.name()),
++                        "element", damageType.asNBT()
++                )))
++                .map(RegistryEntry.NBT_TO_REG_ENTRY)
++                .toList();
++    }
+ }
+\ No newline at end of file
+diff --git a/src/main/java/net/minestom/server/item/armor/TrimManager.java b/src/main/java/net/minestom/server/item/armor/TrimManager.java
+index c9c94aa1a0b1761997697904f8868d3cd443a7af..14e1ea7282a9cdf06b40d31dc0916cf2797f442d 100644
+--- a/src/main/java/net/minestom/server/item/armor/TrimManager.java
++++ b/src/main/java/net/minestom/server/item/armor/TrimManager.java
+@@ -1,6 +1,9 @@
+ package net.minestom.server.item.armor;
+ 
++import java.util.List;
++
+ import net.minestom.server.item.Material;
++import net.minestom.server.network.RegistryEntry;
+ import org.jetbrains.annotations.Nullable;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+@@ -48,6 +51,24 @@ public class TrimManager {
+         return trimMaterialCache;
+     }
+ 
++    public List<RegistryEntry> toTrimMaterialRegistryEntries() {
++        return this.trimMaterials.stream()
++                .map((trimMaterial) -> NBT.Compound(Map.of(
++                        "id", NBT.Int(trimMaterial.id()),
++                        "name", NBT.String(trimMaterial.name()),
++                        "element", trimMaterial.asNBT()
++                ))).map(RegistryEntry.NBT_TO_REG_ENTRY).toList();
++    }
++
++    public List<RegistryEntry> toTrimPatternRegistryEntries() {
++        return this.trimPatterns.stream()
++                .map((trimPattern) -> NBT.Compound(Map.of(
++                        "id", NBT.Int(trimPattern.id()),
++                        "name", NBT.String(trimPattern.name()),
++                        "element", trimPattern.asNBT()
++                ))).map(RegistryEntry.NBT_TO_REG_ENTRY).toList();
++    }
++
+     public NBTCompound getTrimPatternNBT() {
+         if (trimPatternCache == null) {
+             var trimPatterns = this.trimPatterns.stream()
+diff --git a/src/main/java/net/minestom/server/listener/common/SettingsListener.java b/src/main/java/net/minestom/server/listener/common/SettingsListener.java
+index 8d25bfe1d1023baf4013bc2a8c96f6c82a343316..7741eed94ac4a4f4972014d4a3c4681a2733441f 100644
+--- a/src/main/java/net/minestom/server/listener/common/SettingsListener.java
++++ b/src/main/java/net/minestom/server/listener/common/SettingsListener.java
+@@ -8,7 +8,7 @@ import net.minestom.server.network.packet.client.common.ClientSettingsPacket;
+ public final class SettingsListener {
+     public static void listener(ClientSettingsPacket packet, Player player) {
+         Player.PlayerSettings settings = player.getSettings();
+-        // Since viewDistance bounds checking is performed in the refresh function, it is not necessary to check it here
++        // Since chunkRadius bounds checking is performed in the refresh function, it is not necessary to check it here
+         settings.refresh(packet.locale(), packet.viewDistance(), packet.chatMessageType(), packet.chatColors(), packet.displayedSkinParts(), packet.mainHand(), packet.enableTextFiltering(), packet.allowsListing());
+         EventDispatcher.call(new PlayerSettingsChangeEvent(player));
+     }
+diff --git a/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java b/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
+index 0cf0b869b50b4df7c87322c4153d0865ce959084..83b21cc6229d3ad4c3e1cf5af6a565d0d141d38c 100644
+--- a/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
++++ b/src/main/java/net/minestom/server/listener/preplay/HandshakeListener.java
+@@ -43,6 +43,7 @@ public final class HandshakeListener {
+             case 1 -> connection.setConnectionState(ConnectionState.STATUS);
+             case 2 -> {
+                 connection.setConnectionState(ConnectionState.LOGIN);
++                System.out.println(packet.protocolVersion());
+                 if (packet.protocolVersion() != MinecraftServer.PROTOCOL_VERSION) {
+                     // Incorrect client version
+                     disconnect(connection, INVALID_VERSION_TEXT);
+@@ -114,6 +115,9 @@ public final class HandshakeListener {
+                     }
+                 }
+             }
++            case 3 -> {
++                //TODO: Transfer
++            }
+             default -> {
+                 // Unexpected error
+             }
+diff --git a/src/main/java/net/minestom/server/listener/preplay/LoginListener.java b/src/main/java/net/minestom/server/listener/preplay/LoginListener.java
+index d05c6569e8c2217683ae06b7cf722d8291c66f3a..48a434004e22d857e19c485d42486930725a9827 100644
+--- a/src/main/java/net/minestom/server/listener/preplay/LoginListener.java
++++ b/src/main/java/net/minestom/server/listener/preplay/LoginListener.java
+@@ -17,7 +17,7 @@ import net.minestom.server.network.packet.client.login.ClientEncryptionResponseP
+ import net.minestom.server.network.packet.client.login.ClientLoginAcknowledgedPacket;
+ import net.minestom.server.network.packet.client.login.ClientLoginPluginResponsePacket;
+ import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
+-import net.minestom.server.network.packet.server.login.EncryptionRequestPacket;
++import net.minestom.server.network.packet.server.login.ServerboundHelloPacket;
+ import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
+ import net.minestom.server.network.packet.server.login.LoginPluginRequestPacket;
+ import net.minestom.server.network.player.GameProfile;
+@@ -76,7 +76,7 @@ public final class LoginListener {
+             byte[] nonce = new byte[4];
+             ThreadLocalRandom.current().nextBytes(nonce);
+             socketConnection.setNonce(nonce);
+-            socketConnection.sendPacket(new EncryptionRequestPacket("", publicKey, nonce));
++            socketConnection.sendPacket(new ServerboundHelloPacket("", publicKey, nonce, true));
+         } else {
+             final boolean bungee = BungeeCordProxy.isEnabled();
+             // Offline
+diff --git a/src/main/java/net/minestom/server/message/Messenger.java b/src/main/java/net/minestom/server/message/Messenger.java
+index 16af3663e65253ffde14384f4b98ad372a133433..7e173d34e97f8249e7fb1f97b6e47cc07d7dfbcb 100644
+--- a/src/main/java/net/minestom/server/message/Messenger.java
++++ b/src/main/java/net/minestom/server/message/Messenger.java
+@@ -1,14 +1,18 @@
+ package net.minestom.server.message;
+ 
++import java.util.List;
++
+ import net.kyori.adventure.text.Component;
+ import net.kyori.adventure.text.format.NamedTextColor;
+ import net.minestom.server.entity.Player;
++import net.minestom.server.network.RegistryEntry;
+ import net.minestom.server.network.packet.server.play.SystemChatPacket;
+ import net.minestom.server.utils.PacketUtils;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+ import org.jglrxavpok.hephaistos.nbt.NBTException;
++import org.jglrxavpok.hephaistos.nbt.NBTList;
+ import org.jglrxavpok.hephaistos.parser.SNBTParser;
+ 
+ import java.io.StringReader;
+@@ -27,15 +31,13 @@ public final class Messenger {
+     private static final UUID NO_SENDER = new UUID(0, 0);
+     private static final SystemChatPacket CANNOT_SEND_PACKET = new SystemChatPacket(CANNOT_SEND_MESSAGE, false);
+ 
+-    private static final NBTCompound CHAT_REGISTRY;
++    private static final NBTList<NBTCompound> CHAT_REGISTRY;
+ 
+     static {
+         try {
+-            CHAT_REGISTRY = (NBTCompound) new SNBTParser(new StringReader(
++            CHAT_REGISTRY = (NBTList<NBTCompound>) new SNBTParser(new StringReader(
+                     """
+-                            {
+-                                "type": "minecraft:chat_type",
+-                                "value": [
++                            [
+                                      {
+                                         "name":"minecraft:chat",
+                                         "id":1,
+@@ -55,18 +57,21 @@ public final class Messenger {
+                                               ]
+                                            }
+                                         }
+-                                     }    ]
+-                            }"""
++                                     }    ]"""
+             )).parse();
+         } catch (NBTException e) {
+             throw new RuntimeException(e);
+         }
+     }
+ 
+-    public static @NotNull NBTCompound chatRegistry() {
++    public static @NotNull NBTList<NBTCompound> chatRegistry() {
+         return CHAT_REGISTRY;
+     }
+ 
++    public static @NotNull List<RegistryEntry> registryEntries() {
++        return chatRegistry().getValue().stream().map(RegistryEntry.NBT_TO_REG_ENTRY).toList();
++    }
++
+     /**
+      * Sends a message to a player, respecting their chat settings.
+      *
+diff --git a/src/main/java/net/minestom/server/network/ConnectionManager.java b/src/main/java/net/minestom/server/network/ConnectionManager.java
+index f59f075ce9604f0b06b9df52f5abfbf54d74e4c8..5f5ca929cd18545cc3fdbeb93096a0716fb92858 100644
+--- a/src/main/java/net/minestom/server/network/ConnectionManager.java
++++ b/src/main/java/net/minestom/server/network/ConnectionManager.java
+@@ -16,10 +16,11 @@ import net.minestom.server.network.packet.server.common.PluginMessagePacket;
+ import net.minestom.server.network.packet.server.common.TagsPacket;
+ import net.minestom.server.network.packet.server.configuration.FinishConfigurationPacket;
+ import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
+-import net.minestom.server.network.packet.server.login.LoginSuccessPacket;
++import net.minestom.server.network.packet.server.login.ServerboundGameProfilePacket;
+ import net.minestom.server.network.packet.server.play.StartConfigurationPacket;
+ import net.minestom.server.network.player.PlayerConnection;
+ import net.minestom.server.network.player.PlayerSocketConnection;
++import net.minestom.server.utils.NamespaceID;
+ import net.minestom.server.utils.StringUtils;
+ import net.minestom.server.utils.async.AsyncUtils;
+ import net.minestom.server.utils.debug.DebugUtils;
+@@ -29,7 +30,7 @@ import org.jctools.queues.MpscUnboundedArrayQueue;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+-import org.jglrxavpok.hephaistos.nbt.NBT;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+ import org.slf4j.Logger;
+ import org.slf4j.LoggerFactory;
+ 
+@@ -243,8 +244,8 @@ public final class ConnectionManager {
+             }
+ 
+             // Send login success packet (and switch to configuration phase)
+-            LoginSuccessPacket loginSuccessPacket = new LoginSuccessPacket(player.getUuid(), player.getUsername(), 0);
+-            playerConnection.sendPacket(loginSuccessPacket);
++            ServerboundGameProfilePacket serverboundGameProfilePacket = new ServerboundGameProfilePacket(player.getUuid(), player.getUsername(), 0);
++            playerConnection.sendPacket(serverboundGameProfilePacket);
+         });
+     }
+ 
+@@ -273,14 +274,13 @@ public final class ConnectionManager {
+ 
+             // Registry data (if it should be sent)
+             if (event.willSendRegistryData()) {
+-                var registry = new HashMap<String, NBT>();
+-                registry.put("minecraft:chat_type", Messenger.chatRegistry());
+-                registry.put("minecraft:dimension_type", MinecraftServer.getDimensionTypeManager().toNBT());
+-                registry.put("minecraft:worldgen/biome", MinecraftServer.getBiomeManager().toNBT());
+-                registry.put("minecraft:damage_type", DamageType.getNBT());
+-                registry.put("minecraft:trim_material", MinecraftServer.getTrimManager().getTrimMaterialNBT());
+-                registry.put("minecraft:trim_pattern", MinecraftServer.getTrimManager().getTrimPatternNBT());
+-                player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
++                var registry = new HashMap<String, NBTCompound>();
++                player.sendPacket(new RegistryDataPacket(NamespaceID.from("minecraft:dimension_type"), MinecraftServer.getDimensionTypeManager().toRegistryEntries()));
++                player.sendPacket(new RegistryDataPacket(NamespaceID.from("minecraft:worldgen/biome"), MinecraftServer.getBiomeManager().toRegistryEntries()));
++                player.sendPacket(new RegistryDataPacket(NamespaceID.from("minecraft:damage_type"), DamageType.getRegistryEntries()));
++                player.sendPacket(new RegistryDataPacket(NamespaceID.from("minecraft:trim_material"), MinecraftServer.getTrimManager().toTrimMaterialRegistryEntries()));
++                player.sendPacket(new RegistryDataPacket(NamespaceID.from("minecraft:trim_pattern"), MinecraftServer.getTrimManager().toTrimPatternRegistryEntries()));
++                player.sendPacket(new RegistryDataPacket(NamespaceID.from("minecraft:chat_type"), Messenger.registryEntries()));
+ 
+                 player.sendPacket(TagsPacket.DEFAULT_TAGS);
+             }
+diff --git a/src/main/java/net/minestom/server/network/NetworkBuffer.java b/src/main/java/net/minestom/server/network/NetworkBuffer.java
+index 07118782494b840d26fd7a10f3f19ef167faf492..a092c5cf3fc29d79f31e0e5d3267ec8ffad74253 100644
+--- a/src/main/java/net/minestom/server/network/NetworkBuffer.java
++++ b/src/main/java/net/minestom/server/network/NetworkBuffer.java
+@@ -53,6 +53,7 @@ public final class NetworkBuffer {
+     public static final Type<@Nullable ItemStack> ITEM = NetworkBufferTypes.ITEM;
+ 
+     public static final Type<byte[]> BYTE_ARRAY = NetworkBufferTypes.BYTE_ARRAY;
++    public static final Type<byte[]> BYTE_ARRAY_2048 = NetworkBufferTypes.BYTE_ARRAY_2048;
+     public static final Type<long[]> LONG_ARRAY = NetworkBufferTypes.LONG_ARRAY;
+     public static final Type<int[]> VAR_INT_ARRAY = NetworkBufferTypes.VAR_INT_ARRAY;
+     public static final Type<long[]> VAR_LONG_ARRAY = NetworkBufferTypes.VAR_LONG_ARRAY;
+diff --git a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
+index 13cc9079a34832e9bae32d275b0e9842bd761164..e2df4a0cd49a086ae2e083860bad6ae45b32040e 100644
+--- a/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
++++ b/src/main/java/net/minestom/server/network/NetworkBufferTypes.java
+@@ -367,6 +367,25 @@ final class NetworkBufferTypes {
+                 buffer.readIndex += length;
+                 return bytes;
+             });
++    static final TypeImpl<byte[]> BYTE_ARRAY_2048 = new TypeImpl<>(byte[].class,
++            (buffer, value) -> {
++                if (value.length > 2048) {
++                    return -1;
++                }
++                buffer.write(VAR_INT, value.length);
++                buffer.write(RAW_BYTES, value);
++                return -1;
++            },
++            buffer -> {
++                final int length = buffer.read(VAR_INT);
++                if (length > 2048) {
++                    return new byte[2048];
++                }
++                final byte[] bytes = new byte[length];
++                buffer.nioBuffer.get(buffer.readIndex(), bytes);
++                buffer.readIndex += length;
++                return bytes;
++            });
+     static final TypeImpl<long[]> LONG_ARRAY = new TypeImpl<>(long[].class,
+             (buffer, value) -> {
+                 buffer.write(VAR_INT, value.length);
+diff --git a/src/main/java/net/minestom/server/network/RegistryEntry.java b/src/main/java/net/minestom/server/network/RegistryEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..c54c10e06d1d94bdfb94b8d1a27fa1ec8f51cce9
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/RegistryEntry.java
+@@ -0,0 +1,20 @@
++package net.minestom.server.network;
++
++import java.util.function.Function;
++
++import org.jetbrains.annotations.Nullable;
++import org.jglrxavpok.hephaistos.nbt.NBT;
++import org.jglrxavpok.hephaistos.nbt.NBTCompound;
++
++/**
++ * Ref: https://github.com/ViaVersion/ViaVersion/blob/dev/api/src/main/java/com/viaversion/viaversion/api/minecraft/RegistryEntry.java
++ * @param key
++ * @param nbt
++ */
++public record RegistryEntry(String key,@Nullable NBT nbt) {
++
++    public static Function<NBTCompound, RegistryEntry> NBT_TO_REG_ENTRY = entries -> new RegistryEntry(
++            entries.getString("name"),
++            entries.get("element")
++    );
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
+index 80ec4e5c10136c5c972a5630db95a14be775ba48..87b85a1f43b3dac0d5d4aacc8a88261c26304572 100644
+--- a/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
++++ b/src/main/java/net/minestom/server/network/packet/client/ClientPacketsHandler.java
+@@ -3,6 +3,8 @@ package net.minestom.server.network.packet.client;
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.client.common.*;
+ import net.minestom.server.network.packet.client.configuration.ClientFinishConfigurationPacket;
++import net.minestom.server.network.packet.client.cookie.ClientboundCookieResponsePacket;
++import net.minestom.server.network.packet.server.cookie.ServerboundStoreCookiePacket;
+ import net.minestom.server.network.packet.client.login.ClientEncryptionResponsePacket;
+ import net.minestom.server.network.packet.client.login.ClientLoginAcknowledgedPacket;
+ import net.minestom.server.network.packet.client.login.ClientLoginPluginResponsePacket;
+@@ -60,6 +62,7 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
+             register(nextId(), ClientEncryptionResponsePacket::new);
+             register(nextId(), ClientLoginPluginResponsePacket::new);
+             register(nextId(), ClientLoginAcknowledgedPacket::new);
++            register(nextId(), ClientboundCookieResponsePacket::new);
+         }
+     }
+ 
+@@ -71,6 +74,7 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
+ 
+         public Configuration() {
+             register(nextId(), ClientSettingsPacket::new);
++            register(nextId(), ClientboundCookieResponsePacket::new);
+             register(nextId(), ClientPluginMessagePacket::new);
+             register(nextId(), ClientFinishConfigurationPacket::new);
+             register(nextId(), ClientKeepAlivePacket::new);
+@@ -104,6 +108,7 @@ public sealed class ClientPacketsHandler permits ClientPacketsHandler.Status, Cl
+             register(nextId(), ClientClickWindowPacket::new);
+             register(nextId(), ClientCloseWindowPacket::new);
+             register(nextId(), ClientWindowSlotStatePacket::new);
++            register(nextId(), ClientboundCookieResponsePacket::new);
+             register(nextId(), ClientPluginMessagePacket::new);
+             register(nextId(), ClientEditBookPacket::new);
+             register(nextId(), ClientQueryEntityNbtPacket::new);
+diff --git a/src/main/java/net/minestom/server/network/packet/client/cookie/ClientboundCookieResponsePacket.java b/src/main/java/net/minestom/server/network/packet/client/cookie/ClientboundCookieResponsePacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..c642cac053fbbfb7996363e12f6ffde3662f6567
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/client/cookie/ClientboundCookieResponsePacket.java
+@@ -0,0 +1,21 @@
++package net.minestom.server.network.packet.client.cookie;
++
++import net.kyori.adventure.key.Namespaced;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.client.ClientPacket;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++public record ClientboundCookieResponsePacket(Namespaced namespaced, byte @Nullable [] data) implements ClientPacket {
++
++    public ClientboundCookieResponsePacket(@NotNull NetworkBuffer reader) {
++        this(NamespaceID.from(reader.read(NetworkBuffer.STRING)), reader.readOptional(NetworkBuffer.BYTE_ARRAY));
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.STRING, namespaced.toString());
++        writer.writeOptional(NetworkBuffer.BYTE_ARRAY, data);
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/server/ServerPacketIdentifier.java b/src/main/java/net/minestom/server/network/packet/server/ServerPacketIdentifier.java
+index c6afcdc877550892f508d500c448191826c60f82..791c4ebdde47a0937a09fd9b883ced30a1b33652 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/ServerPacketIdentifier.java
++++ b/src/main/java/net/minestom/server/network/packet/server/ServerPacketIdentifier.java
+@@ -9,21 +9,25 @@ public final class ServerPacketIdentifier {
+     public static final int STATUS_PING_RESPONSE = 0x01;
+ 
+     public static final int LOGIN_DISCONNECT = 0x00;
+-    public static final int LOGIN_ENCRYPTION_REQUEST = 0x01;
+-    public static final int LOGIN_SUCCESS = 0x02;
++    public static final int LOGIN_HELLO_PACKET = 0x01;
++    public static final int LOGIN_GAMEPROFILE = 0x02;
+     public static final int LOGIN_SET_COMPRESSION = 0x03;
+     public static final int LOGIN_PLUGIN_REQUEST = 0x04;
++    public static final int LOGIN_COOKIE_REQUEST = 0x05;
+ 
+-    public static final int CONFIGURATION_PLUGIN_MESSAGE = 0x00;
+-    public static final int CONFIGURATION_DISCONNECT = 0x01;
+-    public static final int CONFIGURATION_FINISH_CONFIGURATION = 0x02;
+-    public static final int CONFIGURATION_KEEP_ALIVE = 0x03;
+-    public static final int CONFIGURATION_PING = 0x04;
+-    public static final int CONFIGURATION_REGISTRY_DATA = 0x05;
+-    public static final int CONFIGURATION_RESOURCE_PACK_POP_PACKET = 0x06;
+-    public static final int CONFIGURATION_RESOURCE_PACK_PUSH_PACKET = 0x07;
+-    public static final int CONFIGURATION_UPDATE_ENABLED_FEATURES = 0x08;
+-    public static final int CONFIGURATION_TAGS = 0x09;
++    public static final int CONFIGURATION_COOKIE_REQUEST_PACKET = 0x00;
++    public static final int CONFIGURATION_PLUGIN_MESSAGE = 0x01;
++    public static final int CONFIGURATION_DISCONNECT = 0x02;
++    public static final int CONFIGURATION_FINISH_CONFIGURATION = 0x03;
++    public static final int CONFIGURATION_KEEP_ALIVE = 0x04;
++    public static final int CONFIGURATION_PING = 0x05;
++    public static final int CONFIGURATION_REGISTRY_DATA = 0x06;
++    public static final int CONFIGURATION_RESOURCE_PACK_POP_PACKET = 0x07;
++    public static final int CONFIGURATION_RESOURCE_PACK_PUSH_PACKET = 0x08;
++    public static final int CONFIGURATION_STORE_COOKIE_PACKET = 0x09;
++    public static final int CONFIGURATION_TRANSFER_PACKET = 0x0A;
++    public static final int CONFIGURATION_UPDATE_ENABLED_FEATURES = 0x0B;
++    public static final int CONFIGURATION_TAGS = 0x0C;
+ 
+     public static final int BUNDLE = nextPlayId();
+     public static final int SPAWN_ENTITY = nextPlayId();
+@@ -47,10 +51,12 @@ public final class ServerPacketIdentifier {
+     public static final int WINDOW_ITEMS = nextPlayId();
+     public static final int WINDOW_PROPERTY = nextPlayId();
+     public static final int SET_SLOT = nextPlayId();
++    public static final int COOKIE_REQUEST = nextPlayId();
+     public static final int SET_COOLDOWN = nextPlayId();
+     public static final int CUSTOM_CHAT_COMPLETIONS = nextPlayId();
+     public static final int PLUGIN_MESSAGE = nextPlayId();
+     public static final int DAMAGE_EVENT = nextPlayId();
++    public static final int DEBUG = nextPlayId();
+     public static final int DELETE_CHAT_MESSAGE = nextPlayId();
+     public static final int DISCONNECT = nextPlayId();
+     public static final int DISGUISED_CHAT = nextPlayId();
+@@ -66,7 +72,7 @@ public final class ServerPacketIdentifier {
+     public static final int EFFECT = nextPlayId();
+     public static final int PARTICLE = nextPlayId();
+     public static final int UPDATE_LIGHT = nextPlayId();
+-    public static final int JOIN_GAME = nextPlayId();
++    public static final int LOGIN = nextPlayId();
+     public static final int MAP_DATA = nextPlayId();
+     public static final int TRADE_LIST = nextPlayId();
+     public static final int ENTITY_POSITION = nextPlayId();
+@@ -130,6 +136,7 @@ public final class ServerPacketIdentifier {
+     public static final int SOUND_EFFECT = nextPlayId();
+     public static final int START_CONFIGURATION_PACKET = nextPlayId();
+     public static final int STOP_SOUND = nextPlayId();
++    public static final int STORE_COOKIE = nextPlayId();
+     public static final int SYSTEM_CHAT = nextPlayId();
+     public static final int PLAYER_LIST_HEADER_AND_FOOTER = nextPlayId();
+     public static final int NBT_QUERY_RESPONSE = nextPlayId();
+@@ -137,6 +144,7 @@ public final class ServerPacketIdentifier {
+     public static final int ENTITY_TELEPORT = nextPlayId();
+     public static final int TICK_STATE = nextPlayId();
+     public static final int TICK_STEP = nextPlayId();
++    public static final int TRANSFER = nextPlayId();
+     public static final int ADVANCEMENTS = nextPlayId();
+     public static final int ENTITY_PROPERTIES = nextPlayId();
+     public static final int ENTITY_EFFECT = nextPlayId();
+diff --git a/src/main/java/net/minestom/server/network/packet/server/configuration/RegistryDataPacket.java b/src/main/java/net/minestom/server/network/packet/server/configuration/RegistryDataPacket.java
+index 0fb4824a99868527e72c5451ed8e323468e7b01f..01b7f452d057bddca3b0fb4cc5d9ef36e04d0ea1 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/configuration/RegistryDataPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/configuration/RegistryDataPacket.java
+@@ -1,24 +1,47 @@
+ package net.minestom.server.network.packet.server.configuration;
+ 
++import net.kyori.adventure.key.Namespaced;
+ import net.minestom.server.network.ConnectionState;
+ import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.RegistryEntry;
+ import net.minestom.server.network.packet.server.ServerPacket;
+ import net.minestom.server.network.packet.server.ServerPacketIdentifier;
++import net.minestom.server.utils.NamespaceID;
+ import net.minestom.server.utils.PacketUtils;
+ import org.jetbrains.annotations.NotNull;
+-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+ 
+-import static net.minestom.server.network.NetworkBuffer.NBT;
++import java.util.ArrayList;
++import java.util.List;
+ 
+-public record RegistryDataPacket(@NotNull NBTCompound data) implements ServerPacket {
++import static net.minestom.server.network.NetworkBuffer.*;
++
++public record RegistryDataPacket(Namespaced namespaced,
++                                 @NotNull List<RegistryEntry> entryList) implements ServerPacket {
+ 
+     public RegistryDataPacket(@NotNull NetworkBuffer buffer) {
+-        this((NBTCompound) buffer.read(NBT));
++        this(NamespaceID.from(buffer.read(STRING)), read(buffer));
++    }
++
++    private static List<RegistryEntry> read(@NotNull NetworkBuffer buffer) {
++        int size = buffer.read(VAR_INT);
++        List<RegistryEntry> entries = new ArrayList<>(size);
++        for (int i = 0; i < size; i++) {
++            String key = buffer.read(STRING);
++            org.jglrxavpok.hephaistos.nbt.NBT nbt = buffer.readOptional(NBT);
++            RegistryEntry entry = new RegistryEntry(key, nbt);
++            entries.add(entry);
++        }
++        return entries;
+     }
+ 
+     @Override
+     public void write(@NotNull NetworkBuffer writer) {
+-        writer.write(NBT, data);
++        writer.write(STRING, namespaced.toString());
++        writer.write(VAR_INT, entryList.size());
++        entryList.forEach(entry -> {
++            writer.write(STRING, entry.key());
++            writer.writeOptional(NBT, entry.nbt());
++        });
+     }
+ 
+     @Override
+diff --git a/src/main/java/net/minestom/server/network/packet/server/cookie/ServerboundCookieRequestPacket.java b/src/main/java/net/minestom/server/network/packet/server/cookie/ServerboundCookieRequestPacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..ae796bcd537088eb2d43722e86949ccc5ea268c3
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/server/cookie/ServerboundCookieRequestPacket.java
+@@ -0,0 +1,32 @@
++package net.minestom.server.network.packet.server.cookie;
++
++import net.kyori.adventure.key.Namespaced;
++import net.minestom.server.network.ConnectionState;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.server.ServerPacket;
++import net.minestom.server.network.packet.server.ServerPacketIdentifier;
++import net.minestom.server.utils.NamespaceID;
++import net.minestom.server.utils.PacketUtils;
++import org.jetbrains.annotations.NotNull;
++
++public record ServerboundCookieRequestPacket(@NotNull Namespaced namespaced) implements ServerPacket {
++
++    public ServerboundCookieRequestPacket(@NotNull NetworkBuffer reader) {
++        this(NamespaceID.from(reader.read(NetworkBuffer.STRING)));
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.STRING, namespaced.toString());
++    }
++
++    @Override
++    public int getId(@NotNull ConnectionState state) {
++        return switch (state) {
++            case CONFIGURATION -> ServerPacketIdentifier.CONFIGURATION_COOKIE_REQUEST_PACKET;
++            case PLAY -> ServerPacketIdentifier.COOKIE_REQUEST;
++            case LOGIN -> ServerPacketIdentifier.LOGIN_COOKIE_REQUEST;
++            default -> PacketUtils.invalidPacketState(getClass(), state, ConnectionState.HANDSHAKE, ConnectionState.STATUS);
++        };
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/server/cookie/ServerboundStoreCookiePacket.java b/src/main/java/net/minestom/server/network/packet/server/cookie/ServerboundStoreCookiePacket.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..1d71459588a4bc7a7ec593f2756945b59e177c25
+--- /dev/null
++++ b/src/main/java/net/minestom/server/network/packet/server/cookie/ServerboundStoreCookiePacket.java
+@@ -0,0 +1,33 @@
++package net.minestom.server.network.packet.server.cookie;
++
++import net.kyori.adventure.key.Namespaced;
++import net.minestom.server.network.ConnectionState;
++import net.minestom.server.network.NetworkBuffer;
++import net.minestom.server.network.packet.server.ServerPacket;
++import net.minestom.server.network.packet.server.ServerPacketIdentifier;
++import net.minestom.server.utils.NamespaceID;
++import net.minestom.server.utils.PacketUtils;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++public record ServerboundStoreCookiePacket(Namespaced namespaced, byte @Nullable [] data) implements ServerPacket {
++
++    public ServerboundStoreCookiePacket(@NotNull NetworkBuffer reader) {
++        this(NamespaceID.from(reader.read(NetworkBuffer.STRING)), reader.readOptional(NetworkBuffer.BYTE_ARRAY));
++    }
++
++    @Override
++    public void write(@NotNull NetworkBuffer writer) {
++        writer.write(NetworkBuffer.STRING, namespaced.toString());
++        writer.writeOptional(NetworkBuffer.BYTE_ARRAY, data);
++    }
++
++    @Override
++    public int getId(@NotNull ConnectionState state) {
++        return switch (state) {
++            case CONFIGURATION -> ServerPacketIdentifier.CONFIGURATION_STORE_COOKIE_PACKET;
++            case PLAY -> ServerPacketIdentifier.STORE_COOKIE;
++            default -> PacketUtils.invalidPacketState(getClass(), state, ConnectionState.HANDSHAKE, ConnectionState.STATUS);
++        };
++    }
++}
+diff --git a/src/main/java/net/minestom/server/network/packet/server/login/LoginSuccessPacket.java b/src/main/java/net/minestom/server/network/packet/server/login/ServerboundGameProfilePacket.java
+similarity index 79%
+rename from src/main/java/net/minestom/server/network/packet/server/login/LoginSuccessPacket.java
+rename to src/main/java/net/minestom/server/network/packet/server/login/ServerboundGameProfilePacket.java
+index 8d8604fcb53ca0b681f5ef67b25e1bcdb8a0a5c3..eb5dcfcae7428ae92bd3e366d7270150095446a1 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/login/LoginSuccessPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/login/ServerboundGameProfilePacket.java
+@@ -12,8 +12,8 @@ import java.util.UUID;
+ import static net.minestom.server.network.NetworkBuffer.STRING;
+ import static net.minestom.server.network.NetworkBuffer.VAR_INT;
+ 
+-public record LoginSuccessPacket(@NotNull UUID uuid, @NotNull String username, int properties) implements ServerPacket {
+-    public LoginSuccessPacket(@NotNull NetworkBuffer reader) {
++public record ServerboundGameProfilePacket(@NotNull UUID uuid, @NotNull String username, int properties) implements ServerPacket {
++    public ServerboundGameProfilePacket(@NotNull NetworkBuffer reader) {
+         this(reader.read(NetworkBuffer.UUID), reader.read(STRING), reader.read(VAR_INT));
+     }
+ 
+@@ -27,7 +27,7 @@ public record LoginSuccessPacket(@NotNull UUID uuid, @NotNull String username, i
+     @Override
+     public int getId(@NotNull ConnectionState state) {
+         return switch (state) {
+-            case LOGIN -> ServerPacketIdentifier.LOGIN_SUCCESS;
++            case LOGIN -> ServerPacketIdentifier.LOGIN_GAMEPROFILE;
+             default -> PacketUtils.invalidPacketState(getClass(), state, ConnectionState.LOGIN);
+         };
+     }
+diff --git a/src/main/java/net/minestom/server/network/packet/server/login/EncryptionRequestPacket.java b/src/main/java/net/minestom/server/network/packet/server/login/ServerboundHelloPacket.java
+similarity index 59%
+rename from src/main/java/net/minestom/server/network/packet/server/login/EncryptionRequestPacket.java
+rename to src/main/java/net/minestom/server/network/packet/server/login/ServerboundHelloPacket.java
+index b9996c341e04f67a51d29c01b195e465e891e9af..879a7680e1960732b443f8ec37cf84e476d4f1a9 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/login/EncryptionRequestPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/login/ServerboundHelloPacket.java
+@@ -2,21 +2,23 @@ package net.minestom.server.network.packet.server.login;
+ 
+ import net.minestom.server.network.ConnectionState;
+ import net.minestom.server.network.NetworkBuffer;
++
++import static net.minestom.server.network.NetworkBuffer.*;
++
+ import net.minestom.server.network.packet.server.ServerPacket;
+ import net.minestom.server.network.packet.server.ServerPacketIdentifier;
+ import net.minestom.server.utils.PacketUtils;
+ import org.jetbrains.annotations.NotNull;
+ 
+-import static net.minestom.server.network.NetworkBuffer.BYTE_ARRAY;
+-import static net.minestom.server.network.NetworkBuffer.STRING;
+-
+-public record EncryptionRequestPacket(@NotNull String serverId,
+-                                      byte @NotNull [] publicKey,
+-                                      byte @NotNull [] verifyToken) implements ServerPacket {
+-    public EncryptionRequestPacket(@NotNull NetworkBuffer reader) {
++public record ServerboundHelloPacket(@NotNull String serverId,
++                                     byte @NotNull [] publicKey,
++                                     byte @NotNull [] verifyToken,
++                                     boolean shouldAuthenticate) implements ServerPacket {
++    public ServerboundHelloPacket(@NotNull NetworkBuffer reader) {
+         this(reader.read(STRING),
+                 reader.read(BYTE_ARRAY),
+-                reader.read(BYTE_ARRAY));
++                reader.read(BYTE_ARRAY),
++                reader.read(BOOLEAN));
+     }
+ 
+     @Override
+@@ -24,12 +26,13 @@ public record EncryptionRequestPacket(@NotNull String serverId,
+         writer.write(STRING, serverId);
+         writer.write(BYTE_ARRAY, publicKey);
+         writer.write(BYTE_ARRAY, verifyToken);
++        writer.write(BOOLEAN, shouldAuthenticate);
+     }
+ 
+     @Override
+     public int getId(@NotNull ConnectionState state) {
+         return switch (state) {
+-            case LOGIN -> ServerPacketIdentifier.LOGIN_ENCRYPTION_REQUEST;
++            case LOGIN -> ServerPacketIdentifier.LOGIN_HELLO_PACKET;
+             default -> PacketUtils.invalidPacketState(getClass(), state, ConnectionState.LOGIN);
+         };
+     }
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/DeclareRecipesPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/DeclareRecipesPacket.java
+index 072d764ea4de8f8dc7c198c978fb3217ffb27062..511619a454d73e74e15a9b82aff9861134187c0a 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/DeclareRecipesPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/DeclareRecipesPacket.java
+@@ -42,7 +42,7 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+     public void write(@NotNull NetworkBuffer writer) {
+         writer.writeCollection(recipes, (bWriter, recipe) -> {
+             bWriter.write(STRING, recipe.type());
+-            bWriter.write(STRING, recipe.recipeId());
++            bWriter.write(VAR_INT, recipe.indexId());
+             bWriter.write(recipe);
+         });
+     }
+@@ -63,14 +63,16 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         @NotNull String type();
+ 
+         @NotNull String recipeId();
++
++        Integer indexId();
+     }
+ 
+-    public record DeclaredShapelessCraftingRecipe(@NotNull String recipeId, @NotNull String group,
++    public record DeclaredShapelessCraftingRecipe(Integer indexId, @NotNull String recipeId, @NotNull String group,
+                                                   @NotNull RecipeCategory.Crafting crafting,
+                                                   @NotNull List<Ingredient> ingredients,
+                                                   @NotNull ItemStack result) implements DeclaredRecipe {
+         private DeclaredShapelessCraftingRecipe(@NotNull NetworkBuffer reader) {
+-            this(reader.read(STRING), reader.read(STRING),
++            this(reader.read(VAR_INT), reader.read(STRING), reader.read(STRING),
+                     reader.readEnum(RecipeCategory.Crafting.class),
+                     reader.readCollection(Ingredient::new), reader.read(ITEM));
+         }
+@@ -89,7 +91,7 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+     }
+ 
+-    public record DeclaredShapedCraftingRecipe(@NotNull String recipeId,
++    public record DeclaredShapedCraftingRecipe(Integer indexId, @NotNull String recipeId,
+                                                @NotNull String group, @NotNull RecipeCategory.Crafting category,
+                                                int width, int height, @NotNull List<Ingredient> ingredients,
+                                                @NotNull ItemStack result, boolean showNotification) implements DeclaredRecipe {
+@@ -98,7 +100,7 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+ 
+         private DeclaredShapedCraftingRecipe(DeclaredShapedCraftingRecipe packet) {
+-            this(packet.recipeId, packet.group, packet.category, packet.width, packet.height, packet.ingredients, packet.result, packet.showNotification);
++            this(packet.indexId, packet.recipeId, packet.group, packet.category, packet.width, packet.height, packet.ingredients, packet.result, packet.showNotification);
+         }
+ 
+         public DeclaredShapedCraftingRecipe(@NotNull NetworkBuffer reader) {
+@@ -107,6 +109,7 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+ 
+         private static DeclaredShapedCraftingRecipe read(@NotNull NetworkBuffer reader) {
+ 
++            int indexId = reader.read(VAR_INT);
+             String recipeId = reader.read(STRING);
+             String group = reader.read(STRING);
+             RecipeCategory.Crafting category = reader.readEnum(RecipeCategory.Crafting.class);
+@@ -118,7 +121,7 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+             }
+             ItemStack result = reader.read(ITEM);
+             boolean showNotification = reader.read(BOOLEAN);
+-            return new DeclaredShapedCraftingRecipe(recipeId, group, category, width, height, ingredients, result, showNotification);
++            return new DeclaredShapedCraftingRecipe(indexId, recipeId, group, category, width, height, ingredients, result, showNotification);
+         }
+ 
+         @Override
+@@ -140,12 +143,12 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+     }
+ 
+-    public record DeclaredSmeltingRecipe(@NotNull String recipeId, @NotNull String group,
++    public record DeclaredSmeltingRecipe(Integer indexId, @NotNull String recipeId, @NotNull String group,
+                                          @NotNull RecipeCategory.Cooking category, @NotNull Ingredient ingredient,
+                                          @NotNull ItemStack result, float experience,
+                                          int cookingTime) implements DeclaredRecipe {
+         public DeclaredSmeltingRecipe(@NotNull NetworkBuffer reader) {
+-            this(reader.read(STRING), reader.read(STRING),
++            this(reader.read(VAR_INT), reader.read(STRING), reader.read(STRING),
+                     reader.readEnum(RecipeCategory.Cooking.class),
+                     new Ingredient(reader), reader.read(ITEM),
+                     reader.read(FLOAT), reader.read(VAR_INT));
+@@ -167,12 +170,12 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+     }
+ 
+-    public record DeclaredBlastingRecipe(@NotNull String recipeId, @NotNull String group,
++    public record DeclaredBlastingRecipe(Integer indexId, @NotNull String recipeId, @NotNull String group,
+                                          @NotNull RecipeCategory.Cooking category, @NotNull Ingredient ingredient,
+                                          @NotNull ItemStack result, float experience,
+                                          int cookingTime) implements DeclaredRecipe {
+         public DeclaredBlastingRecipe(@NotNull NetworkBuffer reader) {
+-            this(reader.read(STRING), reader.read(STRING),
++            this(reader.read(VAR_INT), reader.read(STRING), reader.read(STRING),
+                     reader.readEnum(RecipeCategory.Cooking.class),
+                     new Ingredient(reader), reader.read(ITEM),
+                     reader.read(FLOAT), reader.read(VAR_INT));
+@@ -194,12 +197,12 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+     }
+ 
+-    public record DeclaredSmokingRecipe(@NotNull String recipeId, @NotNull String group,
++    public record DeclaredSmokingRecipe(Integer indexId, @NotNull String recipeId, @NotNull String group,
+                                         @NotNull RecipeCategory.Cooking category, @NotNull Ingredient ingredient,
+                                         @NotNull ItemStack result, float experience,
+                                         int cookingTime) implements DeclaredRecipe {
+         public DeclaredSmokingRecipe(@NotNull NetworkBuffer reader) {
+-            this(reader.read(STRING), reader.read(STRING),
++            this(reader.read(VAR_INT), reader.read(STRING), reader.read(STRING),
+                     reader.readEnum(RecipeCategory.Cooking.class),
+                     new Ingredient(reader), reader.read(ITEM),
+                     reader.read(FLOAT), reader.read(VAR_INT));
+@@ -221,12 +224,12 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+     }
+ 
+-    public record DeclaredCampfireCookingRecipe(@NotNull String recipeId, @NotNull String group,
++    public record DeclaredCampfireCookingRecipe(Integer indexId, @NotNull String recipeId, @NotNull String group,
+                                                 @NotNull RecipeCategory.Cooking category, @NotNull Ingredient ingredient,
+                                                 @NotNull ItemStack result, float experience,
+                                                 int cookingTime) implements DeclaredRecipe {
+         public DeclaredCampfireCookingRecipe(@NotNull NetworkBuffer reader) {
+-            this(reader.read(STRING), reader.read(STRING),
++            this(reader.read(VAR_INT), reader.read(STRING), reader.read(STRING),
+                     reader.readEnum(RecipeCategory.Cooking.class),
+                     new Ingredient(reader), reader.read(ITEM),
+                     reader.read(FLOAT), reader.read(VAR_INT));
+@@ -248,10 +251,10 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+     }
+ 
+-    public record DeclaredStonecutterRecipe(String recipeId, String group,
++    public record DeclaredStonecutterRecipe(Integer indexId, String recipeId, String group,
+                                             Ingredient ingredient, ItemStack result) implements DeclaredRecipe {
+         public DeclaredStonecutterRecipe(@NotNull NetworkBuffer reader) {
+-            this(reader.read(STRING), reader.read(STRING),
++            this(reader.read(VAR_INT), reader.read(STRING), reader.read(STRING),
+                     new Ingredient(reader), reader.read(ITEM));
+         }
+ 
+@@ -268,11 +271,11 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+     }
+ 
+-    public record DeclaredSmithingTransformRecipe(String recipeId, Ingredient template,
++    public record DeclaredSmithingTransformRecipe(Integer indexId, String recipeId, Ingredient template,
+                                                   Ingredient base, Ingredient addition,
+                                                   ItemStack result) implements DeclaredRecipe {
+         public DeclaredSmithingTransformRecipe(@NotNull NetworkBuffer reader) {
+-            this(reader.read(STRING), new Ingredient(reader), new Ingredient(reader), new Ingredient(reader), reader.read(ITEM));
++            this(reader.read(VAR_INT), reader.read(STRING), new Ingredient(reader), new Ingredient(reader), new Ingredient(reader), reader.read(ITEM));
+         }
+ 
+         @Override
+@@ -289,10 +292,10 @@ public record DeclareRecipesPacket(@NotNull List<DeclaredRecipe> recipes) implem
+         }
+     }
+ 
+-    public record DeclaredSmithingTrimRecipe(String recipeId, Ingredient template,
++    public record DeclaredSmithingTrimRecipe(Integer indexId, String recipeId, Ingredient template,
+                                              Ingredient base, Ingredient addition) implements DeclaredRecipe {
+         public DeclaredSmithingTrimRecipe(@NotNull NetworkBuffer reader) {
+-            this(reader.read(STRING), new Ingredient(reader), new Ingredient(reader), new Ingredient(reader));
++            this(reader.read(VAR_INT), reader.read(STRING), new Ingredient(reader), new Ingredient(reader), new Ingredient(reader));
+         }
+ 
+         @Override
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
+index fea7090fe4f672cdc089d17edc8d942e632a6b3f..39ed430e6875a39ea13f803e40e2caf498801394 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
+@@ -24,7 +24,7 @@ public record EntityPropertiesPacket(int entityId, List<AttributeInstance> prope
+ 
+     public EntityPropertiesPacket(@NotNull NetworkBuffer reader) {
+         this(reader.read(VAR_INT), reader.readCollection(r -> {
+-            final Attribute attribute = MinecraftServer.getAttributeManager().fromKey(reader.read(STRING));
++            final Attribute attribute = MinecraftServer.getAttributeManager().fromId(reader.read(VAR_INT));
+             final double value = reader.read(DOUBLE);
+             int modifierCount = reader.read(VAR_INT);
+             AttributeInstance instance = new AttributeInstance(attribute, null);
+@@ -43,7 +43,7 @@ public record EntityPropertiesPacket(int entityId, List<AttributeInstance> prope
+         for (AttributeInstance instance : properties) {
+             final Attribute attribute = instance.getAttribute();
+ 
+-            writer.write(STRING, attribute.key());
++            writer.write(VAR_INT, MinecraftServer.getAttributeManager().getAttributeCount(attribute));
+             writer.write(DOUBLE, (double) instance.getBaseValue());
+ 
+             {
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java b/src/main/java/net/minestom/server/network/packet/server/play/LoginPacket.java
+similarity index 74%
+rename from src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java
+rename to src/main/java/net/minestom/server/network/packet/server/play/LoginPacket.java
+index b1a55f5aac654bb2ba4c0692f2ada843c0446b18..0563a3c0d0afd0b47a460658f69053e30921757e 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/JoinGamePacket.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/LoginPacket.java
+@@ -1,32 +1,34 @@
+ package net.minestom.server.network.packet.server.play;
+ 
++import net.minestom.server.MinecraftServer;
+ import net.minestom.server.entity.GameMode;
+ import net.minestom.server.network.ConnectionState;
+ import net.minestom.server.network.NetworkBuffer;
+ import net.minestom.server.network.packet.server.ServerPacket;
+ import net.minestom.server.network.packet.server.ServerPacketIdentifier;
+ import net.minestom.server.network.packet.server.play.data.DeathLocation;
++import net.minestom.server.utils.NamespaceID;
+ import net.minestom.server.utils.PacketUtils;
++import net.minestom.server.world.DimensionType;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+-import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+ 
+ import java.util.List;
+ 
+ import static net.minestom.server.network.NetworkBuffer.*;
+ 
+-public record JoinGamePacket(
++public record LoginPacket(
+         int entityId, boolean isHardcore, List<String> worlds, int maxPlayers,
+-        int viewDistance, int simulationDistance, boolean reducedDebugInfo, boolean enableRespawnScreen,
++        int chunkRadius, int simulationDistance, boolean reducedDebugInfo, boolean showDeathScreen,
+         boolean doLimitedCrafting,
+-        String dimensionType, String world, long hashedSeed, GameMode gameMode, GameMode previousGameMode,
+-        boolean isDebug, boolean isFlat, DeathLocation deathLocation, int portalCooldown
++        DimensionType dimensionType, String world, long hashedSeed, GameMode gameMode, GameMode previousGameMode,
++        boolean isDebug, boolean isFlat, DeathLocation deathLocation, int portalCooldown, boolean enforceSecure
+ ) implements ServerPacket {
+-    public JoinGamePacket {
++    public LoginPacket {
+         worlds = List.copyOf(worlds);
+     }
+ 
+-    public JoinGamePacket(@NotNull NetworkBuffer reader) {
++    public LoginPacket(@NotNull NetworkBuffer reader) {
+         this(
+                 reader.read(INT),
+                 reader.read(BOOLEAN),
+@@ -38,15 +40,16 @@ public record JoinGamePacket(
+                 reader.read(BOOLEAN),
+                 reader.read(BOOLEAN),
+ 
+-                reader.read(STRING),
++                MinecraftServer.getDimensionTypeManager().getDimension(reader.read(VAR_INT)),
+                 reader.read(STRING),
+                 reader.read(LONG),
+                 GameMode.fromId(reader.read(BYTE)),
+                 getNullableGameMode(reader.read(BYTE)),
+                 reader.read(BOOLEAN),
+                 reader.read(BOOLEAN),
+-                reader.read(DEATH_LOCATION),
+-                reader.read(VAR_INT)
++                reader.readOptional(DEATH_LOCATION),
++                reader.read(VAR_INT),
++                reader.read(BOOLEAN)
+         );
+     }
+ 
+@@ -56,13 +59,13 @@ public record JoinGamePacket(
+         writer.write(BOOLEAN, isHardcore);
+         writer.writeCollection(STRING, worlds);
+         writer.write(VAR_INT, maxPlayers);
+-        writer.write(VAR_INT, viewDistance);
++        writer.write(VAR_INT, chunkRadius);
+         writer.write(VAR_INT, simulationDistance);
+         writer.write(BOOLEAN, reducedDebugInfo);
+-        writer.write(BOOLEAN, enableRespawnScreen);
++        writer.write(BOOLEAN, showDeathScreen);
+         writer.write(BOOLEAN, doLimitedCrafting);
+ 
+-        writer.write(STRING, dimensionType);
++        writer.write(VAR_INT, dimensionType.getId());
+         writer.write(STRING, world);
+         writer.write(LONG, hashedSeed);
+         writer.write(BYTE, gameMode.id());
+@@ -73,14 +76,16 @@ public record JoinGamePacket(
+         }
+         writer.write(BOOLEAN, isDebug);
+         writer.write(BOOLEAN, isFlat);
+-        writer.write(DEATH_LOCATION, deathLocation);
++        writer.writeOptional(DEATH_LOCATION, deathLocation);
+         writer.write(VAR_INT, portalCooldown);
++
++        writer.write(BOOLEAN, enforceSecure);
+     }
+ 
+     @Override
+     public int getId(@NotNull ConnectionState state) {
+         return switch (state) {
+-            case PLAY -> ServerPacketIdentifier.JOIN_GAME;
++            case PLAY -> ServerPacketIdentifier.LOGIN;
+             default -> PacketUtils.invalidPacketState(getClass(), state, ConnectionState.PLAY);
+         };
+     }
+diff --git a/src/main/java/net/minestom/server/network/packet/server/play/data/LightData.java b/src/main/java/net/minestom/server/network/packet/server/play/data/LightData.java
+index 1ffb291f68e1b55bd49dc43d017487ece76d7ee0..c65233f70664ac0fb2d899f6086da52a784c6a58 100644
+--- a/src/main/java/net/minestom/server/network/packet/server/play/data/LightData.java
++++ b/src/main/java/net/minestom/server/network/packet/server/play/data/LightData.java
+@@ -18,7 +18,7 @@ public record LightData(
+         this(
+                 BitSet.valueOf(reader.read(LONG_ARRAY)), BitSet.valueOf(reader.read(LONG_ARRAY)),
+                 BitSet.valueOf(reader.read(LONG_ARRAY)), BitSet.valueOf(reader.read(LONG_ARRAY)),
+-                reader.readCollection(BYTE_ARRAY), reader.readCollection(BYTE_ARRAY)
++                reader.readCollection(BYTE_ARRAY_2048), reader.readCollection(BYTE_ARRAY_2048)
+         );
+     }
+ 
+@@ -30,7 +30,7 @@ public record LightData(
+         writer.write(LONG_ARRAY, emptySkyMask.toLongArray());
+         writer.write(LONG_ARRAY, emptyBlockMask.toLongArray());
+ 
+-        writer.writeCollection(BYTE_ARRAY, skyLight);
+-        writer.writeCollection(BYTE_ARRAY, blockLight);
++        writer.writeCollection(BYTE_ARRAY_2048, skyLight);
++        writer.writeCollection(BYTE_ARRAY_2048, blockLight);
+     }
+ }
+diff --git a/src/main/java/net/minestom/server/recipe/RecipeManager.java b/src/main/java/net/minestom/server/recipe/RecipeManager.java
+index 3f6db28985185b64790b34d6220f9b0b38cb8dfc..f3a760fa79ecf8be66b9f33b172659c48ab32740 100644
+--- a/src/main/java/net/minestom/server/recipe/RecipeManager.java
++++ b/src/main/java/net/minestom/server/recipe/RecipeManager.java
+@@ -42,12 +42,14 @@ public class RecipeManager {
+ 
+     private void refreshRecipesPacket() {
+         List<DeclareRecipesPacket.DeclaredRecipe> recipesCache = new ArrayList<>();
++        int index = 0;
+         for (Recipe recipe : recipes) {
+             switch (recipe.recipeType) {
+                 case SHAPELESS -> {
+                     ShapelessRecipe shapelessRecipe = (ShapelessRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
++                                    index,
+                                     shapelessRecipe.getRecipeId(),
+                                     shapelessRecipe.getGroup(),
+                                     shapelessRecipe.getCategory(),
+@@ -58,6 +60,7 @@ public class RecipeManager {
+                     ShapedRecipe shapedRecipe = (ShapedRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredShapedCraftingRecipe(
++                                    index,
+                                     shapedRecipe.getRecipeId(),
+                                     shapedRecipe.getGroup(),
+                                     shapedRecipe.getCategory(),
+@@ -71,6 +74,7 @@ public class RecipeManager {
+                     SmeltingRecipe smeltingRecipe = (SmeltingRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredSmeltingRecipe(
++                                    index,
+                                     smeltingRecipe.getRecipeId(),
+                                     smeltingRecipe.getGroup(),
+                                     smeltingRecipe.getCategory(),
+@@ -83,6 +87,7 @@ public class RecipeManager {
+                     BlastingRecipe blastingRecipe = (BlastingRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredBlastingRecipe(
++                                    index,
+                                     blastingRecipe.getRecipeId(),
+                                     blastingRecipe.getGroup(),
+                                     blastingRecipe.getCategory(),
+@@ -95,6 +100,7 @@ public class RecipeManager {
+                     SmokingRecipe smokingRecipe = (SmokingRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredSmokingRecipe(
++                                    index,
+                                     smokingRecipe.getRecipeId(),
+                                     smokingRecipe.getGroup(),
+                                     smokingRecipe.getCategory(),
+@@ -107,6 +113,7 @@ public class RecipeManager {
+                     CampfireCookingRecipe campfireCookingRecipe = (CampfireCookingRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredCampfireCookingRecipe(
++                                    index,
+                                     campfireCookingRecipe.getRecipeId(),
+                                     campfireCookingRecipe.getGroup(),
+                                     campfireCookingRecipe.getCategory(),
+@@ -119,6 +126,7 @@ public class RecipeManager {
+                     StonecutterRecipe stonecuttingRecipe = (StonecutterRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredStonecutterRecipe(
++                                    index,
+                                     stonecuttingRecipe.getRecipeId(),
+                                     stonecuttingRecipe.getGroup(),
+                                     stonecuttingRecipe.getIngredient(),
+@@ -128,6 +136,7 @@ public class RecipeManager {
+                     SmithingTransformRecipe smithingTransformRecipe = (SmithingTransformRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredSmithingTransformRecipe(
++                                    index,
+                                     smithingTransformRecipe.getRecipeId(),
+                                     smithingTransformRecipe.getTemplate(),
+                                     smithingTransformRecipe.getBaseIngredient(),
+@@ -138,12 +147,14 @@ public class RecipeManager {
+                     SmithingTrimRecipe smithingTrimRecipe = (SmithingTrimRecipe) recipe;
+                     recipesCache.add(
+                             new DeclareRecipesPacket.DeclaredSmithingTrimRecipe(
++                                    index,
+                                     smithingTrimRecipe.getRecipeId(),
+                                     smithingTrimRecipe.getTemplate(),
+                                     smithingTrimRecipe.getBaseIngredient(),
+                                     smithingTrimRecipe.getAdditionIngredient()));
+                 }
+             }
++            index++;
+         }
+ 
+         declareRecipesPacket = new DeclareRecipesPacket(recipesCache);
+diff --git a/src/main/java/net/minestom/server/world/DimensionTypeManager.java b/src/main/java/net/minestom/server/world/DimensionTypeManager.java
+index 0c38fac887eaed3a9a994b361d7ce44436d4d596..a8cd5a7e4d718a39f9c40ee43ce2eaeb4f8c445e 100644
+--- a/src/main/java/net/minestom/server/world/DimensionTypeManager.java
++++ b/src/main/java/net/minestom/server/world/DimensionTypeManager.java
+@@ -1,5 +1,6 @@
+ package net.minestom.server.world;
+ 
++import net.minestom.server.network.RegistryEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+@@ -71,6 +72,16 @@ public final class DimensionTypeManager {
+         return unmodifiableList().stream().filter(dimensionType -> dimensionType.getName().equals(namespaceID)).filter(DimensionType::isRegistered).findFirst().orElse(null);
+     }
+ 
++    /**
++     * Return to a @{@link DimensionType} only if present and registered
++     *
++     * @param id The Dimension Name
++     * @return a DimensionType if it is present and registered
++     */
++    public @Nullable DimensionType getDimension(@NotNull int id) {
++        return unmodifiableList().stream().filter(dimensionType -> dimensionType.getId() == id).filter(DimensionType::isRegistered).findFirst().orElse(null);
++    }
++
+     /**
+      * Returns an immutable copy of the dimension types already registered.
+      *
+@@ -98,4 +109,11 @@ public final class DimensionTypeManager {
+             ));
+         });
+     }
++
++    public @NotNull List<RegistryEntry> toRegistryEntries() {
++        return dimensionTypes.stream()
++                .map(DimensionType::toIndexedNBT)
++                .map(RegistryEntry.NBT_TO_REG_ENTRY).toList();
++
++    }
+ }
+diff --git a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
+index 8532902956806455dbbb378ba56e08ffb43ecf2d..2ae2e5473c171bb6b7fadb4eab6b659df3c490e6 100644
+--- a/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
++++ b/src/main/java/net/minestom/server/world/biomes/BiomeManager.java
+@@ -1,5 +1,6 @@
+ package net.minestom.server.world.biomes;
+ 
++import net.minestom.server.network.RegistryEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+@@ -92,4 +93,14 @@ public final class BiomeManager {
+                 "type", NBT.String("minecraft:worldgen/biome"),
+                 "value", NBT.List(NBTType.TAG_Compound, nbtCompounds)));
+     }
++
++    public synchronized List<RegistryEntry> toRegistryEntries() {
++        return IntStream
++                .range(0, biomes.size())
++                .mapToObj(i -> {
++                    var biome = biomes.get(i);
++                    biome.setId(i);
++                    return biome;
++                }).map(Biome::toNbt).map(RegistryEntry.NBT_TO_REG_ENTRY).toList();
++    }
+ }
+diff --git a/src/test/java/net/minestom/server/command/ArgumentTypeTest.java b/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
+index bf6e0c40a83ea645f025f342cae044c0cfcb90ff..e1f3355d1341b6a55a72138cc1a325cf60b3c207 100644
+--- a/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
++++ b/src/test/java/net/minestom/server/command/ArgumentTypeTest.java
+@@ -36,7 +36,7 @@ class ArgumentTypeTest {
+     void testArgumentEnchantment() {
+         var arg = ArgumentType.Enchantment("enchantment");
+         assertInvalidArg(arg, "minecraft:invalid_enchantment");
+-        assertArg(arg, Enchantment.SWEEPING, Enchantment.SWEEPING.name());
++        assertArg(arg, Enchantment.SWEEPING_EDGE, Enchantment.SWEEPING_EDGE.name());
+         assertArg(arg, Enchantment.MENDING, Enchantment.MENDING.name());
+     }
+ 
+diff --git a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
+index 4bbe16d2d86c57bb19ccb3b13707ddea76a68b0e..1679a7235a6c47280d92cb815b4fba16aff5645e 100644
+--- a/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
++++ b/src/test/java/net/minestom/server/entity/player/PlayerIntegrationTest.java
+@@ -116,7 +116,7 @@ class PlayerIntegrationTest {
+         var connection = env.createConnection();
+ 
+         final var packets = List.of(
+-                JoinGamePacket.class, ServerDifficultyPacket.class, SpawnPositionPacket.class,
++                LoginPacket.class, ServerDifficultyPacket.class, SpawnPositionPacket.class,
+                 DeclareCommandsPacket.class, EntityPropertiesPacket.class, EntityStatusPacket.class,
+                 UpdateHealthPacket.class, PlayerAbilitiesPacket.class
+         );
+diff --git a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
+index 3641ce969c5c1693bc1f92fafebd83449453cc38..7887489cb7b1750eb8099e104fa06a4e2f43c50b 100644
+--- a/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
++++ b/src/test/java/net/minestom/server/network/PacketWriteReadTest.java
+@@ -16,7 +16,7 @@ import net.minestom.server.network.packet.server.ServerPacket;
+ import net.minestom.server.network.packet.server.common.DisconnectPacket;
+ import net.minestom.server.network.packet.server.common.PingResponsePacket;
+ import net.minestom.server.network.packet.server.login.LoginDisconnectPacket;
+-import net.minestom.server.network.packet.server.login.LoginSuccessPacket;
++import net.minestom.server.network.packet.server.login.ServerboundGameProfilePacket;
+ import net.minestom.server.network.packet.server.login.SetCompressionPacket;
+ import net.minestom.server.network.packet.server.play.*;
+ import net.minestom.server.network.packet.server.play.DeclareRecipesPacket.Ingredient;
+@@ -56,7 +56,7 @@ public class PacketWriteReadTest {
+         //SERVER_PACKETS.add(new EncryptionRequestPacket("server", generateByteArray(16), generateByteArray(16)));
+         SERVER_PACKETS.add(new LoginDisconnectPacket(COMPONENT));
+         //SERVER_PACKETS.add(new LoginPluginRequestPacket(5, "id", generateByteArray(16)));
+-        SERVER_PACKETS.add(new LoginSuccessPacket(UUID.randomUUID(), "TheMode911", 0));
++        SERVER_PACKETS.add(new ServerboundGameProfilePacket(UUID.randomUUID(), "TheMode911", 0));
+         SERVER_PACKETS.add(new SetCompressionPacket(256));
+         // Play
+         SERVER_PACKETS.add(new AcknowledgeBlockChangePacket(0));
