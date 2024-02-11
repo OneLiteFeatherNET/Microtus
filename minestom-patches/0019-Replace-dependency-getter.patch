@@ -5,7 +5,7 @@ Subject: [PATCH] Replace dependency getter
 
 
 diff --git a/build.gradle.kts b/build.gradle.kts
-index 067d90c0e2c79d9a1d2373c0f5ef9e0c6083415b..b82b8a49c0a52a03e5342f4a2426546ca6590761 100644
+index ee29b50b3fc2332edd934e8bbca1376b9178eab7..9eed8b1c31efb59ed69378b4706e29711f431c8c 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -102,8 +102,9 @@ dependencies {
@@ -21,7 +21,7 @@ index 067d90c0e2c79d9a1d2373c0f5ef9e0c6083415b..b82b8a49c0a52a03e5342f4a2426546c
      // Minestom Data (From MinestomDataGenerator)
      implementation(libs.minestomData)
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 4ec1083ae79b33a50573042bf0f6e3dfb60135eb..afb10cae2015f85d83edd8ba00f86217f76e49fd 100644
+index 2bb561096662e547e747a95850b9f9bee94ecbdd..29e52191d1ee12c300f80dd6905186ef7b231331 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
 @@ -18,6 +18,8 @@ dependencyResolutionManagement {
