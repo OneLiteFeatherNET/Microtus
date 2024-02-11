@@ -38,19 +38,29 @@ index 5f8acd515579c6356296929cbe512ed14049741e..731101eb87c45f02ce7f569d7e8cc02e
 \ No newline at end of file
 diff --git a/extension/build.gradle.kts b/extension/build.gradle.kts
 new file mode 100644
-index 0000000000000000000000000000000000000000..f4fbad921d82393c93d92d05913b791742762269
+index 0000000000000000000000000000000000000000..1b9042c9bf3d79504f204b8cabe96ab6f264a248
 --- /dev/null
 +++ b/extension/build.gradle.kts
-@@ -0,0 +1,47 @@
+@@ -0,0 +1,86 @@
++import java.time.Duration
++import java.util.*
++
 +plugins {
 +    `java-gradle-plugin`
 +    `kotlin-dsl`
 +    id("com.gradle.plugin-publish") version "1.2.1"
 +    id("org.cadixdev.licenser") version "0.6.1"
++    id("io.github.gradle-nexus.publish-plugin") version "2.0.0-rc-1"
++    signing
 +}
 +
++var baseVersion by extra("1.0.1")
++var snapshot by extra("-SNAPSHOT")
++
 +group = "net.onelitefeather.microtus"
-+version = "1.0.1-SNAPSHOT"
++
++
++version = "%s%s".format(Locale.ROOT, baseVersion, snapshot)
 +
 +repositories {
 +    mavenCentral()
@@ -78,6 +88,25 @@ index 0000000000000000000000000000000000000000..f4fbad921d82393c93d92d05913b7917
 +    }
 +}
 +
++nexusPublishing{
++    useStaging.set(true)
++
++    transitionCheckOptions {
++        maxRetries.set(360) // 1 hour
++        delayBetween.set(Duration.ofSeconds(10))
++    }
++
++    repositories.sonatype {
++        nexusUrl.set(uri("https://s01.oss.sonatype.org/service/local/"))
++        snapshotRepositoryUrl.set(uri("https://s01.oss.sonatype.org/content/repositories/snapshots/"))
++
++        if (System.getenv("SONATYPE_USERNAME") != null) {
++            username.set(System.getenv("SONATYPE_USERNAME"))
++            password.set(System.getenv("SONATYPE_PASSWORD"))
++        }
++    }
++}
++
 +publishing {
 +    repositories {
 +        maven {
@@ -88,6 +117,16 @@ index 0000000000000000000000000000000000000000..f4fbad921d82393c93d92d05913b7917
 +            }
 +        }
 +    }
++}
++
++signing {
++    isRequired = System.getenv("CI") != null
++
++    val privateKey = System.getenv("GPG_PRIVATE_KEY")
++    val keyPassphrase = System.getenv()["GPG_PASSPHRASE"]
++    useInMemoryPgpKeys(privateKey, keyPassphrase)
++
++    sign(publishing.publications)
 +}
 \ No newline at end of file
 diff --git a/extension/src/main/kotlin/net/onelitefeather/microtus/ExtensionPlugin.kt b/extension/src/main/kotlin/net/onelitefeather/microtus/ExtensionPlugin.kt
@@ -342,7 +381,7 @@ index 0000000000000000000000000000000000000000..3e8976c597067bb93e3fa86ec6c1add1
 +    }
 +}
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index bf68b61d8a2483648136e2e8a45c37f761ec9d28..4ec1083ae79b33a50573042bf0f6e3dfb60135eb 100644
+index b30740e2725762962d4bf8d873e41c7acaaebde1..2bb561096662e547e747a95850b9f9bee94ecbdd 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
 @@ -135,6 +135,7 @@ pluginManagement {

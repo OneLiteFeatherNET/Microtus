@@ -73,10 +73,10 @@ index d9af25dd00549449f429e79af70a431fefb86b8e..305dd158be3325000a668159a39f05e7
  
      github("OneLiteFeatherNET", "Microtus") {
 diff --git a/extension/build.gradle.kts b/extension/build.gradle.kts
-index f4fbad921d82393c93d92d05913b791742762269..1db800b9a8851daf10495d9cadc18277a4457fa8 100644
+index 1b9042c9bf3d79504f204b8cabe96ab6f264a248..08854349d3ccf58be06b4bb2fa9eb6261eabdb0d 100644
 --- a/extension/build.gradle.kts
 +++ b/extension/build.gradle.kts
-@@ -21,15 +21,15 @@ dependencies {
+@@ -31,15 +31,15 @@ dependencies {
      testImplementation("org.junit.jupiter:junit-jupiter:5.10.1")
  }
  gradlePlugin {

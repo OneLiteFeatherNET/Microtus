@@ -2482,7 +2482,7 @@ index 1e41e00b7d128df8b59dd63ee059d93146567c14..00000000000000000000000000000000
 -  - openjdk17
 \ No newline at end of file
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..bf68b61d8a2483648136e2e8a45c37f761ec9d28 100644
+index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..b30740e2725762962d4bf8d873e41c7acaaebde1 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
 @@ -1,8 +1,145 @@
@@ -2506,7 +2506,7 @@ index 68ea5a446eb3e1ecf507e850f0cb63037c8101ac..bf68b61d8a2483648136e2e8a45c37f7
 +            version("kotlin", "1.9.22")
 +            version("hydrazine", "1.7.2")
 +            version("dependencyGetter", "v1.0.1")
-+            version("data", "1.20.4-SNAPSHOT")
++            version("data", "1.20.4-rv4")
 +            version("hephaistos", "2.6.1")
 +            version("jetbrainsAnnotations", "24.1.0")
 +            version("logback", "1.4.5")
