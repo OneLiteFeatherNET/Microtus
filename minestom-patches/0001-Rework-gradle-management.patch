@@ -98,7 +98,7 @@ index 0000000000000000000000000000000000000000..d9af25dd00549449f429e79af70a431f
 +}
 \ No newline at end of file
 diff --git a/build.gradle.kts b/build.gradle.kts
-index ee2561e2520a2659a959dbee3f6a15b84e80f254..d03f7b1e1fe1dfb4ed9a9a2f9b7c0e82ff1cce79 100644
+index ee2561e2520a2659a959dbee3f6a15b84e80f254..cdaede42a77a9dd867959bb0eacf075b9e3a27fc 100644
 --- a/build.gradle.kts
 +++ b/build.gradle.kts
 @@ -1,90 +1,50 @@
@@ -147,7 +147,7 @@ index ee2561e2520a2659a959dbee3f6a15b84e80f254..d03f7b1e1fe1dfb4ed9a9a2f9b7c0e82
 -        targetCompatibility = JavaVersion.VERSION_17
 -    }
 +var baseVersion by extra("1.3.1")
-+var snapshot by extra("-SNAPSHOT")
++var snapshot by extra("")
  
 -    tasks.withType<Zip> {
 -        duplicatesStrategy = DuplicatesStrategy.EXCLUDE
