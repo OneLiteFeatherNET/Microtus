@@ -40,9 +40,22 @@ jobs:
         with:
           name: Minestom Archive
           path: patched-minestom/build/libs/minestom-*.jar
-      - name: Publish to Github
+      - name: Publish to Central
         run: |
           ./gradlew :patched-minestom:publishToSonatype :patched-minestom:testing:publishToSonatype :patched-minestom:closeAndReleaseSonatypeStagingRepository -PforceSign=true
+        env:
+          SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+          SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+          GPG_PRIVATE_KEY: ${{ secrets.ONELITEFEATHER_GPG_KEY }}
+          GPG_PASSPHRASE: ${{ secrets.ONELITEFEATHER_GPG_PASSWORD }}
+          ORG_GRADLE_PROJECT_sonatypeUsername: "${{ secrets.SONATYPE_USERNAME }}"
+          ORG_GRADLE_PROJECT_sonatypePassword: "${{ secrets.SONATYPE_PASSWORD }}"
+          ORG_GRADLE_PROJECT_onelitefeatherSigningKey: "${{ secrets.ONELITEFEATHER_GPG_KEY }}"
+          ORG_GRADLE_PROJECT_onelitefeatherSigningPassword: "${{ secrets.ONELITEFEATHER_GPG_PASSWORD }}"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish extension to Central
+        run: |
+          ./gradlew :patched-minestom:extension:publishToSonatype :patched-minestom:extension:closeAndReleaseSonatypeStagingRepository -PforceSign=true
         env:
           SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
           SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
