@@ -5,23 +5,24 @@ Subject: [PATCH] Update 1.20.5
 
 
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 4ec1083ae79b33a50573042bf0f6e3dfb60135eb..491990baf9791902b5de58529e01405f8dc1e9fb 100644
+index 4ec1083ae79b33a50573042bf0f6e3dfb60135eb..0501c95bccf2fb60ec5c7d0129fd69bcea85d3af 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
-@@ -2,6 +2,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+@@ -2,7 +2,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
  
  dependencyResolutionManagement {
      repositories {
+-        maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
 +        mavenLocal()
-         maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
          maven("https://jitpack.io")
          mavenCentral()
-@@ -13,7 +14,7 @@ dependencyResolutionManagement {
+     }
+@@ -13,7 +13,7 @@ dependencyResolutionManagement {
              version("kotlin", "1.9.22")
              version("hydrazine", "1.7.2")
              version("dependencyGetter", "v1.0.1")
 -            version("data", "1.20.4-SNAPSHOT")
-+            version("data", "24w06a-SNAPSHOT")
++            version("data", "24w06a-rv1")
              version("hephaistos", "2.6.1")
              version("jetbrainsAnnotations", "24.1.0")
              version("logback", "1.4.5")
@@ -1768,3 +1769,15 @@ index 3641ce969c5c1693bc1f92fafebd83449453cc38..7887489cb7b1750eb8099e104fa06a4e
          SERVER_PACKETS.add(new SetCompressionPacket(256));
          // Play
          SERVER_PACKETS.add(new AcknowledgeBlockChangePacket(0));
+diff --git a/testing/build.gradle.kts b/testing/build.gradle.kts
+index 34c7ab94613156b9c525c5e79878207a48ab6500..8a80d6d01b8023caac54c4af5f21d8020f3f016d 100644
+--- a/testing/build.gradle.kts
++++ b/testing/build.gradle.kts
+@@ -9,7 +9,6 @@ group = "net.onelitefeather.microtus.testing"
+ 
+ 
+ repositories {
+-    maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
+     mavenCentral()
+     maven(url = "https://jitpack.io")
+ }
