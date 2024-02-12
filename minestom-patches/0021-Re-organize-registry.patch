@@ -59,6 +59,30 @@ index 801dd7f74d4328885e86ce64eb44ed8aeb2ba851..ae50b9af494b28767890cb3b6f9af377
          BoundingBox[] collisionBoundingBoxes = parseRegistryBoundingBoxString(collision);
          BoundingBox[] occlusionBoundingBoxes = blockEntry.occludes() ? parseRegistryBoundingBoxString(occlusion) : new BoundingBox[0];
          return new ShapeImpl(collisionBoundingBoxes, occlusionBoundingBoxes, blockEntry);
+diff --git a/src/main/java/net/minestom/server/command/builder/arguments/Argument.java b/src/main/java/net/minestom/server/command/builder/arguments/Argument.java
+index fe4e34b120fd3f6c35616c5d8d3a0d98c7f08c66..77d7157fa6cb43234848dc92dec1da64a5e1670d 100644
+--- a/src/main/java/net/minestom/server/command/builder/arguments/Argument.java
++++ b/src/main/java/net/minestom/server/command/builder/arguments/Argument.java
+@@ -7,8 +7,10 @@ import net.minestom.server.command.builder.CommandExecutor;
+ import net.minestom.server.command.builder.arguments.minecraft.SuggestionType;
+ import net.minestom.server.command.builder.exception.ArgumentSyntaxException;
+ import net.minestom.server.command.builder.suggestion.SuggestionCallback;
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.ProtocolObject;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+@@ -30,7 +32,7 @@ import java.util.function.Supplier;
+  */
+ public abstract class Argument<T> {
+     @ApiStatus.Internal
+-    public static final Registry.Container<ArgumentImpl> CONTAINER = Registry.createContainer(Registry.Resource.COMMAND_ARGUMENTS,
++    public static final Container<ArgumentImpl> CONTAINER = Registry.createContainer(Resource.COMMAND_ARGUMENTS,
+             (namespace, properties) -> new ArgumentImpl(NamespaceID.from(namespace), properties.getInt("id")));
+ 
+     record ArgumentImpl(NamespaceID namespace, int id) implements ProtocolObject {
 diff --git a/src/main/java/net/minestom/server/entity/EntityType.java b/src/main/java/net/minestom/server/entity/EntityType.java
 index d6c899715504462d170d90f8ec07820dd7dc0af6..bbe089438010de3645c103f9bc173730f036431b 100644
 --- a/src/main/java/net/minestom/server/entity/EntityType.java
@@ -456,27 +480,33 @@ index 89ff795dbf4c78a9f34d4849d1a7c2f01a3964be..6c80a1ca6939bd900a3a1a05362da241
      }
  
 diff --git a/src/main/java/net/minestom/server/item/armor/TrimPattern.java b/src/main/java/net/minestom/server/item/armor/TrimPattern.java
-index 590bd2dd161a6c231922f8d61caf6653b9fba0c4..83420ffa38fbad012b08bf0eeb7be1c4bcc5ad3c 100644
+index 590bd2dd161a6c231922f8d61caf6653b9fba0c4..fe5fb3a8c7b79becf9dc6cb77b293672fc749020 100644
 --- a/src/main/java/net/minestom/server/item/armor/TrimPattern.java
 +++ b/src/main/java/net/minestom/server/item/armor/TrimPattern.java
-@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
+@@ -2,8 +2,10 @@ package net.minestom.server.item.armor;
+ 
+ import net.kyori.adventure.text.Component;
  import net.minestom.server.item.Material;
++import net.minestom.server.registry.Properties;
  import net.minestom.server.registry.ProtocolObject;
  import net.minestom.server.registry.Registry;
 +import net.minestom.server.registry.entries.TrimPatternEntry;
  import net.minestom.server.utils.NamespaceID;
  import org.jetbrains.annotations.Contract;
  import org.jetbrains.annotations.NotNull;
-@@ -19,7 +20,7 @@ public interface TrimPattern extends ProtocolObject {
+@@ -17,9 +19,9 @@ public interface TrimPattern extends ProtocolObject {
+                                        @NotNull Material template,
+                                        @NotNull Component description,
                                         boolean decal,
-                                        @NotNull Registry.Properties custom) {
+-                                       @NotNull Registry.Properties custom) {
++                                       @NotNull Properties custom) {
          return new TrimPatternImpl(
 -                new Registry.TrimPatternEntry(namespace, assetID, template, description, decal, custom)
 +                new TrimPatternEntry(namespace, assetID, template, description, decal, custom)
          );
      }
  
-@@ -29,7 +30,7 @@ public interface TrimPattern extends ProtocolObject {
+@@ -29,7 +31,7 @@ public interface TrimPattern extends ProtocolObject {
                                         @NotNull Component description,
                                         boolean decal) {
          return new TrimPatternImpl(
@@ -485,7 +515,7 @@ index 590bd2dd161a6c231922f8d61caf6653b9fba0c4..83420ffa38fbad012b08bf0eeb7be1c4
          );
      }
  
-@@ -38,7 +39,7 @@ public interface TrimPattern extends ProtocolObject {
+@@ -38,7 +40,7 @@ public interface TrimPattern extends ProtocolObject {
      }
  
      @Contract(pure = true)
@@ -529,6 +559,49 @@ index 304d65b3f91884f5510c75fba488c3e190d82c90..7e7e480c23426a7b8a558138d80b65ab
          this(registry, i.getAndIncrement());
      }
  
+diff --git a/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java b/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java
+index 063b5565ba859c2a57d6840323dc16064ffdc600..3631cf62212e1e0da67da979d1f048fddb7fd888 100644
+--- a/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java
++++ b/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java
+@@ -1,6 +1,8 @@
+ package net.minestom.server.item.banner;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.NotNull;
+ 
+@@ -12,7 +14,7 @@ import java.util.Map;
+ public record BannerPatternImpl(NamespaceID namespace, int id, String identifier) implements BannerPattern {
+ 
+     private static Map<String, BannerPatternImpl> IDENTIFIERS = new HashMap<>();
+-    private static final Registry.Container<BannerPattern> CONTAINER = Registry.createContainer(Registry.Resource.BANNER_PATTERNS,
++    private static final Container<BannerPattern> CONTAINER = Registry.createContainer(Resource.BANNER_PATTERNS,
+             (namespace, properties) -> {
+                 int id = properties.getInt("id");
+                 String identifier = properties.getString("identifier");
+diff --git a/src/main/java/net/minestom/server/particle/ParticleImpl.java b/src/main/java/net/minestom/server/particle/ParticleImpl.java
+index 2a41dabfe2425175e6c8bf91a504b147c8e02eb9..b99c577ca0c36930d11f58480a85434fffe0dfe1 100644
+--- a/src/main/java/net/minestom/server/particle/ParticleImpl.java
++++ b/src/main/java/net/minestom/server/particle/ParticleImpl.java
+@@ -1,13 +1,15 @@
+ package net.minestom.server.particle;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+ 
+ record ParticleImpl(NamespaceID namespace, int id) implements Particle {
+-    private static final Registry.Container<Particle> CONTAINER = Registry.createContainer(Registry.Resource.PARTICLES,
++    private static final Container<Particle> CONTAINER = Registry.createContainer(Resource.PARTICLES,
+             (namespace, properties) -> new ParticleImpl(NamespaceID.from(namespace), properties.getInt("id")));
+ 
+     static Particle get(@NotNull String namespace) {
 diff --git a/src/main/java/net/minestom/server/potion/PotionEffect.java b/src/main/java/net/minestom/server/potion/PotionEffect.java
 index e0d9a2a5817e77b6095b6fc9e1aa84b4774d137c..650ce7f3d30399205721432e04b382aed65031cb 100644
 --- a/src/main/java/net/minestom/server/potion/PotionEffect.java
@@ -573,6 +646,27 @@ index 6396afc14cd0c85ece56e0ec8df2d190ea7779aa..51c999146016b54c17d7e9db29fd48b8
              (namespace, properties) -> new PotionEffectImpl(Registry.potionEffect(namespace, properties)));
  
      static PotionEffect get(@NotNull String namespace) {
+diff --git a/src/main/java/net/minestom/server/potion/PotionTypeImpl.java b/src/main/java/net/minestom/server/potion/PotionTypeImpl.java
+index daf3f1ec7a74809b19106e13dc4a8ac72280d68a..6b1aff0d08eb486d2941eea598672eb90215645e 100644
+--- a/src/main/java/net/minestom/server/potion/PotionTypeImpl.java
++++ b/src/main/java/net/minestom/server/potion/PotionTypeImpl.java
+@@ -1,13 +1,15 @@
+ package net.minestom.server.potion;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+ 
+ record PotionTypeImpl(NamespaceID namespace, int id) implements PotionType {
+-    private static final Registry.Container<PotionType> CONTAINER = Registry.createContainer(Registry.Resource.POTION_TYPES,
++    private static final Container<PotionType> CONTAINER = Registry.createContainer(Resource.POTION_TYPES,
+             (namespace, properties) -> new PotionTypeImpl(NamespaceID.from(namespace), properties.getInt("id")));
+ 
+     static PotionType get(@NotNull String namespace) {
 diff --git a/src/main/java/net/minestom/server/registry/Container.java b/src/main/java/net/minestom/server/registry/Container.java
 new file mode 100644
 index 0000000000000000000000000000000000000000..c47a6c58ccc5c709e4773c9aa2c11f415a44adec
@@ -1880,3 +1974,45 @@ index 0000000000000000000000000000000000000000..898954a435dbe2143307434ed2fa87cf
 +        );
 +    }
 +}
+diff --git a/src/main/java/net/minestom/server/sound/SoundEventImpl.java b/src/main/java/net/minestom/server/sound/SoundEventImpl.java
+index 586633f19262f35047661ae1446f512ca7d44ea1..d6a3caa5ab49a0d5e27217dcc501d16d1806f7ca 100644
+--- a/src/main/java/net/minestom/server/sound/SoundEventImpl.java
++++ b/src/main/java/net/minestom/server/sound/SoundEventImpl.java
+@@ -1,13 +1,15 @@
+ package net.minestom.server.sound;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+ 
+ record SoundEventImpl(NamespaceID namespace, int id) implements SoundEvent {
+-    private static final Registry.Container<SoundEvent> CONTAINER = Registry.createContainer(Registry.Resource.SOUNDS,
++    private static final Container<SoundEvent> CONTAINER = Registry.createContainer(Resource.SOUNDS,
+             (namespace, properties) -> new SoundEventImpl(NamespaceID.from(namespace), properties.getInt("id")));
+ 
+     static SoundEvent get(@NotNull String namespace) {
+diff --git a/src/main/java/net/minestom/server/statistic/StatisticTypeImpl.java b/src/main/java/net/minestom/server/statistic/StatisticTypeImpl.java
+index ab770034d27f785393eb48f29f996649202aa8e5..f65166f1de266e0dc7d6bfcfb87272ae59b83cd6 100644
+--- a/src/main/java/net/minestom/server/statistic/StatisticTypeImpl.java
++++ b/src/main/java/net/minestom/server/statistic/StatisticTypeImpl.java
+@@ -1,13 +1,15 @@
+ package net.minestom.server.statistic;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+ 
+ record StatisticTypeImpl(NamespaceID namespace, int id) implements StatisticType {
+-    private static final Registry.Container<StatisticType> CONTAINER = Registry.createContainer(Registry.Resource.STATISTICS,
++    private static final Container<StatisticType> CONTAINER = Registry.createContainer(Resource.STATISTICS,
+             (namespace, properties) -> new StatisticTypeImpl(NamespaceID.from(namespace), properties.getInt("id")));
+ 
+     static StatisticType get(@NotNull String namespace) {
