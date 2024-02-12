@@ -439,7 +439,7 @@ index f71041a7a7fa50561e6ab1c50163e12ff4172c4f..7ddee57d28f9c225b2c50e518fbbaf1c
      // Impl Note: Adding an entry here requires that a default value entry is added in MetadataImpl.EMPTY_VALUES
  
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index a7980f47130dc741c4071f60194b83143e905590..73e764848f23fc4a264592e036f360bc035b811e 100644
+index 57b5287970f5255bebfb7757c5ad3e14f6c056e2..aeb8004c29faf011be0d4acaf4a8228276214814 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -286,11 +286,11 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
