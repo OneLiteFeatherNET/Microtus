@@ -181,7 +181,7 @@ index d97bc82ae1cd4f52268d16b394274d6a31b31656..c8f7392ec3fc95af089be33ff6761822
      public @NotNull TagHandler tagHandler() {
          return tagHandler;
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index a195dd79e45b561df6eef65385fc9778dab83e2a..d805fa467a06772dbb60c785e6cdad0a0962ebe7 100644
+index 1f0ef00225fcc06593a9a579bd4944dbb9d1d8de..176ba40ab0ea59634fea4a8bfad7c05dffb36f48 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -2342,16 +2342,6 @@ public class Player extends LivingEntity implements CommandSender, Localizable,

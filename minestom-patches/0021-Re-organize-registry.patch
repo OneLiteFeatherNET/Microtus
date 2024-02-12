@@ -1,0 +1,1882 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Phillipp Glanz <6745190+TheMeinerLP@users.noreply.github.com>
+Date: Mon, 12 Feb 2024 10:20:31 +0100
+Subject: [PATCH] Re-organize registry
+
+
+diff --git a/src/main/java/net/minestom/server/collision/CollisionUtils.java b/src/main/java/net/minestom/server/collision/CollisionUtils.java
+index e68e0b8e5da107b45cfa934e242fca5915d6c058..d01fad29dec4a0dada34ce71460b3d90d6a42882 100644
+--- a/src/main/java/net/minestom/server/collision/CollisionUtils.java
++++ b/src/main/java/net/minestom/server/collision/CollisionUtils.java
+@@ -9,6 +9,7 @@ import net.minestom.server.instance.Instance;
+ import net.minestom.server.instance.WorldBorder;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.BlockEntry;
+ import net.minestom.server.utils.chunk.ChunkCache;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+@@ -165,7 +166,7 @@ public final class CollisionUtils {
+         };
+     }
+ 
+-    public static Shape parseBlockShape(String collision, String occlusion, Registry.BlockEntry blockEntry) {
++    public static Shape parseBlockShape(String collision, String occlusion, BlockEntry blockEntry) {
+         return ShapeImpl.parseBlockFromRegistry(collision, occlusion, blockEntry);
+     }
+ }
+diff --git a/src/main/java/net/minestom/server/collision/ShapeImpl.java b/src/main/java/net/minestom/server/collision/ShapeImpl.java
+index 801dd7f74d4328885e86ce64eb44ed8aeb2ba851..ae50b9af494b28767890cb3b6f9af377049bfb3d 100644
+--- a/src/main/java/net/minestom/server/collision/ShapeImpl.java
++++ b/src/main/java/net/minestom/server/collision/ShapeImpl.java
+@@ -7,6 +7,7 @@ import net.minestom.server.coordinate.Vec;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.instance.block.BlockFace;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.BlockEntry;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.ArrayList;
+@@ -23,10 +24,10 @@ public final class ShapeImpl implements Shape {
+     private final byte blockOcclusion;
+     private final byte airOcclusion;
+ 
+-    private final Registry.BlockEntry blockEntry;
++    private final BlockEntry blockEntry;
+     private Block block;
+ 
+-    private ShapeImpl(BoundingBox[] boundingBoxes, BoundingBox[] occlusionBoundingBoxes, Registry.BlockEntry blockEntry) {
++    private ShapeImpl(BoundingBox[] boundingBoxes, BoundingBox[] occlusionBoundingBoxes, BlockEntry blockEntry) {
+         this.collisionBoundingBoxes = boundingBoxes;
+         this.occlusionBoundingBoxes = occlusionBoundingBoxes;
+         this.blockEntry = blockEntry;
+@@ -111,7 +112,7 @@ public final class ShapeImpl implements Shape {
+         return 1;
+     }
+ 
+-    static ShapeImpl parseBlockFromRegistry(String collision, String occlusion, Registry.BlockEntry blockEntry) {
++    static ShapeImpl parseBlockFromRegistry(String collision, String occlusion, BlockEntry blockEntry) {
+         BoundingBox[] collisionBoundingBoxes = parseRegistryBoundingBoxString(collision);
+         BoundingBox[] occlusionBoundingBoxes = blockEntry.occludes() ? parseRegistryBoundingBoxString(occlusion) : new BoundingBox[0];
+         return new ShapeImpl(collisionBoundingBoxes, occlusionBoundingBoxes, blockEntry);
+diff --git a/src/main/java/net/minestom/server/entity/EntityType.java b/src/main/java/net/minestom/server/entity/EntityType.java
+index d6c899715504462d170d90f8ec07820dd7dc0af6..bbe089438010de3645c103f9bc173730f036431b 100644
+--- a/src/main/java/net/minestom/server/entity/EntityType.java
++++ b/src/main/java/net/minestom/server/entity/EntityType.java
+@@ -2,6 +2,7 @@ package net.minestom.server.entity;
+ 
+ import net.minestom.server.registry.ProtocolObject;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.EntityEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.Contract;
+ import org.jetbrains.annotations.NotNull;
+@@ -16,7 +17,7 @@ public sealed interface EntityType extends ProtocolObject, EntityTypes permits E
+      * @return the entity registry
+      */
+     @Contract(pure = true)
+-    @NotNull Registry.EntityEntry registry();
++    @NotNull EntityEntry registry();
+ 
+     @Override
+     default @NotNull NamespaceID namespace() {
+diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
+index 7314d354481118f0d2a764c2218d8c5361b92b8e..134114d1a06e59e1310cbad131a9be2ab58e0374 100644
+--- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
++++ b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
+@@ -32,7 +32,10 @@ import net.minestom.server.entity.metadata.water.DolphinMeta;
+ import net.minestom.server.entity.metadata.water.GlowSquidMeta;
+ import net.minestom.server.entity.metadata.water.SquidMeta;
+ import net.minestom.server.entity.metadata.water.fish.*;
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
++import net.minestom.server.registry.entries.EntityEntry;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+@@ -41,8 +44,8 @@ import java.util.function.BiFunction;
+ 
+ import static java.util.Map.entry;
+ 
+-record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+-    private static final Registry.Container<EntityType> CONTAINER = Registry.createContainer(Registry.Resource.ENTITIES,
++record EntityTypeImpl(EntityEntry registry) implements EntityType {
++    private static final Container<EntityType> CONTAINER = Registry.createContainer(Resource.ENTITIES,
+             (namespace, properties) -> new EntityTypeImpl(Registry.entity(namespace, properties)));
+     static final Map<String, BiFunction<Entity, Metadata, EntityMeta>> ENTITY_META_SUPPLIER = createMetaMap();
+ 
+diff --git a/src/main/java/net/minestom/server/entity/damage/DamageType.java b/src/main/java/net/minestom/server/entity/damage/DamageType.java
+index deec1d4db2bea6d6bda45f0aca7b3090b9f6c2af..48e9a30b14ae75a51a1ebc0ae4bb51ddd3334afc 100644
+--- a/src/main/java/net/minestom/server/entity/damage/DamageType.java
++++ b/src/main/java/net/minestom/server/entity/damage/DamageType.java
+@@ -1,7 +1,7 @@
+ package net.minestom.server.entity.damage;
+ 
+ import net.minestom.server.registry.ProtocolObject;
+-import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.DamageTypeEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.Contract;
+ import org.jetbrains.annotations.NotNull;
+@@ -17,7 +17,7 @@ public sealed interface DamageType extends ProtocolObject, DamageTypes permits D
+      * @return the damage type registry
+      */
+     @Contract(pure = true)
+-    @NotNull Registry.DamageTypeEntry registry();
++    @NotNull DamageTypeEntry registry();
+ 
+     @Override
+     default @NotNull NamespaceID namespace() {
+diff --git a/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java b/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java
+index 2873cad2da680bf4e66d7e3dae0e13f1546294e2..ca8b42baa9e47434d06707ecdce25ba0e8818e65 100644
+--- a/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java
++++ b/src/main/java/net/minestom/server/entity/damage/DamageTypeImpl.java
+@@ -1,6 +1,9 @@
+ package net.minestom.server.entity.damage;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
++import net.minestom.server.registry.entries.DamageTypeEntry;
+ import org.jetbrains.annotations.NotNull;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+@@ -11,12 +14,12 @@ import java.util.HashMap;
+ import java.util.Map;
+ import java.util.concurrent.atomic.AtomicInteger;
+ 
+-record DamageTypeImpl(Registry.DamageTypeEntry registry, int id) implements DamageType {
+-    private static final Registry.Container<DamageType> CONTAINER;
++record DamageTypeImpl(DamageTypeEntry registry, int id) implements DamageType {
++    private static final Container<DamageType> CONTAINER;
+ 
+     static {
+         AtomicInteger i = new AtomicInteger();
+-        CONTAINER = Registry.createContainer(Registry.Resource.DAMAGE_TYPES,
++        CONTAINER = Registry.createContainer(Resource.DAMAGE_TYPES,
+                 (namespace, properties) -> new DamageTypeImpl(Registry.damageType(namespace, properties), i.getAndIncrement()));
+     }
+ 
+diff --git a/src/main/java/net/minestom/server/gamedata/tags/Tag.java b/src/main/java/net/minestom/server/gamedata/tags/Tag.java
+index 273f2be07ce95ed744f48e593e1f031c7d02fbda..f3e97ba3657e965bed6178779d774d2e081e0bee 100644
+--- a/src/main/java/net/minestom/server/gamedata/tags/Tag.java
++++ b/src/main/java/net/minestom/server/gamedata/tags/Tag.java
+@@ -5,6 +5,7 @@ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.item.Material;
+ import net.minestom.server.registry.Registries;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+@@ -66,24 +67,24 @@ public final class Tag {
+     }
+ 
+     public enum BasicType {
+-        BLOCKS("minecraft:block", Registry.Resource.BLOCK_TAGS,
++        BLOCKS("minecraft:block", Resource.BLOCK_TAGS,
+                 name -> Objects.requireNonNull(Block.fromNamespaceId(name)).id()),
+-        ITEMS("minecraft:item", Registry.Resource.ITEM_TAGS,
++        ITEMS("minecraft:item", Resource.ITEM_TAGS,
+                 name -> Objects.requireNonNull(Material.fromNamespaceId(name)).id()),
+-        FLUIDS("minecraft:fluid", Registry.Resource.FLUID_TAGS,
++        FLUIDS("minecraft:fluid", Resource.FLUID_TAGS,
+                 name -> Registries.getFluid(name).ordinal()),
+-        ENTITY_TYPES("minecraft:entity_type", Registry.Resource.ENTITY_TYPE_TAGS,
++        ENTITY_TYPES("minecraft:entity_type", Resource.ENTITY_TYPE_TAGS,
+                 name -> Objects.requireNonNull(EntityType.fromNamespaceId(name)).id()),
+-        GAME_EVENTS("minecraft:game_event", Registry.Resource.GAMEPLAY_TAGS,
++        GAME_EVENTS("minecraft:game_event", Resource.GAMEPLAY_TAGS,
+                 name -> Registries.getFluid(name).ordinal());
+ 
+         private final static BasicType[] VALUES = values();
+         private final String identifier;
+-        private final Registry.Resource resource;
++        private final Resource resource;
+         private final Function<String, Integer> function;
+ 
+         BasicType(@NotNull String identifier,
+-                  @NotNull Registry.Resource resource,
++                  @NotNull Resource resource,
+                   @NotNull Function<String, Integer> function) {
+             this.identifier = identifier;
+             this.resource = resource;
+@@ -94,7 +95,7 @@ public final class Tag {
+             return identifier;
+         }
+ 
+-        public Registry.Resource getResource() {
++        public Resource getResource() {
+             return resource;
+         }
+ 
+diff --git a/src/main/java/net/minestom/server/instance/block/Block.java b/src/main/java/net/minestom/server/instance/block/Block.java
+index 967a6435719533927e9f92c07ded7dfad838cad2..8f38103843d86d868792b60337e03abafc646940 100644
+--- a/src/main/java/net/minestom/server/instance/block/Block.java
++++ b/src/main/java/net/minestom/server/instance/block/Block.java
+@@ -5,6 +5,7 @@ import net.minestom.server.instance.Instance;
+ import net.minestom.server.instance.batch.Batch;
+ import net.minestom.server.registry.ProtocolObject;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.BlockEntry;
+ import net.minestom.server.tag.Tag;
+ import net.minestom.server.tag.TagReadable;
+ import net.minestom.server.utils.NamespaceID;
+@@ -133,7 +134,8 @@ public sealed interface Block extends ProtocolObject, TagReadable, Blocks permit
+      * @return the block registry
+      */
+     @Contract(pure = true)
+-    @NotNull Registry.BlockEntry registry();
++    @NotNull
++    BlockEntry registry();
+ 
+     @Override
+     default @NotNull NamespaceID namespace() {
+diff --git a/src/main/java/net/minestom/server/instance/block/BlockImpl.java b/src/main/java/net/minestom/server/instance/block/BlockImpl.java
+index c700a6c70a3e6f96f9348bc30aea1a6c34706194..e3a814996eda5e9cb98f5433186bc64074e4cb79 100644
+--- a/src/main/java/net/minestom/server/instance/block/BlockImpl.java
++++ b/src/main/java/net/minestom/server/instance/block/BlockImpl.java
+@@ -4,7 +4,11 @@ import com.github.benmanes.caffeine.cache.Cache;
+ import com.github.benmanes.caffeine.cache.Caffeine;
+ import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
+ import it.unimi.dsi.fastutil.objects.Object2ObjectMaps;
++import net.minestom.server.registry.Container;
++import net.minestom.server.registry.Properties;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
++import net.minestom.server.registry.entries.BlockEntry;
+ import net.minestom.server.tag.Tag;
+ import net.minestom.server.utils.ArrayUtils;
+ import net.minestom.server.utils.block.BlockUtils;
+@@ -21,7 +25,7 @@ import java.time.Duration;
+ import java.util.*;
+ import java.util.function.Function;
+ 
+-record BlockImpl(@NotNull Registry.BlockEntry registry,
++record BlockImpl(@NotNull BlockEntry registry,
+                  byte @NotNull [] propertiesArray,
+                  @Nullable NBTCompound nbt,
+                  @Nullable BlockHandler handler) implements Block {
+@@ -31,15 +35,15 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
+     private static final ObjectArray<PropertyType[]> PROPERTIES_TYPE = ObjectArray.singleThread();
+     // Block id -> Map<PropertiesValues, Block>
+     private static final ObjectArray<Map<PropertiesHolder, BlockImpl>> POSSIBLE_STATES = ObjectArray.singleThread();
+-    private static final Registry.Container<Block> CONTAINER = Registry.createContainer(Registry.Resource.BLOCKS,
++    private static final Container<Block> CONTAINER = Registry.createContainer(Resource.BLOCKS,
+             (namespace, properties) -> {
+                 final int blockId = properties.getInt("id");
+-                final Registry.Properties stateObject = properties.section("states");
++                final Properties stateObject = properties.section("states");
+ 
+                 // Retrieve properties
+                 PropertyType[] propertyTypes;
+                 {
+-                    Registry.Properties stateProperties = properties.section("properties");
++                    Properties stateProperties = properties.section("properties");
+                     if (stateProperties != null) {
+                         final int stateCount = stateProperties.size();
+                         propertyTypes = new PropertyType[stateCount];
+@@ -73,7 +77,7 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
+                             propertiesArray[keyIndex] = valueIndex;
+                         }
+ 
+-                        var mainProperties = Registry.Properties.fromMap(new MergedMap<>(stateOverride, properties.asMap()));
++                        var mainProperties = Properties.fromMap(new MergedMap<>(stateOverride, properties.asMap()));
+                         final BlockImpl block = new BlockImpl(Registry.block(namespace, mainProperties),
+                                 propertiesArray, null, null);
+                         BLOCK_STATE_MAP.set(block.stateId(), block);
+diff --git a/src/main/java/net/minestom/server/item/Enchantment.java b/src/main/java/net/minestom/server/item/Enchantment.java
+index 0acf67da93413c06eabd7e9ffacfef3b02dbfe85..7dbb00dd82f288d36908bbb7b06e60994f5718c9 100644
+--- a/src/main/java/net/minestom/server/item/Enchantment.java
++++ b/src/main/java/net/minestom/server/item/Enchantment.java
+@@ -1,7 +1,7 @@
+ package net.minestom.server.item;
+ 
+ import net.minestom.server.registry.ProtocolObject;
+-import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.EnchantmentEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.Contract;
+ import org.jetbrains.annotations.NotNull;
+@@ -17,7 +17,7 @@ public sealed interface Enchantment extends ProtocolObject, Enchantments permits
+      * @return the enchantment registry
+      */
+     @Contract(pure = true)
+-    @NotNull Registry.EnchantmentEntry registry();
++    @NotNull EnchantmentEntry registry();
+ 
+     @Override
+     default @NotNull NamespaceID namespace() {
+diff --git a/src/main/java/net/minestom/server/item/EnchantmentImpl.java b/src/main/java/net/minestom/server/item/EnchantmentImpl.java
+index b29f07df80938ebe3c8e289d799dfa4724eeb114..fc2f12ee715dcfc2fa6e6395f2ce0cf9bffc29c2 100644
+--- a/src/main/java/net/minestom/server/item/EnchantmentImpl.java
++++ b/src/main/java/net/minestom/server/item/EnchantmentImpl.java
+@@ -1,12 +1,15 @@
+ package net.minestom.server.item;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
++import net.minestom.server.registry.entries.EnchantmentEntry;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+ 
+-record EnchantmentImpl(Registry.EnchantmentEntry registry) implements Enchantment {
+-    private static final Registry.Container<Enchantment> CONTAINER = Registry.createContainer(Registry.Resource.ENCHANTMENTS,
++record EnchantmentImpl(EnchantmentEntry registry) implements Enchantment {
++    private static final Container<Enchantment> CONTAINER = Registry.createContainer(Resource.ENCHANTMENTS,
+             (namespace, properties) -> new EnchantmentImpl(Registry.enchantment(namespace, properties)));
+ 
+     static Enchantment get(@NotNull String namespace) {
+diff --git a/src/main/java/net/minestom/server/item/Material.java b/src/main/java/net/minestom/server/item/Material.java
+index a0d46c807ea57d124066e2170b4861d05e8a682f..55e6ec21b86951f99acdb39f17c468acac98c286 100644
+--- a/src/main/java/net/minestom/server/item/Material.java
++++ b/src/main/java/net/minestom/server/item/Material.java
+@@ -3,6 +3,7 @@ package net.minestom.server.item;
+ import net.minestom.server.instance.block.Block;
+ import net.minestom.server.registry.ProtocolObject;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.MaterialEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.Contract;
+ import org.jetbrains.annotations.NotNull;
+@@ -18,7 +19,8 @@ public sealed interface Material extends ProtocolObject, Materials permits Mater
+      * @return the material registry
+      */
+     @Contract(pure = true)
+-    @NotNull Registry.MaterialEntry registry();
++    @NotNull
++    MaterialEntry registry();
+ 
+     @Override
+     default @NotNull NamespaceID namespace() {
+diff --git a/src/main/java/net/minestom/server/item/MaterialImpl.java b/src/main/java/net/minestom/server/item/MaterialImpl.java
+index 98d371a2a4810082955e702be9181570c67214a2..7643a2f6292826537dc0e16fcbe8db9d1a2c68c3 100644
+--- a/src/main/java/net/minestom/server/item/MaterialImpl.java
++++ b/src/main/java/net/minestom/server/item/MaterialImpl.java
+@@ -1,12 +1,15 @@
+ package net.minestom.server.item;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
++import net.minestom.server.registry.entries.MaterialEntry;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+ 
+-record MaterialImpl(Registry.MaterialEntry registry) implements Material {
+-    private static final Registry.Container<Material> CONTAINER = Registry.createContainer(Registry.Resource.ITEMS,
++record MaterialImpl(MaterialEntry registry) implements Material {
++    private static final Container<Material> CONTAINER = Registry.createContainer(Resource.ITEMS,
+             (namespace, properties) -> new MaterialImpl(Registry.material(namespace, properties)));
+ 
+     static Material get(@NotNull String namespace) {
+diff --git a/src/main/java/net/minestom/server/item/armor/TrimMaterial.java b/src/main/java/net/minestom/server/item/armor/TrimMaterial.java
+index 23effa3c3e0ee92878ff2ca1710dfda956fbd9f8..7b7dae9ccb31ec101b7fc6db65f87fc753d90c8a 100644
+--- a/src/main/java/net/minestom/server/item/armor/TrimMaterial.java
++++ b/src/main/java/net/minestom/server/item/armor/TrimMaterial.java
+@@ -2,8 +2,10 @@ package net.minestom.server.item.armor;
+ 
+ import net.kyori.adventure.text.Component;
+ import net.minestom.server.item.Material;
++import net.minestom.server.registry.Properties;
+ import net.minestom.server.registry.ProtocolObject;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.TrimMaterialEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.Contract;
+ import org.jetbrains.annotations.NotNull;
+@@ -19,9 +21,9 @@ public interface TrimMaterial extends ProtocolObject {
+                                         float itemModelIndex,
+                                         @NotNull Map<String, String> overrideArmorMaterials,
+                                         @NotNull Component description,
+-                                        Registry.Properties custom) {
++                                        Properties custom) {
+         return new TrimMaterialImpl(
+-                new Registry.TrimMaterialEntry(
++                new TrimMaterialEntry(
+                         namespace,
+                         assetName,
+                         ingredient,
+@@ -40,7 +42,7 @@ public interface TrimMaterial extends ProtocolObject {
+                                         @NotNull Map<String, String> overrideArmorMaterials,
+                                         @NotNull Component description) {
+         return new TrimMaterialImpl(
+-                new Registry.TrimMaterialEntry(
++                new TrimMaterialEntry(
+                         namespace,
+                         assetName,
+                         ingredient,
+@@ -57,7 +59,7 @@ public interface TrimMaterial extends ProtocolObject {
+     }
+ 
+     @Contract(pure = true)
+-    @NotNull Registry.TrimMaterialEntry registry();
++    @NotNull TrimMaterialEntry registry();
+ 
+     @Override
+     default @NotNull NamespaceID namespace() {
+diff --git a/src/main/java/net/minestom/server/item/armor/TrimMaterialImpl.java b/src/main/java/net/minestom/server/item/armor/TrimMaterialImpl.java
+index 89ff795dbf4c78a9f34d4849d1a7c2f01a3964be..6c80a1ca6939bd900a3a1a05362da24180c2daee 100644
+--- a/src/main/java/net/minestom/server/item/armor/TrimMaterialImpl.java
++++ b/src/main/java/net/minestom/server/item/armor/TrimMaterialImpl.java
+@@ -1,7 +1,10 @@
+ package net.minestom.server.item.armor;
+ 
+ import net.minestom.server.adventure.serializer.nbt.NbtComponentSerializer;
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
++import net.minestom.server.registry.entries.TrimMaterialEntry;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+ 
+@@ -10,16 +13,16 @@ import java.util.Map;
+ import java.util.concurrent.atomic.AtomicInteger;
+ import java.util.stream.Collectors;
+ 
+-record TrimMaterialImpl(Registry.TrimMaterialEntry registry, int id) implements TrimMaterial {
++record TrimMaterialImpl(TrimMaterialEntry registry, int id) implements TrimMaterial {
+     static final AtomicInteger i = new AtomicInteger();
+-    private static final Registry.Container<TrimMaterial> CONTAINER;
++    private static final Container<TrimMaterial> CONTAINER;
+ 
+     static {
+-        CONTAINER = Registry.createContainer(Registry.Resource.TRIM_MATERIALS,
++        CONTAINER = Registry.createContainer(Resource.TRIM_MATERIALS,
+                 (namespace, properties) -> new TrimMaterialImpl(Registry.trimMaterial(namespace, properties)));
+     }
+ 
+-    public TrimMaterialImpl(Registry.TrimMaterialEntry registry) {
++    public TrimMaterialImpl(TrimMaterialEntry registry) {
+         this(registry, i.getAndIncrement());
+     }
+ 
+diff --git a/src/main/java/net/minestom/server/item/armor/TrimPattern.java b/src/main/java/net/minestom/server/item/armor/TrimPattern.java
+index 590bd2dd161a6c231922f8d61caf6653b9fba0c4..83420ffa38fbad012b08bf0eeb7be1c4bcc5ad3c 100644
+--- a/src/main/java/net/minestom/server/item/armor/TrimPattern.java
++++ b/src/main/java/net/minestom/server/item/armor/TrimPattern.java
+@@ -4,6 +4,7 @@ import net.kyori.adventure.text.Component;
+ import net.minestom.server.item.Material;
+ import net.minestom.server.registry.ProtocolObject;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.TrimPatternEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.Contract;
+ import org.jetbrains.annotations.NotNull;
+@@ -19,7 +20,7 @@ public interface TrimPattern extends ProtocolObject {
+                                        boolean decal,
+                                        @NotNull Registry.Properties custom) {
+         return new TrimPatternImpl(
+-                new Registry.TrimPatternEntry(namespace, assetID, template, description, decal, custom)
++                new TrimPatternEntry(namespace, assetID, template, description, decal, custom)
+         );
+     }
+ 
+@@ -29,7 +30,7 @@ public interface TrimPattern extends ProtocolObject {
+                                        @NotNull Component description,
+                                        boolean decal) {
+         return new TrimPatternImpl(
+-                new Registry.TrimPatternEntry(namespace, assetID, template, description, decal, null)
++                new TrimPatternEntry(namespace, assetID, template, description, decal, null)
+         );
+     }
+ 
+@@ -38,7 +39,7 @@ public interface TrimPattern extends ProtocolObject {
+     }
+ 
+     @Contract(pure = true)
+-    @NotNull Registry.TrimPatternEntry registry();
++    @NotNull TrimPatternEntry registry();
+ 
+     @Override
+     default @NotNull NamespaceID namespace() {
+diff --git a/src/main/java/net/minestom/server/item/armor/TrimPatternImpl.java b/src/main/java/net/minestom/server/item/armor/TrimPatternImpl.java
+index 304d65b3f91884f5510c75fba488c3e190d82c90..7e7e480c23426a7b8a558138d80b65ab0a5b2b80 100644
+--- a/src/main/java/net/minestom/server/item/armor/TrimPatternImpl.java
++++ b/src/main/java/net/minestom/server/item/armor/TrimPatternImpl.java
+@@ -1,23 +1,26 @@
+ package net.minestom.server.item.armor;
+ 
+ import net.minestom.server.adventure.serializer.nbt.NbtComponentSerializer;
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
++import net.minestom.server.registry.entries.TrimPatternEntry;
+ import org.jglrxavpok.hephaistos.nbt.NBT;
+ import org.jglrxavpok.hephaistos.nbt.NBTCompound;
+ 
+ import java.util.Collection;
+ import java.util.concurrent.atomic.AtomicInteger;
+ 
+-record TrimPatternImpl(Registry.TrimPatternEntry registry, int id) implements TrimPattern {
++record TrimPatternImpl(TrimPatternEntry registry, int id) implements TrimPattern {
+     static final AtomicInteger i = new AtomicInteger();
+-    private static final Registry.Container<TrimPattern> CONTAINER;
++    private static final Container<TrimPattern> CONTAINER;
+ 
+     static {
+-        CONTAINER = Registry.createContainer(Registry.Resource.TRIM_PATTERNS,
++        CONTAINER = Registry.createContainer(Resource.TRIM_PATTERNS,
+                 (namespace, properties) -> new TrimPatternImpl(Registry.trimPattern(namespace, properties)));
+     }
+ 
+-    public TrimPatternImpl(Registry.TrimPatternEntry registry) {
++    public TrimPatternImpl(TrimPatternEntry registry) {
+         this(registry, i.getAndIncrement());
+     }
+ 
+diff --git a/src/main/java/net/minestom/server/potion/PotionEffect.java b/src/main/java/net/minestom/server/potion/PotionEffect.java
+index e0d9a2a5817e77b6095b6fc9e1aa84b4774d137c..650ce7f3d30399205721432e04b382aed65031cb 100644
+--- a/src/main/java/net/minestom/server/potion/PotionEffect.java
++++ b/src/main/java/net/minestom/server/potion/PotionEffect.java
+@@ -1,7 +1,7 @@
+ package net.minestom.server.potion;
+ 
+ import net.minestom.server.registry.ProtocolObject;
+-import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.entries.PotionEffectEntry;
+ import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.Contract;
+ import org.jetbrains.annotations.NotNull;
+@@ -12,7 +12,7 @@ import java.util.Collection;
+ public sealed interface PotionEffect extends ProtocolObject, PotionEffects permits PotionEffectImpl {
+ 
+     @Contract(pure = true)
+-    @NotNull Registry.PotionEffectEntry registry();
++    @NotNull PotionEffectEntry registry();
+ 
+     @Override
+     default @NotNull NamespaceID namespace() {
+diff --git a/src/main/java/net/minestom/server/potion/PotionEffectImpl.java b/src/main/java/net/minestom/server/potion/PotionEffectImpl.java
+index 6396afc14cd0c85ece56e0ec8df2d190ea7779aa..51c999146016b54c17d7e9db29fd48b8fb32ecd8 100644
+--- a/src/main/java/net/minestom/server/potion/PotionEffectImpl.java
++++ b/src/main/java/net/minestom/server/potion/PotionEffectImpl.java
+@@ -1,12 +1,15 @@
+ package net.minestom.server.potion;
+ 
++import net.minestom.server.registry.Container;
+ import net.minestom.server.registry.Registry;
++import net.minestom.server.registry.Resource;
++import net.minestom.server.registry.entries.PotionEffectEntry;
+ import org.jetbrains.annotations.NotNull;
+ 
+ import java.util.Collection;
+ 
+-record PotionEffectImpl(Registry.PotionEffectEntry registry) implements PotionEffect {
+-    private static final Registry.Container<PotionEffect> CONTAINER = Registry.createContainer(Registry.Resource.POTION_EFFECTS,
++record PotionEffectImpl(PotionEffectEntry registry) implements PotionEffect {
++    private static final Container<PotionEffect> CONTAINER = Registry.createContainer(Resource.POTION_EFFECTS,
+             (namespace, properties) -> new PotionEffectImpl(Registry.potionEffect(namespace, properties)));
+ 
+     static PotionEffect get(@NotNull String namespace) {
+diff --git a/src/main/java/net/minestom/server/registry/Container.java b/src/main/java/net/minestom/server/registry/Container.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..c47a6c58ccc5c709e4773c9aa2c11f415a44adec
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/Container.java
+@@ -0,0 +1,55 @@
++package net.minestom.server.registry;
++
++import net.minestom.server.utils.collection.ObjectArray;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Collection;
++import java.util.Map;
++import java.util.Objects;
++
++@ApiStatus.Internal
++public record Container<T extends ProtocolObject>(Resource resource,
++                                                  Map<String, T> namespaces,
++                                                  ObjectArray<T> ids) {
++    public Container {
++        namespaces = Map.copyOf(namespaces);
++        ids.trim();
++    }
++
++    public T get(@NotNull String namespace) {
++        return namespaces.get(namespace);
++    }
++
++    public T getSafe(@NotNull String namespace) {
++        return get(namespace.contains(":") ? namespace : "minecraft:" + namespace);
++    }
++
++    public T getId(int id) {
++        return ids.get(id);
++    }
++
++    public int toId(@NotNull String namespace) {
++        return get(namespace).id();
++    }
++
++    public Collection<T> values() {
++        return namespaces.values();
++    }
++
++    @Override
++    public boolean equals(Object o) {
++        if (this == o) return true;
++        if (!(o instanceof Container<?> container)) return false;
++        return resource == container.resource();
++    }
++
++    @Override
++    public int hashCode() {
++        return Objects.hash(resource);
++    }
++
++    public interface Loader<T extends ProtocolObject> {
++        T get(String namespace, Properties properties);
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minestom/server/registry/Entry.java b/src/main/java/net/minestom/server/registry/Entry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..191acb9ff6d8b41f7316a1e6fce48f07ef1deabd
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/Entry.java
+@@ -0,0 +1,8 @@
++package net.minestom.server.registry;
++
++import org.jetbrains.annotations.ApiStatus;
++
++public interface Entry {
++    @ApiStatus.Experimental
++    Properties custom();
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minestom/server/registry/Properties.java b/src/main/java/net/minestom/server/registry/Properties.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..0fe31720aaaf7ca4768e5b7b376d0c293a8afb82
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/Properties.java
+@@ -0,0 +1,41 @@
++package net.minestom.server.registry;
++
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Iterator;
++import java.util.Map;
++
++public interface Properties extends Iterable<Map.Entry<String, Object>> {
++    static Properties fromMap(Map<String, Object> map) {
++        return new PropertiesMap(map);
++    }
++
++    String getString(String name, String defaultValue);
++
++    String getString(String name);
++
++    double getDouble(String name, double defaultValue);
++
++    double getDouble(String name);
++
++    int getInt(String name, int defaultValue);
++
++    int getInt(String name);
++
++    boolean getBoolean(String name, boolean defaultValue);
++
++    boolean getBoolean(String name);
++
++    Properties section(String name);
++
++    Map<String, Object> asMap();
++
++    @Override
++    default @NotNull Iterator<Map.Entry<String, Object>> iterator() {
++        return asMap().entrySet().iterator();
++    }
++
++    default int size() {
++        return asMap().size();
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/PropertiesMap.java b/src/main/java/net/minestom/server/registry/PropertiesMap.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..35128f032119cf15583dbcc9e53f465879b2f488
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/PropertiesMap.java
+@@ -0,0 +1,75 @@
++package net.minestom.server.registry;
++
++import java.util.Map;
++import java.util.concurrent.atomic.AtomicReference;
++
++public record PropertiesMap(Map<String, Object> map) implements Properties {
++    @Override
++    public String getString(String name, String defaultValue) {
++        var element = element(name);
++        return element != null ? (String) element : defaultValue;
++    }
++
++    @Override
++    public String getString(String name) {
++        return element(name);
++    }
++
++    @Override
++    public double getDouble(String name, double defaultValue) {
++        var element = element(name);
++        return element != null ? ((Number) element).doubleValue() : defaultValue;
++    }
++
++    @Override
++    public double getDouble(String name) {
++        return ((Number) element(name)).doubleValue();
++    }
++
++    @Override
++    public int getInt(String name, int defaultValue) {
++        var element = element(name);
++        return element != null ? ((Number) element).intValue() : defaultValue;
++    }
++
++    @Override
++    public int getInt(String name) {
++        return ((Number) element(name)).intValue();
++    }
++
++    @Override
++    public boolean getBoolean(String name, boolean defaultValue) {
++        var element = element(name);
++        return element != null ? (boolean) element : defaultValue;
++    }
++
++    @Override
++    public boolean getBoolean(String name) {
++        return element(name);
++    }
++
++    @Override
++    public Properties section(String name) {
++        Map<String, Object> map = element(name);
++        if (map == null) return null;
++        return new PropertiesMap(map);
++    }
++
++    @Override
++    public Map<String, Object> asMap() {
++        return map;
++    }
++
++    private <T> T element(String name) {
++        //noinspection unchecked
++        return (T) map.get(name);
++    }
++
++    @Override
++    public String toString() {
++        AtomicReference<String> string = new AtomicReference<>("{ ");
++        this.map.forEach((s, object) -> string.set(string.get() + " , " + "\"" + s + "\"" + " : " + "\"" + object.toString() + "\""));
++        return string.updateAndGet(s -> s.replaceFirst(" , ","") + "}");
++    }
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
+index 6945755e3e6f0739e59934995097a97e7829340e..f779551121861d1bc37cb8f0678aebb9bf34b971 100644
+--- a/src/main/java/net/minestom/server/registry/Registry.java
++++ b/src/main/java/net/minestom/server/registry/Registry.java
+@@ -2,36 +2,24 @@ package net.minestom.server.registry;
+ 
+ import com.google.gson.ToNumberPolicy;
+ import com.google.gson.stream.JsonReader;
+-import net.kyori.adventure.text.Component;
+-import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
+ import net.minestom.server.MinecraftServer;
+-import net.minestom.server.collision.BoundingBox;
+-import net.minestom.server.collision.CollisionUtils;
+-import net.minestom.server.collision.Shape;
+-import net.minestom.server.entity.EntitySpawnType;
+-import net.minestom.server.entity.EquipmentSlot;
+-import net.minestom.server.instance.block.Block;
+-import net.minestom.server.item.Material;
+-import net.minestom.server.utils.NamespaceID;
++import net.minestom.server.registry.entries.*;
+ import net.minestom.server.utils.collection.ObjectArray;
+ import net.minestom.server.utils.validate.Check;
+ import org.jetbrains.annotations.ApiStatus;
+ import org.jetbrains.annotations.NotNull;
+-import org.jetbrains.annotations.Nullable;
+ 
+ import java.io.IOException;
+ import java.io.InputStream;
+ import java.io.InputStreamReader;
+ import java.util.*;
+-import java.util.concurrent.atomic.AtomicReference;
+-import java.util.function.Supplier;
+-import java.util.stream.Collectors;
+ 
+ /**
+  * Handles registry data, used by {@link ProtocolObject} implementations and is strictly internal.
+  * Use at your own risk.
+  */
+ public final class Registry {
++
+     @ApiStatus.Internal
+     public static BlockEntry block(String namespace, @NotNull Properties main) {
+         return new BlockEntry(namespace, main, null);
+@@ -75,7 +63,7 @@ public final class Registry {
+     @ApiStatus.Internal
+     public static Map<String, Map<String, Object>> load(Resource resource) {
+         Map<String, Map<String, Object>> map = new HashMap<>();
+-        try (InputStream resourceStream = Registry.class.getClassLoader().getResourceAsStream(resource.name)) {
++        try (InputStream resourceStream = Registry.class.getClassLoader().getResourceAsStream(resource.name())) {
+             Check.notNull(resourceStream, "Resource {0} does not exist!", resource);
+             try (JsonReader reader = new JsonReader(new InputStreamReader(resourceStream))) {
+                 reader.beginObject();
+@@ -103,429 +91,6 @@ public final class Registry {
+         return new Container<>(resource, namespaces, ids);
+     }
+ 
+-    @ApiStatus.Internal
+-    public record Container<T extends ProtocolObject>(Resource resource,
+-                                                      Map<String, T> namespaces,
+-                                                      ObjectArray<T> ids) {
+-        public Container {
+-            namespaces = Map.copyOf(namespaces);
+-            ids.trim();
+-        }
+-
+-        public T get(@NotNull String namespace) {
+-            return namespaces.get(namespace);
+-        }
+-
+-        public T getSafe(@NotNull String namespace) {
+-            return get(namespace.contains(":") ? namespace : "minecraft:" + namespace);
+-        }
+-
+-        public T getId(int id) {
+-            return ids.get(id);
+-        }
+-
+-        public int toId(@NotNull String namespace) {
+-            return get(namespace).id();
+-        }
+-
+-        public Collection<T> values() {
+-            return namespaces.values();
+-        }
+-
+-        @Override
+-        public boolean equals(Object o) {
+-            if (this == o) return true;
+-            if (!(o instanceof Container<?> container)) return false;
+-            return resource == container.resource;
+-        }
+-
+-        @Override
+-        public int hashCode() {
+-            return Objects.hash(resource);
+-        }
+-
+-        public interface Loader<T extends ProtocolObject> {
+-            T get(String namespace, Properties properties);
+-        }
+-    }
+-
+-    @ApiStatus.Internal
+-    public enum Resource {
+-        BLOCKS("blocks.json"),
+-        ITEMS("items.json"),
+-        ENTITIES("entities.json"),
+-        ENCHANTMENTS("enchantments.json"),
+-        SOUNDS("sounds.json"),
+-        COMMAND_ARGUMENTS("command_arguments.json"),
+-        STATISTICS("custom_statistics.json"),
+-        POTION_EFFECTS("potion_effects.json"),
+-        POTION_TYPES("potions.json"),
+-        PARTICLES("particles.json"),
+-        DAMAGE_TYPES("damage_types.json"),
+-        TRIM_MATERIALS("trim_materials.json"),
+-        TRIM_PATTERNS("trim_patterns.json"),
+-        BANNER_PATTERNS("banner_patterns.json"), // Microtus -  Banner and Shield Meta
+-        BLOCK_TAGS("tags/block_tags.json"),
+-        ENTITY_TYPE_TAGS("tags/entity_type_tags.json"),
+-        FLUID_TAGS("tags/fluid_tags.json"),
+-        GAMEPLAY_TAGS("tags/gameplay_tags.json"),
+-        ITEM_TAGS("tags/item_tags.json");
+-
+-        private final String name;
+-
+-        Resource(String name) {
+-            this.name = name;
+-        }
+-    }
+-
+-    public static final class BlockEntry implements Entry {
+-        private final NamespaceID namespace;
+-        private final int id;
+-        private final int stateId;
+-        private final String translationKey;
+-        private final double hardness;
+-        private final double explosionResistance;
+-        private final double friction;
+-        private final double speedFactor;
+-        private final double jumpFactor;
+-        private final boolean air;
+-        private final boolean solid;
+-        private final boolean liquid;
+-        private final boolean occludes;
+-        private final int lightEmission;
+-        private final boolean replaceable;
+-        private final String blockEntity;
+-        private final int blockEntityId;
+-        private final Supplier<Material> materialSupplier;
+-        private final Shape shape;
+-        private final Properties custom;
+-
+-        private BlockEntry(String namespace, Properties main, Properties custom) {
+-            this.custom = custom;
+-            this.namespace = NamespaceID.from(namespace);
+-            this.id = main.getInt("id");
+-            this.stateId = main.getInt("stateId");
+-            this.translationKey = main.getString("translationKey");
+-            this.hardness = main.getDouble("hardness");
+-            this.explosionResistance = main.getDouble("explosionResistance");
+-            this.friction = main.getDouble("friction");
+-            this.speedFactor = main.getDouble("speedFactor", 1);
+-            this.jumpFactor = main.getDouble("jumpFactor", 1);
+-            this.air = main.getBoolean("air", false);
+-            this.solid = main.getBoolean("solid");
+-            this.liquid = main.getBoolean("liquid", false);
+-            this.occludes = main.getBoolean("occludes", true);
+-            this.lightEmission = main.getInt("lightEmission", 0);
+-            this.replaceable = main.getBoolean("replaceable", false);
+-            {
+-                Properties blockEntity = main.section("blockEntity");
+-                if (blockEntity != null) {
+-                    this.blockEntity = blockEntity.getString("namespace");
+-                    this.blockEntityId = blockEntity.getInt("id");
+-                } else {
+-                    this.blockEntity = null;
+-                    this.blockEntityId = 0;
+-                }
+-            }
+-            {
+-                final String materialNamespace = main.getString("correspondingItem", null);
+-                this.materialSupplier = materialNamespace != null ? () -> Material.fromNamespaceId(materialNamespace) : () -> null;
+-            }
+-            {
+-                final String collision = main.getString("collisionShape");
+-                final String occlusion = main.getString("occlusionShape");
+-                this.shape = CollisionUtils.parseBlockShape(collision, occlusion, this);
+-            }
+-        }
+-
+-        public @NotNull NamespaceID namespace() {
+-            return namespace;
+-        }
+-
+-        public int id() {
+-            return id;
+-        }
+-
+-        public int stateId() {
+-            return stateId;
+-        }
+-
+-        public String translationKey() {
+-            return translationKey;
+-        }
+-
+-        public double hardness() {
+-            return hardness;
+-        }
+-
+-        public double explosionResistance() {
+-            return explosionResistance;
+-        }
+-
+-        public double friction() {
+-            return friction;
+-        }
+-
+-        public double speedFactor() {
+-            return speedFactor;
+-        }
+-
+-        public double jumpFactor() {
+-            return jumpFactor;
+-        }
+-
+-        public boolean isAir() {
+-            return air;
+-        }
+-
+-        public boolean isSolid() {
+-            return solid;
+-        }
+-
+-        public boolean isLiquid() {
+-            return liquid;
+-        }
+-
+-        public boolean occludes() {
+-            return occludes;
+-        }
+-
+-        public int lightEmission() {
+-            return lightEmission;
+-        }
+-
+-        public boolean isReplaceable() {
+-            return replaceable;
+-        }
+-
+-        public boolean isBlockEntity() {
+-            return blockEntity != null;
+-        }
+-
+-        public @Nullable String blockEntity() {
+-            return blockEntity;
+-        }
+-
+-        public int blockEntityId() {
+-            return blockEntityId;
+-        }
+-
+-        public @Nullable Material material() {
+-            return materialSupplier.get();
+-        }
+-
+-        public Shape collisionShape() {
+-            return shape;
+-        }
+-
+-        @Override
+-        public Properties custom() {
+-            return custom;
+-        }
+-    }
+-
+-    public static final class MaterialEntry implements Entry {
+-        private final NamespaceID namespace;
+-        private final int id;
+-        private final String translationKey;
+-        private final int maxStackSize;
+-        private final int maxDamage;
+-        private final boolean isFood;
+-        private final Supplier<Block> blockSupplier;
+-        private final EquipmentSlot equipmentSlot;
+-        private final Properties custom;
+-
+-        private MaterialEntry(String namespace, Properties main, Properties custom) {
+-            this.custom = custom;
+-            this.namespace = NamespaceID.from(namespace);
+-            this.id = main.getInt("id");
+-            this.translationKey = main.getString("translationKey");
+-            this.maxStackSize = main.getInt("maxStackSize", 64);
+-            this.maxDamage = main.getInt("maxDamage", 0);
+-            this.isFood = main.getBoolean("edible", false);
+-            {
+-                final String blockNamespace = main.getString("correspondingBlock", null);
+-                this.blockSupplier = blockNamespace != null ? () -> Block.fromNamespaceId(blockNamespace) : () -> null;
+-            }
+-            {
+-                final Properties armorProperties = main.section("armorProperties");
+-                if (armorProperties != null) {
+-                    switch (armorProperties.getString("slot")) {
+-                        case "feet" -> this.equipmentSlot = EquipmentSlot.BOOTS;
+-                        case "legs" -> this.equipmentSlot = EquipmentSlot.LEGGINGS;
+-                        case "chest" -> this.equipmentSlot = EquipmentSlot.CHESTPLATE;
+-                        case "head" -> this.equipmentSlot = EquipmentSlot.HELMET;
+-                        default -> this.equipmentSlot = null;
+-                    }
+-                } else {
+-                    this.equipmentSlot = null;
+-                }
+-            }
+-        }
+-
+-        public @NotNull NamespaceID namespace() {
+-            return namespace;
+-        }
+-
+-        public int id() {
+-            return id;
+-        }
+-
+-        public String translationKey() {
+-            return translationKey;
+-        }
+-
+-        public int maxStackSize() {
+-            return maxStackSize;
+-        }
+-
+-        public int maxDamage() {
+-            return maxDamage;
+-        }
+-
+-        public boolean isFood() {
+-            return isFood;
+-        }
+-
+-        public @Nullable Block block() {
+-            return blockSupplier.get();
+-        }
+-
+-        public boolean isArmor() {
+-            return equipmentSlot != null;
+-        }
+-
+-        public @Nullable EquipmentSlot equipmentSlot() {
+-            return equipmentSlot;
+-        }
+-
+-        @Override
+-        public Properties custom() {
+-            return custom;
+-        }
+-    }
+-
+-    public record EntityEntry(NamespaceID namespace, int id,
+-                              String translationKey,
+-                              double width, double height,
+-                              double drag, double acceleration,
+-                              EntitySpawnType spawnType,
+-                              BoundingBox boundingBox,
+-                              Properties custom) implements Entry {
+-        public EntityEntry(String namespace, Properties main, Properties custom) {
+-            this(NamespaceID.from(namespace),
+-                    main.getInt("id"),
+-                    main.getString("translationKey"),
+-                    main.getDouble("width"),
+-                    main.getDouble("height"),
+-                    main.getDouble("drag", 0.02),
+-                    main.getDouble("acceleration", 0.08),
+-                    EntitySpawnType.valueOf(main.getString("packetType").toUpperCase(Locale.ROOT)),
+-                    new BoundingBox(
+-                            main.getDouble("width"),
+-                            main.getDouble("height"),
+-                            main.getDouble("width")),
+-                    custom
+-            );
+-        }
+-    }
+-
+-    public record DamageTypeEntry(NamespaceID namespace, float exhaustion,
+-                                  String messageId,
+-                                  String scaling,
+-                                  @Nullable String effects,
+-                                  @Nullable String deathMessageType,
+-                                  Properties custom) implements Entry {
+-        public DamageTypeEntry(String namespace, Properties main, Properties custom) {
+-            this(NamespaceID.from(namespace),
+-                    (float) main.getDouble("exhaustion"),
+-                    main.getString("message_id"),
+-                    main.getString("scaling"),
+-                    main.getString("effects"),
+-                    main.getString("death_message_type"),
+-                    custom);
+-        }
+-    }
+-    public record TrimMaterialEntry(@NotNull NamespaceID namespace,
+-                                    @NotNull String assetName,
+-                                    @NotNull Material ingredient,
+-                                    float itemModelIndex,
+-                                    @NotNull Map<String,String> overrideArmorMaterials,
+-                                    @NotNull Component description,
+-                                    Properties custom) implements Entry {
+-        public TrimMaterialEntry(@NotNull String namespace, @NotNull Properties main, Properties custom) {
+-            this(
+-                    NamespaceID.from(namespace),
+-                    main.getString("asset_name"),
+-                    Objects.requireNonNull(Material.fromNamespaceId(main.getString("ingredient"))),
+-                    (float) main.getDouble("item_model_index"),
+-                    Objects.requireNonNullElse(main.section("override_armor_materials"),new PropertiesMap(Map.of()))
+-                            .asMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> (String) entry.getValue())),
+-                    JSONComponentSerializer.json().deserialize(main.section("description").toString()),
+-                    custom
+-            );
+-        }
+-    }
+-
+-    public record TrimPatternEntry(@NotNull NamespaceID namespace,
+-                                   @NotNull NamespaceID assetID,
+-                                   @NotNull Material template,
+-                                   @NotNull Component description,
+-                                   boolean decal,
+-                                   Properties custom) implements Entry {
+-        public TrimPatternEntry(@NotNull String namespace, @NotNull Properties main, Properties custom) {
+-            this(
+-                    NamespaceID.from(namespace),
+-                    NamespaceID.from(main.getString("asset_id")),
+-                    Objects.requireNonNull(Material.fromNamespaceId(main.getString("template_item"))),
+-                    JSONComponentSerializer.json().deserialize(main.section("description").toString()),
+-                    main.getBoolean("decal"),
+-                    custom
+-            );
+-        }
+-    }
+-
+-    public record EnchantmentEntry(NamespaceID namespace, int id,
+-                                   String translationKey,
+-                                   double maxLevel,
+-                                   boolean isCursed,
+-                                   boolean isDiscoverable,
+-                                   boolean isTradeable,
+-                                   boolean isTreasureOnly,
+-                                   Properties custom) implements Entry {
+-        public EnchantmentEntry(String namespace, Properties main, Properties custom) {
+-            this(NamespaceID.from(namespace),
+-                    main.getInt("id"),
+-                    main.getString("translationKey"),
+-                    main.getDouble("maxLevel"),
+-                    main.getBoolean("curse", false),
+-                    main.getBoolean("discoverable", true),
+-                    main.getBoolean("tradeable", true),
+-                    main.getBoolean("treasureOnly", false),
+-                    custom);
+-        }
+-    }
+-
+-    public record PotionEffectEntry(NamespaceID namespace, int id,
+-                                    String translationKey,
+-                                    int color,
+-                                    boolean isInstantaneous,
+-                                    Properties custom) implements Entry {
+-        public PotionEffectEntry(String namespace, Properties main, Properties custom) {
+-            this(NamespaceID.from(namespace),
+-                    main.getInt("id"),
+-                    main.getString("translationKey"),
+-                    main.getInt("color"),
+-                    main.getBoolean("instantaneous"),
+-                    custom);
+-        }
+-    }
+-
+-    public interface Entry {
+-        @ApiStatus.Experimental
+-        Properties custom();
+-    }
+-
+     private static Object readObject(JsonReader reader) throws IOException {
+         return switch (reader.peek()) {
+             case BEGIN_ARRAY -> {
+@@ -548,110 +113,4 @@ public final class Registry {
+             default -> throw new IllegalStateException("Invalid peek: " + reader.peek());
+         };
+     }
+-
+-    record PropertiesMap(Map<String, Object> map) implements Properties {
+-        @Override
+-        public String getString(String name, String defaultValue) {
+-            var element = element(name);
+-            return element != null ? (String) element : defaultValue;
+-        }
+-
+-        @Override
+-        public String getString(String name) {
+-            return element(name);
+-        }
+-
+-        @Override
+-        public double getDouble(String name, double defaultValue) {
+-            var element = element(name);
+-            return element != null ? ((Number) element).doubleValue() : defaultValue;
+-        }
+-
+-        @Override
+-        public double getDouble(String name) {
+-            return ((Number) element(name)).doubleValue();
+-        }
+-
+-        @Override
+-        public int getInt(String name, int defaultValue) {
+-            var element = element(name);
+-            return element != null ? ((Number) element).intValue() : defaultValue;
+-        }
+-
+-        @Override
+-        public int getInt(String name) {
+-            return ((Number) element(name)).intValue();
+-        }
+-
+-        @Override
+-        public boolean getBoolean(String name, boolean defaultValue) {
+-            var element = element(name);
+-            return element != null ? (boolean) element : defaultValue;
+-        }
+-
+-        @Override
+-        public boolean getBoolean(String name) {
+-            return element(name);
+-        }
+-
+-        @Override
+-        public Properties section(String name) {
+-            Map<String, Object> map = element(name);
+-            if (map == null) return null;
+-            return new PropertiesMap(map);
+-        }
+-
+-        @Override
+-        public Map<String, Object> asMap() {
+-            return map;
+-        }
+-
+-        private <T> T element(String name) {
+-            //noinspection unchecked
+-            return (T) map.get(name);
+-        }
+-
+-        @Override
+-        public String toString() {
+-            AtomicReference<String> string = new AtomicReference<>("{ ");
+-            this.map.forEach((s, object) -> string.set(string.get() + " , " + "\"" + s + "\"" + " : " + "\"" + object.toString() + "\""));
+-            return string.updateAndGet(s -> s.replaceFirst(" , ","") + "}");
+-        }
+-
+-    }
+-
+-    public interface Properties extends Iterable<Map.Entry<String, Object>> {
+-        static Properties fromMap(Map<String, Object> map) {
+-            return new PropertiesMap(map);
+-        }
+-
+-        String getString(String name, String defaultValue);
+-
+-        String getString(String name);
+-
+-        double getDouble(String name, double defaultValue);
+-
+-        double getDouble(String name);
+-
+-        int getInt(String name, int defaultValue);
+-
+-        int getInt(String name);
+-
+-        boolean getBoolean(String name, boolean defaultValue);
+-
+-        boolean getBoolean(String name);
+-
+-        Properties section(String name);
+-
+-        Map<String, Object> asMap();
+-
+-        @Override
+-        default @NotNull Iterator<Map.Entry<String, Object>> iterator() {
+-            return asMap().entrySet().iterator();
+-        }
+-
+-        default int size() {
+-            return asMap().size();
+-        }
+-    }
+ }
+diff --git a/src/main/java/net/minestom/server/registry/Resource.java b/src/main/java/net/minestom/server/registry/Resource.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..cd569d6343d04332bd251dc3e4098dbf2eca3486
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/Resource.java
+@@ -0,0 +1,32 @@
++package net.minestom.server.registry;
++
++import org.jetbrains.annotations.ApiStatus;
++
++@ApiStatus.Internal
++public enum Resource {
++    BLOCKS("blocks.json"),
++    ITEMS("items.json"),
++    ENTITIES("entities.json"),
++    ENCHANTMENTS("enchantments.json"),
++    SOUNDS("sounds.json"),
++    COMMAND_ARGUMENTS("command_arguments.json"),
++    STATISTICS("custom_statistics.json"),
++    POTION_EFFECTS("potion_effects.json"),
++    POTION_TYPES("potions.json"),
++    PARTICLES("particles.json"),
++    DAMAGE_TYPES("damage_types.json"),
++    TRIM_MATERIALS("trim_materials.json"),
++    TRIM_PATTERNS("trim_patterns.json"),
++    BANNER_PATTERNS("banner_patterns.json"), // Microtus -  Banner and Shield Meta
++    BLOCK_TAGS("tags/block_tags.json"),
++    ENTITY_TYPE_TAGS("tags/entity_type_tags.json"),
++    FLUID_TAGS("tags/fluid_tags.json"),
++    GAMEPLAY_TAGS("tags/gameplay_tags.json"),
++    ITEM_TAGS("tags/item_tags.json");
++
++    private final String name;
++
++    Resource(String name) {
++        this.name = name;
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/entries/BlockEntry.java b/src/main/java/net/minestom/server/registry/entries/BlockEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..1eb177c04a555c323f3a92f90d047e6ac9e961e3
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/entries/BlockEntry.java
+@@ -0,0 +1,160 @@
++package net.minestom.server.registry.entries;
++
++import net.minestom.server.collision.CollisionUtils;
++import net.minestom.server.collision.Shape;
++import net.minestom.server.item.Material;
++import net.minestom.server.registry.Entry;
++import net.minestom.server.registry.Properties;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++import java.util.function.Supplier;
++
++public final class BlockEntry implements Entry {
++
++    private final NamespaceID namespace;
++    private final int id;
++    private final int stateId;
++    private final String translationKey;
++    private final double hardness;
++    private final double explosionResistance;
++    private final double friction;
++    private final double speedFactor;
++    private final double jumpFactor;
++    private final boolean air;
++    private final boolean solid;
++    private final boolean liquid;
++    private final boolean occludes;
++    private final int lightEmission;
++    private final boolean replaceable;
++    private final String blockEntity;
++    private final int blockEntityId;
++    private final Supplier<Material> materialSupplier;
++    private final Shape shape;
++    private final Properties custom;
++
++    public BlockEntry(String namespace, Properties main, Properties custom) {
++        this.custom = custom;
++        this.namespace = NamespaceID.from(namespace);
++        this.id = main.getInt("id");
++        this.stateId = main.getInt("stateId");
++        this.translationKey = main.getString("translationKey");
++        this.hardness = main.getDouble("hardness");
++        this.explosionResistance = main.getDouble("explosionResistance");
++        this.friction = main.getDouble("friction");
++        this.speedFactor = main.getDouble("speedFactor", 1);
++        this.jumpFactor = main.getDouble("jumpFactor", 1);
++        this.air = main.getBoolean("air", false);
++        this.solid = main.getBoolean("solid");
++        this.liquid = main.getBoolean("liquid", false);
++        this.occludes = main.getBoolean("occludes", true);
++        this.lightEmission = main.getInt("lightEmission", 0);
++        this.replaceable = main.getBoolean("replaceable", false);
++        {
++            Properties blockEntity = main.section("blockEntity");
++            if (blockEntity != null) {
++                this.blockEntity = blockEntity.getString("namespace");
++                this.blockEntityId = blockEntity.getInt("id");
++            } else {
++                this.blockEntity = null;
++                this.blockEntityId = 0;
++            }
++        }
++        {
++            final String materialNamespace = main.getString("correspondingItem", null);
++            this.materialSupplier = materialNamespace != null ? () -> Material.fromNamespaceId(materialNamespace) : () -> null;
++        }
++        {
++            final String collision = main.getString("collisionShape");
++            final String occlusion = main.getString("occlusionShape");
++            this.shape = CollisionUtils.parseBlockShape(collision, occlusion, this);
++        }
++    }
++
++    public @NotNull NamespaceID namespace() {
++        return namespace;
++    }
++
++    public int id() {
++        return id;
++    }
++
++    public int stateId() {
++        return stateId;
++    }
++
++    public String translationKey() {
++        return translationKey;
++    }
++
++    public double hardness() {
++        return hardness;
++    }
++
++    public double explosionResistance() {
++        return explosionResistance;
++    }
++
++    public double friction() {
++        return friction;
++    }
++
++    public double speedFactor() {
++        return speedFactor;
++    }
++
++    public double jumpFactor() {
++        return jumpFactor;
++    }
++
++    public boolean isAir() {
++        return air;
++    }
++
++    public boolean isSolid() {
++        return solid;
++    }
++
++    public boolean isLiquid() {
++        return liquid;
++    }
++
++    public boolean occludes() {
++        return occludes;
++    }
++
++    public int lightEmission() {
++        return lightEmission;
++    }
++
++    public boolean isReplaceable() {
++        return replaceable;
++    }
++
++    public boolean isBlockEntity() {
++        return blockEntity != null;
++    }
++
++    public @Nullable String blockEntity() {
++        return blockEntity;
++    }
++
++    public int blockEntityId() {
++        return blockEntityId;
++    }
++
++    public @Nullable Material material() {
++        return materialSupplier.get();
++    }
++
++    public Shape collisionShape() {
++        return shape;
++    }
++
++    @Override
++    public Properties custom() {
++        return custom;
++    }
++
++}
+diff --git a/src/main/java/net/minestom/server/registry/entries/DamageTypeEntry.java b/src/main/java/net/minestom/server/registry/entries/DamageTypeEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..47cca964a673470e5bce8aa486c8c57243352fa1
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/entries/DamageTypeEntry.java
+@@ -0,0 +1,23 @@
++package net.minestom.server.registry.entries;
++
++import net.minestom.server.registry.Entry;
++import net.minestom.server.registry.Properties;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.Nullable;
++
++public record DamageTypeEntry(NamespaceID namespace, float exhaustion,
++                              String messageId,
++                              String scaling,
++                              @Nullable String effects,
++                              @Nullable String deathMessageType,
++                              Properties custom) implements Entry {
++    public DamageTypeEntry(String namespace, Properties main, Properties custom) {
++        this(NamespaceID.from(namespace),
++                (float) main.getDouble("exhaustion"),
++                main.getString("message_id"),
++                main.getString("scaling"),
++                main.getString("effects"),
++                main.getString("death_message_type"),
++                custom);
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/entries/EnchantmentEntry.java b/src/main/java/net/minestom/server/registry/entries/EnchantmentEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..033ee73eda7fec18bf76559578a6432bb4da6324
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/entries/EnchantmentEntry.java
+@@ -0,0 +1,26 @@
++package net.minestom.server.registry.entries;
++
++import net.minestom.server.registry.Entry;
++import net.minestom.server.registry.Properties;
++import net.minestom.server.utils.NamespaceID;
++
++public record EnchantmentEntry(NamespaceID namespace, int id,
++                               String translationKey,
++                               double maxLevel,
++                               boolean isCursed,
++                               boolean isDiscoverable,
++                               boolean isTradeable,
++                               boolean isTreasureOnly,
++                               Properties custom) implements Entry {
++    public EnchantmentEntry(String namespace, Properties main, Properties custom) {
++        this(NamespaceID.from(namespace),
++                main.getInt("id"),
++                main.getString("translationKey"),
++                main.getDouble("maxLevel"),
++                main.getBoolean("curse", false),
++                main.getBoolean("discoverable", true),
++                main.getBoolean("tradeable", true),
++                main.getBoolean("treasureOnly", false),
++                custom);
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/entries/EntityEntry.java b/src/main/java/net/minestom/server/registry/entries/EntityEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..05dddb7c8c7f3781bd034fa0c9eaaedcd79f5990
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/entries/EntityEntry.java
+@@ -0,0 +1,34 @@
++package net.minestom.server.registry.entries;
++
++import net.minestom.server.collision.BoundingBox;
++import net.minestom.server.entity.EntitySpawnType;
++import net.minestom.server.registry.Entry;
++import net.minestom.server.registry.Properties;
++import net.minestom.server.utils.NamespaceID;
++
++import java.util.Locale;
++
++public record EntityEntry(NamespaceID namespace, int id,
++                          String translationKey,
++                          double width, double height,
++                          double drag, double acceleration,
++                          EntitySpawnType spawnType,
++                          BoundingBox boundingBox,
++                          Properties custom) implements Entry {
++    public EntityEntry(String namespace, Properties main, Properties custom) {
++        this(NamespaceID.from(namespace),
++                main.getInt("id"),
++                main.getString("translationKey"),
++                main.getDouble("width"),
++                main.getDouble("height"),
++                main.getDouble("drag", 0.02),
++                main.getDouble("acceleration", 0.08),
++                EntitySpawnType.valueOf(main.getString("packetType").toUpperCase(Locale.ROOT)),
++                new BoundingBox(
++                        main.getDouble("width"),
++                        main.getDouble("height"),
++                        main.getDouble("width")),
++                custom
++        );
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/entries/MaterialEntry.java b/src/main/java/net/minestom/server/registry/entries/MaterialEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..f96bf2092dd51aaf6337ab791484e8ced5f077cf
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/entries/MaterialEntry.java
+@@ -0,0 +1,94 @@
++package net.minestom.server.registry.entries;
++
++import net.minestom.server.entity.EquipmentSlot;
++import net.minestom.server.instance.block.Block;
++import net.minestom.server.registry.Entry;
++import net.minestom.server.registry.Properties;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++
++import java.util.function.Supplier;
++
++public final class MaterialEntry implements Entry {
++
++    private final NamespaceID namespace;
++    private final int id;
++    private final String translationKey;
++    private final int maxStackSize;
++    private final int maxDamage;
++    private final boolean isFood;
++    private final Supplier<Block> blockSupplier;
++    private final EquipmentSlot equipmentSlot;
++    private final Properties custom;
++
++    public MaterialEntry(String namespace, Properties main, Properties custom) {
++        this.custom = custom;
++        this.namespace = NamespaceID.from(namespace);
++        this.id = main.getInt("id");
++        this.translationKey = main.getString("translationKey");
++        this.maxStackSize = main.getInt("maxStackSize", 64);
++        this.maxDamage = main.getInt("maxDamage", 0);
++        this.isFood = main.getBoolean("edible", false);
++        {
++            final String blockNamespace = main.getString("correspondingBlock", null);
++            this.blockSupplier = blockNamespace != null ? () -> Block.fromNamespaceId(blockNamespace) : () -> null;
++        }
++        {
++            final Properties armorProperties = main.section("armorProperties");
++            if (armorProperties != null) {
++                switch (armorProperties.getString("slot")) {
++                    case "feet" -> this.equipmentSlot = EquipmentSlot.BOOTS;
++                    case "legs" -> this.equipmentSlot = EquipmentSlot.LEGGINGS;
++                    case "chest" -> this.equipmentSlot = EquipmentSlot.CHESTPLATE;
++                    case "head" -> this.equipmentSlot = EquipmentSlot.HELMET;
++                    default -> this.equipmentSlot = null;
++                }
++            } else {
++                this.equipmentSlot = null;
++            }
++        }
++    }
++
++    public @NotNull NamespaceID namespace() {
++        return namespace;
++    }
++
++    public int id() {
++        return id;
++    }
++
++    public String translationKey() {
++        return translationKey;
++    }
++
++    public int maxStackSize() {
++        return maxStackSize;
++    }
++
++    public int maxDamage() {
++        return maxDamage;
++    }
++
++    public boolean isFood() {
++        return isFood;
++    }
++
++    public @Nullable Block block() {
++        return blockSupplier.get();
++    }
++
++    public boolean isArmor() {
++        return equipmentSlot != null;
++    }
++
++    public @Nullable EquipmentSlot equipmentSlot() {
++        return equipmentSlot;
++    }
++
++    @Override
++    public Properties custom() {
++        return custom;
++    }
++
++}
+diff --git a/src/main/java/net/minestom/server/registry/entries/PotionEffectEntry.java b/src/main/java/net/minestom/server/registry/entries/PotionEffectEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..6c7e7e213a20f5132d6c5efe1e004548e9301216
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/entries/PotionEffectEntry.java
+@@ -0,0 +1,20 @@
++package net.minestom.server.registry.entries;
++
++import net.minestom.server.registry.Entry;
++import net.minestom.server.registry.Properties;
++import net.minestom.server.utils.NamespaceID;
++
++public record PotionEffectEntry(NamespaceID namespace, int id,
++                                String translationKey,
++                                int color,
++                                boolean isInstantaneous,
++                                Properties custom) implements Entry {
++    public PotionEffectEntry(String namespace, Properties main, Properties custom) {
++        this(NamespaceID.from(namespace),
++                main.getInt("id"),
++                main.getString("translationKey"),
++                main.getInt("color"),
++                main.getBoolean("instantaneous"),
++                custom);
++    }
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minestom/server/registry/entries/TrimMaterialEntry.java b/src/main/java/net/minestom/server/registry/entries/TrimMaterialEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..a1701c6797df5bafd33db373ab74f23f7479c86b
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/entries/TrimMaterialEntry.java
+@@ -0,0 +1,35 @@
++package net.minestom.server.registry.entries;
++
++import net.kyori.adventure.text.Component;
++import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
++import net.minestom.server.item.Material;
++import net.minestom.server.registry.Entry;
++import net.minestom.server.registry.Properties;
++import net.minestom.server.registry.PropertiesMap;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Map;
++import java.util.Objects;
++import java.util.stream.Collectors;
++
++public record TrimMaterialEntry(@NotNull NamespaceID namespace,
++                                @NotNull String assetName,
++                                @NotNull Material ingredient,
++                                float itemModelIndex,
++                                @NotNull Map<String,String> overrideArmorMaterials,
++                                @NotNull Component description,
++                                Properties custom) implements Entry {
++    public TrimMaterialEntry(@NotNull String namespace, @NotNull Properties main, Properties custom) {
++        this(
++                NamespaceID.from(namespace),
++                main.getString("asset_name"),
++                Objects.requireNonNull(Material.fromNamespaceId(main.getString("ingredient"))),
++                (float) main.getDouble("item_model_index"),
++                Objects.requireNonNullElse(main.section("override_armor_materials"),new PropertiesMap(Map.of()))
++                        .asMap().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> (String) entry.getValue())),
++                JSONComponentSerializer.json().deserialize(main.section("description").toString()),
++                custom
++        );
++    }
++}
+diff --git a/src/main/java/net/minestom/server/registry/entries/TrimPatternEntry.java b/src/main/java/net/minestom/server/registry/entries/TrimPatternEntry.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..898954a435dbe2143307434ed2fa87cf58a45c5f
+--- /dev/null
++++ b/src/main/java/net/minestom/server/registry/entries/TrimPatternEntry.java
+@@ -0,0 +1,29 @@
++package net.minestom.server.registry.entries;
++
++import net.kyori.adventure.text.Component;
++import net.kyori.adventure.text.serializer.json.JSONComponentSerializer;
++import net.minestom.server.item.Material;
++import net.minestom.server.registry.Entry;
++import net.minestom.server.registry.Properties;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Objects;
++
++public record TrimPatternEntry(@NotNull NamespaceID namespace,
++                               @NotNull NamespaceID assetID,
++                               @NotNull Material template,
++                               @NotNull Component description,
++                               boolean decal,
++                               Properties custom) implements Entry {
++    public TrimPatternEntry(@NotNull String namespace, @NotNull Properties main, Properties custom) {
++        this(
++                NamespaceID.from(namespace),
++                NamespaceID.from(main.getString("asset_id")),
++                Objects.requireNonNull(Material.fromNamespaceId(main.getString("template_item"))),
++                JSONComponentSerializer.json().deserialize(main.section("description").toString()),
++                main.getBoolean("decal"),
++                custom
++        );
++    }
++}
