@@ -180,6 +180,31 @@ index d97bc82ae1cd4f52268d16b394274d6a31b31656..c8f7392ec3fc95af089be33ff6761822
      @Override
      public @NotNull TagHandler tagHandler() {
          return tagHandler;
+diff --git a/src/main/java/net/minestom/server/command/builder/SimpleCommand.java b/src/main/java/net/minestom/server/command/builder/SimpleCommand.java
+index ce1e4d75059898e2ad1909f15e9e027284cc46ac..b04c801620e5699aba8ff654a6271fcba69fc7ac 100644
+--- a/src/main/java/net/minestom/server/command/builder/SimpleCommand.java
++++ b/src/main/java/net/minestom/server/command/builder/SimpleCommand.java
+@@ -5,6 +5,7 @@ import net.minestom.server.command.builder.arguments.ArgumentType;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
+ 
++@Deprecated
+ public abstract class SimpleCommand extends Command {
+     public SimpleCommand(@NotNull String name, @Nullable String... aliases) {
+         super(name, aliases);
+diff --git a/src/main/java/net/minestom/server/command/builder/arguments/ArgumentType.java b/src/main/java/net/minestom/server/command/builder/arguments/ArgumentType.java
+index 6722e6a72c90065f5317e1d1aca5d366b12b747b..aef5345fed489e8e38ba30f13b4ebcfcc85db517 100644
+--- a/src/main/java/net/minestom/server/command/builder/arguments/ArgumentType.java
++++ b/src/main/java/net/minestom/server/command/builder/arguments/ArgumentType.java
+@@ -273,7 +273,7 @@ public class ArgumentType {
+      * @see ArgumentEntity
+      * @deprecated use {@link #Entity(String)}
+      */
+-    @Deprecated
++    @Deprecated(forRemoval = true)
+     public static ArgumentEntity Entities(@NotNull String id) {
+         return new ArgumentEntity(id);
+     }
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
 index a195dd79e45b561df6eef65385fc9778dab83e2a..d805fa467a06772dbb60c785e6cdad0a0962ebe7 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
@@ -258,6 +283,28 @@ index 3775f1bf346d97b0a0f915f9ff9eb93698a128f3..b046349be27298a819f37905254ffd7a
      /**
       * @param entityCreature  the entity (self)
       * @param range           the maximum range the entity can target others within
+diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
+index 60d7102b205bc04a60678fecc2da0009ce56437a..1accc81d6cd31260da002e40cf532b61c672747b 100644
+--- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
++++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
+@@ -82,7 +82,7 @@ public class LivingEntityMeta extends EntityMeta {
+      * Use {@link #getBeeStingerCount()} instead
+      * @return The number of bee stingers in this entity
+      */
+-    @Deprecated
++    @Deprecated(forRemoval = true)
+     public int getHealthAddedByAbsorption() {
+         return super.metadata.getIndex(OFFSET + 5, 0);
+     }
+@@ -93,7 +93,7 @@ public class LivingEntityMeta extends EntityMeta {
+      * Use {@link #setBeeStingerCount(int)} instead
+      * @param value The number of bee stingers for this entity to have
+      */
+-    @Deprecated
++    @Deprecated(forRemoval = true)
+     public void setHealthAddedByAbsorption(int value) {
+         super.metadata.setIndex(OFFSET + 5, Metadata.VarInt(value));
+     }
 diff --git a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java b/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java
 index b45665fb719606ade2bc83318ba25866487a6dc4..71d3c37edba5b2be3324afc4f8b27aa15bfcc805 100644
 --- a/src/main/java/net/minestom/server/event/player/PlayerEatEvent.java

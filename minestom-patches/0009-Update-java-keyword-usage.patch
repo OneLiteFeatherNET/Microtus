@@ -136,7 +136,7 @@ index 449b16bbbc863703e293606d3253d2b7c4f64078..c1a4ae454e23bb8a58596089c1cb5328
      private final WeakReference<Entity> entityRef;
      protected final Metadata metadata;
 diff --git a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
-index 60d7102b205bc04a60678fecc2da0009ce56437a..1640a25fa4f17b0f49e20621f858d74436c9ea5e 100644
+index 1accc81d6cd31260da002e40cf532b61c672747b..2bec3ea7469b69f2bebfa7969eeb5302c7f4475b 100644
 --- a/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
 +++ b/src/main/java/net/minestom/server/entity/metadata/LivingEntityMeta.java
 @@ -11,9 +11,11 @@ public class LivingEntityMeta extends EntityMeta {
