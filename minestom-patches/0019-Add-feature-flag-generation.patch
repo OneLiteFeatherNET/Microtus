@@ -21,7 +21,7 @@ index 0ef2929b748f1dec1baa037ad7da95e35c878116..d403cfbbadbf2702cdd7741d9a9b036a
      // Provides the input JSON to generate from
      implementation(libs.minestomData)
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 704e927dbec1e68a52dab6238dcc279b55b9b7c4..ed20687fb6fc7c58ce66cb748a9e37a503f2f754 100644
+index 78c97d394de963de469a0aae396731be0383f61d..c8f6db70229f078c90a09b1e909d26748b025990 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
 @@ -3,6 +3,7 @@ package net.minestom.codegen;

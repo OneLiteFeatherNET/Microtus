@@ -396,7 +396,7 @@ index 2e5671e61f4d6f749b5ac343625d7f05538b5c42..5f8acd515579c6356296929cbe512ed1
  }
 \ No newline at end of file
 diff --git a/gradle/libs.versions.toml b/gradle/libs.versions.toml
-index b864046a4f27036b98b55701cff680ae0d03b940..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 100644
+index 64a61ce700829fce5958769542d59f5a8c1e235f..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391 100644
 --- a/gradle/libs.versions.toml
 +++ b/gradle/libs.versions.toml
 @@ -1,100 +0,0 @@
@@ -405,7 +405,7 @@ index b864046a4f27036b98b55701cff680ae0d03b940..e69de29bb2d1d6434b8b29ae775ad8c2
 -[versions]
 -
 -# Important dependencies
--data = "1.20.4-rv2"
+-data = "1.20.4-rv3"
 -adventure = "4.15.0"
 -kotlin = "1.7.22"
 -dependencyGetter = "v1.0.1"
