@@ -5,17 +5,17 @@ Subject: [PATCH] Add attribute generator
 
 
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 0ed975dd8c03c1b8e13e5e40cf8452c3aaaf83be..78c97d394de963de469a0aae396731be0383f61d 100644
+index 551ffe66856fbcf01b670a17aef9225bcf94b8c6..961e2e096380461dd24fde6ab333019e2541f644 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
 @@ -1,5 +1,6 @@
  package net.minestom.codegen;
  
 +import net.minestom.codegen.attribute.AttributeGenerator;
- import net.minestom.codegen.biome.BiomeGenerator;
  import net.minestom.codegen.color.DyeColorGenerator;
  import net.minestom.codegen.fluid.FluidGenerator;
-@@ -45,11 +46,10 @@ public class Generators {
+ import org.slf4j.Logger;
+@@ -43,11 +44,10 @@ public class Generators {
          // Generate fluids
          new FluidGenerator(resource("fluids.json"), outputFolder).generate();
  
@@ -437,13 +437,16 @@ index d8ffa960217a739ef5edd4f554459a9d92efea65..ec2f8fe6b49fb317c707819e85998667
          return serverProcess.advancement();
      }
 diff --git a/src/main/java/net/minestom/server/ServerFlag.java b/src/main/java/net/minestom/server/ServerFlag.java
-index 3c126640a14d073e37562a66ab6eb3465be7c472..a510f74bb2c4b553b68c8923e94f553fae879e82 100644
+index ea61869059d877f59ac9c613891c5c502c603198..a510f74bb2c4b553b68c8923e94f553fae879e82 100644
 --- a/src/main/java/net/minestom/server/ServerFlag.java
 +++ b/src/main/java/net/minestom/server/ServerFlag.java
-@@ -42,6 +42,9 @@ public final class ServerFlag {
-     // Biomes
-     public static final boolean BIOMES_ENABLED = System.getProperty("minestom.attributes.disabled") == null;
+@@ -39,6 +39,12 @@ public final class ServerFlag {
+     public static final @Nullable String STACKING_RULE = System.getProperty("minestom.stacking-rule");
+     public static final int WORLD_BORDER_SIZE = Integer.getInteger("minestom.world-border-size", 29999984);
  
++    // Biomes
++    public static final boolean BIOMES_ENABLED = System.getProperty("minestom.attributes.disabled") == null;
++
 +    // Attributes
 +    public static final boolean ATTRIBUTES_ENABLED = System.getProperty("minestom.attributes.disabled") == null;
 +
@@ -475,7 +478,7 @@ index 7c1002cab0f8fca3c0bc1c859b0737e708ae6892..f6998c2f9c10750047d5acd64c02ed6e
       * Handles registered advancements.
       */
 diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
-index aac3f8749abfd970760049e81861bf29643c4608..2fb1f5ee76ad6cc390a2c1b056f57ec4f454c1f3 100644
+index fd5af2b71286497addf6a41f3df8d151dfb6720e..00b128f05b3e659f3b9469d889d8b266790bca1c 100644
 --- a/src/main/java/net/minestom/server/ServerProcessImpl.java
 +++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
 @@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
@@ -487,7 +490,7 @@ index aac3f8749abfd970760049e81861bf29643c4608..2fb1f5ee76ad6cc390a2c1b056f57ec4
  import net.minestom.server.command.CommandManager;
  import net.minestom.server.entity.Entity;
  import net.minestom.server.event.EventDispatcher;
-@@ -68,6 +70,7 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -67,6 +69,7 @@ final class ServerProcessImpl implements ServerProcess {
      private final BenchmarkManager benchmark;
      private final DimensionTypeManager dimension;
      private final BiomeManager biome;
@@ -495,7 +498,7 @@ index aac3f8749abfd970760049e81861bf29643c4608..2fb1f5ee76ad6cc390a2c1b056f57ec4
      private final AdvancementManager advancement;
      private final BossBarManager bossBar;
      private final TagManager tag;
-@@ -100,6 +103,7 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -99,6 +102,7 @@ final class ServerProcessImpl implements ServerProcess {
          this.benchmark = new BenchmarkManager();
          this.dimension = new DimensionTypeManager();
          this.biome = new BiomeManager();
@@ -503,7 +506,7 @@ index aac3f8749abfd970760049e81861bf29643c4608..2fb1f5ee76ad6cc390a2c1b056f57ec4
          this.advancement = new AdvancementManager();
          this.bossBar = new BossBarManager();
          this.tag = new TagManager();
-@@ -221,6 +225,11 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -220,6 +224,11 @@ final class ServerProcessImpl implements ServerProcess {
          return ticker;
      }
  
@@ -515,21 +518,21 @@ index aac3f8749abfd970760049e81861bf29643c4608..2fb1f5ee76ad6cc390a2c1b056f57ec4
      @Override
      public void start(@NotNull SocketAddress socketAddress) {
          if (!started.compareAndSet(false, true)) {
-@@ -249,12 +258,17 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -248,7 +257,17 @@ final class ServerProcessImpl implements ServerProcess {
  
          LOGGER.info(MinecraftServer.getBrandName() + " server started successfully.");
  
+-        if (MinecraftServer.isTerminalEnabled()) {
 +        if (ServerFlag.ATTRIBUTES_ENABLED) {
 +            Attributes.registerAttributes();
 +        }
 +        LOGGER.info("Register Attributes({})", attribute.values().size());
 +
-         if (ServerFlag.BIOMES_ENABLED) {
-             Biomes.registerBiomes();
-         }
-         LOGGER.info("Register Biomes({})", biome.unmodifiableCollection().size());
- 
--        if (MinecraftServer.isTerminalEnabled()) {
++        if (ServerFlag.BIOMES_ENABLED) {
++            MinecraftServer.getBiomeManager().loadVanillaBiomes();
++        }
++        LOGGER.info("Register Biomes({})", biome.unmodifiableCollection().size());
++
 +        if (ServerFlag.TERMINAL_ENABLED) {
              MinestomTerminal.start();
          }

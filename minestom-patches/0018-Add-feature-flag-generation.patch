@@ -21,21 +21,21 @@ index 0ef2929b748f1dec1baa037ad7da95e35c878116..d403cfbbadbf2702cdd7741d9a9b036a
      // Provides the input JSON to generate from
      implementation(libs.minestomData)
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 78c97d394de963de469a0aae396731be0383f61d..c8f6db70229f078c90a09b1e909d26748b025990 100644
+index 961e2e096380461dd24fde6ab333019e2541f644..d54f01540c571e3040f575b7b3331c2b4be7dc51 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-@@ -3,6 +3,7 @@ package net.minestom.codegen;
+@@ -2,6 +2,7 @@ package net.minestom.codegen;
+ 
  import net.minestom.codegen.attribute.AttributeGenerator;
- import net.minestom.codegen.biome.BiomeGenerator;
  import net.minestom.codegen.color.DyeColorGenerator;
 +import net.minestom.codegen.feature.FeatureFlagGenerator;
  import net.minestom.codegen.fluid.FluidGenerator;
  import org.slf4j.Logger;
  import org.slf4j.LoggerFactory;
-@@ -24,6 +25,7 @@ public class Generators {
+@@ -22,6 +23,7 @@ public class Generators {
+ 
          // Generate DyeColors
          new DyeColorGenerator(resource("dye_colors.json"), outputFolder).generate();
-         new BiomeGenerator(resource("biomes.json"), outputFolder).generate();
 +        new FeatureFlagGenerator(resource("feature_flags.json"), outputFolder).generate();
  
  

@@ -167,10 +167,10 @@ index ae427644f16ed3c6d99d07ba071cb0c1ebe776d4..e1d2d6277a74c731e3366a77ef9d95b2
      }
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index a49a65590a80320e17bfa28461f891f0bb33ac70..0ed975dd8c03c1b8e13e5e40cf8452c3aaaf83be 100644
+index aae4d324f16ff4b5204d7bb3ffb110b43e40b1fc..551ffe66856fbcf01b670a17aef9225bcf94b8c6 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-@@ -49,7 +49,7 @@ public class Generators {
+@@ -47,7 +47,7 @@ public class Generators {
  //        new AttributeGenerator(
  //                new File(inputFolder, targetVersion + "_attributes.json"),
  //                outputFolder
@@ -180,15 +180,14 @@ index a49a65590a80320e17bfa28461f891f0bb33ac70..0ed975dd8c03c1b8e13e5e40cf8452c3
  //        new VillagerProfessionGenerator(
  //                new File(inputFolder, targetVersion + "_villager_professions.json"),
 diff --git a/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
-index 69eb7e67dd5253bca7e7948335a8f2f2acd849f1..1966f7d2c627604f74c2b590805088de1b1e4c8f 100644
+index a56248de382badce98656ce4006452beb8990cc8..1966f7d2c627604f74c2b590805088de1b1e4c8f 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/MinestomCodeGenerator.java
-@@ -2,36 +2,51 @@ package net.minestom.codegen;
+@@ -2,33 +2,51 @@ package net.minestom.codegen;
  
  import com.google.gson.Gson;
  import com.google.gson.GsonBuilder;
 -import com.squareup.javapoet.JavaFile;
--import java.util.regex.Pattern;
 +import com.squareup.javapoet.ClassName;
 +import org.jetbrains.annotations.ApiStatus;
  import org.jetbrains.annotations.NotNull;
@@ -209,7 +208,6 @@ index 69eb7e67dd5253bca7e7948335a8f2f2acd849f1..1966f7d2c627604f74c2b590805088de
 +    public static final ClassName NAMESPACE_ID_CLASS =
 +            ClassName.get("net.minestom.server.utils", "NamespaceID");
      protected static final Gson GSON = new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
--    protected static final Pattern minecraftNamespaceRegex = Pattern.compile("minecraft:");
 +    protected static final ClassName REGISTRY_CLASS =
 +            ClassName.get("net.minestom.server.registry", "Registries");
 +    protected static final ClassName KEYORI_ADVENTURE_KEY =
@@ -218,20 +216,9 @@ index 69eb7e67dd5253bca7e7948335a8f2f2acd849f1..1966f7d2c627604f74c2b590805088de
 +    protected static final Modifier[] PRIVATE_FINAL_MODIFIERS = {Modifier.PRIVATE, Modifier.FINAL};
 +    protected static final String DEFAULT_INDENT = "    ";
 +    protected String packageName;
-+
-+    /**
-+     * Creates a new code generator.
-+     * @param packageName the package name of the generated class
-+     */
-+    protected MinestomCodeGenerator(@NotNull String packageName) {
-+        if (packageName.trim().isEmpty()) {
-+            throw new IllegalArgumentException("Package name cannot be empty");
-+        }
-+        this.packageName = packageName;
-+    }
  
-     public abstract void generate();
- 
+-    public abstract void generate();
+-
 -    protected void writeFiles(@NotNull List<JavaFile> fileList, File outputFolder) {
 -        for (JavaFile javaFile : fileList) {
 -            try {
@@ -239,21 +226,32 @@ index 69eb7e67dd5253bca7e7948335a8f2f2acd849f1..1966f7d2c627604f74c2b590805088de
 -            } catch (IOException e) {
 -                LOGGER.error("An error occured while writing source code to the file system.", e);
 -            }
--        }
-+    protected static @NotNull String extractNamespace(@NotNull String namespace) {
-+        return namespace.replace("minecraft:", "").toUpperCase(Locale.ROOT);
++    /**
++     * Creates a new code generator.
++     * @param packageName the package name of the generated class
++     */
++    protected MinestomCodeGenerator(@NotNull String packageName) {
++        if (packageName.trim().isEmpty()) {
++            throw new IllegalArgumentException("Package name cannot be empty");
+         }
++        this.packageName = packageName;
      }
  
+-    protected static String toConstant(String namespace) {
++    public abstract void generate();
++
++    protected static @NotNull String extractNamespace(@NotNull String namespace) {
+         return namespace.replace("minecraft:", "").toUpperCase(Locale.ROOT);
+     }
++
 +    protected static @NotNull String extractNamespaces(@NotNull String namespace, @NotNull Map<String, String> arguments) {
 +        if (arguments.isEmpty()) return extractNamespace(namespace);
- 
--    protected static String toConstant(String namespace) {
--        return minecraftNamespaceRegex.matcher(namespace).replaceAll("").toUpperCase(Locale.ROOT);
++
 +        for (Map.Entry<String, String> entry : arguments.entrySet()) {
 +            namespace = namespace.replace(entry.getKey(), entry.getValue());
 +        }
 +        return namespace.toUpperCase(Locale.ROOT);
-     }
++    }
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
 index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..618040b6ff868f2327c641ed3e5c205c8a00344f 100644
@@ -585,35 +583,8 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..618040b6ff868f2327c641ed3e5c205c
 +    }
  }
 diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-index ca13484b90d51dd3c72b9369f299f7af20088505..f82f817012cea15bc2964acb2ade0d88d9c2d9b6 100644
---- a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-+++ b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-@@ -37,6 +37,7 @@ public final class BiomeGenerator extends MinestomCodeGenerator {
-     private final File outputFolder;
- 
-     public BiomeGenerator(@Nullable InputStream biomeFile, @NotNull File outputFolder) {
-+        super(BIOME_FILE_PACKAGE);
-         this.biomeFile = biomeFile;
-         this.outputFolder = outputFolder;
-     }
-@@ -124,7 +125,7 @@ public final class BiomeGenerator extends MinestomCodeGenerator {
-             }
-             effectCodeBlock = effectCodeBlock.add(".build()");
-             var namespacedCode = CodeBlock.of("$T.from($S)", namespaceIDCn, biome.replaceFirst("minecraft:", ""));
--            biomesEnum.addEnumConstant(toConstant(biome), TypeSpec.anonymousClassBuilder(
-+            biomesEnum.addEnumConstant(extractNamespace(biome), TypeSpec.anonymousClassBuilder(
-                             "$T.builder().name($L).category($T.NONE).depth(0.125F).scale(0.05F).temperature($Lf).downfall($Lf).showPrecipitation($L).effects($L).build()",
-                             biomeCn, namespacedCode, categoryCn, temperature, downfall, hasPrecipitation, effectCodeBlock.build()
-                     ).build()
-@@ -135,7 +136,7 @@ public final class BiomeGenerator extends MinestomCodeGenerator {
-         writeFiles(
-                 List.of(
-                         JavaFile.builder(BIOME_FILE_PACKAGE, biomesEnum.build())
--                                .indent("    ")
-+                                .indent(DEFAULT_INDENT)
-                                 .skipJavaLangImports(true)
-                                 .build()
-                 ),
+new file mode 100644
+index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java b/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
 index cbb759818ed4a7d61769bafaf4bc3fb24776ecbc..c27b85e155bd974c449c38adb062cff93ed46e9f 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
