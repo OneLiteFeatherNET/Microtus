@@ -230,14 +230,13 @@ index 087743b761797b3a1dfcc6ab7f8c83816f23a0b8..529d30aa4c7447700bcf03939303725d
      public void setCollarColor(@NotNull DyeColor value) {
 diff --git a/src/main/java/net/minestom/server/item/banner/BannerPattern.java b/src/main/java/net/minestom/server/item/banner/BannerPattern.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..582bc644d4276d2aa67dcca24ba37eba6ecf4ddd
+index 0000000000000000000000000000000000000000..c4514700ef086506151d1569a97d631694bc4cce
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/item/banner/BannerPattern.java
-@@ -0,0 +1,39 @@
+@@ -0,0 +1,33 @@
 +package net.minestom.server.item.banner;
 +
-+import net.kyori.adventure.key.Key;
-+import net.minestom.server.registry.ProtocolObject;
++import net.minestom.server.registry.StaticProtocolObject;
 +import net.minestom.server.utils.NamespaceID;
 +import org.jetbrains.annotations.NotNull;
 +import org.jetbrains.annotations.Nullable;
@@ -245,7 +244,7 @@ index 0000000000000000000000000000000000000000..582bc644d4276d2aa67dcca24ba37eba
 +import java.util.Collection;
 +
 +// Microtus -  Banner and Shield Meta
-+public sealed interface BannerPattern extends ProtocolObject, BannerPatterns permits BannerPatternImpl {
++public sealed interface BannerPattern extends StaticProtocolObject, BannerPatterns permits BannerPatternImpl {
 +    static @NotNull Collection<@NotNull BannerPattern> values() {
 +        return BannerPatternImpl.values();
 +    }
@@ -266,16 +265,11 @@ index 0000000000000000000000000000000000000000..582bc644d4276d2aa67dcca24ba37eba
 +        return BannerPatternImpl.getIdentifier(identifier);
 +    }
 +
-+    @Override
-+    default @NotNull Key key() {
-+        return ProtocolObject.super.key();
-+    }
-+
 +    @NotNull String identifier();
 +}
 diff --git a/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java b/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..063b5565ba859c2a57d6840323dc16064ffdc600
+index 0000000000000000000000000000000000000000..923a0134458cd627dea97bb8262c6a45be876975
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/item/banner/BannerPatternImpl.java
 @@ -0,0 +1,48 @@
@@ -292,12 +286,12 @@ index 0000000000000000000000000000000000000000..063b5565ba859c2a57d6840323dc1606
 +// Microtus -  Banner and Shield Meta
 +public record BannerPatternImpl(NamespaceID namespace, int id, String identifier) implements BannerPattern {
 +
-+    private static Map<String, BannerPatternImpl> IDENTIFIERS = new HashMap<>();
-+    private static final Registry.Container<BannerPattern> CONTAINER = Registry.createContainer(Registry.Resource.BANNER_PATTERNS,
++    private static Map<String, BannerPattern> IDENTIFIERS = new HashMap<>();
++    private static final Registry.Container<BannerPattern> CONTAINER = Registry.createStaticContainer(Registry.Resource.BANNER_PATTERNS,
 +            (namespace, properties) -> {
 +                int id = properties.getInt("id");
 +                String identifier = properties.getString("identifier");
-+                BannerPatternImpl bannerPattern = new BannerPatternImpl(NamespaceID.from(namespace), id, identifier);
++                BannerPattern bannerPattern = new BannerPatternImpl(NamespaceID.from(namespace), id, identifier);
 +                IDENTIFIERS.put(identifier, bannerPattern);
 +                return bannerPattern;
 +            });
