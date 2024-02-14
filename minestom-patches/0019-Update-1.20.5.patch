@@ -4,8 +4,36 @@ Date: Sun, 11 Feb 2024 01:23:43 +0100
 Subject: [PATCH] Update 1.20.5
 
 
+diff --git a/demo/src/main/java/net/minestom/demo/PlayerInit.java b/demo/src/main/java/net/minestom/demo/PlayerInit.java
+index cfedb7f39db633bf6d8f4e6fcd02d88cde80908f..ad4e8b254157625c8fff8a29573bbce31ec1b0da 100644
+--- a/demo/src/main/java/net/minestom/demo/PlayerInit.java
++++ b/demo/src/main/java/net/minestom/demo/PlayerInit.java
+@@ -22,6 +22,7 @@ import net.minestom.server.event.item.ItemDropEvent;
+ import net.minestom.server.event.item.PickupItemEvent;
+ import net.minestom.server.event.player.*;
+ import net.minestom.server.event.server.ServerTickMonitorEvent;
++import net.minestom.server.feature.FeatureFlags;
+ import net.minestom.server.instance.Instance;
+ import net.minestom.server.instance.InstanceContainer;
+ import net.minestom.server.instance.InstanceManager;
+@@ -39,6 +40,7 @@ import net.minestom.server.utils.time.TimeUnit;
+ import net.minestom.server.world.DimensionType;
+ 
+ import java.time.Duration;
++import java.util.List;
+ import java.util.Random;
+ import java.util.Set;
+ import java.util.UUID;
+@@ -99,6 +101,7 @@ public class PlayerInit {
+                 int x = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
+                 int z = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
+                 player.setRespawnPoint(new Pos(0, 40f, 0));
++                event.setEnabledFeatures(List.of(FeatureFlags.VANILLA.feature(), FeatureFlags.UPDATE_1_21.feature()));
+             })
+             .addListener(PlayerSpawnEvent.class, event -> {
+                 final Player player = event.getPlayer();
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 4ec1083ae79b33a50573042bf0f6e3dfb60135eb..f14699c0ff2fd3fe158990fb5a4f08590b28b6d4 100644
+index 4ec1083ae79b33a50573042bf0f6e3dfb60135eb..72fa90f1146487dfe54da6f08f9f21476248b586 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
 @@ -2,7 +2,7 @@ enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
@@ -22,7 +50,7 @@ index 4ec1083ae79b33a50573042bf0f6e3dfb60135eb..f14699c0ff2fd3fe158990fb5a4f0859
              version("hydrazine", "1.7.2")
              version("dependencyGetter", "v1.0.1")
 -            version("data", "1.20.4-SNAPSHOT")
-+            version("data", "24w07a-dev")
++            version("data", "24w07a-rv1")
              version("hephaistos", "2.6.1")
              version("jetbrainsAnnotations", "24.1.0")
              version("logback", "1.4.5")
@@ -548,7 +576,7 @@ index a11ba6e607e5c2e224632c10a258a647231f9722..5ab4ab330c563ac5dccf57f5b42ed300
      private static final Biomes[] VALUES = Biomes.values();
  
 diff --git a/src/main/java/net/minestom/server/MinecraftServer.java b/src/main/java/net/minestom/server/MinecraftServer.java
-index e19a6cfca2a1eadb868f19040bad93ef47859c1d..2e28f51fc30e1fcf9bdd16059e6606cbd6f63d5a 100644
+index e19a6cfca2a1eadb868f19040bad93ef47859c1d..cd155f3c261e9d9aa55cc6d7e9572f7cc7163343 100644
 --- a/src/main/java/net/minestom/server/MinecraftServer.java
 +++ b/src/main/java/net/minestom/server/MinecraftServer.java
 @@ -48,8 +48,8 @@ public final class MinecraftServer {
@@ -557,8 +585,8 @@ index e19a6cfca2a1eadb868f19040bad93ef47859c1d..2e28f51fc30e1fcf9bdd16059e6606cb
  
 -    public static final String VERSION_NAME = "1.20.4";
 -    public static final int PROTOCOL_VERSION = 765;
-+    public static final String VERSION_NAME = "24w06a";
-+    public static final int PROTOCOL_VERSION = 0x400000B0;
++    public static final String VERSION_NAME = "24w07a";
++    public static final int PROTOCOL_VERSION = 0x400000B1;
  
      // Threads
      public static final String THREAD_NAME_BENCHMARK = "Ms-Benchmark";
@@ -631,10 +659,23 @@ index e9bdc070c8764da03d3baccda41490d8a5f0df0a..dace33a4a60dd8b4f90570b597897857
 +    }
  }
 diff --git a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-index 7314d354481118f0d2a764c2218d8c5361b92b8e..83b1ffc3e886942d4690c51194196bc41292e66b 100644
+index 7314d354481118f0d2a764c2218d8c5361b92b8e..edb4d85e0ccd60dc2ac0592d0c97fd3d82db6b54 100644
 --- a/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
 +++ b/src/main/java/net/minestom/server/entity/EntityTypeImpl.java
-@@ -165,6 +165,7 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+@@ -22,6 +22,7 @@ import net.minestom.server.entity.metadata.monster.*;
+ import net.minestom.server.entity.metadata.monster.raider.*;
+ import net.minestom.server.entity.metadata.monster.skeleton.SkeletonMeta;
+ import net.minestom.server.entity.metadata.monster.skeleton.StrayMeta;
++import net.minestom.server.entity.metadata.monster.skeleton.BoggedMeta;
+ import net.minestom.server.entity.metadata.monster.skeleton.WitherSkeletonMeta;
+ import net.minestom.server.entity.metadata.monster.zombie.*;
+ import net.minestom.server.entity.metadata.other.*;
+@@ -161,10 +162,12 @@ record EntityTypeImpl(Registry.EntityEntry registry) implements EntityType {
+                 entry("minecraft:shulker_bullet", ShulkerBulletMeta::new),
+                 entry("minecraft:silverfish", SilverfishMeta::new),
+                 entry("minecraft:skeleton", SkeletonMeta::new),
++                entry("minecraft:bogged", BoggedMeta::new),
+                 entry("minecraft:skeleton_horse", SkeletonHorseMeta::new),
                  entry("minecraft:slime", SlimeMeta::new),
                  entry("minecraft:small_fireball", SmallFireballMeta::new),
                  entry("minecraft:sniffer", SnifferMeta::new),
@@ -793,6 +834,27 @@ index 0000000000000000000000000000000000000000..b211f93d3247f68342ff2aa6865ae9c5
 +        SCARED;
 +
 +        private static final ArmadilloMeta.State[] VALUES = values();
++    }
++
++}
+diff --git a/src/main/java/net/minestom/server/entity/metadata/monster/skeleton/BoggedMeta.java b/src/main/java/net/minestom/server/entity/metadata/monster/skeleton/BoggedMeta.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..aa40c9dab2ed82ad1a6f57d5971b2f3d2f3e2967
+--- /dev/null
++++ b/src/main/java/net/minestom/server/entity/metadata/monster/skeleton/BoggedMeta.java
+@@ -0,0 +1,15 @@
++package net.minestom.server.entity.metadata.monster.skeleton;
++
++import net.minestom.server.entity.Entity;
++import net.minestom.server.entity.Metadata;
++import org.jetbrains.annotations.NotNull;
++
++public class BoggedMeta extends AbstractSkeletonMeta {
++    public static final byte OFFSET = AbstractSkeletonMeta.MAX_OFFSET;
++    public static final byte MAX_OFFSET = OFFSET + 0;
++
++    public BoggedMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
++        super(entity, metadata);
 +    }
 +
 +}
