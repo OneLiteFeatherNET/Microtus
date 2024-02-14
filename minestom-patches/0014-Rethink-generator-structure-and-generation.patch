@@ -582,9 +582,6 @@ index 11ee9eef838aeda0f5e0c4fb3d9a21940563d9f9..618040b6ff868f2327c641ed3e5c205c
 +        return clampedAttributeClass.build();
 +    }
  }
-diff --git a/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/biome/BiomeGenerator.java
-new file mode 100644
-index 0000000000000000000000000000000000000000..e69de29bb2d1d6434b8b29ae775ad8c2e48c5391
 diff --git a/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java b/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
 index cbb759818ed4a7d61769bafaf4bc3fb24776ecbc..c27b85e155bd974c449c38adb062cff93ed46e9f 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/color/DyeColorGenerator.java
