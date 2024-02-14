@@ -4004,7 +4004,7 @@ index 400271ef5d61a29cb34b1e191d3570d2ff2d4d09..0fe69fd6447431152a65c02dbf893604
              @Override
              public @NotNull Collection<Tag<?>> getBlockEntityTags() {
 diff --git a/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java b/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
-index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d719c0dba 100644
+index 82c6e821f81c4e11d0ace279d3a7c6d1019657cb..4b8986aca42b45e9acab7df8e6bbbc111b086c28 100644
 --- a/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/instance/BlockLightMergeIntegrationTest.java
 @@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.fail;
@@ -4106,7 +4106,7 @@ index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d
          Instance instance = env.createFlatInstance();
          instance.setChunkSupplier(LightingChunk::new);
          for (int x = 4; x <= 7; x++) {
-@@ -353,7 +353,7 @@ public class BlockLightMergeIntegrationTest {
+@@ -397,7 +397,7 @@ public class BlockLightMergeIntegrationTest {
      }
  
      @Test
@@ -4115,7 +4115,7 @@ index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d
          Instance instance = env.createFlatInstance();
          instance.setChunkSupplier(LightingChunk::new);
          for (int x = 4; x <= 7; x++) {
-@@ -371,7 +371,7 @@ public class BlockLightMergeIntegrationTest {
+@@ -415,7 +415,7 @@ public class BlockLightMergeIntegrationTest {
      }
  
      @Test
@@ -4124,7 +4124,7 @@ index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d
          Instance instance = env.createFlatInstance();
          instance.setChunkSupplier(LightingChunk::new);
          for (int x = 4; x <= 7; x++) {
-@@ -397,7 +397,7 @@ public class BlockLightMergeIntegrationTest {
+@@ -441,7 +441,7 @@ public class BlockLightMergeIntegrationTest {
      }
  
      @Test
@@ -4133,7 +4133,7 @@ index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d
          Instance instance = env.createFlatInstance();
          instance.setChunkSupplier(LightingChunk::new);
          for (int x = -3; x <= 3; x++) {
-@@ -431,7 +431,7 @@ public class BlockLightMergeIntegrationTest {
+@@ -475,7 +475,7 @@ public class BlockLightMergeIntegrationTest {
      }
  
      @Test
@@ -4142,7 +4142,7 @@ index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d
          Instance instance = env.createFlatInstance();
          instance.setChunkSupplier(LightingChunk::new);
          for (int x = -3; x <= 3; x++) {
-@@ -457,7 +457,7 @@ public class BlockLightMergeIntegrationTest {
+@@ -501,7 +501,7 @@ public class BlockLightMergeIntegrationTest {
      }
  
      @Test
@@ -4151,7 +4151,7 @@ index ba25d656009f6fa9e0551d022949e45c8c004c80..2d632c33270e0a382bae401201324f4d
          Instance instance = env.createFlatInstance();
          instance.setChunkSupplier(LightingChunk::new);
          for (int x = -3; x <= 3; x++) {
-@@ -491,7 +491,7 @@ public class BlockLightMergeIntegrationTest {
+@@ -535,7 +535,7 @@ public class BlockLightMergeIntegrationTest {
      }
  
      @Test

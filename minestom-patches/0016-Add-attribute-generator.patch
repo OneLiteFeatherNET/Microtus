@@ -702,7 +702,7 @@ index 368f9188233768ee68125c253c394fee90eab778..459edc248d91d3b49b3bc40fd9eba18f
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 5cca3698d7a2c9a50c835f852ce17f2019e53100..57b5287970f5255bebfb7757c5ad3e14f6c056e2 100644
+index 90eac58addf8912cf296fe417eabf448bd5bf0fc..a7980f47130dc741c4071f60194b83143e905590 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -25,7 +25,7 @@ import net.minestom.server.advancements.AdvancementTab;

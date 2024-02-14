@@ -18,7 +18,7 @@ index 35ffb819279d3c4586a0b699bd2843912a828661..cfec621e570fa159b94e3e1dcecd8b25
          } else if (entityMeta.isSneaking()) {
              setPose(Pose.SNEAKING);
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 176ba40ab0ea59634fea4a8bfad7c05dffb36f48..5cca3698d7a2c9a50c835f852ce17f2019e53100 100644
+index d805fa467a06772dbb60c785e6cdad0a0962ebe7..90eac58addf8912cf296fe417eabf448bd5bf0fc 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
 @@ -1022,7 +1022,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
