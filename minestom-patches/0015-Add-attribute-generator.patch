@@ -5,42 +5,41 @@ Subject: [PATCH] Add attribute generator
 
 
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 551ffe66856fbcf01b670a17aef9225bcf94b8c6..961e2e096380461dd24fde6ab333019e2541f644 100644
+index 551ffe66856fbcf01b670a17aef9225bcf94b8c6..9d620234bb233dbd724df28d7261bd525025e586 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-@@ -1,5 +1,6 @@
- package net.minestom.codegen;
+@@ -28,6 +28,7 @@ public class Generators {
+         generator.generate(resource("items.json"), "net.minestom.server.item", "Material", "MaterialImpl", "Materials");
+         generator.generate(resource("entities.json"), "net.minestom.server.entity", "EntityType", "EntityTypeImpl", "EntityTypes");
+         generator.generate(resource("biomes.json"), "net.minestom.server.world.biomes", "Biome", "BiomeImpl", "Biomes");
++        generator.generate(resource("attributes.json"), "net.minestom.server.attribute", "Attribute", "AttributeImpl", "Attributes");
+         generator.generate(resource("enchantments.json"), "net.minestom.server.item", "Enchantment", "EnchantmentImpl", "Enchantments");
+         generator.generate(resource("potion_effects.json"), "net.minestom.server.potion", "PotionEffect", "PotionEffectImpl", "PotionEffects");
+         generator.generate(resource("potions.json"), "net.minestom.server.potion", "PotionType", "PotionTypeImpl", "PotionTypes");
+@@ -42,12 +43,6 @@ public class Generators {
  
-+import net.minestom.codegen.attribute.AttributeGenerator;
- import net.minestom.codegen.color.DyeColorGenerator;
- import net.minestom.codegen.fluid.FluidGenerator;
- import org.slf4j.Logger;
-@@ -43,11 +44,10 @@ public class Generators {
          // Generate fluids
          new FluidGenerator(resource("fluids.json"), outputFolder).generate();
- 
+-
 -        // TODO: Generate attributes
 -//        new AttributeGenerator(
 -//                new File(inputFolder, targetVersion + "_attributes.json"),
 -//                outputFolder
 -//        2).generate();
-+        new AttributeGenerator(
-+                resource("attributes.json"),
-+                outputFolder
-+        ).generate();
          // TODO: Generate villager professions
  //        new VillagerProfessionGenerator(
  //                new File(inputFolder, targetVersion + "_villager_professions.json"),
 diff --git a/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java b/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
-index 618040b6ff868f2327c641ed3e5c205c8a00344f..2bd0ec47837841bf2654fdacd8524ec8183ec78c 100644
+deleted file mode 100644
+index 618040b6ff868f2327c641ed3e5c205c8a00344f..0000000000000000000000000000000000000000
 --- a/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
-+++ b/code-generators/src/main/java/net/minestom/codegen/attribute/AttributeGenerator.java
-@@ -1,43 +1,30 @@
- package net.minestom.codegen.attribute;
- 
++++ /dev/null
+@@ -1,246 +0,0 @@
+-package net.minestom.codegen.attribute;
+-
 -import com.google.gson.JsonArray;
 -import com.google.gson.JsonElement;
- import com.google.gson.JsonObject;
+-import com.google.gson.JsonObject;
 -import com.squareup.javapoet.CodeBlock;
 -import com.squareup.javapoet.ClassName;
 -import com.squareup.javapoet.FieldSpec;
@@ -50,56 +49,61 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..2bd0ec47837841bf2654fdacd8524ec8
 -import com.squareup.javapoet.ParameterizedTypeName;
 -import com.squareup.javapoet.MethodSpec;
 -import com.squareup.javapoet.ParameterSpec;
-+import com.squareup.javapoet.*;
- import net.minestom.codegen.MinestomCodeGenerator;
+-import net.minestom.codegen.MinestomCodeGenerator;
 -import org.jetbrains.annotations.ApiStatus;
- import org.jetbrains.annotations.NotNull;
- import org.jetbrains.annotations.Nullable;
- import org.slf4j.Logger;
- import org.slf4j.LoggerFactory;
+-import org.jetbrains.annotations.NotNull;
+-import org.jetbrains.annotations.Nullable;
+-import org.slf4j.Logger;
+-import org.slf4j.LoggerFactory;
 -import net.minestom.codegen.util.GenerationHelper;
- 
- import javax.lang.model.element.Modifier;
- import java.io.File;
- import java.io.InputStream;
- import java.io.InputStreamReader;
- import java.util.ArrayList;
-+import java.util.HashMap;
- import java.util.List;
-+import java.util.Map;
- 
- import static net.minestom.codegen.util.GenerationHelper.VARIABLE_SETTER;
- 
+-
+-import javax.lang.model.element.Modifier;
+-import java.io.File;
+-import java.io.InputStream;
+-import java.io.InputStreamReader;
+-import java.util.ArrayList;
+-import java.util.List;
+-
+-import static net.minestom.codegen.util.GenerationHelper.VARIABLE_SETTER;
+-
 -@ApiStatus.NonExtendable
 -@ApiStatus.Internal
- public final class AttributeGenerator extends MinestomCodeGenerator {
-     private static final Logger LOGGER = LoggerFactory.getLogger(AttributeGenerator.class);
+-public final class AttributeGenerator extends MinestomCodeGenerator {
+-    private static final Logger LOGGER = LoggerFactory.getLogger(AttributeGenerator.class);
 -    private static final String MIN_VALUE = "minValue";
-     private static final String MAX_VALUE = "maxValue";
-     private static final String DEFAULT_VALUE = "defaultValue";
+-    private static final String MAX_VALUE = "maxValue";
+-    private static final String DEFAULT_VALUE = "defaultValue";
 -    private static final String CLIENT_SYNCABLE = "clientSyncable";
-     private static final String LITERAL_RETURN = "return this.$L";
-+    private static final String ATTRIBUTE_KEY = "attribute";
-     private final InputStream attributesFile;
-     private final File outputFolder;
- 
-@@ -59,125 +46,70 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
-             return;
-         }
- 
+-    private static final String LITERAL_RETURN = "return this.$L";
+-    private final InputStream attributesFile;
+-    private final File outputFolder;
+-
+-    public AttributeGenerator(@Nullable InputStream attributesFile, @NotNull File outputFolder) {
+-        super("net.minestom.server.attribute");
+-        this.attributesFile = attributesFile;
+-        this.outputFolder = outputFolder;
+-    }
+-
+-    @Override
+-    public void generate() {
+-        if (attributesFile == null) {
+-            LOGGER.error("Failed to find attributes.json.");
+-            LOGGER.error("Stopped code generation for attributes.");
+-            return;
+-        }
+-        if (!outputFolder.exists() && !outputFolder.mkdirs()) {
+-            LOGGER.error("Output folder for code generation does not exist and could not be created.");
+-            return;
+-        }
+-
 -        JsonArray attributes = GSON.fromJson(new InputStreamReader(attributesFile), JsonArray.class);
-+        JsonObject attributes = GSON.fromJson(new InputStreamReader(attributesFile), JsonObject.class);
-         List<JavaFile> filesToWrite = new ArrayList<>();
- 
+-        List<JavaFile> filesToWrite = new ArrayList<>();
+-
 -        ClassName attributeClassName = ClassName.get(packageName, "Attribute");
-+        ClassName attributeClassName = ClassName.get(packageName, "Attributes");
-+        ClassName className = ClassName.get(packageName, "Attribute");
-+        ClassName minecraftServerCn = ClassName.get("net.minestom.server", "MinecraftServer");
-         // Attribute
+-        // Attribute
 -        TypeSpec.Builder attributeClass = TypeSpec.classBuilder(attributeClassName)
 -                .addSuperinterface(KEYORI_ADVENTURE_KEY)
-+        TypeSpec.Builder attributeClass = TypeSpec.enumBuilder(attributeClassName)
-                 .addModifiers(Modifier.PUBLIC).addJavadoc("AUTOGENERATED by " + getClass().getSimpleName());
+-                .addModifiers(Modifier.PUBLIC).addJavadoc("AUTOGENERATED by " + getClass().getSimpleName());
 -        attributeClass.addField(
 -                FieldSpec.builder(NAMESPACE_ID_CLASS, "id")
 -                        .addModifiers(PRIVATE_FINAL_MODIFIERS).addAnnotation(NotNull.class).build()
@@ -151,14 +155,7 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..2bd0ec47837841bf2654fdacd8524ec8
 -                        .addStatement(LITERAL_RETURN, CLIENT_SYNCABLE)
 -                        .addModifiers(Modifier.PUBLIC)
 -                        .build()
-+
-+        // Fields
-+        attributeClass.addFields(
-+                List.of(
-+                        FieldSpec.builder(className, ATTRIBUTE_KEY, Modifier.PRIVATE, Modifier.FINAL).build(),
-+                        FieldSpec.builder(ArrayTypeName.of(attributeClassName), "VALUES", Modifier.PRIVATE, Modifier.STATIC, Modifier.FINAL).initializer("values()").build()  // Microtus - Banner and shield meta
-+                )
-         );
+-        );
 -        // values method
 -        attributeClass.addMethod(
 -                MethodSpec.methodBuilder("values")
@@ -167,55 +164,20 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..2bd0ec47837841bf2654fdacd8524ec8
 -                        .addStatement("return $T.ATTRIBUTE_REGISTRY.values()", REGISTRY_CLASS)
 -                        .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
 -                        .build()
-+
-+        attributeClass.addMethods(
-+                List.of(
-+                        // Constructor
-+                        MethodSpec.constructorBuilder()
-+                                .addParameter(
-+                                        ParameterSpec.builder(className, ATTRIBUTE_KEY).addAnnotation(NotNull.class).build()
-+                                )
-+                                .addStatement(VARIABLE_SETTER, ATTRIBUTE_KEY)
-+                                .build(),
-+                        MethodSpec.methodBuilder(ATTRIBUTE_KEY)
-+                                .addModifiers(Modifier.PUBLIC)
-+                                .returns(className.annotated(AnnotationSpec.builder(NotNull.class).build()))
-+                                .addStatement(LITERAL_RETURN, ATTRIBUTE_KEY)
-+                                .build(),
-+                        MethodSpec.methodBuilder("getValue")
-+                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-+                                .addParameter(ParameterSpec.builder(TypeName.INT, "id").build())
-+                                .addAnnotation(Nullable.class)
-+                                .returns(className)
-+                                .addCode("return VALUES[$L].$L;", "id", ATTRIBUTE_KEY)
-+                                .build(),
-+                        MethodSpec.methodBuilder("registerAttributes")
-+                                .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
-+                                .beginControlFlow("for (var $L : VALUES)", "v")
-+                                .addStatement("$1T.getAttributeManager().register($2L.$3L())", minecraftServerCn, "v", ATTRIBUTE_KEY)
-+                                .endControlFlow()
-+                                .build()
-+                )
-         );
+-        );
 -        // toString method
 -        attributeClass.addMethod(GenerationHelper.TO_STRING);
- 
+-
 -        // Creating ClampedAttribute
 -        TypeSpec clampedAttributeClass = generateClampedAttributeClass(attributeClassName);
-+        Map<String, String> extractData = new HashMap<>();
-+        extractData.put("minecraft:", "");
-+        extractData.put(".", "_");
- 
+-
 -        CodeBlock.Builder staticBlock = CodeBlock.builder();
-         // Use data
+-        // Use data
 -        for (JsonElement a : attributes) {
 -            JsonObject attribute = a.getAsJsonObject();
 -            String attributeName = attribute.get("name").getAsString();
 -
-+        for (String key : attributes.keySet()) {
-+            JsonObject attribute = attributes.getAsJsonObject(key);
-+            String attributeName = extractNamespaces(key, extractData);
-             JsonObject range = attribute.getAsJsonObject("range");
+-            JsonObject range = attribute.getAsJsonObject("range");
 -            if (range == null) {
 -                // Normal attribute
 -                attributeClass.addField(
@@ -251,34 +213,28 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..2bd0ec47837841bf2654fdacd8524ec8
 -            }
 -            // Add to static init.
 -            staticBlock.addStatement("$T.ATTRIBUTE_REGISTRY.register($N)", REGISTRY_CLASS, attributeName);
-+            attributeClass.addEnumConstant(attributeName, TypeSpec.anonymousClassBuilder(
-+                            "new $T($S, $Lf, $Lf)",
-+                    className, key, attribute.get(DEFAULT_VALUE).getAsFloat(), range.get(MAX_VALUE).getAsFloat()
-+                    ).build()
-+            );
-         }
+-        }
 -        attributeClass.addStaticBlock(staticBlock.build());
-+
- 
-         filesToWrite.add(
-                 JavaFile.builder(packageName, attributeClass.build())
-@@ -185,12 +117,6 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
-                         .skipJavaLangImports(true)
-                         .build()
-         );
+-
+-        filesToWrite.add(
+-                JavaFile.builder(packageName, attributeClass.build())
+-                        .indent(DEFAULT_INDENT)
+-                        .skipJavaLangImports(true)
+-                        .build()
+-        );
 -        filesToWrite.add(
 -                JavaFile.builder(packageName, clampedAttributeClass)
 -                        .indent(DEFAULT_VALUE)
 -                        .skipJavaLangImports(true)
 -                        .build()
 -        );
- 
-         // Write files to outputFolder
-         writeFiles(
-@@ -198,49 +124,4 @@ public final class AttributeGenerator extends MinestomCodeGenerator {
-                 outputFolder
-         );
-     }
+-
+-        // Write files to outputFolder
+-        writeFiles(
+-                filesToWrite,
+-                outputFolder
+-        );
+-    }
 -
 -    private @NotNull TypeSpec generateClampedAttributeClass(@NotNull ClassName attributeClassName) {
 -        ClassName clampedAttributeClassName = ClassName.get(packageName, "ClampedAttribute");
@@ -324,7 +280,7 @@ index 618040b6ff868f2327c641ed3e5c205c8a00344f..2bd0ec47837841bf2654fdacd8524ec8
 -        );
 -        return clampedAttributeClass.build();
 -    }
- }
+-}
 diff --git a/demo/src/main/java/net/minestom/demo/entity/ChickenCreature.java b/demo/src/main/java/net/minestom/demo/entity/ChickenCreature.java
 index 6f241e422c37dd72e19b25ac10f7928411c94211..328a9d855e8b4bb4eed8ac988dac8e8615163bc3 100644
 --- a/demo/src/main/java/net/minestom/demo/entity/ChickenCreature.java
@@ -348,70 +304,44 @@ index 6f241e422c37dd72e19b25ac10f7928411c94211..328a9d855e8b4bb4eed8ac988dac8e86
      @Override
 diff --git a/src/autogenerated/java/net/minestom/server/attribute/Attributes.java b/src/autogenerated/java/net/minestom/server/attribute/Attributes.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..a5edd76b551f92fa4e4e6403123f4f465ec48957
+index 0000000000000000000000000000000000000000..b0e0b870ac7d7441e87076b288c966a936f3d4a6
 --- /dev/null
 +++ b/src/autogenerated/java/net/minestom/server/attribute/Attributes.java
-@@ -0,0 +1,61 @@
+@@ -0,0 +1,35 @@
 +package net.minestom.server.attribute;
 +
-+import net.minestom.server.MinecraftServer;
-+import org.jetbrains.annotations.NotNull;
-+import org.jetbrains.annotations.Nullable;
-+
 +/**
-+ * AUTOGENERATED by AttributeGenerator
++ * Code autogenerated, do not edit!
 + */
-+public enum Attributes {
-+    GENERIC_ARMOR(new Attribute("minecraft:generic.armor", 0.0f, 30.0f)),
++@SuppressWarnings("unused")
++interface Attributes {
++    Attribute GENERIC_ARMOR = AttributeImpl.get("minecraft:generic.armor");
 +
-+    GENERIC_ARMOR_TOUGHNESS(new Attribute("minecraft:generic.armor_toughness", 0.0f, 20.0f)),
++    Attribute GENERIC_ARMOR_TOUGHNESS = AttributeImpl.get("minecraft:generic.armor_toughness");
 +
-+    GENERIC_ATTACK_DAMAGE(new Attribute("minecraft:generic.attack_damage", 2.0f, 2048.0f)),
++    Attribute GENERIC_ATTACK_DAMAGE = AttributeImpl.get("minecraft:generic.attack_damage");
 +
-+    GENERIC_ATTACK_KNOCKBACK(new Attribute("minecraft:generic.attack_knockback", 0.0f, 5.0f)),
++    Attribute GENERIC_ATTACK_KNOCKBACK = AttributeImpl.get("minecraft:generic.attack_knockback");
 +
-+    GENERIC_ATTACK_SPEED(new Attribute("minecraft:generic.attack_speed", 4.0f, 1024.0f)),
++    Attribute GENERIC_ATTACK_SPEED = AttributeImpl.get("minecraft:generic.attack_speed");
 +
-+    GENERIC_FLYING_SPEED(new Attribute("minecraft:generic.flying_speed", 0.4f, 1024.0f)),
++    Attribute GENERIC_FLYING_SPEED = AttributeImpl.get("minecraft:generic.flying_speed");
 +
-+    GENERIC_FOLLOW_RANGE(new Attribute("minecraft:generic.follow_range", 32.0f, 2048.0f)),
++    Attribute GENERIC_FOLLOW_RANGE = AttributeImpl.get("minecraft:generic.follow_range");
 +
-+    HORSE_JUMP_STRENGTH(new Attribute("minecraft:horse.jump_strength", 0.7f, 2.0f)),
++    Attribute HORSE_JUMP_STRENGTH = AttributeImpl.get("minecraft:horse.jump_strength");
 +
-+    GENERIC_KNOCKBACK_RESISTANCE(new Attribute("minecraft:generic.knockback_resistance", 0.0f, 1.0f)),
++    Attribute GENERIC_KNOCKBACK_RESISTANCE = AttributeImpl.get("minecraft:generic.knockback_resistance");
 +
-+    GENERIC_LUCK(new Attribute("minecraft:generic.luck", 0.0f, 1024.0f)),
++    Attribute GENERIC_LUCK = AttributeImpl.get("minecraft:generic.luck");
 +
-+    GENERIC_MAX_ABSORPTION(new Attribute("minecraft:generic.max_absorption", 0.0f, 2048.0f)),
++    Attribute GENERIC_MAX_ABSORPTION = AttributeImpl.get("minecraft:generic.max_absorption");
 +
-+    GENERIC_MAX_HEALTH(new Attribute("minecraft:generic.max_health", 20.0f, 1024.0f)),
++    Attribute GENERIC_MAX_HEALTH = AttributeImpl.get("minecraft:generic.max_health");
 +
-+    GENERIC_MOVEMENT_SPEED(new Attribute("minecraft:generic.movement_speed", 0.7f, 1024.0f)),
++    Attribute GENERIC_MOVEMENT_SPEED = AttributeImpl.get("minecraft:generic.movement_speed");
 +
-+    ZOMBIE_SPAWN_REINFORCEMENTS(new Attribute("minecraft:zombie.spawn_reinforcements", 0.0f, 1.0f));
-+
-+    private static final Attributes[] VALUES = values();
-+
-+    private final Attribute attribute;
-+
-+    Attributes(@NotNull Attribute attribute) {
-+        this.attribute = attribute;
-+    }
-+
-+    public @NotNull Attribute attribute() {
-+        return this.attribute;
-+    }
-+
-+    @Nullable
-+    public static Attribute getValue(int id) {
-+        return VALUES[id].attribute;
-+    }
-+
-+    public static void registerAttributes() {
-+        for (var v : VALUES) {
-+            MinecraftServer.getAttributeManager().register(v.attribute());
-+        }
-+    }
++    Attribute ZOMBIE_SPAWN_REINFORCEMENTS = AttributeImpl.get("minecraft:zombie.spawn_reinforcements");
 +}
 diff --git a/src/main/java/net/minestom/server/MinecraftServer.java b/src/main/java/net/minestom/server/MinecraftServer.java
 index d8ffa960217a739ef5edd4f554459a9d92efea65..ec2f8fe6b49fb317c707819e85998667e0d274a9 100644
@@ -478,19 +408,18 @@ index 7c1002cab0f8fca3c0bc1c859b0737e708ae6892..f6998c2f9c10750047d5acd64c02ed6e
       * Handles registered advancements.
       */
 diff --git a/src/main/java/net/minestom/server/ServerProcessImpl.java b/src/main/java/net/minestom/server/ServerProcessImpl.java
-index fd5af2b71286497addf6a41f3df8d151dfb6720e..00b128f05b3e659f3b9469d889d8b266790bca1c 100644
+index fd5af2b71286497addf6a41f3df8d151dfb6720e..4f4a0d264dc78dc51b6ec4bc31f4280dd6fa41f4 100644
 --- a/src/main/java/net/minestom/server/ServerProcessImpl.java
 +++ b/src/main/java/net/minestom/server/ServerProcessImpl.java
-@@ -9,6 +9,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
+@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  import java.util.concurrent.atomic.AtomicReference;
  import net.minestom.server.advancements.AdvancementManager;
  import net.minestom.server.adventure.bossbar.BossBarManager;
 +import net.minestom.server.attribute.AttributeManager;
-+import net.minestom.server.attribute.Attributes;
  import net.minestom.server.command.CommandManager;
  import net.minestom.server.entity.Entity;
  import net.minestom.server.event.EventDispatcher;
-@@ -67,6 +69,7 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -67,6 +68,7 @@ final class ServerProcessImpl implements ServerProcess {
      private final BenchmarkManager benchmark;
      private final DimensionTypeManager dimension;
      private final BiomeManager biome;
@@ -498,7 +427,7 @@ index fd5af2b71286497addf6a41f3df8d151dfb6720e..00b128f05b3e659f3b9469d889d8b266
      private final AdvancementManager advancement;
      private final BossBarManager bossBar;
      private final TagManager tag;
-@@ -99,6 +102,7 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -99,6 +101,7 @@ final class ServerProcessImpl implements ServerProcess {
          this.benchmark = new BenchmarkManager();
          this.dimension = new DimensionTypeManager();
          this.biome = new BiomeManager();
@@ -506,7 +435,7 @@ index fd5af2b71286497addf6a41f3df8d151dfb6720e..00b128f05b3e659f3b9469d889d8b266
          this.advancement = new AdvancementManager();
          this.bossBar = new BossBarManager();
          this.tag = new TagManager();
-@@ -220,6 +224,11 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -220,6 +223,11 @@ final class ServerProcessImpl implements ServerProcess {
          return ticker;
      }
  
@@ -518,13 +447,13 @@ index fd5af2b71286497addf6a41f3df8d151dfb6720e..00b128f05b3e659f3b9469d889d8b266
      @Override
      public void start(@NotNull SocketAddress socketAddress) {
          if (!started.compareAndSet(false, true)) {
-@@ -248,7 +257,17 @@ final class ServerProcessImpl implements ServerProcess {
+@@ -248,7 +256,17 @@ final class ServerProcessImpl implements ServerProcess {
  
          LOGGER.info(MinecraftServer.getBrandName() + " server started successfully.");
  
 -        if (MinecraftServer.isTerminalEnabled()) {
 +        if (ServerFlag.ATTRIBUTES_ENABLED) {
-+            Attributes.registerAttributes();
++            MinecraftServer.getAttributeManager().loadVanillaAttributes();
 +        }
 +        LOGGER.info("Register Attributes({})", attribute.values().size());
 +
@@ -538,23 +467,25 @@ index fd5af2b71286497addf6a41f3df8d151dfb6720e..00b128f05b3e659f3b9469d889d8b266
          }
          if (bstatsEnabled) {
 diff --git a/src/main/java/net/minestom/server/attribute/Attribute.java b/src/main/java/net/minestom/server/attribute/Attribute.java
-index ed97a493c48bc213077bababac2723562b53dc6f..0b1a3ceb6e6f8fab6c7b66e34b8254803e41dadb 100644
+index ed97a493c48bc213077bababac2723562b53dc6f..d61f60467ece2d2eed318cce01a0ba5e2c80cb5d 100644
 --- a/src/main/java/net/minestom/server/attribute/Attribute.java
 +++ b/src/main/java/net/minestom/server/attribute/Attribute.java
-@@ -1,66 +1,13 @@
+@@ -1,66 +1,21 @@
  package net.minestom.server.attribute;
  
--import org.jetbrains.annotations.NotNull;
++import net.minestom.server.registry.ProtocolObject;
++import net.minestom.server.utils.NamespaceID;
+ import org.jetbrains.annotations.NotNull;
 -import org.jetbrains.annotations.Nullable;
 -
 -import java.util.Collection;
 -import java.util.Map;
 -import java.util.concurrent.ConcurrentHashMap;
--
+ 
  /**
   * Represents a {@link net.minestom.server.entity.LivingEntity living entity} attribute.
   */
- public record Attribute(String key, float defaultValue, float maxValue) {
+-public record Attribute(String key, float defaultValue, float maxValue) {
 -    private static final Map<String, Attribute> ATTRIBUTES = new ConcurrentHashMap<>();
 -
 -    public static final Attribute MAX_HEALTH = (new Attribute("generic.max_health", 20, 1024)).register();
@@ -570,12 +501,12 @@ index ed97a493c48bc213077bababac2723562b53dc6f..0b1a3ceb6e6f8fab6c7b66e34b825480
 -    public static final Attribute LUCK = (new Attribute("generic.luck", 0, 1024)).register();
 -    public static final Attribute HORSE_JUMP_STRENGTH = (new Attribute("horse.jump_strength", 0.7f, 2)).register();
 -    public static final Attribute ZOMBIE_SPAWN_REINFORCEMENTS = (new Attribute("zombie.spawn_reinforcements", 0, 1)).register();
- 
-     public Attribute {
-         if (defaultValue > maxValue) {
-             throw new IllegalArgumentException("Default value cannot be greater than the maximum allowed");
-         }
-     }
+-
+-    public Attribute {
+-        if (defaultValue > maxValue) {
+-            throw new IllegalArgumentException("Default value cannot be greater than the maximum allowed");
+-        }
+-    }
 -
 -    /**
 -     * Register this attribute.
@@ -607,13 +538,106 @@ index ed97a493c48bc213077bababac2723562b53dc6f..0b1a3ceb6e6f8fab6c7b66e34b825480
 -    public static @NotNull Collection<@NotNull Attribute> values() {
 -        return ATTRIBUTES.values();
 -    }
- }
+-}
++public sealed interface Attribute extends ProtocolObject, Attributes permits AttributeImpl {
++
++    @Override
++    @NotNull
++    NamespaceID namespace();
++    float defaultValue();
++    String translationKey();
++    boolean isClientSync();
++    float maxValue();
++    float minValue();
++
++}
+\ No newline at end of file
+diff --git a/src/main/java/net/minestom/server/attribute/AttributeImpl.java b/src/main/java/net/minestom/server/attribute/AttributeImpl.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..4ac18e725a29ed26c7ef08ca732c6462ae2147ae
+--- /dev/null
++++ b/src/main/java/net/minestom/server/attribute/AttributeImpl.java
+@@ -0,0 +1,74 @@
++package net.minestom.server.attribute;
++
++import net.minestom.server.registry.ProtocolObject;
++import net.minestom.server.registry.Registry;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
++
++import java.util.Collection;
++
++final class AttributeImpl implements ProtocolObject, Attribute {
++
++    private static final Registry.DynamicContainer<AttributeImpl> CONTAINER = Registry.createDynamicContainer(Registry.Resource.ATTRIBUTES,
++            (namespace, properties) -> new AttributeImpl(Registry.attribute(namespace, properties)));
++
++    static Collection<AttributeImpl> values() {
++        return CONTAINER.values();
++    }
++
++    static AttributeImpl get(@NotNull String namespace) {
++        return CONTAINER.get(namespace);
++    }
++
++    static AttributeImpl getSafe(@NotNull String namespace) {
++        return CONTAINER.getSafe(namespace);
++    }
++
++    @NotNull
++    private final NamespaceID name;
++    private final float defaultValue;
++    private final float maxValue;
++    private final float minValue;
++    private final boolean clientSync;
++    @NotNull
++    private final String translationKey;
++
++    public AttributeImpl(Registry.AttributeEntry entry) {
++        this.name = entry.getNamespace();
++        this.defaultValue = entry.getDefaultValue();
++        this.clientSync = entry.isClientSync();
++        this.maxValue = entry.getMaxValue();
++        this.minValue = entry.getMinValue();
++        this.translationKey = entry.getTranslationKey();
++    }
++
++    @Override
++    public @NotNull NamespaceID namespace() {
++        return this.name;
++    }
++
++    @Override
++    public float defaultValue() {
++        return this.defaultValue;
++    }
++
++    @Override
++    public String translationKey() {
++        return this.translationKey;
++    }
++
++    @Override
++    public boolean isClientSync() {
++        return this.clientSync;
++    }
++
++    @Override
++    public float maxValue() {
++        return this.maxValue;
++    }
++
++    @Override
++    public float minValue() {
++        return this.minValue;
++    }
++}
 diff --git a/src/main/java/net/minestom/server/attribute/AttributeManager.java b/src/main/java/net/minestom/server/attribute/AttributeManager.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..e9bdc070c8764da03d3baccda41490d8a5f0df0a
+index 0000000000000000000000000000000000000000..466fd37dbc30159812bc025985909b4df0df5e70
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/attribute/AttributeManager.java
-@@ -0,0 +1,43 @@
+@@ -0,0 +1,51 @@
 +package net.minestom.server.attribute;
 +
 +import java.util.Collection;
@@ -621,21 +645,22 @@ index 0000000000000000000000000000000000000000..e9bdc070c8764da03d3baccda41490d8
 +import java.util.Map;
 +import java.util.concurrent.ConcurrentHashMap;
 +
++import net.minestom.server.utils.NamespaceID;
 +import org.jetbrains.annotations.NotNull;
 +import org.jetbrains.annotations.Nullable;
 +
 +public final class AttributeManager {
 +
-+    private final Map<String, Attribute> attributes = new ConcurrentHashMap<>();
++    private final Map<NamespaceID, Attribute> attributes = new ConcurrentHashMap<>();
 +
 +    /**
 +     * Register this attribute.
 +     *
-+     * @see #fromKey(String)
++     * @see #fromKey(NamespaceID)
 +     * @see #values()
 +     */
 +    public synchronized void register(Attribute attribute) {
-+        attributes.put(attribute.key(), attribute);
++        attributes.put(attribute.namespace(), attribute);
 +    }
 +
 +    /**
@@ -644,7 +669,7 @@ index 0000000000000000000000000000000000000000..e9bdc070c8764da03d3baccda41490d8
 +     * @param key the key of the attribute
 +     * @return the attribute for the key or null if not any
 +     */
-+    public synchronized @Nullable Attribute fromKey(@NotNull String key) {
++    public synchronized @Nullable Attribute fromKey(@NotNull NamespaceID key) {
 +        return attributes.get(key);
 +    }
 +
@@ -656,117 +681,108 @@ index 0000000000000000000000000000000000000000..e9bdc070c8764da03d3baccda41490d8
 +    public synchronized @NotNull Collection<@NotNull Attribute> values() {
 +        return attributes.values();
 +    }
++
++    public void loadVanillaAttributes() {
++        for (AttributeImpl attribute : AttributeImpl.values()) {
++            if (fromKey(attribute.namespace()) == null)
++                register(attribute);
++        }
++    }
 +}
 diff --git a/src/main/java/net/minestom/server/entity/LivingEntity.java b/src/main/java/net/minestom/server/entity/LivingEntity.java
-index 368f9188233768ee68125c253c394fee90eab778..459edc248d91d3b49b3bc40fd9eba18f261cba30 100644
+index 368f9188233768ee68125c253c394fee90eab778..669ef7166c5b5d048f99ba230c031cfc4abf7973 100644
 --- a/src/main/java/net/minestom/server/entity/LivingEntity.java
 +++ b/src/main/java/net/minestom/server/entity/LivingEntity.java
-@@ -3,6 +3,7 @@ package net.minestom.server.entity;
- import net.kyori.adventure.sound.Sound.Source;
- import net.minestom.server.attribute.Attribute;
- import net.minestom.server.attribute.AttributeInstance;
-+import net.minestom.server.attribute.Attributes;
- import net.minestom.server.collision.BoundingBox;
- import net.minestom.server.coordinate.Point;
- import net.minestom.server.coordinate.Vec;
-@@ -419,21 +420,21 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+@@ -419,21 +419,21 @@ public class LivingEntity extends Entity implements EquipmentHandler {
      }
  
      /**
 -     * Gets the entity max health from {@link #getAttributeValue(Attribute)} {@link Attribute#MAX_HEALTH}.
-+     * Gets the entity max health from {@link #getAttributeValue(Attribute)} {@link Attributes#GENERIC_MAX_HEALTH}.
++     * Gets the entity max health from {@link #getAttributeValue(Attribute)} {@link Attribute#GENERIC_MAX_HEALTH}.
       *
       * @return the entity max health
       */
      public float getMaxHealth() {
 -        return getAttributeValue(Attribute.MAX_HEALTH);
-+        return getAttributeValue(Attributes.GENERIC_MAX_HEALTH.attribute());
++        return getAttributeValue(Attribute.GENERIC_MAX_HEALTH);
      }
  
      /**
       * Sets the heal of the entity as its max health.
       * <p>
 -     * Retrieved from {@link #getAttributeValue(Attribute)} with the attribute {@link Attribute#MAX_HEALTH}.
-+     * Retrieved from {@link #getAttributeValue(Attribute)} with the attribute {@link Attributes#GENERIC_MAX_HEALTH}.
++     * Retrieved from {@link #getAttributeValue(Attribute)} with the attribute {@link Attribute#GENERIC_MAX_HEALTH}.
       */
      public void heal() {
 -        setHealth(getAttributeValue(Attribute.MAX_HEALTH));
-+        setHealth(getAttributeValue(Attributes.GENERIC_MAX_HEALTH.attribute()));
++        setHealth(getAttributeValue(Attribute.GENERIC_MAX_HEALTH));
      }
  
      /**
-@@ -667,7 +668,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+@@ -443,7 +443,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
+      * @return the attribute instance
+      */
+     public @NotNull AttributeInstance getAttribute(@NotNull Attribute attribute) {
+-        return attributeModifiers.computeIfAbsent(attribute.key(),
++        return attributeModifiers.computeIfAbsent(attribute.key().toString(),
+                 s -> new AttributeInstance(attribute, this::onAttributeChanged));
+     }
+ 
+@@ -667,7 +667,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
       */
      @Override
      public void takeKnockback(float strength, final double x, final double z) {
 -        strength *= 1 - getAttributeValue(Attribute.KNOCKBACK_RESISTANCE);
-+        strength *= 1 - getAttributeValue(Attributes.GENERIC_KNOCKBACK_RESISTANCE.attribute());
++        strength *= 1 - getAttributeValue(Attribute.GENERIC_KNOCKBACK_RESISTANCE);
          super.takeKnockback(strength, x, z);
      }
  }
 diff --git a/src/main/java/net/minestom/server/entity/Player.java b/src/main/java/net/minestom/server/entity/Player.java
-index 90eac58addf8912cf296fe417eabf448bd5bf0fc..a7980f47130dc741c4071f60194b83143e905590 100644
+index 90eac58addf8912cf296fe417eabf448bd5bf0fc..86efdb89f08fa077b866ec005b4220e954c3f51f 100644
 --- a/src/main/java/net/minestom/server/entity/Player.java
 +++ b/src/main/java/net/minestom/server/entity/Player.java
-@@ -25,7 +25,7 @@ import net.minestom.server.advancements.AdvancementTab;
- import net.minestom.server.adventure.AdventurePacketConvertor;
- import net.minestom.server.adventure.Localizable;
- import net.minestom.server.adventure.audience.Audiences;
--import net.minestom.server.attribute.Attribute;
-+import net.minestom.server.attribute.Attributes;
- import net.minestom.server.collision.BoundingBox;
- import net.minestom.server.command.CommandSender;
- import net.minestom.server.coordinate.Point;
 @@ -247,7 +247,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable,
          this.gameMode = GameMode.SURVIVAL;
          this.dimensionType = DimensionType.OVERWORLD; // Default dimension
          this.levelFlat = true;
 -        getAttribute(Attribute.MOVEMENT_SPEED).setBaseValue(0.1f);
-+        getAttribute(Attributes.GENERIC_MOVEMENT_SPEED.attribute()).setBaseValue(0.1f);
++        getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).setBaseValue(0.1f);
  
          // FakePlayer init its connection there
          playerConnectionInit();
 diff --git a/src/main/java/net/minestom/server/entity/pathfinding/PFPathingEntity.java b/src/main/java/net/minestom/server/entity/pathfinding/PFPathingEntity.java
-index a8e6a7422af7479d057f091a7189c557dd05100b..7fc994cd76b81d9268bdc643fce7273e46e8228b 100644
+index a8e6a7422af7479d057f091a7189c557dd05100b..c7600a3afd0fad3f7553a9f4641b3b1ac4632503 100644
 --- a/src/main/java/net/minestom/server/entity/pathfinding/PFPathingEntity.java
 +++ b/src/main/java/net/minestom/server/entity/pathfinding/PFPathingEntity.java
-@@ -5,6 +5,7 @@ import com.extollit.gaming.ai.path.model.IPathingEntity;
- import com.extollit.gaming.ai.path.model.Passibility;
- import com.extollit.linalg.immutable.Vec3d;
- import net.minestom.server.attribute.Attribute;
-+import net.minestom.server.attribute.Attributes;
- import net.minestom.server.coordinate.Point;
- import net.minestom.server.coordinate.Vec;
- import net.minestom.server.entity.Entity;
-@@ -34,7 +35,7 @@ public final class PFPathingEntity implements IPathingEntity {
+@@ -34,7 +34,7 @@ public final class PFPathingEntity implements IPathingEntity {
          this.navigator = navigator;
          this.entity = navigator.getEntity();
  
 -        this.searchRange = getAttributeValue(Attribute.FOLLOW_RANGE);
-+        this.searchRange = getAttributeValue(Attributes.GENERIC_FOLLOW_RANGE.attribute());
++        this.searchRange = getAttributeValue(Attribute.GENERIC_FOLLOW_RANGE);
      }
  
      @Override
-@@ -138,7 +139,7 @@ public final class PFPathingEntity implements IPathingEntity {
+@@ -138,7 +138,7 @@ public final class PFPathingEntity implements IPathingEntity {
          return new Capabilities() {
              @Override
              public float speed() {
 -                return getAttributeValue(Attribute.MOVEMENT_SPEED);
-+                return getAttributeValue(Attributes.GENERIC_MOVEMENT_SPEED.attribute());
++                return getAttributeValue(Attribute.GENERIC_MOVEMENT_SPEED);
              }
  
              @Override
-@@ -191,7 +192,7 @@ public final class PFPathingEntity implements IPathingEntity {
+@@ -191,7 +191,7 @@ public final class PFPathingEntity implements IPathingEntity {
      @Override
      public void moveTo(Vec3d position, Passibility passibility, Gravitation gravitation) {
          final Point targetPosition = new Vec(position.x, position.y, position.z);
 -        this.navigator.moveTowards(targetPosition, getAttributeValue(Attribute.MOVEMENT_SPEED));
-+        this.navigator.moveTowards(targetPosition, getAttributeValue(Attributes.GENERIC_MOVEMENT_SPEED.attribute()));
++        this.navigator.moveTowards(targetPosition, getAttributeValue(Attribute.GENERIC_MOVEMENT_SPEED));
          final double entityY = entity.getPosition().y() + 0.00001D; // After any negative y movement, entities will always be extremely
                                                                      // slightly below floor level. This +0.00001D is here to offset this
                                                                      // error and stop the entity from permanently jumping.
 diff --git a/src/main/java/net/minestom/server/item/ItemSerializers.java b/src/main/java/net/minestom/server/item/ItemSerializers.java
-index c2b6494bc343157a6f2397a4ab4247b122142270..00d79d2979073bd48166ef1e748e098b235de919 100644
+index c2b6494bc343157a6f2397a4ab4247b122142270..418dc6c253d1359a3c4fe44f1b56bec21f7b78ef 100644
 --- a/src/main/java/net/minestom/server/item/ItemSerializers.java
 +++ b/src/main/java/net/minestom/server/item/ItemSerializers.java
 @@ -1,5 +1,6 @@
@@ -785,8 +801,17 @@ index c2b6494bc343157a6f2397a4ab4247b122142270..00d79d2979073bd48166ef1e748e098b
              // Wrong attribute name, stop here
              if (attribute == null) return null;
              final AttributeOperation attributeOperation = AttributeOperation.fromId(operation);
+@@ -79,7 +80,7 @@ public final class ItemSerializers {
+             writer.setTag(ID, value.uuid());
+             writer.setTag(AMOUNT, value.amount());
+             writer.setTag(SLOT, value.slot().name().toLowerCase(Locale.ROOT));
+-            writer.setTag(ATTRIBUTE_NAME, value.attribute().key());
++            writer.setTag(ATTRIBUTE_NAME, value.attribute().namespace().toString());
+             writer.setTag(OPERATION, value.operation().getId());
+             writer.setTag(NAME, value.name());
+         }
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
-index 98fefc2ee8530bd753b6271b4d82b040711d49d7..fea7090fe4f672cdc089d17edc8d942e632a6b3f 100644
+index 98fefc2ee8530bd753b6271b4d82b040711d49d7..76a9e68c210f9bb8d7630ed0c96837aeb223ebb6 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
 @@ -1,5 +1,6 @@
@@ -805,6 +830,103 @@ index 98fefc2ee8530bd753b6271b4d82b040711d49d7..fea7090fe4f672cdc089d17edc8d942e
              final double value = reader.read(DOUBLE);
              int modifierCount = reader.read(VAR_INT);
              AttributeInstance instance = new AttributeInstance(attribute, null);
+@@ -42,7 +43,7 @@ public record EntityPropertiesPacket(int entityId, List<AttributeInstance> prope
+         for (AttributeInstance instance : properties) {
+             final Attribute attribute = instance.getAttribute();
+ 
+-            writer.write(STRING, attribute.key());
++            writer.write(STRING, attribute.namespace().toString());
+             writer.write(DOUBLE, (double) instance.getBaseValue());
+ 
+             {
+diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
+index 74a86cccdac7e63981b4111924bb850e1ddacd61..5732fa5a2653479bca71f0ffba78b447354537f1 100644
+--- a/src/main/java/net/minestom/server/registry/Registry.java
++++ b/src/main/java/net/minestom/server/registry/Registry.java
+@@ -37,6 +37,11 @@ public final class Registry {
+         return new BlockEntry(namespace, main, null);
+     }
+ 
++    @ApiStatus.Internal
++    public static AttributeEntry attribute(String namespace, Properties properties) {
++        return new AttributeEntry(namespace, properties, null);
++    }
++
+     @ApiStatus.Internal
+     public static BiomeEntry biome(String namespace, Properties properties) {
+         return new BiomeEntry(namespace, properties, null);
+@@ -223,7 +228,9 @@ public final class Registry {
+         FLUID_TAGS("tags/fluid_tags.json"),
+         GAMEPLAY_TAGS("tags/gameplay_tags.json"),
+         ITEM_TAGS("tags/item_tags.json"),
+-        BIOMES("biomes.json");
++        BIOMES("biomes.json"),
++        ATTRIBUTES("attributes.json"),
++        ;
+ 
+         private final String name;
+ 
+@@ -378,6 +385,60 @@ public final class Registry {
+         }
+     }
+ 
++    public static final class AttributeEntry implements Entry {
++        private final Properties custom;
++        private final NamespaceID namespace;
++        private final float defaultValue;
++        private final String translationKey;
++        private final boolean clientSync;
++        private final float maxValue;
++        private final float minValue;
++
++        public AttributeEntry(String namespace, Properties main, Properties custom) {
++            this.custom = custom;
++            this.namespace = NamespaceID.from(namespace);
++            this.maxValue = (float) main.getDouble("maxValue", 0);
++            this.minValue = (float) main.getDouble("minValue",0 );
++            this.defaultValue = (float) main.getDouble("defaultValue", 0);
++            this.translationKey = main.getString("translationKey", null);
++            this.clientSync = main.getBoolean("clientSync", false);
++
++        }
++
++        public Properties getCustom() {
++            return custom;
++        }
++
++        public NamespaceID getNamespace() {
++            return namespace;
++        }
++
++        public float getDefaultValue() {
++            return defaultValue;
++        }
++
++        public String getTranslationKey() {
++            return translationKey;
++        }
++
++        public boolean isClientSync() {
++            return clientSync;
++        }
++
++        public float getMaxValue() {
++            return maxValue;
++        }
++
++        public float getMinValue() {
++            return minValue;
++        }
++
++        @Override
++        public Properties custom() {
++            return custom;
++        }
++    }
++
+     public static final class BiomeEntry implements Entry {
+         private final Properties custom;
+         private final NamespaceID namespace;
 diff --git a/src/test/java/net/minestom/server/item/ItemAttributeTest.java b/src/test/java/net/minestom/server/item/ItemAttributeTest.java
 index f8ea7c7d8c1b68b1914732c290f6936a318a12ee..fc28ae393248570850fe3c79b8618b9c6d3ab27e 100644
 --- a/src/test/java/net/minestom/server/item/ItemAttributeTest.java
