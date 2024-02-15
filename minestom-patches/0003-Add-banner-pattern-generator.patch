@@ -5,10 +5,10 @@ Subject: [PATCH] Add banner pattern generator
 
 
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 911e2b59e3f9f6dbad3987372ca67f5a311ca324..55dbe2abb16c7a3673c34ab530603ebeb3450d7c 100644
+index 6cb6ded578eb241b318426e9868e7877308fbfdc..aae4d324f16ff4b5204d7bb3ffb110b43e40b1fc 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-@@ -36,6 +36,7 @@ public class Generators {
+@@ -37,6 +37,7 @@ public class Generators {
          generator.generate(resource("damage_types.json"), "net.minestom.server.entity.damage", "DamageType", "DamageTypeImpl", "DamageTypes");
          generator.generate(resource("trim_materials.json"), "net.minestom.server.item.armor", "TrimMaterial", "TrimMaterialImpl", "TrimMaterials");
          generator.generate(resource("trim_patterns.json"), "net.minestom.server.item.armor", "TrimPattern", "TrimPatternImpl", "TrimPatterns");
@@ -630,10 +630,10 @@ index 0000000000000000000000000000000000000000..56a864253f2b2508a9c91239e1664534
 +    }
 +}
 diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
-index e29de8d4d049c489d4bde72c61bed18ba229d59f..6945755e3e6f0739e59934995097a97e7829340e 100644
+index aa3960ee277717be7ac5bcab5a70e741054721e9..74a86cccdac7e63981b4111924bb850e1ddacd61 100644
 --- a/src/main/java/net/minestom/server/registry/Registry.java
 +++ b/src/main/java/net/minestom/server/registry/Registry.java
-@@ -164,6 +164,7 @@ public final class Registry {
+@@ -217,6 +217,7 @@ public final class Registry {
          DAMAGE_TYPES("damage_types.json"),
          TRIM_MATERIALS("trim_materials.json"),
          TRIM_PATTERNS("trim_patterns.json"),
