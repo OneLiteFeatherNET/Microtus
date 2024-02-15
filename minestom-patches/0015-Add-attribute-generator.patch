@@ -5,7 +5,7 @@ Subject: [PATCH] Add attribute generator
 
 
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 551ffe66856fbcf01b670a17aef9225bcf94b8c6..961e2e096380461dd24fde6ab333019e2541f644 100644
+index 07bdd19315721d6c5951a3addfa22563c4700c6c..686f2f58a189d9d5116f842a4e1a707ea2325c81 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
 @@ -1,5 +1,6 @@
@@ -15,7 +15,7 @@ index 551ffe66856fbcf01b670a17aef9225bcf94b8c6..961e2e096380461dd24fde6ab333019e
  import net.minestom.codegen.color.DyeColorGenerator;
  import net.minestom.codegen.fluid.FluidGenerator;
  import org.slf4j.Logger;
-@@ -43,11 +44,10 @@ public class Generators {
+@@ -42,11 +43,10 @@ public class Generators {
          // Generate fluids
          new FluidGenerator(resource("fluids.json"), outputFolder).generate();
  

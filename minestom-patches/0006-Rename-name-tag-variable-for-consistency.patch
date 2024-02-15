@@ -5,7 +5,7 @@ Subject: [PATCH] Rename name tag variable for consistency
 
 
 diff --git a/src/main/java/net/minestom/server/item/ItemMeta.java b/src/main/java/net/minestom/server/item/ItemMeta.java
-index bb2a99038dcd886beabb204c23c94b25c4f33753..3aa718fa060c148de26e8583570697e65a177be0 100644
+index 65d37d2d41f96fb5df241ee5609747da273c373f..e89215a55259d23d7e27b457c1f25b278698a280 100644
 --- a/src/main/java/net/minestom/server/item/ItemMeta.java
 +++ b/src/main/java/net/minestom/server/item/ItemMeta.java
 @@ -47,7 +47,7 @@ public sealed interface ItemMeta extends TagReadable, NetworkBuffer.Writer

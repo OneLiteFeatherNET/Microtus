@@ -2289,7 +2289,7 @@ index fe2b5186f3b90d46b465c0ca7fb319020f0b0286..a4ff2e54c1650dae3831c07072c0f54b
  
          assertNull(sender.getMostRecentMessage());
 diff --git a/src/test/java/net/minestom/server/command/CommandSuggestionIntegrationTest.java b/src/test/java/net/minestom/server/command/CommandSuggestionIntegrationTest.java
-index 28fc868a8648f068e475277995027af42703595d..fb4ad0c0b47c59b94b4cb22a835b27196f39b09e 100644
+index 638842a379e3780f9accb9041d2731eb86240b3f..bb74be0f934ffa578c748c412aaef78a6577248f 100644
 --- a/src/test/java/net/minestom/server/command/CommandSuggestionIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/command/CommandSuggestionIntegrationTest.java
 @@ -16,10 +16,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -2314,7 +2314,7 @@ index 28fc868a8648f068e475277995027af42703595d..fb4ad0c0b47c59b94b4cb22a835b2719
          var instance = env.createFlatInstance();
          var connection = env.createConnection();
          var player = connection.connect(instance, new Pos(0, 42, 0)).join();
-@@ -62,16 +62,16 @@ public class CommandSuggestionIntegrationTest {
+@@ -62,15 +62,15 @@ public class CommandSuggestionIntegrationTest {
  
          var command = new Command("foo");
  
@@ -2333,8 +2333,7 @@ index 28fc868a8648f068e475277995027af42703595d..fb4ad0c0b47c59b94b4cb22a835b2719
 +        listener.assertSingle(tabCompletePacket ->
 +                assertEquals(List.of(new TabCompletePacket.Match("suggestion", null)), tabCompletePacket.matches()));
      }
- 
-     @Test
+ }
 diff --git a/src/test/java/net/minestom/server/command/CommandSyntaxMultiTest.java b/src/test/java/net/minestom/server/command/CommandSyntaxMultiTest.java
 index ca0fec6265f2373a96d63a7b4c402ab35aa0395e..063ad7f76714778b6e459db03e13066bb02bd13c 100644
 --- a/src/test/java/net/minestom/server/command/CommandSyntaxMultiTest.java
@@ -3931,7 +3930,7 @@ index 114033a08a7d9acebfd67ce535afe9e39a08262a..b1e46999c543fce8efabf4f38e3e655c
  
          var handler = ItemStack.AIR;
 diff --git a/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java b/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
-index e66729c4ede5f67d3593d52876d9325641d9aa72..d03ed2b6a9865c0eb5b3f6610f15733d259b2e55 100644
+index 1e8f352c6dea803bbe9cea8998fb4d03535f6177..7fcb6ffa93f15baf5dc1d77f21a01068461f8115 100644
 --- a/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/instance/AnvilLoaderIntegrationTest.java
 @@ -19,14 +19,14 @@ import java.util.function.Consumer;
@@ -3960,7 +3959,7 @@ index e66729c4ede5f67d3593d52876d9325641d9aa72..d03ed2b6a9865c0eb5b3f6610f15733d
          // load a world that contains only a basic house and make sure it is loaded properly
  
          AnvilLoader chunkLoader = new AnvilLoader(worldFolder) {
-@@ -143,7 +143,7 @@ public class AnvilLoaderIntegrationTest {
+@@ -145,7 +145,7 @@ public class AnvilLoaderIntegrationTest {
      }
  
      @Test
@@ -3969,7 +3968,7 @@ index e66729c4ede5f67d3593d52876d9325641d9aa72..d03ed2b6a9865c0eb5b3f6610f15733d
          Instance instance = env.createFlatInstance(new AnvilLoader(worldFolder) {
              // Force loads inside current thread
              @Override
-@@ -181,7 +181,7 @@ public class AnvilLoaderIntegrationTest {
+@@ -183,7 +183,7 @@ public class AnvilLoaderIntegrationTest {
      }
  
      @AfterAll
@@ -4551,10 +4550,10 @@ index 5df0c70b1c6b11fa20181184fe71a6f0e51add70..6655a400483b8b951097f9661f7d172c
          var instance = manager.createInstanceContainer();
          Set<Point> points = ConcurrentHashMap.newKeySet();
 diff --git a/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java b/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
-index ed3097b4615d176fa1448b1cc693dad1afd6a30d..9049986806ea8f4598e8d88339b6677e56c17036 100644
+index ec9b91cebac942d77f6e027b5be9fc04bf2f7eb9..3580264ac43c7268834e53315d968afe480e707c 100644
 --- a/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
 +++ b/src/test/java/net/minestom/server/instance/GeneratorForkIntegrationTest.java
-@@ -12,10 +12,10 @@ import org.junit.jupiter.api.Test;
+@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
  import static org.junit.jupiter.api.Assertions.*;
  
  @EnvTest
@@ -4567,7 +4566,7 @@ index ed3097b4615d176fa1448b1cc693dad1afd6a30d..9049986806ea8f4598e8d88339b6677e
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
          var block = Block.STONE;
-@@ -30,7 +30,7 @@ public class GeneratorForkIntegrationTest {
+@@ -29,7 +29,7 @@ public class GeneratorForkIntegrationTest {
      }
  
      @Test
@@ -4576,7 +4575,7 @@ index ed3097b4615d176fa1448b1cc693dad1afd6a30d..9049986806ea8f4598e8d88339b6677e
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
          // Set the Generator
-@@ -47,7 +47,7 @@ public class GeneratorForkIntegrationTest {
+@@ -46,7 +46,7 @@ public class GeneratorForkIntegrationTest {
      }
  
      @Test
@@ -4585,7 +4584,7 @@ index ed3097b4615d176fa1448b1cc693dad1afd6a30d..9049986806ea8f4598e8d88339b6677e
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
          var block = Block.STONE;
-@@ -66,7 +66,7 @@ public class GeneratorForkIntegrationTest {
+@@ -65,7 +65,7 @@ public class GeneratorForkIntegrationTest {
      }
  
      @Test
@@ -4594,7 +4593,7 @@ index ed3097b4615d176fa1448b1cc693dad1afd6a30d..9049986806ea8f4598e8d88339b6677e
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
          instance.setGenerator(unit -> {
-@@ -80,7 +80,7 @@ public class GeneratorForkIntegrationTest {
+@@ -79,7 +79,7 @@ public class GeneratorForkIntegrationTest {
      }
  
      @Test
@@ -4603,15 +4602,15 @@ index ed3097b4615d176fa1448b1cc693dad1afd6a30d..9049986806ea8f4598e8d88339b6677e
          var manager = env.process().instance();
          var instance = manager.createInstanceContainer();
          instance.setGenerator(unit -> {
-@@ -96,7 +96,7 @@ public class GeneratorForkIntegrationTest {
+@@ -95,7 +95,7 @@ public class GeneratorForkIntegrationTest {
      }
  
      @Test
 -    public void biome(Env env) {
 +    void biome(Env env) {
          var manager = env.process().instance();
- 
-         var plains = MinecraftServer.getBiomeManager().getByName(NamespaceID.from("minecraft:plains"));
+         var instance = manager.createInstanceContainer();
+         instance.setGenerator(unit -> {
 diff --git a/src/test/java/net/minestom/server/instance/GeneratorIntegrationTest.java b/src/test/java/net/minestom/server/instance/GeneratorIntegrationTest.java
 index e2ddf7d46b58c61ed33dd81c275428736dcf23b6..ce1e765ee0f3f0cc4319b63933d62511999d222e 100644
 --- a/src/test/java/net/minestom/server/instance/GeneratorIntegrationTest.java
@@ -4676,23 +4675,23 @@ index e2ddf7d46b58c61ed33dd81c275428736dcf23b6..ce1e765ee0f3f0cc4319b63933d62511
          var instance = manager.createInstanceContainer();
          instance.setGenerator(unit -> {
 diff --git a/src/test/java/net/minestom/server/instance/GeneratorTest.java b/src/test/java/net/minestom/server/instance/GeneratorTest.java
-index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2cf4032aa 100644
+index 4a53ede725c99c4448e28d11625476eed34189c5..b1c88a9cc2d165cc24f104220819e75e85112f3f 100644
 --- a/src/test/java/net/minestom/server/instance/GeneratorTest.java
 +++ b/src/test/java/net/minestom/server/instance/GeneratorTest.java
-@@ -27,9 +27,10 @@ import static net.minestom.server.utils.chunk.ChunkUtils.ceilSection;
+@@ -25,10 +25,10 @@ import static net.minestom.server.utils.chunk.ChunkUtils.ceilSection;
  import static net.minestom.server.utils.chunk.ChunkUtils.floorSection;
  import static org.junit.jupiter.api.Assertions.*;
  
 -public class GeneratorTest {
 +class GeneratorTest {
-+
+ 
      @Test
 -    public void unitSize() {
 +    void unitSize() {
          assertDoesNotThrow(() -> dummyUnit(Vec.ZERO, new Vec(16)));
          assertDoesNotThrow(() -> dummyUnit(new Vec(16), new Vec(32)));
          assertThrows(IllegalArgumentException.class, () -> dummyUnit(new Vec(15), Vec.ZERO));
-@@ -40,7 +41,7 @@ public class GeneratorTest {
+@@ -39,7 +39,7 @@ public class GeneratorTest {
  
      @ParameterizedTest
      @MethodSource("sectionFloorParam")
@@ -4701,7 +4700,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          assertEquals(expected, floorSection(input), "floorSection(" + input + ")");
      }
  
-@@ -59,7 +60,7 @@ public class GeneratorTest {
+@@ -58,7 +58,7 @@ public class GeneratorTest {
  
      @ParameterizedTest
      @MethodSource("sectionCeilParam")
@@ -4710,7 +4709,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          assertEquals(expected, ceilSection(input), "ceilSection(" + input + ")");
      }
  
-@@ -77,7 +78,7 @@ public class GeneratorTest {
+@@ -76,7 +76,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4719,7 +4718,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int minSection = 0;
          final int maxSection = 5;
          final int chunkX = 3;
-@@ -92,7 +93,7 @@ public class GeneratorTest {
+@@ -91,7 +91,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4728,7 +4727,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int minSection = -1;
          final int maxSection = 5;
          final int chunkX = 3;
-@@ -107,7 +108,7 @@ public class GeneratorTest {
+@@ -106,7 +106,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4737,7 +4736,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int sectionX = 3;
          final int sectionY = -5;
          final int sectionZ = -2;
-@@ -118,7 +119,7 @@ public class GeneratorTest {
+@@ -117,7 +117,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4746,7 +4745,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int minSection = -1;
          final int maxSection = 5;
          final int chunkX = 3;
-@@ -138,7 +139,7 @@ public class GeneratorTest {
+@@ -137,7 +137,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4755,7 +4754,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int minSection = 0;
          final int maxSection = 5;
          final int chunkX = 3;
-@@ -159,7 +160,7 @@ public class GeneratorTest {
+@@ -158,7 +158,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4764,7 +4763,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int minSection = 0;
          final int maxSection = 5;
          final int chunkX = 3;
-@@ -187,7 +188,7 @@ public class GeneratorTest {
+@@ -186,7 +186,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4773,7 +4772,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int minSection = -1;
          final int maxSection = 5;
          final int chunkX = 3;
-@@ -214,7 +215,7 @@ public class GeneratorTest {
+@@ -213,7 +213,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4782,16 +4781,27 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int minSection = -1;
          final int maxSection = 5;
          final int chunkX = 3;
-@@ -243,7 +244,7 @@ public class GeneratorTest {
+@@ -242,7 +242,7 @@ public class GeneratorTest {
      }
  
      @Test
+-    public void chunkBiomeSet() {
++    void chunkBiomeSet() {
+         final int minSection = -1;
+         final int maxSection = 5;
+         final int chunkX = 3;
+@@ -282,9 +282,7 @@ public class GeneratorTest {
+                     assertEquals(Biome.PLAINS.id(), value));
+         }
+     }
+-
+-    @Test
 -    public void chunkFillHeightExact() {
 +    void chunkFillHeightExact() {
          final int minSection = -1;
          final int maxSection = 5;
          final int sectionCount = maxSection - minSection;
-@@ -267,7 +268,7 @@ public class GeneratorTest {
+@@ -308,7 +306,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4800,7 +4810,7 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          final int minSection = -1;
          final int maxSection = 5;
          final int sectionCount = maxSection - minSection;
-@@ -305,7 +306,7 @@ public class GeneratorTest {
+@@ -346,7 +344,7 @@ public class GeneratorTest {
      }
  
      @Test
@@ -4809,6 +4819,13 @@ index bd6c60d7924f62aeb2401b45f00ef50ea91270aa..fed7c4b8c3468a412fabbd85d2f7b1f2
          Section section = new Section();
          var chunkUnit = GeneratorImpl.section(section, -1, -1, 0);
          Generator generator = chunk -> chunk.modifier().fill(Block.STONE);
+@@ -358,4 +356,4 @@ public class GeneratorTest {
+     static GenerationUnit dummyUnit(Point start, Point end) {
+         return unit(null, start, end, null);
+     }
+-}
++}
+\ No newline at end of file
 diff --git a/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java b/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
 index a2019e8a46f96c6b4fec81bd2f388e9f017c29d4..a4e6a37b559c39d51fa6a49fc3d089d22dbda240 100644
 --- a/src/test/java/net/minestom/server/instance/InstanceBlockIntegrationTest.java
