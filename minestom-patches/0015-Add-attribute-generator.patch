@@ -467,28 +467,29 @@ index fd5af2b71286497addf6a41f3df8d151dfb6720e..4f4a0d264dc78dc51b6ec4bc31f4280d
          }
          if (bstatsEnabled) {
 diff --git a/src/main/java/net/minestom/server/attribute/Attribute.java b/src/main/java/net/minestom/server/attribute/Attribute.java
-index ed97a493c48bc213077bababac2723562b53dc6f..9b8836e73d0e76f7662dd03fbca670f96b7743ce 100644
+index ed97a493c48bc213077bababac2723562b53dc6f..90b44e401d5145b1e2209375e2e6a0b0bc1000a1 100644
 --- a/src/main/java/net/minestom/server/attribute/Attribute.java
 +++ b/src/main/java/net/minestom/server/attribute/Attribute.java
-@@ -1,66 +1,34 @@
+@@ -1,66 +1,39 @@
  package net.minestom.server.attribute;
  
--import org.jetbrains.annotations.NotNull;
--import org.jetbrains.annotations.Nullable;
--
- import java.util.Collection;
--import java.util.Map;
--import java.util.concurrent.ConcurrentHashMap;
++import java.util.Collection;
 +import net.minestom.server.registry.ProtocolObject;
 +import net.minestom.server.utils.NamespaceID;
-+import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.NotNull;
+ import org.jetbrains.annotations.Nullable;
  
+-import java.util.Collection;
+-import java.util.Map;
+-import java.util.concurrent.ConcurrentHashMap;
+-
  /**
   * Represents a {@link net.minestom.server.entity.LivingEntity living entity} attribute.
   */
 -public record Attribute(String key, float defaultValue, float maxValue) {
 -    private static final Map<String, Attribute> ATTRIBUTES = new ConcurrentHashMap<>();
--
++public sealed interface Attribute extends ProtocolObject, Attributes permits AttributeImpl {
+ 
 -    public static final Attribute MAX_HEALTH = (new Attribute("generic.max_health", 20, 1024)).register();
 -    public static final Attribute FOLLOW_RANGE = (new Attribute("generic.follow_range", 32, 2048)).register();
 -    public static final Attribute KNOCKBACK_RESISTANCE = (new Attribute("generic.knockback_resistance", 0, 1)).register();
@@ -502,25 +503,21 @@ index ed97a493c48bc213077bababac2723562b53dc6f..9b8836e73d0e76f7662dd03fbca670f9
 -    public static final Attribute LUCK = (new Attribute("generic.luck", 0, 1024)).register();
 -    public static final Attribute HORSE_JUMP_STRENGTH = (new Attribute("horse.jump_strength", 0.7f, 2)).register();
 -    public static final Attribute ZOMBIE_SPAWN_REINFORCEMENTS = (new Attribute("zombie.spawn_reinforcements", 0, 1)).register();
--
--    public Attribute {
--        if (defaultValue > maxValue) {
--            throw new IllegalArgumentException("Default value cannot be greater than the maximum allowed");
--        }
-+public sealed interface Attribute extends ProtocolObject, Attributes permits AttributeImpl {
-+
 +    @Override
 +    @NotNull
 +    NamespaceID namespace();
 +    float defaultValue();
+ 
+-    public Attribute {
+-        if (defaultValue > maxValue) {
+-            throw new IllegalArgumentException("Default value cannot be greater than the maximum allowed");
+-        }
+-    }
++    @NotNull
 +    String translationKey();
 +    boolean isClientSync();
 +    float maxValue();
 +    float minValue();
-+
-+    static @NotNull Collection<@NotNull Attribute> values() {
-+        return AttributeImpl.values();
-     }
  
 -    /**
 -     * Register this attribute.
@@ -532,8 +529,8 @@ index ed97a493c48bc213077bababac2723562b53dc6f..9b8836e73d0e76f7662dd03fbca670f9
 -    public @NotNull Attribute register() {
 -        ATTRIBUTES.put(key, this);
 -        return this;
-+    static Attribute fromNamespaceId(@NotNull String namespaceID) {
-+        return AttributeImpl.getSafe(namespaceID);
++    static @NotNull Collection<@NotNull Attribute> values() {
++        return AttributeImpl.values();
      }
  
 -    /**
@@ -544,8 +541,9 @@ index ed97a493c48bc213077bababac2723562b53dc6f..9b8836e73d0e76f7662dd03fbca670f9
 -     */
 -    public static @Nullable Attribute fromKey(@NotNull String key) {
 -        return ATTRIBUTES.get(key);
-+    static Attribute fromNamespaceId(@NotNull NamespaceID namespaceID) {
-+        return fromNamespaceId(namespaceID.asString());
++    @Nullable
++    static Attribute fromNamespaceId(@NotNull String namespaceID) {
++        return AttributeImpl.getSafe(namespaceID);
      }
  
 -    /**
@@ -555,16 +553,20 @@ index ed97a493c48bc213077bababac2723562b53dc6f..9b8836e73d0e76f7662dd03fbca670f9
 -     */
 -    public static @NotNull Collection<@NotNull Attribute> values() {
 -        return ATTRIBUTES.values();
--    }
++    @Nullable
++    static Attribute fromNamespaceId(@NotNull NamespaceID namespaceID) {
++        return fromNamespaceId(namespaceID.asString());
+     }
 -}
++
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minestom/server/attribute/AttributeImpl.java b/src/main/java/net/minestom/server/attribute/AttributeImpl.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..9cbd8cd57c82ead250fc6ebec78c19e7853214ce
+index 0000000000000000000000000000000000000000..22180a7d958e013a79ee074855c1d5b0e5d50de9
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/attribute/AttributeImpl.java
-@@ -0,0 +1,74 @@
+@@ -0,0 +1,78 @@
 +package net.minestom.server.attribute;
 +
 +import net.minestom.server.registry.ProtocolObject;
@@ -573,20 +575,23 @@ index 0000000000000000000000000000000000000000..9cbd8cd57c82ead250fc6ebec78c19e7
 +import org.jetbrains.annotations.NotNull;
 +
 +import java.util.Collection;
++import org.jetbrains.annotations.Nullable;
 +
 +final class AttributeImpl implements ProtocolObject, Attribute {
 +
 +    private static final Registry.DynamicContainer<Attribute> CONTAINER = Registry.createDynamicContainer(Registry.Resource.ATTRIBUTES,
 +            (namespace, properties) -> new AttributeImpl(Registry.attribute(namespace, properties)));
-+
++    @NotNull
 +    static Collection<Attribute> values() {
 +        return CONTAINER.values();
 +    }
++    @Nullable
 +
 +    static Attribute get(@NotNull String namespace) {
 +        return CONTAINER.get(namespace);
 +    }
 +
++    @Nullable
 +    static Attribute getSafe(@NotNull String namespace) {
 +        return CONTAINER.getSafe(namespace);
 +    }
@@ -600,7 +605,7 @@ index 0000000000000000000000000000000000000000..9cbd8cd57c82ead250fc6ebec78c19e7
 +    @NotNull
 +    private final String translationKey;
 +
-+    public AttributeImpl(Registry.AttributeEntry entry) {
++    public AttributeImpl(@NotNull Registry.AttributeEntry entry) {
 +        this.name = entry.getNamespace();
 +        this.defaultValue = entry.getDefaultValue();
 +        this.clientSync = entry.isClientSync();
@@ -619,6 +624,7 @@ index 0000000000000000000000000000000000000000..9cbd8cd57c82ead250fc6ebec78c19e7
 +        return this.defaultValue;
 +    }
 +
++    @NotNull
 +    @Override
 +    public String translationKey() {
 +        return this.translationKey;
@@ -641,10 +647,10 @@ index 0000000000000000000000000000000000000000..9cbd8cd57c82ead250fc6ebec78c19e7
 +}
 diff --git a/src/main/java/net/minestom/server/attribute/AttributeManager.java b/src/main/java/net/minestom/server/attribute/AttributeManager.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..744d837ba643013a2ead871e0ebc5fd2a71d0cd0
+index 0000000000000000000000000000000000000000..7713972cbd86cf46d1957610ef75083197568d0b
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/attribute/AttributeManager.java
-@@ -0,0 +1,51 @@
+@@ -0,0 +1,53 @@
 +package net.minestom.server.attribute;
 +
 +import java.util.Collection;
@@ -653,9 +659,11 @@ index 0000000000000000000000000000000000000000..744d837ba643013a2ead871e0ebc5fd2
 +import java.util.concurrent.ConcurrentHashMap;
 +
 +import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.ApiStatus;
 +import org.jetbrains.annotations.NotNull;
 +import org.jetbrains.annotations.Nullable;
 +
++@ApiStatus.NonExtendable
 +public final class AttributeManager {
 +
 +    private final Map<NamespaceID, Attribute> attributes = new ConcurrentHashMap<>();
@@ -666,7 +674,7 @@ index 0000000000000000000000000000000000000000..744d837ba643013a2ead871e0ebc5fd2
 +     * @see #fromKey(NamespaceID)
 +     * @see #values()
 +     */
-+    public synchronized void register(Attribute attribute) {
++    public synchronized void register(@NotNull Attribute attribute) {
 +        attributes.put(attribute.namespace(), attribute);
 +    }
 +
@@ -847,7 +855,7 @@ index 98fefc2ee8530bd753b6271b4d82b040711d49d7..65b98b68c07f64d10d70afbf70518113
  
              {
 diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
-index 74a86cccdac7e63981b4111924bb850e1ddacd61..5732fa5a2653479bca71f0ffba78b447354537f1 100644
+index 74a86cccdac7e63981b4111924bb850e1ddacd61..839c777b29e771e9eea8bcbf0e6a78fdf9a841d8 100644
 --- a/src/main/java/net/minestom/server/registry/Registry.java
 +++ b/src/main/java/net/minestom/server/registry/Registry.java
 @@ -37,6 +37,11 @@ public final class Registry {
@@ -873,7 +881,7 @@ index 74a86cccdac7e63981b4111924bb850e1ddacd61..5732fa5a2653479bca71f0ffba78b447
  
          private final String name;
  
-@@ -378,6 +385,60 @@ public final class Registry {
+@@ -378,6 +385,58 @@ public final class Registry {
          }
      }
  
@@ -886,7 +894,7 @@ index 74a86cccdac7e63981b4111924bb850e1ddacd61..5732fa5a2653479bca71f0ffba78b447
 +        private final float maxValue;
 +        private final float minValue;
 +
-+        public AttributeEntry(String namespace, Properties main, Properties custom) {
++        public AttributeEntry(@NotNull String namespace,@NotNull  Properties main,@Nullable Properties custom) {
 +            this.custom = custom;
 +            this.namespace = NamespaceID.from(namespace);
 +            this.maxValue = (float) main.getDouble("maxValue", 0);
@@ -897,10 +905,7 @@ index 74a86cccdac7e63981b4111924bb850e1ddacd61..5732fa5a2653479bca71f0ffba78b447
 +
 +        }
 +
-+        public Properties getCustom() {
-+            return custom;
-+        }
-+
++        @NotNull
 +        public NamespaceID getNamespace() {
 +            return namespace;
 +        }
@@ -909,6 +914,7 @@ index 74a86cccdac7e63981b4111924bb850e1ddacd61..5732fa5a2653479bca71f0ffba78b447
 +            return defaultValue;
 +        }
 +
++        @NotNull
 +        public String getTranslationKey() {
 +            return translationKey;
 +        }
@@ -925,7 +931,7 @@ index 74a86cccdac7e63981b4111924bb850e1ddacd61..5732fa5a2653479bca71f0ffba78b447
 +            return minValue;
 +        }
 +
-+        @Override
++        @Override @Nullable
 +        public Properties custom() {
 +            return custom;
 +        }
