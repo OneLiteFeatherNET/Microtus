@@ -1,0 +1,31 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Phillipp Glanz <6745190+TheMeinerLP@users.noreply.github.com>
+Date: Thu, 15 Feb 2024 13:56:06 +0100
+Subject: [PATCH] General network improvements
+
+
+diff --git a/src/main/java/net/minestom/server/network/socket/Server.java b/src/main/java/net/minestom/server/network/socket/Server.java
+index 6975a9697e266e5bc65f7323ebb2fbfdc765df09..dd241f606f12288099dc0b1359d568de94dd93fd 100644
+--- a/src/main/java/net/minestom/server/network/socket/Server.java
++++ b/src/main/java/net/minestom/server/network/socket/Server.java
+@@ -113,7 +113,19 @@ public final class Server {
+             MinecraftServer.getExceptionManager().handleException(e);
+         }
+         this.selector.wakeup();
+-        this.workers.forEach(worker -> worker.selector.wakeup());
++        try {
++            this.selector.close();
++        } catch (IOException e) {
++            throw new RuntimeException(e);
++        }
++        this.workers.forEach(worker -> {
++            worker.selector.wakeup();
++            try {
++                worker.selector.close();
++            } catch (IOException e) {
++                throw new RuntimeException(e);
++            }
++        });
+     }
+ 
+     @ApiStatus.Internal
