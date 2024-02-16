@@ -467,20 +467,21 @@ index fd5af2b71286497addf6a41f3df8d151dfb6720e..4f4a0d264dc78dc51b6ec4bc31f4280d
          }
          if (bstatsEnabled) {
 diff --git a/src/main/java/net/minestom/server/attribute/Attribute.java b/src/main/java/net/minestom/server/attribute/Attribute.java
-index ed97a493c48bc213077bababac2723562b53dc6f..d61f60467ece2d2eed318cce01a0ba5e2c80cb5d 100644
+index ed97a493c48bc213077bababac2723562b53dc6f..9b8836e73d0e76f7662dd03fbca670f96b7743ce 100644
 --- a/src/main/java/net/minestom/server/attribute/Attribute.java
 +++ b/src/main/java/net/minestom/server/attribute/Attribute.java
-@@ -1,66 +1,21 @@
+@@ -1,66 +1,34 @@
  package net.minestom.server.attribute;
  
-+import net.minestom.server.registry.ProtocolObject;
-+import net.minestom.server.utils.NamespaceID;
- import org.jetbrains.annotations.NotNull;
+-import org.jetbrains.annotations.NotNull;
 -import org.jetbrains.annotations.Nullable;
 -
--import java.util.Collection;
+ import java.util.Collection;
 -import java.util.Map;
 -import java.util.concurrent.ConcurrentHashMap;
++import net.minestom.server.registry.ProtocolObject;
++import net.minestom.server.utils.NamespaceID;
++import org.jetbrains.annotations.NotNull;
  
  /**
   * Represents a {@link net.minestom.server.entity.LivingEntity living entity} attribute.
@@ -506,39 +507,6 @@ index ed97a493c48bc213077bababac2723562b53dc6f..d61f60467ece2d2eed318cce01a0ba5e
 -        if (defaultValue > maxValue) {
 -            throw new IllegalArgumentException("Default value cannot be greater than the maximum allowed");
 -        }
--    }
--
--    /**
--     * Register this attribute.
--     *
--     * @return this attribute
--     * @see #fromKey(String)
--     * @see #values()
--     */
--    public @NotNull Attribute register() {
--        ATTRIBUTES.put(key, this);
--        return this;
--    }
--
--    /**
--     * Retrieves an attribute by its key.
--     *
--     * @param key the key of the attribute
--     * @return the attribute for the key or null if not any
--     */
--    public static @Nullable Attribute fromKey(@NotNull String key) {
--        return ATTRIBUTES.get(key);
--    }
--
--    /**
--     * Retrieves all registered attributes.
--     *
--     * @return an array containing all registered attributes
--     */
--    public static @NotNull Collection<@NotNull Attribute> values() {
--        return ATTRIBUTES.values();
--    }
--}
 +public sealed interface Attribute extends ProtocolObject, Attributes permits AttributeImpl {
 +
 +    @Override
@@ -550,11 +518,50 @@ index ed97a493c48bc213077bababac2723562b53dc6f..d61f60467ece2d2eed318cce01a0ba5e
 +    float maxValue();
 +    float minValue();
 +
++    static @NotNull Collection<@NotNull Attribute> values() {
++        return AttributeImpl.values();
+     }
+ 
+-    /**
+-     * Register this attribute.
+-     *
+-     * @return this attribute
+-     * @see #fromKey(String)
+-     * @see #values()
+-     */
+-    public @NotNull Attribute register() {
+-        ATTRIBUTES.put(key, this);
+-        return this;
++    static Attribute fromNamespaceId(@NotNull String namespaceID) {
++        return AttributeImpl.getSafe(namespaceID);
+     }
+ 
+-    /**
+-     * Retrieves an attribute by its key.
+-     *
+-     * @param key the key of the attribute
+-     * @return the attribute for the key or null if not any
+-     */
+-    public static @Nullable Attribute fromKey(@NotNull String key) {
+-        return ATTRIBUTES.get(key);
++    static Attribute fromNamespaceId(@NotNull NamespaceID namespaceID) {
++        return fromNamespaceId(namespaceID.asString());
+     }
+ 
+-    /**
+-     * Retrieves all registered attributes.
+-     *
+-     * @return an array containing all registered attributes
+-     */
+-    public static @NotNull Collection<@NotNull Attribute> values() {
+-        return ATTRIBUTES.values();
+-    }
+-}
 +}
 \ No newline at end of file
 diff --git a/src/main/java/net/minestom/server/attribute/AttributeImpl.java b/src/main/java/net/minestom/server/attribute/AttributeImpl.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..4ac18e725a29ed26c7ef08ca732c6462ae2147ae
+index 0000000000000000000000000000000000000000..9cbd8cd57c82ead250fc6ebec78c19e7853214ce
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/attribute/AttributeImpl.java
 @@ -0,0 +1,74 @@
@@ -569,18 +576,18 @@ index 0000000000000000000000000000000000000000..4ac18e725a29ed26c7ef08ca732c6462
 +
 +final class AttributeImpl implements ProtocolObject, Attribute {
 +
-+    private static final Registry.DynamicContainer<AttributeImpl> CONTAINER = Registry.createDynamicContainer(Registry.Resource.ATTRIBUTES,
++    private static final Registry.DynamicContainer<Attribute> CONTAINER = Registry.createDynamicContainer(Registry.Resource.ATTRIBUTES,
 +            (namespace, properties) -> new AttributeImpl(Registry.attribute(namespace, properties)));
 +
-+    static Collection<AttributeImpl> values() {
++    static Collection<Attribute> values() {
 +        return CONTAINER.values();
 +    }
 +
-+    static AttributeImpl get(@NotNull String namespace) {
++    static Attribute get(@NotNull String namespace) {
 +        return CONTAINER.get(namespace);
 +    }
 +
-+    static AttributeImpl getSafe(@NotNull String namespace) {
++    static Attribute getSafe(@NotNull String namespace) {
 +        return CONTAINER.getSafe(namespace);
 +    }
 +
@@ -634,7 +641,7 @@ index 0000000000000000000000000000000000000000..4ac18e725a29ed26c7ef08ca732c6462
 +}
 diff --git a/src/main/java/net/minestom/server/attribute/AttributeManager.java b/src/main/java/net/minestom/server/attribute/AttributeManager.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..466fd37dbc30159812bc025985909b4df0df5e70
+index 0000000000000000000000000000000000000000..744d837ba643013a2ead871e0ebc5fd2a71d0cd0
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/attribute/AttributeManager.java
 @@ -0,0 +1,51 @@
@@ -683,7 +690,7 @@ index 0000000000000000000000000000000000000000..466fd37dbc30159812bc025985909b4d
 +    }
 +
 +    public void loadVanillaAttributes() {
-+        for (AttributeImpl attribute : AttributeImpl.values()) {
++        for (Attribute attribute : AttributeImpl.values()) {
 +            if (fromKey(attribute.namespace()) == null)
 +                register(attribute);
 +        }
@@ -782,7 +789,7 @@ index a8e6a7422af7479d057f091a7189c557dd05100b..c7600a3afd0fad3f7553a9f4641b3b1a
                                                                      // slightly below floor level. This +0.00001D is here to offset this
                                                                      // error and stop the entity from permanently jumping.
 diff --git a/src/main/java/net/minestom/server/item/ItemSerializers.java b/src/main/java/net/minestom/server/item/ItemSerializers.java
-index c2b6494bc343157a6f2397a4ab4247b122142270..418dc6c253d1359a3c4fe44f1b56bec21f7b78ef 100644
+index c2b6494bc343157a6f2397a4ab4247b122142270..cc988780123c521cf90da20f7451aa99c5cbdb64 100644
 --- a/src/main/java/net/minestom/server/item/ItemSerializers.java
 +++ b/src/main/java/net/minestom/server/item/ItemSerializers.java
 @@ -1,5 +1,6 @@
@@ -797,7 +804,7 @@ index c2b6494bc343157a6f2397a4ab4247b122142270..418dc6c253d1359a3c4fe44f1b56bec2
              final String name = reader.getTag(NAME);
  
 -            final Attribute attribute = Attribute.fromKey(attributeName.toLowerCase(Locale.ROOT));
-+            final Attribute attribute = MinecraftServer.getAttributeManager().fromKey(attributeName.toLowerCase(Locale.ROOT));
++            final Attribute attribute = Attribute.fromNamespaceId(attributeName.toLowerCase(Locale.ROOT));
              // Wrong attribute name, stop here
              if (attribute == null) return null;
              final AttributeOperation attributeOperation = AttributeOperation.fromId(operation);
@@ -811,7 +818,7 @@ index c2b6494bc343157a6f2397a4ab4247b122142270..418dc6c253d1359a3c4fe44f1b56bec2
              writer.setTag(NAME, value.name());
          }
 diff --git a/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java b/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
-index 98fefc2ee8530bd753b6271b4d82b040711d49d7..76a9e68c210f9bb8d7630ed0c96837aeb223ebb6 100644
+index 98fefc2ee8530bd753b6271b4d82b040711d49d7..65b98b68c07f64d10d70afbf705181134630f82d 100644
 --- a/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
 +++ b/src/main/java/net/minestom/server/network/packet/server/play/EntityPropertiesPacket.java
 @@ -1,5 +1,6 @@
@@ -826,7 +833,7 @@ index 98fefc2ee8530bd753b6271b4d82b040711d49d7..76a9e68c210f9bb8d7630ed0c96837ae
      public EntityPropertiesPacket(@NotNull NetworkBuffer reader) {
          this(reader.read(VAR_INT), reader.readCollection(r -> {
 -            final Attribute attribute = Attribute.fromKey(reader.read(STRING));
-+            final Attribute attribute = MinecraftServer.getAttributeManager().fromKey(reader.read(STRING));
++            final Attribute attribute = Attribute.fromNamespaceId(reader.read(STRING));
              final double value = reader.read(DOUBLE);
              int modifierCount = reader.read(VAR_INT);
              AttributeInstance instance = new AttributeInstance(attribute, null);
