@@ -21,7 +21,7 @@ index ee29b50b3fc2332edd934e8bbca1376b9178eab7..9eed8b1c31efb59ed69378b4706e2971
      // Minestom Data (From MinestomDataGenerator)
      implementation(libs.minestomData)
 diff --git a/settings.gradle.kts b/settings.gradle.kts
-index 2bb561096662e547e747a95850b9f9bee94ecbdd..29e52191d1ee12c300f80dd6905186ef7b231331 100644
+index ab20445163c2f50f6b101c8a16cbf5c5b7f718be..94b98307b7984600be5c575b60dd3b04ef2b5968 100644
 --- a/settings.gradle.kts
 +++ b/settings.gradle.kts
 @@ -18,6 +18,8 @@ dependencyResolutionManagement {
