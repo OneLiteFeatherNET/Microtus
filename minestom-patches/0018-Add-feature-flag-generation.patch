@@ -119,10 +119,10 @@ index 9e371032ce414c610dcfe1ec4df6f60fc738648e..9e7b45577ef4bc5ea076087cc1a43722
  }
 diff --git a/src/main/java/net/minestom/server/feature/FeatureFlag.java b/src/main/java/net/minestom/server/feature/FeatureFlag.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..db2887d61316fa4267bee59350d3d131553340aa
+index 0000000000000000000000000000000000000000..d31e422d0dd6626afa7435d2812350c694697b6a
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/feature/FeatureFlag.java
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,40 @@
 +package net.minestom.server.feature;
 +
 +import java.util.Collection;
@@ -131,6 +131,7 @@ index 0000000000000000000000000000000000000000..db2887d61316fa4267bee59350d3d131
 +import net.minestom.server.utils.NamespaceID;
 +import org.jetbrains.annotations.Contract;
 +import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
 +
 +public sealed interface FeatureFlag extends ProtocolObject, FeatureFlags permits FeatureFlagImpl {
 +
@@ -151,10 +152,12 @@ index 0000000000000000000000000000000000000000..db2887d61316fa4267bee59350d3d131
 +        return FeatureFlagImpl.values();
 +    }
 +
++    @Nullable
 +    static FeatureFlag fromNamespaceId(@NotNull String namespaceID) {
 +        return FeatureFlagImpl.getSafe(namespaceID);
 +    }
 +
++    @Nullable
 +    static FeatureFlag fromNamespaceId(@NotNull NamespaceID namespaceID) {
 +        return fromNamespaceId(namespaceID.asString());
 +    }
@@ -162,15 +165,16 @@ index 0000000000000000000000000000000000000000..db2887d61316fa4267bee59350d3d131
 +}
 diff --git a/src/main/java/net/minestom/server/feature/FeatureFlagImpl.java b/src/main/java/net/minestom/server/feature/FeatureFlagImpl.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..dae06ecbf2abfb049e97d07ecc1537b845086ad6
+index 0000000000000000000000000000000000000000..6da1f8c0b48a94d98e1b2d8ced2d96542a971e7c
 --- /dev/null
 +++ b/src/main/java/net/minestom/server/feature/FeatureFlagImpl.java
-@@ -0,0 +1,24 @@
+@@ -0,0 +1,28 @@
 +package net.minestom.server.feature;
 +
 +import java.util.Collection;
 +import net.minestom.server.registry.Registry;
 +import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
 +
 +record FeatureFlagImpl(Registry.FeatureFlagEntry registry) implements FeatureFlag {
 +
@@ -178,14 +182,17 @@ index 0000000000000000000000000000000000000000..dae06ecbf2abfb049e97d07ecc1537b8
 +            Registry.Resource.FEATURE_FLAGS,
 +            (namespace, properties) -> new FeatureFlagImpl(Registry.featureFlag(namespace, properties)));
 +
++    @Nullable
 +    static FeatureFlag get(@NotNull String namespace) {
 +        return CONTAINER.get(namespace);
 +    }
 +
++    @Nullable
 +    static FeatureFlag getSafe(@NotNull String namespace) {
 +        return CONTAINER.getSafe(namespace);
 +    }
 +
++    @NotNull
 +    static Collection<FeatureFlag> values() {
 +        return CONTAINER.values();
 +    }
