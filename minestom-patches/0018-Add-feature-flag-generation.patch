@@ -21,23 +21,17 @@ index 0ef2929b748f1dec1baa037ad7da95e35c878116..d403cfbbadbf2702cdd7741d9a9b036a
      // Provides the input JSON to generate from
      implementation(libs.minestomData)
 diff --git a/code-generators/src/main/java/net/minestom/codegen/Generators.java b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-index 961e2e096380461dd24fde6ab333019e2541f644..14c3253d061050393e5ba75b09c38771459a535e 100644
+index 9d620234bb233dbd724df28d7261bd525025e586..3dee1038ef9cfbbc76f914080c5a09ad3ab74655 100644
 --- a/code-generators/src/main/java/net/minestom/codegen/Generators.java
 +++ b/code-generators/src/main/java/net/minestom/codegen/Generators.java
-@@ -23,12 +23,12 @@ public class Generators {
-         // Generate DyeColors
-         new DyeColorGenerator(resource("dye_colors.json"), outputFolder).generate();
- 
--
-         var generator = new CodeGenerator(outputFolder);
-         generator.generate(resource("blocks.json"), "net.minestom.server.instance.block", "Block", "BlockImpl", "Blocks");
+@@ -28,6 +28,7 @@ public class Generators {
          generator.generate(resource("items.json"), "net.minestom.server.item", "Material", "MaterialImpl", "Materials");
          generator.generate(resource("entities.json"), "net.minestom.server.entity", "EntityType", "EntityTypeImpl", "EntityTypes");
          generator.generate(resource("biomes.json"), "net.minestom.server.world.biomes", "Biome", "BiomeImpl", "Biomes");
 +        generator.generate(resource("feature_flags.json"), "net.minestom.server.feature", "FeatureFlag", "FeatureFlagImpl", "FeatureFlags");
+         generator.generate(resource("attributes.json"), "net.minestom.server.attribute", "Attribute", "AttributeImpl", "Attributes");
          generator.generate(resource("enchantments.json"), "net.minestom.server.item", "Enchantment", "EnchantmentImpl", "Enchantments");
          generator.generate(resource("potion_effects.json"), "net.minestom.server.potion", "PotionEffect", "PotionEffectImpl", "PotionEffects");
-         generator.generate(resource("potions.json"), "net.minestom.server.potion", "PotionType", "PotionTypeImpl", "PotionTypes");
 diff --git a/settings.gradle.kts b/settings.gradle.kts
 index 2bb561096662e547e747a95850b9f9bee94ecbdd..ab20445163c2f50f6b101c8a16cbf5c5b7f718be 100644
 --- a/settings.gradle.kts
@@ -280,7 +274,7 @@ index e186d618b6835dcddf9cb3a21f6e0fd7db9dc601..414b386f16fed4a9a720b9c449b46ecf
  
      @Override
 diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
-index 74a86cccdac7e63981b4111924bb850e1ddacd61..3d89e63c0a9461ec4f3dd8a93bd66409b4703e9c 100644
+index 839c777b29e771e9eea8bcbf0e6a78fdf9a841d8..c94d4f35d53115f60468bac8d62bf8d72e0b33f7 100644
 --- a/src/main/java/net/minestom/server/registry/Registry.java
 +++ b/src/main/java/net/minestom/server/registry/Registry.java
 @@ -32,6 +32,12 @@ import java.util.stream.Collectors;
@@ -296,18 +290,15 @@ index 74a86cccdac7e63981b4111924bb850e1ddacd61..3d89e63c0a9461ec4f3dd8a93bd66409
      @ApiStatus.Internal
      public static BlockEntry block(String namespace, @NotNull Properties main) {
          return new BlockEntry(namespace, main, null);
-@@ -223,7 +229,9 @@ public final class Registry {
-         FLUID_TAGS("tags/fluid_tags.json"),
-         GAMEPLAY_TAGS("tags/gameplay_tags.json"),
+@@ -230,6 +236,7 @@ public final class Registry {
          ITEM_TAGS("tags/item_tags.json"),
--        BIOMES("biomes.json");
-+        BIOMES("biomes.json"),
+         BIOMES("biomes.json"),
+         ATTRIBUTES("attributes.json"),
 +        FEATURE_FLAGS("feature_flags.json")
-+        ;
+         ;
  
          private final String name;
- 
-@@ -232,6 +240,26 @@ public final class Registry {
+@@ -239,6 +246,26 @@ public final class Registry {
          }
      }
  
