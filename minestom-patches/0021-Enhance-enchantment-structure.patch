@@ -1,0 +1,66 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: theEvilReaper <steffenwx@gmail.com>
+Date: Tue, 26 Mar 2024 19:24:41 +0100
+Subject: [PATCH] Enhance enchantment structure
+
+
+diff --git a/src/main/java/net/minestom/server/registry/Registry.java b/src/main/java/net/minestom/server/registry/Registry.java
+index 6945755e3e6f0739e59934995097a97e7829340e..8052455cade1a82969a152c640233d0835218e37 100644
+--- a/src/main/java/net/minestom/server/registry/Registry.java
++++ b/src/main/java/net/minestom/server/registry/Registry.java
+@@ -485,15 +485,16 @@ public final class Registry {
+         }
+     }
+ 
+-    public record EnchantmentEntry(NamespaceID namespace, int id,
+-                                   String translationKey,
++    public record EnchantmentEntry(@NotNull NamespaceID namespace, int id,
++                                   @NotNull String translationKey,
+                                    double maxLevel,
+                                    boolean isCursed,
+                                    boolean isDiscoverable,
+                                    boolean isTradeable,
+                                    boolean isTreasureOnly,
+-                                   Properties custom) implements Entry {
+-        public EnchantmentEntry(String namespace, Properties main, Properties custom) {
++                                   @NotNull String category, //Microtus - Enhance enchantment structure
++                                   @Nullable Properties custom) implements Entry {
++        public EnchantmentEntry(@NotNull String namespace, @NotNull Properties main, @Nullable Properties custom) {
+             this(NamespaceID.from(namespace),
+                     main.getInt("id"),
+                     main.getString("translationKey"),
+@@ -502,6 +503,7 @@ public final class Registry {
+                     main.getBoolean("discoverable", true),
+                     main.getBoolean("tradeable", true),
+                     main.getBoolean("treasureOnly", false),
++                    main.getString("category"), //Microtus - Enhance enchantment structure
+                     custom);
+         }
+     }
+diff --git a/src/test/java/net/minestom/server/registry/EnchantmentRegistryTest.java b/src/test/java/net/minestom/server/registry/EnchantmentRegistryTest.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..212eb0f27a45701e5209fbfb50859e2c7e63ddd8
+--- /dev/null
++++ b/src/test/java/net/minestom/server/registry/EnchantmentRegistryTest.java
+@@ -0,0 +1,21 @@
++package net.minestom.server.registry;
++
++import net.minestom.server.item.Enchantment;
++import org.junit.jupiter.api.DisplayName;
++import org.junit.jupiter.api.Test;
++
++import static org.junit.jupiter.api.Assertions.*;
++
++@DisplayName("Test some methods from the EnchantmentEntry class")
++class EnchantmentRegistryTest {
++
++    @Test
++    void testEnchantmentRegistry() {
++        Enchantment enchantment = Enchantment.SHARPNESS;
++        assertEquals(13, enchantment.id());
++        assertEquals(5, enchantment.registry().maxLevel());
++        assertFalse(enchantment.registry().isCursed());
++        assertTrue(enchantment.registry().isDiscoverable());
++        assertEquals("WEAPON", enchantment.registry().category());
++    }
++}
