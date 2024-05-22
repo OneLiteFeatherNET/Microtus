@@ -54,6 +54,19 @@ public final class ServerFlag {
     // World
     public static final int WORLD_BORDER_SIZE = intProperty("minestom.world-border-size", 29999984);
 
+    // Biomes
+    public static final boolean BIOMES_ENABLED = System.getProperty("minestom.attributes.disabled") == null;
+
+    // Terminal
+    public static final boolean TERMINAL_ENABLED = System.getProperty("minestom.terminal.disabled") == null;
+    public static final boolean TERMINAL_SUPPORT_HEX_COLOR = Boolean.getBoolean("minestom.terminal.support-hex-color");
+    public static final boolean TERMINAL_SUPPORT_COLOR = Boolean.getBoolean("minestom.terminal.support-color");
+    // Extensions todo use enabled flag
+    public static final boolean EXTENSIONS_ENABLED = Boolean.getBoolean("minestom.extension.enabled");
+    public static final @NotNull String EXTENSIONS_FOLDER = System.getProperty("minestom.extension.folder", "extensions");
+    public static final @Nullable String EXTENSIONS_DEV_CLASSES = System.getProperty("minestom.extension.indevfolder.classes");
+    public static final @Nullable String EXTENSIONS_DEV_RESOURCES = System.getProperty("minestom.extension.indevfolder.resources");
+
     // Maps
     public static final @NotNull String MAP_RGB_MAPPING = stringProperty("minestom.map.rgbmapping", "lazy");
     public static final @Nullable String MAP_RGB_REDUCTION = stringProperty("minestom.map.rgbreduction"); // Only used if rgb mapping is "approximate"
