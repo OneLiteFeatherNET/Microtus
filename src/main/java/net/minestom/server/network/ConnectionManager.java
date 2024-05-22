@@ -314,6 +314,7 @@ public final class ConnectionManager {
 
                 player.sendPacket(TagsPacket.DEFAULT_TAGS);
             }
+            player.sendPacket(new UpdateEnabledFeaturesPacket(event.getEnabledFeatures()));
 
             // Wait for pending resource packs if any
             var packFuture = player.getResourcePackFuture();

@@ -8,10 +8,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @EnvTest
-public class WorldBorderIntegrationTest {
+class WorldBorderIntegrationTest {
 
     @Test
-    public void setWorldborderSize(Env env) {
+    void setWorldborderSize(Env env) {
         Instance instance = env.createFlatInstance();
 
         instance.setWorldBorder(WorldBorder.DEFAULT_BORDER.withDiameter(50));
@@ -21,7 +21,7 @@ public class WorldBorderIntegrationTest {
     }
 
     @Test
-    public void resizeWorldBorder(Env env) {
+    void resizeWorldBorder(Env env) {
         Instance instance = env.createFlatInstance();
 
         WorldBorder border = instance.getWorldBorder();
@@ -50,7 +50,7 @@ public class WorldBorderIntegrationTest {
     }
 
     @Test
-    public void invalidArguments(Env env) {
+    void invalidArguments(Env env) {
         Instance instance = env.createFlatInstance();
 
         WorldBorder border = instance.getWorldBorder();

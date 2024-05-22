@@ -232,6 +232,16 @@ public final class Registry {
         PAINTING_VARIANTS("painting_variants.json"),
         JUKEBOX_SONGS("jukebox_songs.json");
 
+        /**
+         * BANNER_PATTERNS("banner_patterns.json"), // Microtus -  Banner and Shield Meta
+         *         BLOCK_TAGS("tags/block_tags.json"),
+         *         ENTITY_TYPE_TAGS("tags/entity_type_tags.json"),
+         *         FLUID_TAGS("tags/fluid_tags.json"),
+         *         GAMEPLAY_TAGS("tags/gameplay_tags.json"),
+         *         ITEM_TAGS("tags/item_tags.json"),
+         *         BIOMES("biomes.json");
+         */
+
         private final String name;
 
         Resource(String name) {

@@ -2,9 +2,11 @@ package net.minestom.server;
 
 import net.minestom.server.advancements.AdvancementManager;
 import net.minestom.server.adventure.bossbar.BossBarManager;
+import net.minestom.server.attribute.AttributeManager;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.exception.ExceptionManager;
+import net.minestom.server.extensions.ExtensionManager;
 import net.minestom.server.gamedata.tags.TagManager;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.InstanceManager;
@@ -23,6 +25,7 @@ import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.timer.SchedulerManager;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.SocketAddress;
 
@@ -83,6 +86,11 @@ public interface ServerProcess extends Registries, Snapshotable {
      * Handles registered boss bars.
      */
     @NotNull BossBarManager bossBar();
+
+    /**
+     * Loads and handle extensions.
+     */
+    @Nullable ExtensionManager extension();
 
     /**
      * Handles registry tags.

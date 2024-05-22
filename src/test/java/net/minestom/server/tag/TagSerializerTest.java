@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
-public class TagSerializerTest {
+class TagSerializerTest {
     @Test
-    public void fromCompound(){
+    void fromCompound(){
         var serializer = TagSerializer.fromCompound(FireworkExplosion.NBT_TYPE::read, explosion -> (CompoundBinaryTag) FireworkExplosion.NBT_TYPE.write(explosion));
         var effect = new FireworkExplosion(FireworkExplosion.Shape.BURST, List.of(), List.of(), false, false);
         TagHandler handler = TagHandler.newHandler();

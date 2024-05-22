@@ -13,10 +13,10 @@ import java.util.Map;
 import static net.minestom.testing.TestUtils.assertEqualsSNBT;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TagRecordTest {
+class TagRecordTest {
 
     @Test
-    public void basic() {
+    void basic() {
         var handler = TagHandler.newHandler();
         var tag = Tag.Structure("vec", Vec.class);
         var vec = new Vec(1, 2, 3);
@@ -26,7 +26,7 @@ public class TagRecordTest {
     }
 
     @Test
-    public void fromNBT() {
+    void fromNBT() {
         var vecCompound = CompoundBinaryTag.builder()
                 .putDouble("x", 1)
                 .putDouble("y", 2)
@@ -38,7 +38,7 @@ public class TagRecordTest {
     }
 
     @Test
-    public void fromNBTView() {
+    void fromNBTView() {
         var handler = TagHandler.fromCompound(CompoundBinaryTag.builder()
                 .putDouble("x", 1)
                 .putDouble("y", 2)
@@ -49,7 +49,7 @@ public class TagRecordTest {
     }
 
     @Test
-    public void basicSerializer() {
+    void basicSerializer() {
         var handler = TagHandler.newHandler();
         var serializer = TagRecord.serializer(Vec.class);
         serializer.write(handler, new Vec(1, 2, 3));
@@ -57,7 +57,7 @@ public class TagRecordTest {
     }
 
     @Test
-    public void basicSnbt() {
+    void basicSnbt() {
         var handler = TagHandler.newHandler();
         var tag = Tag.Structure("vec", Vec.class);
         var vec = new Vec(1, 2, 3);
@@ -76,7 +76,7 @@ public class TagRecordTest {
     }
 
     @Test
-    public void nbtSerializer() {
+    void nbtSerializer() {
         record CompoundRecord(CompoundBinaryTag compound) {
         }
         var test = new CompoundRecord(CompoundBinaryTag.from(Map.of("key", StringBinaryTag.stringBinaryTag("value"))));
@@ -87,26 +87,26 @@ public class TagRecordTest {
     }
 
     @Test
-    public void unsupportedList() {
+    void unsupportedList() {
         record Test(List<Object> list) {
         }
         assertThrows(IllegalArgumentException.class, () -> Tag.Structure("test", Test.class));
     }
 
     @Test
-    public void unsupportedArray() {
+    void unsupportedArray() {
         record Test(Object[] array) {
         }
         assertThrows(IllegalArgumentException.class, () -> Tag.Structure("test", Test.class));
     }
 
     @Test
-    public void forceRecord() {
+    void forceRecord() {
         assertThrows(Throwable.class, () -> Tag.Structure("entity", Class.class.cast(Entity.class)));
     }
 
     @Test
-    public void invalidItem() {
+    void invalidItem() {
         // ItemStack cannot become a record due to `ItemStack#toItemNBT` being serialized differently, and independently of
         // the item record components
         assertThrows(Throwable.class, () -> Tag.Structure("item", Class.class.cast(ItemStack.class)));

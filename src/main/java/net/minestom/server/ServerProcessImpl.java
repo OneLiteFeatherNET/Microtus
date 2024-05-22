@@ -1,8 +1,16 @@
 package net.minestom.server;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import java.io.IOException;
+import java.net.SocketAddress;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import net.minestom.server.advancements.AdvancementManager;
 import net.minestom.server.adventure.bossbar.BossBarManager;
+import net.minestom.server.attribute.AttributeManager;
+import net.minestom.server.attribute.Attributes;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.damage.DamageType;
@@ -12,6 +20,7 @@ import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.event.server.ServerTickMonitorEvent;
 import net.minestom.server.exception.ExceptionManager;
+import net.minestom.server.extensions.ExtensionManager;
 import net.minestom.server.gamedata.tags.TagManager;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.Instance;
@@ -32,7 +41,12 @@ import net.minestom.server.network.socket.Server;
 import net.minestom.server.recipe.RecipeManager;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.scoreboard.TeamManager;
-import net.minestom.server.snapshot.*;
+import net.minestom.server.snapshot.EntitySnapshot;
+import net.minestom.server.snapshot.InstanceSnapshot;
+import net.minestom.server.snapshot.ServerSnapshot;
+import net.minestom.server.snapshot.SnapshotImpl;
+import net.minestom.server.snapshot.SnapshotUpdater;
+import net.minestom.server.terminal.MinestomTerminal;
 import net.minestom.server.thread.Acquirable;
 import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.timer.SchedulerManager;
@@ -46,19 +60,12 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.SocketAddress;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 final class ServerProcessImpl implements ServerProcess {
     private static final Logger LOGGER = LoggerFactory.getLogger(ServerProcessImpl.class);
     private static final Boolean SHUTDOWN_ON_SIGNAL = PropertyUtils.getBoolean("minestom.shutdown-on-signal", true);
 
     private final ExceptionManager exception;
-
+    private final ExtensionManager extension;
     private final DynamicRegistry<BinaryTagSerializer<? extends LevelBasedValue>> enchantmentLevelBasedValues;
     private final DynamicRegistry<BinaryTagSerializer<? extends ValueEffect>> enchantmentValueEffects;
     private final DynamicRegistry<BinaryTagSerializer<? extends EntityEffect>> enchantmentEntityEffects;
@@ -87,17 +94,22 @@ final class ServerProcessImpl implements ServerProcess {
     private final GlobalEventHandler eventHandler;
     private final SchedulerManager scheduler;
     private final BenchmarkManager benchmark;
+    private final AttributeManager attribute;
     private final AdvancementManager advancement;
     private final BossBarManager bossBar;
     private final TagManager tag;
 
     private final Server server;
+    private final Metrics metrics;
 
     private final ThreadDispatcher<Chunk> dispatcher;
     private final Ticker ticker;
 
     private final AtomicBoolean started = new AtomicBoolean();
     private final AtomicBoolean stopped = new AtomicBoolean();
+
+    private static boolean bstatsEnabled = System.getProperty("minestom.bstats.enabled") == null;
+
 
     public ServerProcessImpl() throws IOException {
         this.exception = new ExceptionManager();
@@ -120,7 +132,7 @@ final class ServerProcessImpl implements ServerProcess {
         this.enchantment = Enchantment.createDefaultRegistry(this);
         this.paintingVariant = PaintingMeta.Variant.createDefaultRegistry();
         this.jukeboxSong = JukeboxSong.createDefaultRegistry();
-
+        this.extension = new ExtensionManager(this);
         this.connection = new ConnectionManager();
         this.packetListener = new PacketListenerManager();
         this.packetProcessor = new PacketProcessor(packetListener);
@@ -140,6 +152,7 @@ final class ServerProcessImpl implements ServerProcess {
 
         this.dispatcher = ThreadDispatcher.singleThread();
         this.ticker = new TickerImpl();
+        this.metrics = new Metrics();
     }
 
     @Override
@@ -263,6 +276,11 @@ final class ServerProcessImpl implements ServerProcess {
     }
 
     @Override
+    public @NotNull ExtensionManager extension() {
+        return extension;
+    }
+
+    @Override
     public @NotNull TagManager tag() {
         return tag;
     }
@@ -308,12 +326,22 @@ final class ServerProcessImpl implements ServerProcess {
     }
 
     @Override
+    public @NotNull AttributeManager attribute() {
+        return attribute;
+    }
+
+    @Override
     public void start(@NotNull SocketAddress socketAddress) {
         if (!started.compareAndSet(false, true)) {
             throw new IllegalStateException("Server already started");
         }
 
+        extension.start();
+        extension.gotoPreInit();
+
         LOGGER.info("Starting " + MinecraftServer.getBrandName() + " server.");
+
+        extension.gotoInit();
 
         // Init server
         try {
@@ -326,8 +354,26 @@ final class ServerProcessImpl implements ServerProcess {
         // Start server
         server.start();
 
+        extension.gotoPostInit();
+
         LOGGER.info(MinecraftServer.getBrandName() + " server started successfully.");
 
+        if (ServerFlag.ATTRIBUTES_ENABLED) {
+            Attributes.registerAttributes();
+        }
+        LOGGER.info("Register Attributes({})", attribute.values().size());
+
+        if (ServerFlag.BIOMES_ENABLED) {
+            Biomes.registerBiomes();
+        }
+        LOGGER.info("Register Biomes({})", biome.unmodifiableCollection().size());
+
+        if (ServerFlag.TERMINAL_ENABLED) {
+            MinestomTerminal.start();
+        }
+        if (bstatsEnabled) {
+            this.metrics.start();
+        }
         // Stop the server on SIGINT
         if (SHUTDOWN_ON_SIGNAL) Runtime.getRuntime().addShutdownHook(new Thread(this::stop));
     }
@@ -337,12 +383,16 @@ final class ServerProcessImpl implements ServerProcess {
         if (!stopped.compareAndSet(false, true))
             return;
         LOGGER.info("Stopping " + MinecraftServer.getBrandName() + " server.");
+        LOGGER.info("Unloading all extensions.");
+        extension.shutdown();
         scheduler.shutdown();
         connection.shutdown();
         server.stop();
         LOGGER.info("Shutting down all thread pools.");
         benchmark.disable();
+        MinestomTerminal.stop();
         dispatcher.shutdown();
+        this.metrics.shutdown();
         LOGGER.info(MinecraftServer.getBrandName() + " server stopped successfully.");
     }
 

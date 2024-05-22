@@ -17,14 +17,14 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 @EnvTest
-public class ItemTest {
+class ItemTest {
 
     static {
         MinecraftServer.init();
     }
 
     @Test
-    public void testFields() {
+    void testFields() {
         var item = ItemStack.of(Material.DIAMOND_SWORD);
         assertEquals(item.material(), Material.DIAMOND_SWORD, "Material must be the same");
         assertEquals(item.amount(), 1, "Default item amount must be 1");
@@ -44,12 +44,12 @@ public class ItemTest {
         assertThrows(UnsupportedOperationException.class, () -> finalItem.get(ItemComponent.LORE).add(Component.text("Hey!")), "Lore list cannot be modified directly");
 
         item = item.withAmount(5);
-        assertEquals(item.amount(), 5, "Items with different amount should not be equals");
-        assertEquals(item.withAmount(amount -> amount * 2).amount(), 10, "Amount must be multiplied by 2");
+        assertEquals(5, item.amount(), "Items with different amount should not be equals");
+        assertEquals(10,item.withAmount(amount -> amount * 2).amount(), "Amount must be multiplied by 2");
     }
 
     @Test
-    public void defaultBuilder() {
+    void defaultBuilder() {
         var item = ItemStack.builder(Material.DIAMOND_SWORD).build();
         assertEquals(item.material(), Material.DIAMOND_SWORD, "Material must be the same");
         assertEquals(item.amount(), 1, "Default item amount must be 1");
@@ -67,14 +67,13 @@ public class ItemTest {
 
         ItemStack finalItem = item;
         assertThrows(UnsupportedOperationException.class, () -> finalItem.get(ItemComponent.LORE).add(Component.text("Hey!")), "Lore list cannot be modified directly");
-
         item = item.withAmount(5);
         assertEquals(item.amount(), 5, "Items with different amount should not be equals");
         assertEquals(item.withAmount(amount -> amount * 2).amount(), 10, "Amount must be multiplied by 2");
     }
 
     @Test
-    public void testEquality() {
+    void testEquality() {
         var item1 = ItemStack.of(Material.DIAMOND_SWORD);
         var item2 = ItemStack.of(Material.DIAMOND_SWORD);
         assertEquals(item1, item2);
@@ -86,7 +85,7 @@ public class ItemTest {
     }
 
     @Test
-    public void testFromNbt(Env env) {
+    void testFromNbt(Env env) {
         var itemNbt = createItem().toItemNBT();
         var item = ItemStack.fromItemNBT(itemNbt);
         assertEquals(createItem(), item, "Items must be equal if created from the same item nbt");
@@ -94,7 +93,7 @@ public class ItemTest {
     }
 
     @Test
-    public void testBuilderReuse() {
+    void testBuilderReuse() {
         var builder = ItemStack.builder(Material.DIAMOND);
         var item1 = builder.build();
         var item2 = builder.set(ItemComponent.CUSTOM_NAME, Component.text("Name")).build();
@@ -104,7 +103,7 @@ public class ItemTest {
     }
 
     @Test
-    public void materialUpdate() {
+    void materialUpdate() {
         var item1 = ItemStack.builder(Material.DIAMOND)
                 .amount(5).set(ItemComponent.CUSTOM_NAME, Component.text("Name"))
                 .build();
@@ -122,7 +121,7 @@ public class ItemTest {
     }
 
     @Test
-    public void amountUpdate() {
+    void amountUpdate() {
         var item1 = ItemStack.of(Material.DIAMOND, 5);
         assertEquals(5, item1.amount());
         assertEquals(6, item1.withAmount(6).amount());

@@ -22,11 +22,11 @@ import java.util.concurrent.CompletableFuture;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @EnvTest
-public class LightParityIntegrationTest {
+class LightParityIntegrationTest {
     private static final int REGION_SIZE = 3;
 
     @Test
-    public void test(Env env) throws URISyntaxException, IOException {
+    void test(Env env) throws URISyntaxException, IOException {
         Map<Vec, SectionEntry> sections = retrieveSections();
         // Generate our own light
 

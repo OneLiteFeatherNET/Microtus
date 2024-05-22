@@ -249,7 +249,7 @@ public non-sealed class PlayerInventory extends AbstractInventory implements Equ
     }
 
     @Override
-    public boolean shiftClick(@NotNull Player player, int slot) {
+    public boolean shiftClick(@NotNull Player player, int slot, int button) { // Microtus
         final int convertedSlot = convertPlayerInventorySlot(slot, OFFSET);
         final ItemStack cursor = getCursorItem();
         final ItemStack clicked = getItemStack(convertedSlot);
@@ -259,7 +259,7 @@ public non-sealed class PlayerInventory extends AbstractInventory implements Equ
         final InventoryClickResult clickResult = clickProcessor.shiftClick(
                 this, this,
                 start, end, 1,
-                player, convertedSlot, clicked, cursor);
+                player, convertedSlot, clicked, cursor, button); // Microtus
         if (clickResult.isCancel()) {
             update();
             return false;
