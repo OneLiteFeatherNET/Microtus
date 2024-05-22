@@ -113,7 +113,7 @@ final class ServerProcessImpl implements ServerProcess {
 
     public ServerProcessImpl() throws IOException {
         this.exception = new ExceptionManager();
-
+        this.extension = new ExtensionManager(this);
         // The order of initialization here is relevant, we must load the enchantment util registries before the vanilla data is loaded.
 
         this.enchantmentLevelBasedValues = LevelBasedValue.createDefaultRegistry();
@@ -132,7 +132,6 @@ final class ServerProcessImpl implements ServerProcess {
         this.enchantment = Enchantment.createDefaultRegistry(this);
         this.paintingVariant = PaintingMeta.Variant.createDefaultRegistry();
         this.jukeboxSong = JukeboxSong.createDefaultRegistry();
-        this.extension = new ExtensionManager(this);
         this.connection = new ConnectionManager();
         this.packetListener = new PacketListenerManager();
         this.packetProcessor = new PacketProcessor(packetListener);
@@ -364,7 +363,7 @@ final class ServerProcessImpl implements ServerProcess {
         LOGGER.info("Register Attributes({})", attribute.values().size());
 
         if (ServerFlag.BIOMES_ENABLED) {
-            Biomes.registerBiomes();
+            biome.loadVanillaBiomes();
         }
         LOGGER.info("Register Biomes({})", biome.unmodifiableCollection().size());
 
