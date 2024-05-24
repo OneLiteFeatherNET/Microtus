@@ -13,6 +13,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
+import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.collection.ObjectArray;
 import net.minestom.server.utils.validate.Check;
@@ -76,6 +77,16 @@ public final class Registry {
     @ApiStatus.Internal
     public static TrimPatternEntry trimPattern(String namespace, @NotNull Properties main) {
         return new TrimPatternEntry(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
+    public static VillagerProfession villagerProfession(String namespace, @NotNull Properties main) {
+        return new VillagerProfession(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
+    public static VillagerType villagerType(String namespace, @NotNull Properties main) {
+        return new VillagerType(namespace, main, null);
     }
 
     @ApiStatus.Internal
@@ -229,7 +240,10 @@ public final class Registry {
         FLUID_TAGS("tags/fluid_tags.json"),
         GAMEPLAY_TAGS("tags/gameplay_tags.json"),
         ITEM_TAGS("tags/item_tags.json"),
-        BIOMES("biomes.json");
+        BIOMES("biomes.json"),
+        VILLAGER_PROFESSION("villager_professions.json"),
+        VILLAGER_TYPES("villager_types.json"),
+        ;
 
         private final String name;
 
@@ -646,6 +660,25 @@ public final class Registry {
                     main.getBoolean("decal"),
                     custom
             );
+        }
+    }
+
+    public record VillagerProfession(NamespaceID namespace, int id, SoundEvent soundEvent, Properties custom) implements Entry {
+        public VillagerProfession(String namespace,
+                                  Properties main,
+                                  Properties custom) {
+            this(NamespaceID.from(namespace),
+                    main.getInt("id"),
+                    SoundEvent.fromNamespaceId(main.getString("workSound")),
+                    custom);
+        }
+    }
+
+    public record VillagerType(NamespaceID namespace, int id, Properties custom) implements Entry {
+        public VillagerType(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace),
+                    main.getInt("id"),
+                    custom);
         }
     }
 

@@ -43,6 +43,8 @@ public class Generators {
         generator.generate(resource("trim_materials.json"), "net.minestom.server.item.armor", "TrimMaterial", "TrimMaterialImpl", "TrimMaterials");
         generator.generate(resource("trim_patterns.json"), "net.minestom.server.item.armor", "TrimPattern", "TrimPatternImpl", "TrimPatterns");
         generator.generate(resource("banner_patterns.json"), "net.minestom.server.item.banner", "BannerPattern", "BannerPatternImpl", "BannerPatterns"); // Microtus - Banner and Shield Meta
+        generator.generate(resource("villager_professions.json"), "net.minestom.server.entity.villager", "VillagerProfession", "VillagerProfessionImpl", "VillagerProfessions");
+        generator.generate(resource("villager_types.json"), "net.minestom.server.entity.villager", "VillagerType", "VillagerTypeImpl", "VillagerTypes");
 
 
         // Generate fluids
@@ -52,16 +54,6 @@ public class Generators {
                 resource("attributes.json"),
                 outputFolder
         ).generate();
-        // TODO: Generate villager professions
-//        new VillagerProfessionGenerator(
-//                new File(inputFolder, targetVersion + "_villager_professions.json"),
-//                outputFolder
-//        ).generate();
-        // TODO: Generate villager types
-//        new VillagerTypeGenerator(
-//                new File(inputFolder, targetVersion + "_villager_types.json"),
-//                outputFolder
-//        ).generate();
         LOGGER.info("Finished generating code");
     }
 
