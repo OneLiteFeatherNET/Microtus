@@ -1,6 +1,5 @@
 package net.minestom.codegen;
 
-import net.minestom.codegen.attribute.AttributeGenerator;
 import net.minestom.codegen.biome.BiomeGenerator;
 import net.minestom.codegen.color.DyeColorGenerator;
 import net.minestom.codegen.feature.FeatureFlagGenerator;
