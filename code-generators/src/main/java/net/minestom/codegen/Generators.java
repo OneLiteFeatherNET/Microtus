@@ -43,10 +43,7 @@ public class Generators {
         generator.generate(resource("trim_materials.json"), "net.minestom.server.item.armor", "TrimMaterial", "TrimMaterialImpl", "TrimMaterials");
         generator.generate(resource("trim_patterns.json"), "net.minestom.server.item.armor", "TrimPattern", "TrimPatternImpl", "TrimPatterns");
         generator.generate(resource("banner_patterns.json"), "net.minestom.server.item.banner", "BannerPattern", "BannerPatternImpl", "BannerPatterns"); // Microtus - Banner and Shield Meta
-
-
-        // Generate fluids
-        new FluidGenerator(resource("fluids.json"), outputFolder).generate();
+        generator.generate(resource("fluids.json"), "net.minestom.server.fluid", "FluidType", "FluidTypeImpl", "FluidTypes");
 
         new AttributeGenerator(
                 resource("attributes.json"),
