@@ -1,7 +1,6 @@
 package net.minestom.codegen;
 
 import net.minestom.codegen.attribute.AttributeGenerator;
-import net.minestom.codegen.biome.BiomeGenerator;
 import net.minestom.codegen.color.DyeColorGenerator;
 import net.minestom.codegen.feature.FeatureFlagGenerator;
 import net.minestom.codegen.fluid.FluidGenerator;
@@ -28,7 +27,7 @@ public class Generators {
         new RecipeTypeGenerator(resource("recipe_types.json"), outputFolder).generate();
         new ParticleGenerator(resource("particles.json"), outputFolder).generate();
         new ConstantsGenerator(resource("constants.json"), outputFolder).generate();
-
+        //new FeatureFlagGenerator(resource("feature_flags.json"), outputFolder).generate();
         var generator = new CodeGenerator(outputFolder);
 
         // Static registries
