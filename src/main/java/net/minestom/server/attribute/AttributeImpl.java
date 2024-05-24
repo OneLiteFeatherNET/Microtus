@@ -32,12 +32,6 @@ public record AttributeImpl(Registry.AttributeEntry registry, int id) implements
         return CONTAINER.getSafe(namespace);
     }
 
-    @Nullable
-    @Override
-    public Registry.AttributeEntry registry() {
-        return this.registry;
-    }
-
     @Override
     public @NotNull NamespaceID namespace() {
         return this.registry.namespace();

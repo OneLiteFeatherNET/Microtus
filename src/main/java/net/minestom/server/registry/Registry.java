@@ -266,10 +266,6 @@ public final class Registry {
                     custom
                     );
         }
-        @Override
-        public Properties custom() {
-            return custom;
-        }
     }
 
     public static final class BlockEntry implements Entry {
