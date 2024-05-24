@@ -1,3 +1,6 @@
+import com.github.spotbugs.snom.Confidence
+import com.github.spotbugs.snom.Effort
+import com.github.spotbugs.snom.SpotBugsTask
 import java.util.*
 
 plugins {
@@ -6,6 +9,7 @@ plugins {
     id("minestom.native-conventions")
     alias(libs.plugins.blossom)
     signing
+    id("com.github.spotbugs") version "6.0.15"
 }
 
 var baseVersion by extra("1.3.2")
@@ -47,6 +51,15 @@ java {
     withSourcesJar()
 }
 
+spotbugs {
+    effort = Effort.MAX
+    reportLevel = Confidence.LOW
+    toolVersion = "4.8.5"
+    ignoreFailures = false
+    showStackTraces = true
+    showProgress = true
+}
+
 tasks {
     jar {
         manifest {
@@ -77,7 +90,13 @@ tasks {
         minHeapSize = "512m"
         maxHeapSize = "1024m"
     }
-
+    withType<SpotBugsTask> {
+        reports.create("html") {
+            required = true
+            outputLocation = file("${layout.buildDirectory.get()}/reports/spotbugs.html")
+            setStylesheet("fancy-hist.xsl")
+        }
+    }
 
 }
 
@@ -123,5 +142,7 @@ dependencies {
 
     // BStats
     api(libs.bstats.base)
+
+    spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0")
 }
 
