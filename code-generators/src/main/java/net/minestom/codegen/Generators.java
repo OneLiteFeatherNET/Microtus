@@ -1,7 +1,5 @@
 package net.minestom.codegen;
 
-import net.minestom.codegen.attribute.AttributeGenerator;
-import net.minestom.codegen.biome.BiomeGenerator;
 import net.minestom.codegen.color.DyeColorGenerator;
 import net.minestom.codegen.feature.FeatureFlagGenerator;
 import net.minestom.codegen.fluid.FluidGenerator;
@@ -24,7 +22,6 @@ public class Generators {
 
         // Generate DyeColors
         new DyeColorGenerator(resource("dye_colors.json"), outputFolder).generate();
-        new BiomeGenerator(resource("biomes.json"), outputFolder).generate();
         new FeatureFlagGenerator(resource("feature_flags.json"), outputFolder).generate();
 
 
@@ -45,15 +42,12 @@ public class Generators {
         generator.generate(resource("banner_patterns.json"), "net.minestom.server.item.banner", "BannerPattern", "BannerPatternImpl", "BannerPatterns"); // Microtus - Banner and Shield Meta
         generator.generate(resource("villager_professions.json"), "net.minestom.server.entity.villager", "VillagerProfession", "VillagerProfessionImpl", "VillagerProfessions");
         generator.generate(resource("villager_types.json"), "net.minestom.server.entity.villager", "VillagerType", "VillagerTypeImpl", "VillagerTypes");
+        generator.generate(resource("attributes.json"), "net.minestom.server.attribute", "Attribute", "AttributeImpl", "Attributes");
 
 
         // Generate fluids
         new FluidGenerator(resource("fluids.json"), outputFolder).generate();
 
-        new AttributeGenerator(
-                resource("attributes.json"),
-                outputFolder
-        ).generate();
         LOGGER.info("Finished generating code");
     }
 
