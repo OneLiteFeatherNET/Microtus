@@ -1,6 +1,5 @@
 package net.minestom.codegen;
 
-import net.minestom.codegen.attribute.AttributeGenerator;
 import net.minestom.codegen.color.DyeColorGenerator;
 import net.minestom.codegen.feature.FeatureFlagGenerator;
 import net.minestom.codegen.fluid.FluidGenerator;
@@ -55,11 +54,6 @@ public class Generators {
 
         // Generate fluids
         new FluidGenerator(resource("fluids.json"), outputFolder).generate();
-
-        new AttributeGenerator(
-                resource("attributes.json"),
-                outputFolder
-        ).generate();
         // TODO: Generate villager professions
 //        new VillagerProfessionGenerator(
 //                new File(inputFolder, targetVersion + "_villager_professions.json"),

@@ -29,6 +29,7 @@ import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.scoreboard.Team;
 import net.minestom.server.sound.SoundEvent;
+import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.block.BlockIterator;
 import net.minestom.server.utils.time.Cooldown;
 import net.minestom.server.utils.time.TimeUnit;
@@ -56,7 +57,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
     // Bounding box used for items' pickup (see LivingEntity#setBoundingBox)
     protected BoundingBox expandedBoundingBox;
 
-    private final Map<String, AttributeInstance> attributeModifiers = new ConcurrentHashMap<>();
+    private final Map<NamespaceID, AttributeInstance> attributeModifiers = new ConcurrentHashMap<>();
 
     // Abilities
     protected boolean invulnerable;
