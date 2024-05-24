@@ -79,6 +79,11 @@ public final class Registry {
     }
 
     @ApiStatus.Internal
+    public static AttributeEntry attribute(String namespace, @NotNull Properties main) {
+        return new AttributeEntry(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
     public static Map<String, Map<String, Object>> load(Resource resource) {
         Map<String, Map<String, Object>> map = new HashMap<>();
         try (InputStream resourceStream = Registry.class.getClassLoader().getResourceAsStream(resource.name)) {
@@ -212,6 +217,7 @@ public final class Registry {
     public enum Resource {
         BLOCKS("blocks.json"),
         ITEMS("items.json"),
+        ATTRIBUTES("attributes.json"),
         ENTITIES("entities.json"),
         ENCHANTMENTS("enchantments.json"),
         SOUNDS("sounds.json"),
@@ -235,6 +241,34 @@ public final class Registry {
 
         Resource(String name) {
             this.name = name;
+        }
+    }
+
+    public record AttributeEntry(
+            @NotNull NamespaceID namespace,
+            int id,
+            @NotNull String translationKey,
+            float defaultValue,
+            boolean clientSync,
+            float maxValue,
+            float minValue,
+            @Nullable Properties custom
+    ) implements Entry {
+
+        public AttributeEntry(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace),
+                    main.getInt("id"),
+                    main.getString("translationKey"),
+                    (float) main.getDouble("defaultValue"),
+                    main.getBoolean("clientSync"),
+                    (float) main.getDouble("maxValue"),
+                    (float) main.getDouble("minValue"),
+                    custom
+                    );
+        }
+        @Override
+        public Properties custom() {
+            return custom;
         }
     }
 
