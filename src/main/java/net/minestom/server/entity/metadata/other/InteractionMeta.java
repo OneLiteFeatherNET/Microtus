@@ -4,7 +4,6 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Metadata;
 import net.minestom.server.entity.metadata.EntityMeta;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class InteractionMeta extends EntityMeta {
 

@@ -5,8 +5,6 @@ import net.minestom.server.item.StackingRule;
 import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public final class VanillaStackingRule implements StackingRule {
 
     @Override
