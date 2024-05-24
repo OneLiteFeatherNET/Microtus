@@ -33,6 +33,9 @@ import java.util.stream.Collectors;
  * Use at your own risk.
  */
 public final class Registry {
+
+    private static final String TRANSLATION_KEY = "translationKey";
+
     @ApiStatus.Internal
     public static BlockEntry block(String namespace, @NotNull Properties main) {
         return new BlockEntry(namespace, main, null);
@@ -258,7 +261,7 @@ public final class Registry {
         public AttributeEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace),
                     main.getInt("id"),
-                    main.getString("translationKey"),
+                    main.getString(TRANSLATION_KEY),
                     (float) main.getDouble("defaultValue"),
                     main.getBoolean("clientSync"),
                     (float) main.getDouble("maxValue"),
@@ -517,7 +520,7 @@ public final class Registry {
             this.custom = custom;
             this.namespace = NamespaceID.from(namespace);
             this.id = main.getInt("id");
-            this.translationKey = main.getString("translationKey");
+            this.translationKey = main.getString(TRANSLATION_KEY);
             this.maxStackSize = main.getInt("maxStackSize", 64);
             this.maxDamage = main.getInt("maxDamage", 0);
             this.isFood = main.getBoolean("edible", false);
@@ -609,7 +612,7 @@ public final class Registry {
         public EntityEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace),
                     main.getInt("id"),
-                    main.getString("translationKey"),
+                    main.getString(TRANSLATION_KEY),
                     main.getDouble("width"),
                     main.getDouble("height"),
                     main.getDouble("drag", 0.02),
@@ -690,7 +693,7 @@ public final class Registry {
         public EnchantmentEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace),
                     main.getInt("id"),
-                    main.getString("translationKey"),
+                    main.getString(TRANSLATION_KEY),
                     main.getDouble("maxLevel"),
                     main.getBoolean("curse", false),
                     main.getBoolean("discoverable", true),
@@ -708,7 +711,7 @@ public final class Registry {
         public PotionEffectEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace),
                     main.getInt("id"),
-                    main.getString("translationKey"),
+                    main.getString(TRANSLATION_KEY),
                     main.getInt("color"),
                     main.getBoolean("instantaneous"),
                     custom);
