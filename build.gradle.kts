@@ -96,6 +96,11 @@ tasks {
             outputLocation = file("${layout.buildDirectory.get()}/reports/spotbugs.html")
             setStylesheet("fancy-hist.xsl")
         }
+
+        reports.create("xml") {
+            required = true
+            outputLocation = file("${layout.buildDirectory.get()}/reports/spotbugs.xml")
+        }
     }
 
 }
@@ -144,5 +149,7 @@ dependencies {
     api(libs.bstats.base)
 
     spotbugsPlugins("com.h3xstream.findsecbugs:findsecbugs-plugin:1.12.0")
+    implementation("com.google.code.findbugs:annotations:3.0.1")
+
 }
 
