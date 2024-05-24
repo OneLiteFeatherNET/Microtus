@@ -28,7 +28,7 @@ public record SoundEffectPacket(
 ) implements ServerPacket.Play {
 
     public SoundEffectPacket {
-        Check.argCondition(soundEvent == null && soundName == null, "soundEvent and soundName cannot both be null");
+        Check.argCondition(soundEvent == null || soundName == null, "soundEvent and soundName cannot both be null");
         Check.argCondition(soundEvent != null && soundName != null, "soundEvent and soundName cannot both be present");
         Check.argCondition(soundName == null && range != null, "range cannot be present if soundName is null");
     }
@@ -81,12 +81,14 @@ public record SoundEffectPacket(
 
     @Override
     public void write(@NotNull NetworkBuffer writer) {
-        if (soundEvent != null) {
+        if (soundEvent != null && soundName == null) {
             writer.write(VAR_INT, soundEvent.id() + 1);
-        } else {
+        } else if (soundName != null && soundEvent == null) {
             writer.write(VAR_INT, 0);
             writer.write(STRING, soundName);
             writer.writeOptional(FLOAT, range);
+        } else {
+            return;
         }
         writer.write(VAR_INT, AdventurePacketConvertor.getSoundSourceValue(source));
         writer.write(INT, x * 8);

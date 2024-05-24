@@ -10,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
+import java.util.Objects;
 
 /**
  * See https://wiki.vg/Entity_metadata#Mobs_2
@@ -259,5 +260,10 @@ public final class BoundingBox implements Shape {
         Vec max = aVec.max(b);
         Vec dimensions = max.sub(min);
         return new BoundingBox(dimensions.x(), dimensions.y(), dimensions.z(), min);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(width, height, depth, offset, relativeEnd);
     }
 }

@@ -11,7 +11,7 @@ import static net.minestom.server.instance.light.LightCompute.contentFullyLit;
 import static net.minestom.server.instance.light.LightCompute.emptyContent;
 import static net.minestom.server.network.NetworkBuffer.SHORT;
 
-public final class Section implements NetworkBuffer.Writer {
+public final class Section implements NetworkBuffer.Writer, Cloneable {
     private final Palette blockPalette;
     private final Palette biomePalette;
     private final Light skyLight;

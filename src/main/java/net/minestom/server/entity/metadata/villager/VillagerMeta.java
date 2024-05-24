@@ -78,7 +78,7 @@ public class VillagerMeta extends AbstractVillagerMeta {
         SWAMP,
         TAIGA;
 
-        public final static Type[] VALUES = values();
+        public static final Type[] VALUES = values();
     }
 
     public enum Profession {
@@ -99,7 +99,7 @@ public class VillagerMeta extends AbstractVillagerMeta {
         TOOLSMITH,
         WEAPONSMITH;
 
-        public final static Profession[] VALUES = values();
+        public static final Profession[] VALUES = values();
     }
 
     public enum Level {
@@ -109,7 +109,7 @@ public class VillagerMeta extends AbstractVillagerMeta {
         EXPERT,
         MASTER;
 
-        public final static Level[] VALUES = values();
+        public static final Level[] VALUES = values();
     }
 
 }

@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.Key;
 import java.security.MessageDigest;
@@ -38,7 +39,7 @@ public final class VelocityProxy {
         Check.stateCondition(MojangAuth.isEnabled(), "Velocity modern forwarding should not be enabled with MojangAuth");
 
         VelocityProxy.enabled = true;
-        VelocityProxy.key = new SecretKeySpec(secret.getBytes(), MAC_ALGORITHM);
+        VelocityProxy.key = new SecretKeySpec(secret.getBytes(StandardCharsets.UTF_8), MAC_ALGORITHM);
     }
 
     /**

@@ -68,7 +68,7 @@ public final class BiomeManager {
     public void removeBiome(@NotNull Biome biome) {
         var id = idMappings.get(biome.namespace());
         if (id != null) {
-            biomes.remove(id);
+            biomes.remove(biome);
             biomesByName.remove(biome.namespace());
             idMappings.remove(biome.namespace());
             nbtCache = null;

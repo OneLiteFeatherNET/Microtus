@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
-public record ServerDataPacket(@Nullable Component motd, byte @Nullable [] iconBase64,
+public record ServerDataPacket(@NotNull Component motd, byte @Nullable [] iconBase64,
                                boolean enforcesSecureChat) implements ServerPacket.Play {
     public ServerDataPacket(@NotNull NetworkBuffer reader) {
         this(reader.read(COMPONENT), reader.readOptional(BYTE_ARRAY),

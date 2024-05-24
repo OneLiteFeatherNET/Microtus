@@ -9,7 +9,7 @@ import static net.minestom.server.network.NetworkBuffer.VAR_INT;
 /**
  * Palette containing a single value. Useful for both empty and full palettes.
  */
-record FilledPalette(byte dim, int value) implements SpecializedPalette.Immutable {
+record FilledPalette(byte dim, int value) implements SpecializedPalette.Immutable, Cloneable {
     @Override
     public int get(int x, int y, int z) {
         return value;
