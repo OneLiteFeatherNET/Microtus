@@ -33,6 +33,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -394,7 +395,7 @@ public class ExtensionManager {
             LOGGER.info("Found indev folders for extension. Adding to list of discovered extensions.");
             final String extensionClasses = System.getProperty(INDEV_CLASSES_FOLDER);
             final String extensionResources = System.getProperty(INDEV_RESOURCES_FOLDER);
-            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(extensionResources, "extension.json")))) {
+            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(new File(extensionResources, "extension.json")), StandardCharsets.UTF_8)) {
                 DiscoveredExtension extension = GSON.fromJson(reader, DiscoveredExtension.class);
                 extension.files.add(new File(extensionClasses).toURI().toURL());
                 extension.files.add(new File(extensionResources).toURI().toURL());
@@ -427,7 +428,7 @@ public class ExtensionManager {
             if (entry == null)
                 throw new IllegalStateException("Missing extension.json in extension " + file.getName() + ".");
 
-            InputStreamReader reader = new InputStreamReader(f.getInputStream(entry));
+            InputStreamReader reader = new InputStreamReader(f.getInputStream(entry), StandardCharsets.UTF_8);
 
             // Initialize DiscoveredExtension from GSON.
             DiscoveredExtension extension = GSON.fromJson(reader, DiscoveredExtension.class);

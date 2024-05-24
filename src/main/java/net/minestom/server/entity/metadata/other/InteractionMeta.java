@@ -11,7 +11,7 @@ public class InteractionMeta extends EntityMeta {
     public static final byte OFFSET = EntityMeta.MAX_OFFSET;
     public static final byte MAX_OFFSET = OFFSET + 3;
 
-    public InteractionMeta(@Nullable Entity entity, @NotNull Metadata metadata) {
+    public InteractionMeta(@NotNull Entity entity, @NotNull Metadata metadata) {
         super(entity, metadata);
     }
 

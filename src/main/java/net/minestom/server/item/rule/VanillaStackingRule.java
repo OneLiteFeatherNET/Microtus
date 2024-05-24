@@ -5,6 +5,8 @@ import net.minestom.server.item.StackingRule;
 import net.minestom.server.utils.MathUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.Objects;
+
 public final class VanillaStackingRule implements StackingRule {
 
     @Override
@@ -36,5 +38,10 @@ public final class VanillaStackingRule implements StackingRule {
     public boolean equals(Object obj) {
         if (this == obj) return true;
         return obj != null && getClass() == obj.getClass();
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
     }
 }

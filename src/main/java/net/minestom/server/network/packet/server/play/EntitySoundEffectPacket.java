@@ -75,12 +75,14 @@ public record EntitySoundEffectPacket(
 
     @Override
     public void write(@NotNull NetworkBuffer writer) {
-        if (soundEvent != null) {
+        if (soundEvent != null && soundName == null) {
             writer.write(VAR_INT, soundEvent.id() + 1);
-        } else {
+        } else if (soundName != null && soundEvent == null){
             writer.write(VAR_INT, 0);
             writer.write(STRING, soundName);
             writer.writeOptional(FLOAT, range);
+        } else {
+            return;
         }
         writer.write(VAR_INT, AdventurePacketConvertor.getSoundSourceValue(source));
         writer.write(VAR_INT, entityId);

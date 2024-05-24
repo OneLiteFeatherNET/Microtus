@@ -184,7 +184,7 @@ final class BlockCollision {
 
         return new PhysicsResult(finalPos, new Vec(remainingX, remainingY, remainingZ),
                 collisionY, collisionX, collisionY, collisionZ,
-                Vec.ZERO, null, null, false, finalResult);
+                Vec.ZERO, new Point[3], new Shape[3], false, finalResult);
     }
 
     private static void slowPhysics(@NotNull BoundingBox boundingBox,

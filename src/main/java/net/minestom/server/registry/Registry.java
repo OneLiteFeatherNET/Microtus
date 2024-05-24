@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -83,7 +84,7 @@ public final class Registry {
         Map<String, Map<String, Object>> map = new HashMap<>();
         try (InputStream resourceStream = Registry.class.getClassLoader().getResourceAsStream(resource.name)) {
             Check.notNull(resourceStream, "Resource {0} does not exist!", resource);
-            try (JsonReader reader = new JsonReader(new InputStreamReader(resourceStream))) {
+            try (JsonReader reader = new JsonReader(new InputStreamReader(resourceStream, StandardCharsets.UTF_8))) {
                 reader.beginObject();
                 while (reader.hasNext()) map.put(reader.nextName(), (Map<String, Object>) readObject(reader));
                 reader.endObject();
@@ -189,7 +190,7 @@ public final class Registry {
         @Override
         public boolean equals(Object o) {
             if (this == o) return true;
-            if (!(o instanceof Container<?> container)) return false;
+            if (!(o instanceof DynamicContainer<?> container)) return false;
             return resource == container.resource;
         }
 

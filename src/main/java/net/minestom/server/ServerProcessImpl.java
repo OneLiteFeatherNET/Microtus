@@ -238,7 +238,7 @@ final class ServerProcessImpl implements ServerProcess {
         extension.start();
         extension.gotoPreInit();
 
-        LOGGER.info("Starting " + MinecraftServer.getBrandName() + " server.");
+        LOGGER.info("Starting {} server.", MinecraftServer.getBrandName());
 
         extension.gotoInit();
 
@@ -255,7 +255,7 @@ final class ServerProcessImpl implements ServerProcess {
 
         extension.gotoPostInit();
 
-        LOGGER.info(MinecraftServer.getBrandName() + " server started successfully.");
+        LOGGER.info("{} server started successfully.", MinecraftServer.getBrandName());
 
         if (ServerFlag.ATTRIBUTES_ENABLED) {
             Attributes.registerAttributes();
@@ -281,7 +281,7 @@ final class ServerProcessImpl implements ServerProcess {
     public void stop() {
         if (!stopped.compareAndSet(false, true))
             return;
-        LOGGER.info("Stopping " + MinecraftServer.getBrandName() + " server.");
+        LOGGER.info("Stopping {} server.", MinecraftServer.getBrandName());
         LOGGER.info("Unloading all extensions.");
         extension.shutdown();
         scheduler.shutdown();
@@ -292,7 +292,7 @@ final class ServerProcessImpl implements ServerProcess {
         MinestomTerminal.stop();
         dispatcher.shutdown();
         this.metrics.shutdown();
-        LOGGER.info(MinecraftServer.getBrandName() + " server stopped successfully.");
+        LOGGER.info("{MinecraftServer.getBrandName()} server stopped successfully.");
     }
 
     @Override
