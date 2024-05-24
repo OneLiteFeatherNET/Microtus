@@ -119,20 +119,39 @@ loadScripts(document, 'script');</script>
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@Nullable <a href="Attribute.html" title="class in net.minestom.server.attribute">Attribute</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#fromKey(java.lang.String)" class="member-name-link">fromKey</a><wbr>(@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key)</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@Nullable <a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getById(int)" class="member-name-link">getById</a><wbr>(int&nbsp;id)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Retrieves an attribute by its key.</div>
+<div class="block">Gets a attribute by its id.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#register(net.minestom.server.attribute.Attribute)" class="member-name-link">register</a><wbr>(<a href="Attribute.html" title="class in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@Nullable <a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getByName(java.lang.String)" class="member-name-link">getByName</a><wbr>(@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;namespaceID)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@Nullable <a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getByName(net.minestom.server.utils.NamespaceID)" class="member-name-link">getByName</a><wbr>(@NotNull <a href="../utils/NamespaceID.html" title="class in net.minestom.server.utils">NamespaceID</a>&nbsp;namespaceID)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>int</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getId(net.minestom.server.attribute.Attribute)" class="member-name-link">getId</a><wbr>(<a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Register this attribute.</div>
+<div class="block">Gets the id of a attribute.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a><wbr>&lt;@NotNull <a href="Attribute.html" title="class in net.minestom.server.attribute">Attribute</a>&gt;</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#values()" class="member-name-link">values</a>()</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#loadVanillaAttributes()" class="member-name-link">loadVanillaAttributes</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#register(net.minestom.server.attribute.Attribute)" class="member-name-link">register</a><wbr>(<a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Adds a new Attribute.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#removeBiome(net.minestom.server.attribute.Attribute)" class="member-name-link">removeBiome</a><wbr>(@NotNull <a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Retrieves all registered attributes.</div>
+<div class="block">Removes a attribute.</div>
+</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a><wbr>&lt;<a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&gt;</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#unmodifiableCollection()" class="member-name-link">unmodifiableCollection</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns an immutable copy of the attribute already registered.</div>
 </div>
 </div>
 </div>
@@ -168,43 +187,84 @@ loadScripts(document, 'script');</script>
 <li>
 <section class="detail" id="register(net.minestom.server.attribute.Attribute)">
 <h3>register</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">register</span><wbr><span class="parameters">(<a href="Attribute.html" title="class in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</span></div>
-<div class="block">Register this attribute.</div>
-<dl class="notes">
-<dt>See Also:</dt>
-<dd>
-<ul class="tag-list">
-<li><a href="#fromKey(java.lang.String)"><code>fromKey(String)</code></a></li>
-<li><a href="#values()"><code>values()</code></a></li>
-</ul>
-</dd>
-</dl>
-</section>
-</li>
-<li>
-<section class="detail" id="fromKey(java.lang.String)">
-<h3>fromKey</h3>
-<div class="member-signature"><span class="annotations">@Nullable
-</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@Nullable <a href="Attribute.html" title="class in net.minestom.server.attribute">Attribute</a></span>&nbsp;<span class="element-name">fromKey</span><wbr><span class="parameters">(@NotNull
- @NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;key)</span></div>
-<div class="block">Retrieves an attribute by its key.</div>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">register</span><wbr><span class="parameters">(<a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</span></div>
+<div class="block">Adds a new Attribute. This does NOT send the new list to players.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
-<dd><code>key</code> - the key of the attribute</dd>
-<dt>Returns:</dt>
-<dd>the attribute for the key or null if not any</dd>
+<dd><code>attribute</code> - the attribute to add</dd>
 </dl>
 </section>
 </li>
 <li>
-<section class="detail" id="values()">
-<h3>values</h3>
-<div class="member-signature"><span class="annotations">@NotNull
-</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;@NotNull <a href="Attribute.html" title="class in net.minestom.server.attribute">Attribute</a>&gt;</span>&nbsp;<span class="element-name">values</span>()</div>
-<div class="block">Retrieves all registered attributes.</div>
+<section class="detail" id="loadVanillaAttributes()">
+<h3>loadVanillaAttributes</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">loadVanillaAttributes</span>()</div>
+</section>
+</li>
+<li>
+<section class="detail" id="removeBiome(net.minestom.server.attribute.Attribute)">
+<h3>removeBiome</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">removeBiome</span><wbr><span class="parameters">(@NotNull
+ @NotNull <a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</span></div>
+<div class="block">Removes a attribute. This does NOT send the new list to players.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attribute</code> - the attribute to remove</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="unmodifiableCollection()">
+<h3>unmodifiableCollection</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&gt;</span>&nbsp;<span class="element-name">unmodifiableCollection</span>()</div>
+<div class="block">Returns an immutable copy of the attribute already registered.</div>
 <dl class="notes">
 <dt>Returns:</dt>
-<dd>an array containing all registered attributes</dd>
+<dd>an immutable copy of the attributes already registered</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getById(int)">
+<h3>getById</h3>
+<div class="member-signature"><span class="annotations">@Nullable
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@Nullable <a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a></span>&nbsp;<span class="element-name">getById</span><wbr><span class="parameters">(int&nbsp;id)</span></div>
+<div class="block">Gets a attribute by its id.</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>id</code> - the id of the attribute</dd>
+<dt>Returns:</dt>
+<dd>the <a href="Attribute.html" title="interface in net.minestom.server.attribute"><code>Attribute</code></a> linked to this id</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getByName(net.minestom.server.utils.NamespaceID)">
+<h3>getByName</h3>
+<div class="member-signature"><span class="annotations">@Nullable
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@Nullable <a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a></span>&nbsp;<span class="element-name">getByName</span><wbr><span class="parameters">(@NotNull
+ @NotNull <a href="../utils/NamespaceID.html" title="class in net.minestom.server.utils">NamespaceID</a>&nbsp;namespaceID)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="getByName(java.lang.String)">
+<h3>getByName</h3>
+<div class="member-signature"><span class="annotations">@Nullable
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@Nullable <a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a></span>&nbsp;<span class="element-name">getByName</span><wbr><span class="parameters">(@NotNull
+ @NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;namespaceID)</span></div>
+</section>
+</li>
+<li>
+<section class="detail" id="getId(net.minestom.server.attribute.Attribute)">
+<h3>getId</h3>
+<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">int</span>&nbsp;<span class="element-name">getId</span><wbr><span class="parameters">(<a href="Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</span></div>
+<div class="block">Gets the id of a attribute.
+`</div>
+<dl class="notes">
+<dt>Parameters:</dt>
+<dd><code>attribute</code> - </dd>
+<dt>Returns:</dt>
+<dd>the id of the attribute, or -1 if the attribute is not registered</dd>
 </dl>
 </section>
 </li>

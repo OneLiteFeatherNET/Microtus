@@ -197,12 +197,12 @@ implements <a href="../inventory/EquipmentHandler.html" title="interface in net.
 <div class="block">Gets the amount of arrows in the entity.</div>
 </div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="../attribute/AttributeInstance.html" title="class in net.minestom.server.attribute">AttributeInstance</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAttribute(net.minestom.server.attribute.Attribute)" class="member-name-link">getAttribute</a><wbr>(@NotNull <a href="../attribute/Attribute.html" title="class in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAttribute(net.minestom.server.attribute.Attribute)" class="member-name-link">getAttribute</a><wbr>(@NotNull <a href="../attribute/Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Retrieves the attribute instance and its modifiers.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAttributeValue(net.minestom.server.attribute.Attribute)" class="member-name-link">getAttributeValue</a><wbr>(@NotNull <a href="../attribute/Attribute.html" title="class in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getAttributeValue(net.minestom.server.attribute.Attribute)" class="member-name-link">getAttributeValue</a><wbr>(@NotNull <a href="../attribute/Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Retrieves the attribute value.</div>
 </div>
@@ -259,7 +259,7 @@ implements <a href="../inventory/EquipmentHandler.html" title="interface in net.
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>float</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getMaxHealth()" class="member-name-link">getMaxHealth</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
-<div class="block">Gets the entity max health from <a href="#getAttributeValue(net.minestom.server.attribute.Attribute)"><code>getAttributeValue(Attribute)</code></a> <a href="../attribute/Attributes.html#GENERIC_MAX_HEALTH"><code>Attributes.GENERIC_MAX_HEALTH</code></a>.</div>
+<div class="block">Gets the entity max health from <a href="#getAttributeValue(net.minestom.server.attribute.Attribute)"><code>getAttributeValue(Attribute)</code></a> <code>Attributes.GENERIC_MAX_HEALTH</code>.</div>
 </div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>protected @NotNull <a href="../network/packet/server/play/EntityPropertiesPacket.html" title="class in net.minestom.server.network.packet.server.play">EntityPropertiesPacket</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getPropertiesPacket()" class="member-name-link">getPropertiesPacket</a>()</code></div>
@@ -911,7 +911,7 @@ implements <a href="../inventory/EquipmentHandler.html" title="interface in net.
 <section class="detail" id="getMaxHealth()">
 <h3>getMaxHealth</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">float</span>&nbsp;<span class="element-name">getMaxHealth</span>()</div>
-<div class="block">Gets the entity max health from <a href="#getAttributeValue(net.minestom.server.attribute.Attribute)"><code>getAttributeValue(Attribute)</code></a> <a href="../attribute/Attributes.html#GENERIC_MAX_HEALTH"><code>Attributes.GENERIC_MAX_HEALTH</code></a>.</div>
+<div class="block">Gets the entity max health from <a href="#getAttributeValue(net.minestom.server.attribute.Attribute)"><code>getAttributeValue(Attribute)</code></a> <code>Attributes.GENERIC_MAX_HEALTH</code>.</div>
 <dl class="notes">
 <dt>Returns:</dt>
 <dd>the entity max health</dd>
@@ -924,7 +924,7 @@ implements <a href="../inventory/EquipmentHandler.html" title="interface in net.
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">void</span>&nbsp;<span class="element-name">heal</span>()</div>
 <div class="block">Sets the heal of the entity as its max health.
  <p>
- Retrieved from <a href="#getAttributeValue(net.minestom.server.attribute.Attribute)"><code>getAttributeValue(Attribute)</code></a> with the attribute <a href="../attribute/Attributes.html#GENERIC_MAX_HEALTH"><code>Attributes.GENERIC_MAX_HEALTH</code></a>.</div>
+ Retrieved from <a href="#getAttributeValue(net.minestom.server.attribute.Attribute)"><code>getAttributeValue(Attribute)</code></a> with the attribute <code>Attributes.GENERIC_MAX_HEALTH</code>.</div>
 </section>
 </li>
 <li>
@@ -932,7 +932,7 @@ implements <a href="../inventory/EquipmentHandler.html" title="interface in net.
 <h3>getAttribute</h3>
 <div class="member-signature"><span class="annotations">@NotNull
 </span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull <a href="../attribute/AttributeInstance.html" title="class in net.minestom.server.attribute">AttributeInstance</a></span>&nbsp;<span class="element-name">getAttribute</span><wbr><span class="parameters">(@NotNull
- @NotNull <a href="../attribute/Attribute.html" title="class in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</span></div>
+ @NotNull <a href="../attribute/Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</span></div>
 <div class="block">Retrieves the attribute instance and its modifiers.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -958,7 +958,7 @@ implements <a href="../inventory/EquipmentHandler.html" title="interface in net.
 <section class="detail" id="getAttributeValue(net.minestom.server.attribute.Attribute)">
 <h3>getAttributeValue</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type">float</span>&nbsp;<span class="element-name">getAttributeValue</span><wbr><span class="parameters">(@NotNull
- @NotNull <a href="../attribute/Attribute.html" title="class in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</span></div>
+ @NotNull <a href="../attribute/Attribute.html" title="interface in net.minestom.server.attribute">Attribute</a>&nbsp;attribute)</span></div>
 <div class="block">Retrieves the attribute value.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
