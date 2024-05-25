@@ -1,10 +1,7 @@
 package net.minestom.codegen;
 
-import net.minestom.codegen.attribute.AttributeGenerator;
-import net.minestom.codegen.biome.BiomeGenerator;
 import net.minestom.codegen.color.DyeColorGenerator;
 import net.minestom.codegen.feature.FeatureFlagGenerator;
-import net.minestom.codegen.fluid.FluidGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +21,6 @@ public class Generators {
 
         // Generate DyeColors
         new DyeColorGenerator(resource("dye_colors.json"), outputFolder).generate();
-        new BiomeGenerator(resource("biomes.json"), outputFolder).generate();
         new FeatureFlagGenerator(resource("feature_flags.json"), outputFolder).generate();
 
 
@@ -43,22 +39,11 @@ public class Generators {
         generator.generate(resource("trim_materials.json"), "net.minestom.server.item.armor", "TrimMaterial", "TrimMaterialImpl", "TrimMaterials");
         generator.generate(resource("trim_patterns.json"), "net.minestom.server.item.armor", "TrimPattern", "TrimPatternImpl", "TrimPatterns");
         generator.generate(resource("banner_patterns.json"), "net.minestom.server.item.banner", "BannerPattern", "BannerPatternImpl", "BannerPatterns"); // Microtus - Banner and Shield Meta
+        generator.generate(resource("villager_professions.json"), "net.minestom.server.entity.villager", "VillagerProfession", "VillagerProfessionImpl", "VillagerProfessions");
+        generator.generate(resource("villager_types.json"), "net.minestom.server.entity.villager", "VillagerType", "VillagerTypeImpl", "VillagerTypes");
+        generator.generate(resource("attributes.json"), "net.minestom.server.attribute", "Attribute", "AttributeImpl", "Attributes");
         generator.generate(resource("fluids.json"), "net.minestom.server.fluid", "FluidType", "FluidTypeImpl", "FluidTypes");
 
-        new AttributeGenerator(
-                resource("attributes.json"),
-                outputFolder
-        ).generate();
-        // TODO: Generate villager professions
-//        new VillagerProfessionGenerator(
-//                new File(inputFolder, targetVersion + "_villager_professions.json"),
-//                outputFolder
-//        ).generate();
-        // TODO: Generate villager types
-//        new VillagerTypeGenerator(
-//                new File(inputFolder, targetVersion + "_villager_types.json"),
-//                outputFolder
-//        ).generate();
         LOGGER.info("Finished generating code");
     }
 

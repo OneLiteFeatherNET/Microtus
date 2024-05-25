@@ -13,6 +13,7 @@ import net.minestom.server.entity.EntityType;
 import net.minestom.server.entity.EquipmentSlot;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
+import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.collection.ObjectArray;
 import net.minestom.server.utils.validate.Check;
@@ -33,6 +34,9 @@ import java.util.stream.Collectors;
  * Use at your own risk.
  */
 public final class Registry {
+
+    private static final String TRANSLATION_KEY = "translationKey";
+
     @ApiStatus.Internal
     public static BlockEntry block(String namespace, @NotNull Properties main) {
         return new BlockEntry(namespace, main, null);
@@ -76,6 +80,21 @@ public final class Registry {
     @ApiStatus.Internal
     public static TrimPatternEntry trimPattern(String namespace, @NotNull Properties main) {
         return new TrimPatternEntry(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
+    public static AttributeEntry attribute(String namespace, @NotNull Properties main) {
+        return new AttributeEntry(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
+    public static VillagerProfession villagerProfession(String namespace, @NotNull Properties main) {
+        return new VillagerProfession(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
+    public static VillagerType villagerType(String namespace, @NotNull Properties main) {
+        return new VillagerType(namespace, main, null);
     }
 
     @ApiStatus.Internal
@@ -212,6 +231,7 @@ public final class Registry {
     public enum Resource {
         BLOCKS("blocks.json"),
         ITEMS("items.json"),
+        ATTRIBUTES("attributes.json"),
         ENTITIES("entities.json"),
         ENCHANTMENTS("enchantments.json"),
         SOUNDS("sounds.json"),
@@ -229,12 +249,39 @@ public final class Registry {
         FLUID_TAGS("tags/fluid_tags.json"),
         GAMEPLAY_TAGS("tags/gameplay_tags.json"),
         ITEM_TAGS("tags/item_tags.json"),
-        BIOMES("biomes.json");
+        BIOMES("biomes.json"),
+        VILLAGER_PROFESSION("villager_professions.json"),
+        VILLAGER_TYPES("villager_types.json"),
+        ;
 
         private final String name;
 
         Resource(String name) {
             this.name = name;
+        }
+    }
+
+    public record AttributeEntry(
+            @NotNull NamespaceID namespace,
+            int id,
+            @NotNull String translationKey,
+            float defaultValue,
+            boolean clientSync,
+            float maxValue,
+            float minValue,
+            @Nullable Properties custom
+    ) implements Entry {
+
+        public AttributeEntry(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace),
+                    main.getInt("id"),
+                    main.getString(TRANSLATION_KEY),
+                    (float) main.getDouble("defaultValue"),
+                    main.getBoolean("clientSync"),
+                    (float) main.getDouble("maxValue"),
+                    (float) main.getDouble("minValue"),
+                    custom
+                    );
         }
     }
 
@@ -487,7 +534,7 @@ public final class Registry {
             this.custom = custom;
             this.namespace = NamespaceID.from(namespace);
             this.id = main.getInt("id");
-            this.translationKey = main.getString("translationKey");
+            this.translationKey = main.getString(TRANSLATION_KEY);
             this.maxStackSize = main.getInt("maxStackSize", 64);
             this.maxDamage = main.getInt("maxDamage", 0);
             this.isFood = main.getBoolean("edible", false);
@@ -579,7 +626,7 @@ public final class Registry {
         public EntityEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace),
                     main.getInt("id"),
-                    main.getString("translationKey"),
+                    main.getString(TRANSLATION_KEY),
                     main.getDouble("width"),
                     main.getDouble("height"),
                     main.getDouble("drag", 0.02),
@@ -649,6 +696,25 @@ public final class Registry {
         }
     }
 
+    public record VillagerProfession(NamespaceID namespace, int id, SoundEvent soundEvent, Properties custom) implements Entry {
+        public VillagerProfession(String namespace,
+                                  Properties main,
+                                  Properties custom) {
+            this(NamespaceID.from(namespace),
+                    main.getInt("id"),
+                    SoundEvent.fromNamespaceId(main.getString("workSound")),
+                    custom);
+        }
+    }
+
+    public record VillagerType(NamespaceID namespace, int id, Properties custom) implements Entry {
+        public VillagerType(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace),
+                    main.getInt("id"),
+                    custom);
+        }
+    }
+
     public record EnchantmentEntry(NamespaceID namespace, int id,
                                    String translationKey,
                                    double maxLevel,
@@ -660,7 +726,7 @@ public final class Registry {
         public EnchantmentEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace),
                     main.getInt("id"),
-                    main.getString("translationKey"),
+                    main.getString(TRANSLATION_KEY),
                     main.getDouble("maxLevel"),
                     main.getBoolean("curse", false),
                     main.getBoolean("discoverable", true),
@@ -678,7 +744,7 @@ public final class Registry {
         public PotionEffectEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace),
                     main.getInt("id"),
-                    main.getString("translationKey"),
+                    main.getString(TRANSLATION_KEY),
                     main.getInt("color"),
                     main.getBoolean("instantaneous"),
                     custom);
