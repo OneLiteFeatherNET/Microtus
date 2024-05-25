@@ -42,7 +42,7 @@ public class Generators {
         generator.generate(resource("villager_professions.json"), "net.minestom.server.entity.villager", "VillagerProfession", "VillagerProfessionImpl", "VillagerProfessions");
         generator.generate(resource("villager_types.json"), "net.minestom.server.entity.villager", "VillagerType", "VillagerTypeImpl", "VillagerTypes");
         generator.generate(resource("attributes.json"), "net.minestom.server.attribute", "Attribute", "AttributeImpl", "Attributes");
-        generator.generate(resource("fluids.json"), "net.minestom.server.fluid", "FluidType", "FluidTypeImpl", "FluidTypes");
+        generator.generate(resource("fluids.json"), "net.minestom.server.fluid", "Fluid", "FluidImpl", "Fluids");
 
         LOGGER.info("Finished generating code");
     }
