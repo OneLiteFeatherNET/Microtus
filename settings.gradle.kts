@@ -8,33 +8,33 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             // Important dependencies
-            version("adventure", "4.15.0")
-            version("kotlin", "1.9.22")
+            version("adventure", "4.17.0")
+            version("kotlin", "1.9.23")
             version("hydrazine", "1.7.2")
             version("dependencyGetter", "v1.0.1")
             version("data", "1.20.4-rv9")
             version("hephaistos", "2.6.1")
             version("jetbrainsAnnotations", "24.1.0")
-            version("logback", "1.4.5")
-            version("slf4j", "2.0.7")
-            version("maven-resolver", "1.9.18")
+            version("logback", "1.5.6")
+            version("slf4j", "2.0.13")
+            version("maven-resolver", "1.9.20")
             version("maven-resolver-provider", "3.9.6")
 
             // Terminal / Logging
-            version("tinylog", "2.6.2")
+            version("tinylog", "2.7.0")
             version("jline", "3.25.1")
 
             // Performance / Data Structures
             version("caffeine", "3.1.8")
-            version("fastutil", "8.5.12")
+            version("fastutil", "8.5.13")
             version("flare", "2.0.1")
-            version("gson", "2.10.1")
+            version("gson", "2.11.0")
             version("jcTools", "4.0.2")
 
             // Test
-            version("junit-jupiter", "5.10.1")
+            version("junit-jupiter", "5.10.2")
             version("junit-platform", "1.10.1")
-            version("mockito", "5.9.0")
+            version("mockito", "5.12.0")
 
             // Code Generation
             version("javaPoet", "1.13.0")
