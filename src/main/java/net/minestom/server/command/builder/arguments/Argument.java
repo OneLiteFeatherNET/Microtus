@@ -1,5 +1,9 @@
 package net.minestom.server.command.builder.arguments;
 
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minestom.server.MinecraftServer;
 import net.minestom.server.command.CommandSender;
 import net.minestom.server.command.builder.ArgumentCallback;
 import net.minestom.server.command.builder.Command;
@@ -28,7 +32,7 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of this parsed argument
  */
-public abstract class Argument<T> {
+public abstract class Argument<T> implements ArgumentType<T> {
     @ApiStatus.Internal
     public static final Registry.Container<ArgumentImpl> CONTAINER = Registry.createStaticContainer(Registry.Resource.COMMAND_ARGUMENTS, Argument::createImpl);
 
@@ -95,6 +99,7 @@ public abstract class Argument<T> {
      * @throws ArgumentSyntaxException if the argument cannot be parsed due to a fault input (argument id)
      */
     @ApiStatus.Experimental
+    @Deprecated
     public static <T> @NotNull T parse(@NotNull CommandSender sender, @NotNull Argument<T> argument) throws ArgumentSyntaxException {
         return argument.parse(sender, argument.getId());
     }
@@ -107,7 +112,13 @@ public abstract class Argument<T> {
      * @return the parsed argument
      * @throws ArgumentSyntaxException if {@code value} is not valid
      */
+    @Deprecated(since = "1.4.0", forRemoval = true)
     public abstract @NotNull T parse(@NotNull CommandSender sender, @NotNull String input) throws ArgumentSyntaxException;
+
+    @Override
+    public T parse(final StringReader reader) throws CommandSyntaxException {
+        return parse(MinecraftServer.getCommandManager().getConsoleSender(), reader.readString());
+    }
 
     public abstract String parser();
 
