@@ -123,5 +123,7 @@ dependencies {
 
     // BStats
     api(libs.bstats.base)
+
+    compileOnly(libs.brigadier)
 }
 

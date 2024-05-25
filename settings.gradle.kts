@@ -3,6 +3,7 @@ dependencyResolutionManagement {
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
         maven("https://s01.oss.sonatype.org/content/groups/public/")
         maven("https://jitpack.io")
+        maven("https://repo.papermc.io/repository/maven-public/")
         mavenCentral()
     }
     versionCatalogs {
@@ -19,6 +20,7 @@ dependencyResolutionManagement {
             version("slf4j", "2.0.7")
             version("maven-resolver", "1.9.18")
             version("maven-resolver-provider", "3.9.6")
+            version("brigadier", "1.0.0-SNAPSHOT")
 
             // Terminal / Logging
             version("tinylog", "2.6.2")
@@ -76,6 +78,7 @@ dependencyResolutionManagement {
             library("dependencyGetter", "com.github.Minestom", "DependencyGetter").versionRef("dependencyGetter")
             library("minestomData", "net.onelitefeather.microtus", "data").versionRef("data")
             library("jetbrainsAnnotations", "org.jetbrains", "annotations").versionRef("jetbrainsAnnotations");
+            library("brigadier", "com.velocitypowered", "velocity-brigadier").versionRef("brigadier")
 
             // Logging
             library("tinylog-api", "org.tinylog", "tinylog-api").versionRef("tinylog")
