@@ -3,12 +3,12 @@ package net.minestom.codegen.fluid;
 import com.google.gson.JsonObject;
 import com.squareup.javapoet.*;
 import net.minestom.codegen.MinestomCodeGenerator;
+import net.minestom.codegen.util.GenerationHelper;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import net.minestom.codegen.util.GenerationHelper;
 
 import javax.lang.model.element.Modifier;
 import java.io.File;
