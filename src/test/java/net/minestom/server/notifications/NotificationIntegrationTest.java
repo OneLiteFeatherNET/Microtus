@@ -25,9 +25,9 @@ class NotificationIntegrationTest {
                 .title(Component.text("unit test"))
                 .frameType(FrameType.TASK)
                 .build();
-        assertEquals(notification.type(), FrameType.TASK);
-        assertEquals(notification.icon(), ItemStack.of(Material.ITEM_FRAME));
-        assertEquals(notification.title(), Component.text("unit test"));
+        assertEquals(FrameType.TASK, notification.type());
+        assertEquals(ItemStack.of(Material.ITEM_FRAME), notification.icon());
+        assertEquals(Component.text("unit test"), notification.title());
     }
 
     @Test
@@ -50,9 +50,9 @@ class NotificationIntegrationTest {
             AdvancementsPacket.Advancement advancement = advancementMapping1.value();
             assertFalse(advancement.sendTelemetryData());
             var displayData = advancement.displayData();
-            assertEquals(displayData.icon(), ItemStack.of(Material.ITEM_FRAME));
-            assertEquals(displayData.title(), Component.text("unit test"));
-            assertEquals(displayData.frameType(), FrameType.TASK);
+            assertEquals(ItemStack.of(Material.ITEM_FRAME), displayData.icon());
+            assertEquals(Component.text("unit test"), displayData.title());
+            assertEquals(FrameType.TASK, displayData.frameType());
         });
     }
 }

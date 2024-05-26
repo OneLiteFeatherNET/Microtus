@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
+ * @since 1.0.0
  * Used to send one or multiples {@link Notification}.
  * <p>
  * Works by sending a completed advancement and remove it immediately.

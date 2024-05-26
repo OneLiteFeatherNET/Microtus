@@ -26,6 +26,7 @@ import java.util.List;
  *
  * The constant {@link #IDENTIFIER} is used for the advancement packet
  * The constant {@link #REMOVE_PACKET} is used to remove previous notifications
+ * @since 1.4.1
  */
 public sealed interface Notification permits NotificationImpl {
 
@@ -72,6 +73,9 @@ public sealed interface Notification permits NotificationImpl {
      */
     @NotNull ItemStack icon();
 
+    /**
+     * @since 1.4.1
+     */
     sealed interface Builder permits NotificationBuilder {
         /**
          * Set the title for a notification as component.
