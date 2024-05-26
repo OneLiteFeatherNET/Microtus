@@ -52,6 +52,7 @@ public class CodeGenerator implements CodeExporter {
         Map<String, String> replacementOptions = new HashMap<>();
         replacementOptions.put("minecraft:", "");
         replacementOptions.put(".", "_");
+        replacementOptions.put("/", "_");
         // Use data
         json.keySet().forEach(namespace -> {
             final String constantName = extractNamespaces(namespace, replacementOptions);
