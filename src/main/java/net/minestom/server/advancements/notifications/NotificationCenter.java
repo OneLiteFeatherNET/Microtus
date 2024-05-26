@@ -14,7 +14,10 @@ import java.util.List;
  * Works by sending a completed advancement and remove it immediately.
  * <p>
  * You can simply create a {@link Notification} object and call {@link #send(Notification, Player)}.
+ * @deprecated As of Minestom 22a8ccabfae38c53df0605000aa7eed49765c1ab, because the Maintainability is very hard and
+ *      can break everytime from Mojang side because bad api design use {@link net.minestom.server.notifications.Notification#builder()} instead.
  */
+@Deprecated(since = "1.4.1", forRemoval = true)
 public final class NotificationCenter {
     private static final String IDENTIFIER = "minestom:notification";
     private static final AdvancementsPacket REMOVE_PACKET = new AdvancementsPacket(false, List.of(), List.of(IDENTIFIER), List.of());
