@@ -96,7 +96,7 @@ loadScripts(document, 'script');</script>
 <dd><code><a href="../../../NetworkBuffer.Writer.html" title="interface in net.minestom.server.network">NetworkBuffer.Writer</a></code>, <code><a href="../SendablePacket.html" title="interface in net.minestom.server.network.packet.server">SendablePacket</a></code>, <code><a href="../ServerPacket.html" title="interface in net.minestom.server.network.packet.server">ServerPacket</a></code>, <code><a href="../ServerPacket.Configuration.html" title="interface in net.minestom.server.network.packet.server">ServerPacket.Configuration</a></code></dd>
 </dl>
 <hr>
-<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">UpdateEnabledFeaturesPacket</span>(@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="../../../../utils/NamespaceID.html" title="class in net.minestom.server.utils">NamespaceID</a>&gt;&nbsp;features)
+<div class="type-signature"><span class="modifiers">public record </span><span class="element-name type-name-label">UpdateEnabledFeaturesPacket</span>(@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="../../../../featureflag/FeatureFlag.html" title="interface in net.minestom.server.featureflag">FeatureFlag</a>&gt;&nbsp;features)
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Record.html" title="class or interface in java.lang" class="external-link">Record</a>
 implements <a href="../ServerPacket.Configuration.html" title="interface in net.minestom.server.network.packet.server">ServerPacket.Configuration</a></span></div>
 </section>
@@ -134,7 +134,7 @@ implements <a href="../ServerPacket.Configuration.html" title="interface in net.
 <div class="summary-table two-column-summary">
 <div class="table-header col-first">Constructor</div>
 <div class="table-header col-last">Description</div>
-<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.Set)" class="member-name-link">UpdateEnabledFeaturesPacket</a><wbr>(@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="../../../../utils/NamespaceID.html" title="class in net.minestom.server.utils">NamespaceID</a>&gt;&nbsp;features)</code></div>
+<div class="col-constructor-name even-row-color"><code><a href="#%3Cinit%3E(java.util.Set)" class="member-name-link">UpdateEnabledFeaturesPacket</a><wbr>(@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="../../../../featureflag/FeatureFlag.html" title="interface in net.minestom.server.featureflag">FeatureFlag</a>&gt;&nbsp;features)</code></div>
 <div class="col-last even-row-color">
 <div class="block">Creates an instance of a <code>UpdateEnabledFeaturesPacket</code> record class.</div>
 </div>
@@ -162,7 +162,7 @@ implements <a href="../ServerPacket.Configuration.html" title="interface in net.
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Indicates whether some other object is "equal to" this one.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a><wbr>&lt;<a href="../../../../utils/NamespaceID.html" title="class in net.minestom.server.utils">NamespaceID</a>&gt;</code></div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a><wbr>&lt;<a href="../../../../featureflag/FeatureFlag.html" title="interface in net.minestom.server.featureflag">FeatureFlag</a>&gt;</code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#features()" class="member-name-link">features</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
 <div class="block">Returns the value of the <code>features</code> record component.</div>
@@ -233,7 +233,7 @@ implements <a href="../ServerPacket.Configuration.html" title="interface in net.
 <section class="detail" id="&lt;init&gt;(java.util.Set)">
 <h3>UpdateEnabledFeaturesPacket</h3>
 <div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="element-name">UpdateEnabledFeaturesPacket</span><wbr><span class="parameters">(@NotNull
- @NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="../../../../utils/NamespaceID.html" title="class in net.minestom.server.utils">NamespaceID</a>&gt;&nbsp;features)</span></div>
+ @NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="../../../../featureflag/FeatureFlag.html" title="interface in net.minestom.server.featureflag">FeatureFlag</a>&gt;&nbsp;features)</span></div>
 <div class="block">Creates an instance of a <code>UpdateEnabledFeaturesPacket</code> record class.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -315,7 +315,7 @@ implements <a href="../ServerPacket.Configuration.html" title="interface in net.
 <section class="detail" id="features()">
 <h3>features</h3>
 <div class="member-signature"><span class="annotations">@NotNull
-</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="../../../../utils/NamespaceID.html" title="class in net.minestom.server.utils">NamespaceID</a>&gt;</span>&nbsp;<span class="element-name">features</span>()</div>
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Set.html" title="class or interface in java.util" class="external-link">Set</a>&lt;<a href="../../../../featureflag/FeatureFlag.html" title="interface in net.minestom.server.featureflag">FeatureFlag</a>&gt;</span>&nbsp;<span class="element-name">features</span>()</div>
 <div class="block">Returns the value of the <code>features</code> record component.</div>
 <dl class="notes">
 <dt>Returns:</dt>

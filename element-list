@@ -69,7 +69,7 @@ net.minestom.server.extras.query
 net.minestom.server.extras.query.event
 net.minestom.server.extras.query.response
 net.minestom.server.extras.velocity
-net.minestom.server.feature
+net.minestom.server.featureflag
 net.minestom.server.fluid
 net.minestom.server.gamedata.tags
 net.minestom.server.instance
