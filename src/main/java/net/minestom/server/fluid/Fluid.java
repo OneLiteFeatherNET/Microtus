@@ -9,7 +9,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
-public sealed interface Fluid extends StaticProtocolObject permits FluidImpl {
+public sealed interface Fluid extends StaticProtocolObject, Fluids permits FluidImpl {
     /**
      * Returns the entity registry.
      *
