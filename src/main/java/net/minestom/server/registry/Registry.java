@@ -262,7 +262,6 @@ public final class Registry {
         BIOMES("biomes.json"),
         VILLAGER_PROFESSION("villager_professions.json"),
         VILLAGER_TYPES("villager_types.json"),
-        FEATURE_FLAGS("feature_flags.json"),
         FLUIDS("fluids.json"),
         FEATURE_FLAGS("feature_flags.json"),
         ;
@@ -295,16 +294,6 @@ public final class Registry {
                     NamespaceID.from(main.getString("bucketId")),
                     custom
             );
-        }
-    }
-
-    public record FeatureFlagEntry(
-            @NotNull NamespaceID namespace,
-            @Nullable Properties custom
-    ) implements Entry {
-
-        public FeatureFlagEntry(String namespace, Properties main, Properties custom) {
-            this(NamespaceID.from(namespace), custom);
         }
     }
 
