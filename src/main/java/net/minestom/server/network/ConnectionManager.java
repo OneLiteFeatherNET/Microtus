@@ -13,6 +13,7 @@ import net.minestom.server.instance.Instance;
 import net.minestom.server.listener.preplay.LoginListener;
 import net.minestom.server.message.Messenger;
 import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
+import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.common.KeepAlivePacket;
 import net.minestom.server.network.packet.server.common.PluginMessagePacket;
 import net.minestom.server.network.packet.server.common.TagsPacket;
@@ -59,6 +60,7 @@ public final class ConnectionManager {
     private final Set<Player> configurationPlayers = new CopyOnWriteArraySet<>();
     // Players in play state
     private final Set<Player> playPlayers = new CopyOnWriteArraySet<>();
+    public static final CachedPacket DEFAULT_TAGS = new CachedPacket(new TagsPacket(TagsPacket.createDefaultTags()));
 
     // The players who need keep alive ticks. This was added because we may not send a keep alive in
     // the time after sending finish configuration but before receiving configuration end (to swap to play).
@@ -293,7 +295,7 @@ public final class ConnectionManager {
                 registry.put("minecraft:trim_pattern", MinecraftServer.getTrimManager().getTrimPatternNBT());
                 player.sendPacket(new RegistryDataPacket(NBT.Compound(registry)));
 
-                player.sendPacket(TagsPacket.DEFAULT_TAGS);
+                player.sendPacket(DEFAULT_TAGS);
             }
             player.sendPacket(new UpdateEnabledFeaturesPacket(event.getEnabledFeatures()));
 
