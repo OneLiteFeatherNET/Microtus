@@ -10,20 +10,34 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * {@inheritDoc}
+ */
 record NotificationImpl(@NotNull Component title, @NotNull FrameType type,
                         @NotNull ItemStack icon) implements Notification {
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void send(@NotNull Player player) {
         player.sendPacket(createPacket());
         player.sendPacket(REMOVE_PACKET);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void send(@NotNull Collection<@NotNull Player> players) {
         players.forEach(this::send);
     }
 
-    AdvancementsPacket createPacket() {
+    /**
+     * Create the advancement packet that simulates the notification.
+     * It's not private because integration tests
+     * @return the packet
+     */
+    @NotNull AdvancementsPacket createPacket() {
         final var displayData = new AdvancementsPacket.DisplayData(
                 title(), Component.empty(),
                 icon(), type(),

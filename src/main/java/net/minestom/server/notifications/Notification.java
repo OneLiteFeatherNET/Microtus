@@ -23,6 +23,9 @@ import java.util.List;
  *  .icon(Material.IRON_SWORD).build();
  * notification.send(player);
  * </code></pre>
+ *
+ * The constant {@link #IDENTIFIER} is used for the advancement packet
+ * The constant {@link #REMOVE_PACKET} is used to remove previous notifications
  */
 public sealed interface Notification permits NotificationImpl {
 
@@ -31,11 +34,11 @@ public sealed interface Notification permits NotificationImpl {
 
     /**
      * Creates a new builder instance
-     * @return
+     * @return an instance of the builder
      */
     @Contract(pure = true)
     static @NotNull Builder builder() {
-        return new BuilderImpl();
+        return new NotificationBuilder();
     }
 
     /**
@@ -69,7 +72,7 @@ public sealed interface Notification permits NotificationImpl {
      */
     @NotNull ItemStack icon();
 
-    sealed interface Builder permits BuilderImpl {
+    sealed interface Builder permits NotificationBuilder {
         /**
          * Set the title for a notification as component.
          *
