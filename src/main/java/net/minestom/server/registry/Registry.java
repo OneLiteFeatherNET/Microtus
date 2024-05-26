@@ -103,6 +103,11 @@ public final class Registry {
     }
 
     @ApiStatus.Internal
+    public static FluidEntry fluidEntry(String namespace, @NotNull Properties main) {
+        return new FluidEntry(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
     public static Map<String, Map<String, Object>> load(Resource resource) {
         Map<String, Map<String, Object>> map = new HashMap<>();
         try (InputStream resourceStream = Registry.class.getClassLoader().getResourceAsStream(resource.name)) {
@@ -257,6 +262,7 @@ public final class Registry {
         BIOMES("biomes.json"),
         VILLAGER_PROFESSION("villager_professions.json"),
         VILLAGER_TYPES("villager_types.json"),
+        FLUIDS("fluids.json"),
         FEATURE_FLAGS("feature_flags.json"),
         ;
 
@@ -264,6 +270,20 @@ public final class Registry {
 
         Resource(String name) {
             this.name = name;
+        }
+    }
+
+    public record FluidEntry(
+            @NotNull NamespaceID namespace,
+            @NotNull NamespaceID bucketId,
+            @Nullable Properties custom
+    ) implements Entry {
+
+        public FluidEntry(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace),
+                    NamespaceID.from(main.getString("bucketId")),
+                    custom
+            );
         }
     }
 
