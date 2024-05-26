@@ -2,7 +2,6 @@ package net.minestom.codegen;
 
 import net.minestom.codegen.color.DyeColorGenerator;
 import net.minestom.codegen.feature.FeatureFlagGenerator;
-import net.minestom.codegen.fluid.FluidGenerator;
 import net.minestom.codegen.particle.ParticleGenerator;
 import net.minestom.codegen.recipe.RecipeTypeGenerator;
 import org.slf4j.Logger;
