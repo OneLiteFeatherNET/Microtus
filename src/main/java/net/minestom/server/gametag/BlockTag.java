@@ -7,6 +7,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -40,7 +41,7 @@ public record BlockTag(Registry.TagEntry registry, int id, List<String> stringVa
         var concatinatedTags = stringValue.stream().filter(s -> s.startsWith("#")).toList();
         var result = new ArrayList<>(stringValue.stream().filter(s -> !s.startsWith("#")).map(NamespaceID::from).toList());
         concatinatedTags.stream().map(BlockTag::getSafe).filter(Objects::nonNull).map(Tag::tagValues).forEach(result::addAll);
-        return result;
+        return Collections.unmodifiableCollection(result);
     }
 
     @Override
