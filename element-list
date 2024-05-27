@@ -117,6 +117,7 @@ net.minestom.server.network.packet.server.status
 net.minestom.server.network.player
 net.minestom.server.network.plugin
 net.minestom.server.network.socket
+net.minestom.server.notifications
 net.minestom.server.particle
 net.minestom.server.particle.data
 net.minestom.server.permission

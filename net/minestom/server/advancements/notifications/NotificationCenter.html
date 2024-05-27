@@ -90,13 +90,23 @@ loadScripts(document, 'script');</script>
 </div>
 <section class="class-description" id="class-description">
 <hr>
-<div class="type-signature"><span class="modifiers">public final class </span><span class="element-name type-name-label">NotificationCenter</span>
+<div class="type-signature"><span class="annotations"><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Deprecated.html" title="class or interface in java.lang" class="external-link">@Deprecated</a>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Deprecated.html#since()" title="class or interface in java.lang" class="external-link">since</a>="1.4.1",
+            <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Deprecated.html#forRemoval()" title="class or interface in java.lang" class="external-link">forRemoval</a>=true)
+</span><span class="modifiers">public final class </span><span class="element-name type-name-label">NotificationCenter</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Object.html" title="class or interface in java.lang" class="external-link">Object</a></span></div>
-<div class="block">Used to send one or multiples <a href="Notification.html" title="class in net.minestom.server.advancements.notifications"><code>Notification</code></a>.
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span>
+<div class="deprecation-comment">As of Minestom 22a8ccabfae38c53df0605000aa7eed49765c1ab, because the Maintainability is very hard and
+      can break everytime from Mojang side because bad api design use <a href="../../notifications/Notification.html#builder()"><code>Notification.builder()</code></a> instead.</div>
+</div>
+<dl class="notes">
+<dt>Since:</dt>
+<dd>1.0.0
+ Used to send one or multiples <a href="Notification.html" title="class in net.minestom.server.advancements.notifications"><code>Notification</code></a>.
  <p>
  Works by sending a completed advancement and remove it immediately.
  <p>
- You can simply create a <a href="Notification.html" title="class in net.minestom.server.advancements.notifications"><code>Notification</code></a> object and call <a href="#send(net.minestom.server.advancements.notifications.Notification,net.minestom.server.entity.Player)"><code>send(Notification, Player)</code></a>.</div>
+ You can simply create a <a href="Notification.html" title="class in net.minestom.server.advancements.notifications"><code>Notification</code></a> object and call <a href="#send(net.minestom.server.advancements.notifications.Notification,net.minestom.server.entity.Player)"><code>send(Notification, Player)</code></a>.</dd>
+</dl>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -105,22 +115,24 @@ loadScripts(document, 'script');</script>
 <section class="method-summary" id="method-summary">
 <h2>Method Summary</h2>
 <div id="method-summary-table">
-<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button></div>
+<div class="table-tabs" role="tablist" aria-orientation="horizontal"><button id="method-summary-table-tab0" role="tab" aria-selected="true" aria-controls="method-summary-table.tabpanel" tabindex="0" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table', 3)" class="active-table-tab">All Methods</button><button id="method-summary-table-tab1" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab1', 3)" class="table-tab">Static Methods</button><button id="method-summary-table-tab4" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab4', 3)" class="table-tab">Concrete Methods</button><button id="method-summary-table-tab6" role="tab" aria-selected="false" aria-controls="method-summary-table.tabpanel" tabindex="-1" onkeydown="switchTab(event)" onclick="show('method-summary-table', 'method-summary-table-tab6', 3)" class="table-tab">Deprecated Methods</button></div>
 <div id="method-summary-table.tabpanel" role="tabpanel" aria-labelledby="method-summary-table-tab0">
 <div class="summary-table three-column-summary">
 <div class="table-header col-first">Modifier and Type</div>
 <div class="table-header col-second">Method</div>
 <div class="table-header col-last">Description</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#send(net.minestom.server.advancements.notifications.Notification,java.util.Collection)" class="member-name-link">send</a><wbr>(@NotNull <a href="Notification.html" title="class in net.minestom.server.advancements.notifications">Notification</a>&nbsp;notification,
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4 method-summary-table-tab6"><code>static void</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#send(net.minestom.server.advancements.notifications.Notification,java.util.Collection)" class="member-name-link">send</a><wbr>(@NotNull <a href="Notification.html" title="class in net.minestom.server.advancements.notifications">Notification</a>&nbsp;notification,
  @NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="../../entity/Player.html" title="class in net.minestom.server.entity">Player</a>&gt;&nbsp;players)</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
 <div class="block">Send a <a href="Notification.html" title="class in net.minestom.server.advancements.notifications"><code>Notification</code></a> to a collection of players.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#send(net.minestom.server.advancements.notifications.Notification,net.minestom.server.entity.Player)" class="member-name-link">send</a><wbr>(@NotNull <a href="Notification.html" title="class in net.minestom.server.advancements.notifications">Notification</a>&nbsp;notification,
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4 method-summary-table-tab6"><code>static void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4 method-summary-table-tab6"><code><a href="#send(net.minestom.server.advancements.notifications.Notification,net.minestom.server.entity.Player)" class="member-name-link">send</a><wbr>(@NotNull <a href="Notification.html" title="class in net.minestom.server.advancements.notifications">Notification</a>&nbsp;notification,
  @NotNull <a href="../../entity/Player.html" title="class in net.minestom.server.entity">Player</a>&nbsp;player)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4 method-summary-table-tab6">
+<div class="block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
 <div class="block">Send a <a href="Notification.html" title="class in net.minestom.server.advancements.notifications"><code>Notification</code></a> to one player.</div>
 </div>
 </div>
@@ -147,6 +159,7 @@ loadScripts(document, 'script');</script>
  @NotNull <a href="Notification.html" title="class in net.minestom.server.advancements.notifications">Notification</a>&nbsp;notification,
  @NotNull
  @NotNull <a href="../../entity/Player.html" title="class in net.minestom.server.entity">Player</a>&nbsp;player)</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
 <div class="block">Send a <a href="Notification.html" title="class in net.minestom.server.advancements.notifications"><code>Notification</code></a> to one player.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
@@ -162,6 +175,7 @@ loadScripts(document, 'script');</script>
  @NotNull <a href="Notification.html" title="class in net.minestom.server.advancements.notifications">Notification</a>&nbsp;notification,
  @NotNull
  @NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/util/Collection.html" title="class or interface in java.util" class="external-link">Collection</a>&lt;<a href="../../entity/Player.html" title="class in net.minestom.server.entity">Player</a>&gt;&nbsp;players)</span></div>
+<div class="deprecation-block"><span class="deprecated-label">Deprecated, for removal: This API element is subject to removal in a future version.</span></div>
 <div class="block">Send a <a href="Notification.html" title="class in net.minestom.server.advancements.notifications"><code>Notification</code></a> to a collection of players.</div>
 <dl class="notes">
 <dt>Parameters:</dt>
