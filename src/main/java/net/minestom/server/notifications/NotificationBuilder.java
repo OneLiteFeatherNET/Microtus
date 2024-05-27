@@ -14,7 +14,6 @@ final class NotificationBuilder implements Notification.Builder {
     private FrameType type;
     private ItemStack icon;
 
-
     /**
      * {@inheritDoc}
      */

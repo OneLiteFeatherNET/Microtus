@@ -54,7 +54,6 @@ public sealed interface Notification permits NotificationImpl {
      */
     void send(@NotNull Collection<@NotNull Player> players);
 
-
     /**
      * Gets the title of the notification as a {@link Component}
      * @return the title {@link Component}
@@ -77,6 +76,7 @@ public sealed interface Notification permits NotificationImpl {
      * @since 1.4.1
      */
     sealed interface Builder permits NotificationBuilder {
+
         /**
          * Set the title for a notification as component.
          *
@@ -114,6 +114,4 @@ public sealed interface Notification permits NotificationImpl {
          */
         Notification build();
     }
-
-
 }
