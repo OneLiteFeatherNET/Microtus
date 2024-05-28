@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.15.2") {
+    implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1") {
         exclude(group = "org.jetbrains.kotlin")
     }
     testImplementation(platform("org.junit:junit-bom:5.10.1"))
