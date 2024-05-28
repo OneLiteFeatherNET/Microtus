@@ -8,6 +8,7 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
+import net.minestom.server.featureflag.FeatureFlag;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.listener.preplay.LoginListener;
 import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
