@@ -39,7 +39,7 @@ dependencyResolutionManagement {
             version("javaPoet", "1.13.0")
 
             // Demo
-            version("jNoise", "b93008e35e")
+            version("jNoise", "4.0.0")
 
             // JMH
             version("jmh", "1.37")
