@@ -20,7 +20,7 @@ dependencyResolutionManagement {
             version("maven-resolver-provider", "3.9.6")
 
             // Terminal / Logging
-            version("tinylog", "2.6.2")
+            version("tinylog", "2.7.0")
             version("jline", "3.25.1")
 
             // Performance / Data Structures
