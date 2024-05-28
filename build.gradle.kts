@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "net.onelitefeather.microtus"
-version = System.getenv("TAG_VERSION") ?: "1.4.2-SNAPSHOT"
+version = System.getenv("TAG_VERSION") ?: "1.4.3-SNAPSHOT"
 val shortDescription = "1.21 Lightweight Minecraft server"
 
 allprojects {
