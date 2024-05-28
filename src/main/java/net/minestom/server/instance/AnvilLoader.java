@@ -10,6 +10,10 @@ import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.async.AsyncUtils;
 import net.minestom.server.world.biomes.Biome;
+import net.onelitefeather.microtus.nbt.Mode;
+import net.onelitefeather.microtus.nbt.deserialization.Deserializer;
+import net.onelitefeather.microtus.nbt.tree.TagCompound;
+import net.onelitefeather.microtus.nbt.tree.TagRootCompound;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jglrxavpok.hephaistos.mca.*;
@@ -25,6 +29,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PushbackInputStream;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -32,6 +37,7 @@ import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.zip.GZIPInputStream;
 
 public class AnvilLoader implements IChunkLoader {
     private final static Logger LOGGER = LoggerFactory.getLogger(AnvilLoader.class);
@@ -67,6 +73,13 @@ public class AnvilLoader implements IChunkLoader {
     public void loadInstance(@NotNull Instance instance) {
         if (!Files.exists(levelPath)) {
             return;
+        }
+        try {
+            Deserializer deserialize = Deserializer.deserialize(new PushbackInputStream(Files.newInputStream(levelPath), 2), Mode.file());
+            TagRootCompound compound = (TagRootCompound) deserialize.deserializeBytes();
+            compound.value().<TagCompound>get("Data").keys().forEach(System.out::println);
+        } catch (IOException e) {
+            MinecraftServer.getExceptionManager().handleException(e);
         }
         try (var reader = new NBTReader(Files.newInputStream(levelPath))) {
             final NBTCompound tag = (NBTCompound) reader.read();
@@ -142,11 +155,18 @@ public class AnvilLoader implements IChunkLoader {
     private @Nullable RegionFile getMCAFile(Instance instance, int chunkX, int chunkZ) {
         final int regionX = CoordinatesKt.chunkToRegion(chunkX);
         final int regionZ = CoordinatesKt.chunkToRegion(chunkZ);
+
         return alreadyLoaded.computeIfAbsent(RegionFile.Companion.createFileName(regionX, regionZ), n -> {
             try {
                 final Path regionPath = this.regionPath.resolve(n);
                 if (!Files.exists(regionPath)) {
                     return null;
+                }
+                try {
+                    var mca = new net.onelitefeather.microtus.nbt.mca.RegionFile(regionPath);
+                    mca.load();
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
                 }
                 synchronized (perRegionLoadedChunks) {
                     Set<IntIntImmutablePair> previousVersion = perRegionLoadedChunks.put(new IntIntImmutablePair(regionX, regionZ), new HashSet<>());

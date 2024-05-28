@@ -31,8 +31,8 @@ tasks.getByName<Test>("test") {
 
 indra {
     javaVersions {
-        target(21)
-        testWith(21)
+        target(22)
+        testWith(22)
     }
 
     github("OneLiteFeatherNET", "Microtus") {

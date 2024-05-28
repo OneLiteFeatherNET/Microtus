@@ -59,7 +59,7 @@ tasks {
 
             // Custom options
             addBooleanOption("html5", true)
-            addStringOption("-release", "21")
+            addStringOption("-release", "22")
             // Links to external javadocs
             links("https://docs.oracle.com/en/java/javase/21/docs/api/")
             links("https://jd.advntr.dev/api/${libs.versions.adventure.get()}/")
@@ -123,5 +123,7 @@ dependencies {
 
     // BStats
     api(libs.bstats.base)
+
+    implementation(project(mapOf("path" to ":nbt")))
 }
 
