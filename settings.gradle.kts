@@ -21,7 +21,7 @@ dependencyResolutionManagement {
 
             // Terminal / Logging
             version("tinylog", "2.6.2")
-            version("jline", "3.25.1")
+            version("jline", "3.26.1")
 
             // Performance / Data Structures
             version("caffeine", "3.1.8")
