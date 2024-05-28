@@ -14,7 +14,7 @@ dependencyResolutionManagement {
             version("data", "1.20.4-rv10")
             version("hephaistos", "2.6.1")
             version("jetbrainsAnnotations", "24.1.0")
-            version("logback", "1.4.5")
+            version("logback", "1.5.6")
             version("slf4j", "2.0.7")
             version("maven-resolver", "1.9.18")
             version("maven-resolver-provider", "3.9.6")
