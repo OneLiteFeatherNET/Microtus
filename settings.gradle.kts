@@ -10,7 +10,7 @@ dependencyResolutionManagement {
             // Important dependencies
             version("adventure", "4.15.0")
             version("kotlin", "2.0.0")
-            version("hydrazine", "1.7.2")
+            version("hydrazine", "1.8.1")
             version("data", "1.20.4-rv10")
             version("hephaistos", "2.6.1")
             version("jetbrainsAnnotations", "24.1.0")
