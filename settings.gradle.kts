@@ -9,7 +9,7 @@ dependencyResolutionManagement {
         create("libs") {
             // Important dependencies
             version("adventure", "4.15.0")
-            version("kotlin", "1.9.22")
+            version("kotlin", "2.0.0")
             version("hydrazine", "1.7.2")
             version("data", "1.20.4-rv10")
             version("hephaistos", "2.6.1")
@@ -27,13 +27,13 @@ dependencyResolutionManagement {
             version("caffeine", "3.1.8")
             version("fastutil", "8.5.12")
             version("flare", "2.0.1")
-            version("gson", "2.10.1")
+            version("gson", "2.11.0")
             version("jcTools", "4.0.2")
 
             // Test
             version("junit-jupiter", "5.10.1")
             version("junit-platform", "1.10.1")
-            version("mockito", "5.9.0")
+            version("mockito", "5.12.0")
 
             // Code Generation
             version("javaPoet", "1.13.0")
