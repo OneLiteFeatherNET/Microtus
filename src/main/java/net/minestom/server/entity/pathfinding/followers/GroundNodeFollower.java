@@ -1,13 +1,12 @@
 package net.minestom.server.entity.pathfinding.followers;
 
+import net.minestom.server.attribute.VanillaAttribute;
 import net.minestom.server.collision.CollisionUtils;
-import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.LivingEntity;
-import net.minestom.server.entity.attribute.Attribute;
 import net.minestom.server.utils.position.PositionUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,7 +71,7 @@ public class GroundNodeFollower implements NodeFollower {
     @Override
     public double movementSpeed() {
         if (entity instanceof LivingEntity living) {
-            return living.getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).getBaseValue();
+            return living.getAttribute(VanillaAttribute.GENERIC_MOVEMENT_SPEED).getBaseValue();
         }
 
         return 0.1f;
