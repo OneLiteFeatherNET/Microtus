@@ -44,10 +44,9 @@ public class WaterNodeFollower implements NodeFollower {
         }
 
         var instance = entity.getInstance();
-        if (instance != null)
-            if (instance.getBlock(position).isLiquid()) {
-                speed *= WATER_SPEED_MULTIPLIER;
-            }
+        if (instance != null && instance.getBlock(position).isLiquid()) {
+            speed *= WATER_SPEED_MULTIPLIER;
+        }
 
         final double radians = Math.atan2(dz, dx);
         final double speedX = Math.cos(radians) * speed;
@@ -66,6 +65,7 @@ public class WaterNodeFollower implements NodeFollower {
 
     @Override
     public void jump(@Nullable Point point, @Nullable Point target) {
+        // Water can't jump
     }
 
     @Override
