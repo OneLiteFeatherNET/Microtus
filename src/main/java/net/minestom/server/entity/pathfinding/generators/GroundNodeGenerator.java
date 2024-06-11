@@ -15,9 +15,10 @@ import java.util.OptionalDouble;
 import java.util.Set;
 
 public class GroundNodeGenerator implements NodeGenerator {
+
+    private static final int MAX_FALL_DISTANCE = 5;
     private PNode tempNode = null;
     private final BoundingBox.PointIterator pointIterator = new BoundingBox.PointIterator();
-    private final static int MAX_FALL_DISTANCE = 5;
 
     @Override
     public @NotNull Collection<? extends PNode> getWalkable(@NotNull Instance instance, @NotNull Set<PNode> visited, @NotNull PNode current, @NotNull Point goal, @NotNull BoundingBox boundingBox) {

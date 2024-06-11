@@ -19,9 +19,11 @@ public final class BoundingBox implements Shape {
     private static final BoundingBox sneakingBoundingBox = new BoundingBox(0.6, 1.5, 0.6);
     private static final BoundingBox smallBoundingBox = new BoundingBox(0.6, 0.6, 0.6);
 
-    final static BoundingBox ZERO = new BoundingBox(0, 0, 0);
+    static final BoundingBox ZERO = new BoundingBox(0, 0, 0);
 
-    private final double width, height, depth;
+    private final double width;
+    private final double height;
+    private final double depth;
     private final Point offset;
     private Point relativeEnd;
 
@@ -52,7 +54,7 @@ public final class BoundingBox implements Shape {
     @Override
     @ApiStatus.Experimental
     public boolean intersectBoxSwept(@NotNull Point rayStart, @NotNull Point rayDirection, @NotNull Point shapePos, @NotNull BoundingBox moving, @NotNull SweepResult finalResult) {
-        if (RayUtils.BoundingBoxIntersectionCheck(moving, rayStart, rayDirection, this, shapePos, finalResult) ) {
+        if (RayUtils.BoundingBoxIntersectionCheck(moving, rayStart, rayDirection, this, shapePos, finalResult)) {
             finalResult.collidedPositionX = rayStart.x() + rayDirection.x() * finalResult.res;
             finalResult.collidedPositionY = rayStart.y() + rayDirection.y() * finalResult.res;
             finalResult.collidedPositionZ = rayStart.z() + rayDirection.z() * finalResult.res;
@@ -178,7 +180,9 @@ public final class BoundingBox implements Shape {
     }
 
     public static class MutablePoint {
-        double x, y, z;
+        double x;
+        double y;
+        double z;
 
         public void set(double x, double y, double z) {
             this.x = x;
@@ -212,12 +216,23 @@ public final class BoundingBox implements Shape {
     }
 
     public static class PointIterator implements Iterator<MutablePoint> {
-        private double sx, sy, sz;
-        double x, y, z;
-        private double minX, minY, minZ, maxX, maxY, maxZ;
+        private double sx;
+        private double sy;
+        private double sz;
+        double x;
+        double y;
+        double z;
+        private double minX;
+        private double minY;
+        private double minZ;
+        private double maxX;
+        private double maxY;
+        private double maxZ;
         private final MutablePoint point = new MutablePoint();
 
-        public PointIterator() {}
+        public PointIterator() {
+        }
+
         public PointIterator(BoundingBox boundingBox, Point p, AxisMask axisMask, double axis) {
             reset(boundingBox, p, axisMask, axis);
         }

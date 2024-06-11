@@ -19,6 +19,10 @@ public class PathGenerator {
     private static final PNode repathNode = new PNode(0, 0, 0, 0, 0, PNode.NodeType.REPATH, null);
     private static final Comparator<PNode> pNodeComparator = (s1, s2) -> (int) (((s1.g() + s1.h()) - (s2.g() + s2.h())) * 1000);
 
+    private PathGenerator() {
+        // Private constructor to prevent instantiation
+    }
+
     public static @NotNull PPath generate(@NotNull Instance instance, @NotNull Pos orgStart, @NotNull Point orgTarget, double closeDistance, double maxDistance, double pathVariance, @NotNull BoundingBox boundingBox, boolean isOnGround, @NotNull NodeGenerator generator, @Nullable Runnable onComplete) {
         Point start = (!isOnGround && generator.hasGravitySnap())
                 ? orgStart.withY(generator.gravitySnap(instance, orgStart.x(), orgStart.y(), orgStart.z(), boundingBox, 100).orElse(orgStart.y()))
