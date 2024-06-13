@@ -20,11 +20,19 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import net.minestom.server.gametag.Tag;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -105,6 +113,11 @@ public final class Registry {
     @ApiStatus.Internal
     public static FluidEntry fluidEntry(String namespace, @NotNull Properties main) {
         return new FluidEntry(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
+    public static TagEntry tag(String namespace, @NotNull Properties main) {
+        return new TagEntry(namespace , main, null);
     }
 
     @ApiStatus.Internal
@@ -270,6 +283,18 @@ public final class Registry {
 
         Resource(String name) {
             this.name = name;
+        }
+    }
+
+    public record TagEntry(
+            @NotNull NamespaceID namespace,
+            @NotNull List<@NotNull String> values,
+            @Nullable Properties custom
+    ) implements Entry {
+
+        public TagEntry(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace), ((List<String>) main.asMap().get("values")),
+                    custom);
         }
     }
 

@@ -42,6 +42,11 @@ public class Generators {
         generator.generate(resource("attributes.json"), "net.minestom.server.attribute", "Attribute", "AttributeImpl", "Attributes");
         generator.generate(resource("fluids.json"), "net.minestom.server.fluid", "Fluid", "FluidImpl", "Fluids");
         generator.generate(resource("feature_flags.json"), "net.minestom.server.featureflag", "FeatureFlag", "FeatureFlagImpl", "FeatureFlags");
+        generator.generate(resource("tags/gameplay_tags.json"), "net.minestom.server.gametag", "Tag", "GameEventTag", "GameEventTags");
+        generator.generate(resource("tags/entity_type_tags.json"), "net.minestom.server.gametag", "Tag", "EntityTag", "EntityTags");
+        generator.generate(resource("tags/block_tags.json"), "net.minestom.server.gametag", "Tag", "BlockTag", "BlockTags");
+        generator.generate(resource("tags/item_tags.json"), "net.minestom.server.gametag", "Tag", "ItemTag", "ItemTags");
+        generator.generate(resource("tags/fluid_tags.json"), "net.minestom.server.gametag", "Tag", "FluidTag", "FluidTags");
 
         LOGGER.info("Finished generating code");
     }
