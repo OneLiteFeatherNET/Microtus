@@ -6,11 +6,13 @@ plugins {
     id("minestom.native-conventions")
     alias(libs.plugins.blossom)
     signing
+    jacoco
+    id("org.sonarqube") version "4.4.1.3373"
 }
 
 group = "net.onelitefeather.microtus"
 
-version = System.getenv("TAG_VERSION") ?: "1.4.3-SNAPSHOT"
+version = System.getenv("TAG_VERSION") ?: "1.5.0-SNAPSHOT"
 
 allprojects {
     group = "net.onelitefeather.microtus"
@@ -73,7 +75,11 @@ tasks {
         minHeapSize = "512m"
         maxHeapSize = "1024m"
     }
-
+    jacocoTestReport {
+        reports {
+            xml.required = true
+        }
+    }
 
 }
 
@@ -120,4 +126,10 @@ dependencies {
     // BStats
     api(libs.bstats.base)
 }
-
+sonar {
+    properties {
+        property("sonar.projectKey", "OneLiteFeatherNET_Microtus")
+        property("sonar.organization", "onelitefeathernet")
+        property("sonar.host.url", "https://sonarcloud.io")
+    }
+}
