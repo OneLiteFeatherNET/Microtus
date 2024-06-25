@@ -14,7 +14,7 @@ public record UpdateEnabledFeaturesPacket(@NotNull Set<NamespaceID> features) im
     public static final int MAX_FEATURES = 1024;
 
     public UpdateEnabledFeaturesPacket(@NotNull NetworkBuffer buffer) {
-        this(Set.copyOf(buffer.readCollection((b) -> NamespaceID.from(b.read(STRING)), MAX_FEATURES)));
+        this(Set.copyOf(buffer.readCollection(b -> NamespaceID.from(b.read(STRING)), MAX_FEATURES)));
     }
 
     @Override
