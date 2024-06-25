@@ -91,6 +91,11 @@ public final class Registry {
     }
 
     @ApiStatus.Internal
+    public static FeatureFlagEntry featureFlag(String namespace, @NotNull Properties main) {
+        return new FeatureFlagEntry(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
     public static AttributeEntry attribute(String namespace, @NotNull Properties main) {
         return new AttributeEntry(namespace, main, null);
     }
@@ -283,7 +288,8 @@ public final class Registry {
         CHAT_TYPES("chat_types.json"),
         ENCHANTMENTS("enchantments.snbt"),
         PAINTING_VARIANTS("painting_variants.json"),
-        JUKEBOX_SONGS("jukebox_songs.json");
+        JUKEBOX_SONGS("jukebox_songs.json"),
+        FEATURE_FLAGS("feature_flags.json");
 
         /**
          * BANNER_PATTERNS("banner_patterns.json"), // Microtus -  Banner and Shield Meta
@@ -303,6 +309,16 @@ public final class Registry {
 
         public @NotNull String fileName() {
             return name;
+        }
+    }
+
+    public record FeatureFlagEntry(
+            @NotNull NamespaceID namespace,
+            @Nullable Properties custom
+    ) implements Entry {
+
+        public FeatureFlagEntry(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace), custom);
         }
     }
 
