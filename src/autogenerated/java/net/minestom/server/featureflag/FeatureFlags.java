@@ -5,8 +5,6 @@ package net.minestom.server.featureflag;
  */
 @SuppressWarnings("unused")
 interface FeatureFlags {
-    FeatureFlag UPDATE_1_21 = FeatureFlagImpl.get("minecraft:update_1_21");
-
     FeatureFlag BUNDLE = FeatureFlagImpl.get("minecraft:bundle");
 
     FeatureFlag VANILLA = FeatureFlagImpl.get("minecraft:vanilla");
