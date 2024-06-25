@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import net.minestom.server.advancements.AdvancementManager;
 import net.minestom.server.adventure.bossbar.BossBarManager;
-import net.minestom.server.attribute.AttributeManager;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.damage.DamageType;
@@ -93,7 +92,6 @@ final class ServerProcessImpl implements ServerProcess {
     private final GlobalEventHandler eventHandler;
     private final SchedulerManager scheduler;
     private final BenchmarkManager benchmark;
-    private final AttributeManager attribute;
     private final AdvancementManager advancement;
     private final BossBarManager bossBar;
     private final TagManager tag;
@@ -324,11 +322,6 @@ final class ServerProcessImpl implements ServerProcess {
     }
 
     @Override
-    public @NotNull AttributeManager attribute() {
-        return attribute;
-    }
-
-    @Override
     public void start(@NotNull SocketAddress socketAddress) {
         if (!started.compareAndSet(false, true)) {
             throw new IllegalStateException("Server already started");
@@ -354,9 +347,10 @@ final class ServerProcessImpl implements ServerProcess {
 
         extension.gotoPostInit();
 
-        LOGGER.info(MinecraftServer.getBrandName() + " server started successfully.");
+        LOGGER.info("{} server started successfully.", MinecraftServer.getBrandName());
 
-        if (ServerFlag.ATTRIBUTES_ENABLED) {
+        //TODO: Reimplement this
+        /*if (ServerFlag.ATTRIBUTES_ENABLED) {
             attribute.loadVanillaAttributes();
         }
         LOGGER.info("Register Attributes({})", attribute.unmodifiableCollection().size());
@@ -364,7 +358,7 @@ final class ServerProcessImpl implements ServerProcess {
         if (ServerFlag.BIOMES_ENABLED) {
             biome.loadVanillaBiomes();
         }
-        LOGGER.info("Register Biomes({})", biome.unmodifiableCollection().size());
+        LOGGER.info("Register Biomes({})", biome.unmodifiableCollection().size());*/
 
         if (ServerFlag.TERMINAL_ENABLED) {
             MinestomTerminal.start();
