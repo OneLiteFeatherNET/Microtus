@@ -1,7 +1,6 @@
 package net.minestom.codegen;
 
 import net.minestom.codegen.color.DyeColorGenerator;
-import net.minestom.codegen.feature.FeatureFlagGenerator;
 import net.minestom.codegen.particle.ParticleGenerator;
 import net.minestom.codegen.recipe.RecipeTypeGenerator;
 import org.slf4j.Logger;
@@ -25,7 +24,6 @@ public class Generators {
         new RecipeTypeGenerator(resource("recipe_types.json"), outputFolder).generate();
         new ParticleGenerator(resource("particles.json"), outputFolder).generate();
         new ConstantsGenerator(resource("constants.json"), outputFolder).generate();
-        //new FeatureFlagGenerator(resource("feature_flags.json"), outputFolder).generate();
         var generator = new CodeGenerator(outputFolder);
 
         // Static registries
@@ -37,7 +35,7 @@ public class Generators {
         generator.generate(resource("sounds.json"), "net.minestom.server.sound", "SoundEvent", "BuiltinSoundEvent", "SoundEvents");
         generator.generate(resource("custom_statistics.json"), "net.minestom.server.statistic", "StatisticType", "StatisticTypeImpl", "StatisticTypes");
         generator.generate(resource("attributes.json"), "net.minestom.server.entity.attribute", "Attribute", "AttributeImpl", "Attributes");
-
+        generator.generate(resource("feature_flags.json"), "net.minestom.server.featureflag", "FeatureFlag", "FeatureFlagImpl", "FeatureFlags");
         // Dynamic registries
         generator.generateKeys(resource("chat_types.json"), "net.minestom.server.message", "ChatType", "ChatTypes");
         generator.generateKeys(resource("dimension_types.json"), "net.minestom.server.world", "DimensionType", "DimensionTypes");
@@ -52,7 +50,6 @@ public class Generators {
         generator.generateKeys(resource("jukebox_songs.json"), "net.minestom.server.instance.block.jukebox", "JukeboxSong", "JukeboxSongs");
 
         // Generate fluids
-        new FluidGenerator(resource("fluids.json"), outputFolder).generate();
         // TODO: Generate villager professions
 //        new VillagerProfessionGenerator(
 //                new File(inputFolder, targetVersion + "_villager_professions.json"),
