@@ -3,7 +3,6 @@ package net.minestom.server;
 import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import net.minestom.server.advancements.AdvancementManager;
 import net.minestom.server.adventure.bossbar.BossBarManager;
-import net.minestom.server.attribute.AttributeManager;
 import net.minestom.server.command.CommandManager;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.entity.metadata.animal.tameable.WolfMeta;
