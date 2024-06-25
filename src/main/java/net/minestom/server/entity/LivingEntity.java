@@ -431,7 +431,7 @@ public class LivingEntity extends Entity implements EquipmentHandler {
      * @return the attribute instance
      */
     public @NotNull AttributeInstance getAttribute(@NotNull Attribute attribute) {
-        return attributeModifiers.computeIfAbsent(attribute.name(),
+        return attributeModifiers.computeIfAbsent(attribute.namespace(),
                 s -> new AttributeInstance(attribute, this::onAttributeChanged));
     }
 
