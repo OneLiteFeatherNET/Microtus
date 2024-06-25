@@ -8,7 +8,6 @@ import net.minestom.server.fluid.Fluid;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.item.Material;
 import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.registry.FluidRegistries;
 import net.minestom.server.registry.ProtocolObject;
 import net.minestom.server.registry.Registry;
 import net.minestom.server.utils.NamespaceID;
