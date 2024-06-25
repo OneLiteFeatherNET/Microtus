@@ -67,7 +67,7 @@ public record TagsPacket(
         final int typeCount = reader.read(VAR_INT);
         for (int i = 0; i < typeCount; i++) {
             // Read tag type
-            final Tag.BasicType tagType = Tag.BasicType.fromIdentifer(reader.read(STRING));
+            final Tag.BasicType tagType = Tag.BasicType.fromIdentifier(reader.read(STRING));
             if (tagType == null) {
                 throw new IllegalArgumentException("Tag type could not be resolved");
             }

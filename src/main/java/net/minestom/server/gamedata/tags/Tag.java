@@ -105,7 +105,7 @@ public final class Tag implements ProtocolObject, Keyed {
         ENCHANTMENTS("minecraft:enchantment", Registry.Resource.ENCHANTMENT_TAGS,
                 name -> MinecraftServer.getEnchantmentRegistry().getId(DynamicRegistry.Key.of(name)));
 
-        private final static BasicType[] VALUES = values();
+        private static final BasicType[] VALUES = values();
         private final String identifier;
         private final Registry.Resource resource;
         private final Function<String, Integer> function;
@@ -130,13 +130,15 @@ public final class Tag implements ProtocolObject, Keyed {
             return function;
         }
 
-        public static @Nullable Tag.BasicType fromIdentifer(@NotNull String identifier) {
-            for (BasicType value : VALUES) {
-                if (value.identifier.equals(identifier)) {
-                    return value;
+        public static @Nullable Tag.BasicType fromIdentifier(@NotNull String identifier) {
+            BasicType result = null;
+            for (int i = 0; i < VALUES.length && result == null; i++) {
+                final BasicType current = VALUES[i];
+                if (current.identifier.equals(identifier)) {
+                    result = current;
                 }
             }
-            return null;
+            return result;
         }
     }
 }
