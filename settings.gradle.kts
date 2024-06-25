@@ -8,7 +8,7 @@ dependencyResolutionManagement {
     versionCatalogs {
         create("libs") {
             // Important dependencies
-            version("adventure", "4.15.0")
+            version("adventure", "4.17.0")
             version("kotlin", "2.0.0")
             version("hydrazine", "1.7.2")
             version("data", "1.20.4-rv10")
@@ -56,15 +56,35 @@ dependencyResolutionManagement {
             // Libs
             library("adventure-api", "net.kyori", "adventure-api").versionRef("adventure")
             library("adventure-serializer-gson", "net.kyori", "adventure-text-serializer-gson").versionRef("adventure")
-            library("adventure-serializer-legacy", "net.kyori", "adventure-text-serializer-legacy").versionRef("adventure")
-            library("adventure-serializer-plain", "net.kyori", "adventure-text-serializer-plain").versionRef("adventure")
+            library(
+                "adventure-serializer-legacy",
+                "net.kyori",
+                "adventure-text-serializer-legacy"
+            ).versionRef("adventure")
+            library(
+                "adventure-serializer-plain",
+                "net.kyori",
+                "adventure-text-serializer-plain"
+            ).versionRef("adventure")
             library("adventure-text-logger-slf4j", "net.kyori", "adventure-text-logger-slf4j").versionRef("adventure")
             library("adventure-mini-message", "net.kyori", "adventure-text-minimessage").versionRef("adventure")
-
+            library("adventure-nbt", "net.kyori", "adventure-nbt").versionRef("adventure")
             // Maven
-            library("maven.connector", "org.apache.maven.resolver", "maven-resolver-connector-basic").versionRef("maven-resolver")
-            library("maven.transport.http", "org.apache.maven.resolver", "maven-resolver-transport-http").versionRef("maven-resolver")
-            library("maven.resolver", "org.apache.maven", "maven-resolver-provider").versionRef("maven-resolver-provider")
+            library(
+                "maven.connector",
+                "org.apache.maven.resolver",
+                "maven-resolver-connector-basic"
+            ).versionRef("maven-resolver")
+            library(
+                "maven.transport.http",
+                "org.apache.maven.resolver",
+                "maven-resolver-transport-http"
+            ).versionRef("maven-resolver")
+            library(
+                "maven.resolver",
+                "org.apache.maven",
+                "maven-resolver-provider"
+            ).versionRef("maven-resolver-provider")
 
             // Kotlin
             library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
@@ -100,7 +120,11 @@ dependencyResolutionManagement {
             library("junit-engine", "org.junit.jupiter", "junit-jupiter-engine").versionRef("junit-jupiter")
             library("junit-params", "org.junit.jupiter", "junit-jupiter-params").versionRef("junit-jupiter")
             library("junit-suite-api", "org.junit.platform", "junit-platform-suite-api").versionRef("junit-platform")
-            library("junit-suite-engine", "org.junit.platform", "junit-platform-suite-engine").versionRef("junit-platform")
+            library(
+                "junit-suite-engine",
+                "org.junit.platform",
+                "junit-platform-suite-engine"
+            ).versionRef("junit-platform")
             library("mockito-core", "org.mockito", "mockito-core").versionRef("mockito")
 
             // Code Generation
@@ -121,11 +145,25 @@ dependencyResolutionManagement {
 
             bundle("kotlin", listOf("kotlin-stdlib-jdk8", "kotlin-reflect"))
             bundle("flare", listOf("flare", "flare-fastutil"))
-            bundle("adventure", listOf("adventure-api", "adventure-mini-message", "adventure-serializer-gson", "adventure-serializer-legacy", "adventure-serializer-plain", "adventure-text-logger-slf4j"))
+            bundle(
+                "adventure",
+                listOf(
+                    "adventure-api",
+                    "adventure-nbt",
+                    "adventure-mini-message",
+                    "adventure-serializer-gson",
+                    "adventure-serializer-legacy",
+                    "adventure-serializer-plain",
+                    "adventure-text-logger-slf4j"
+                )
+            )
             bundle("logging", listOf("tinylog-api", "tinylog-impl", "tinylog-slf4j"))
             bundle("terminal", listOf("jline", "jline-jansi"))
             bundle("logback", listOf("logback-core", "logback-classic"))
-            bundle("junit", listOf("junit-api", "junit-engine", "junit-params", "junit-suite-api", "junit-suite-engine"))
+            bundle(
+                "junit",
+                listOf("junit-api", "junit-engine", "junit-params", "junit-suite-api", "junit-suite-engine")
+            )
 
             plugin("blossom", "net.kyori.blossom").versionRef("blossom")
 
