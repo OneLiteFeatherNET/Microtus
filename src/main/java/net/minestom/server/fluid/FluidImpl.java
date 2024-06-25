@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public record FluidImpl(Registry.FluidEntry registry, NamespaceID namespace, int id) implements Fluid {
 
     private static final AtomicInteger INDEX = new AtomicInteger();
-    private static final Registry.DynamicContainer<Fluid> CONTAINER = Registry.createDynamicContainer(Registry.Resource.FLUIDS, FluidImpl::createImpl);
+    private static final Registry.DynamicContainer<Fluid> CONTAINER = Registry.createDynamicContainer(Registry.Resource.FLUID_TAGS, FluidImpl::createImpl);
 
     private static FluidImpl createImpl(String namespace, Registry.Properties properties) {
         return new FluidImpl(Registry.fluidEntry(namespace, properties));

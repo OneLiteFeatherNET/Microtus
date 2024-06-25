@@ -131,6 +131,21 @@ public final class Registry {
     }
 
     @ApiStatus.Internal
+    public static VillagerProfession villagerProfession(String namespace, @NotNull Properties main) {
+        return new VillagerProfession(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
+    public static VillagerType villagerType(String namespace, @NotNull Properties main) {
+        return new VillagerType(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
+    public static FluidEntry fluidEntry(String namespace, @NotNull Properties main) {
+        return new FluidEntry(namespace, main, null);
+    }
+
+    @ApiStatus.Internal
     public static Map<String, Map<String, Object>> load(Resource resource) {
         Map<String, Map<String, Object>> map = new HashMap<>();
         try (InputStream resourceStream = Registry.class.getClassLoader().getResourceAsStream(resource.name)) {
@@ -289,17 +304,10 @@ public final class Registry {
         ENCHANTMENTS("enchantments.snbt"),
         PAINTING_VARIANTS("painting_variants.json"),
         JUKEBOX_SONGS("jukebox_songs.json"),
-        FEATURE_FLAGS("feature_flags.json");
-
-        /**
-         * BANNER_PATTERNS("banner_patterns.json"), // Microtus -  Banner and Shield Meta
-         *         BLOCK_TAGS("tags/block_tags.json"),
-         *         ENTITY_TYPE_TAGS("tags/entity_type_tags.json"),
-         *         FLUID_TAGS("tags/fluid_tags.json"),
-         *         GAMEPLAY_TAGS("tags/gameplay_tags.json"),
-         *         ITEM_TAGS("tags/item_tags.json"),
-         *         BIOMES("biomes.json");
-         */
+        FEATURE_FLAGS("feature_flags.json"),
+        VILLAGER_PROFESSION("villager_professions.json"),
+        VILLAGER_TYPES("villager_types.json"),
+        ;
 
         private final String name;
 
@@ -319,6 +327,39 @@ public final class Registry {
 
         public FeatureFlagEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace), custom);
+        }
+    }
+
+    public record FluidEntry(
+            @NotNull NamespaceID namespace,
+            @NotNull NamespaceID bucketId,
+            @Nullable Properties custom
+    ) implements Entry {
+
+        public FluidEntry(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace),
+                    NamespaceID.from(main.getString("bucketId")),
+                    custom
+            );
+        }
+    }
+
+    public record VillagerProfession(NamespaceID namespace, int id, SoundEvent soundEvent, Properties custom) implements Entry {
+        public VillagerProfession(String namespace,
+                                  Properties main,
+                                  Properties custom) {
+            this(NamespaceID.from(namespace),
+                    main.getInt("id"),
+                    SoundEvent.fromNamespaceId(main.getString("workSound")),
+                    custom);
+        }
+    }
+
+    public record VillagerType(NamespaceID namespace, int id, Properties custom) implements Entry {
+        public VillagerType(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace),
+                    main.getInt("id"),
+                    custom);
         }
     }
 
