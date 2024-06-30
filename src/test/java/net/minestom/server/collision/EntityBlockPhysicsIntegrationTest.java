@@ -58,6 +58,21 @@ class EntityBlockPhysicsIntegrationTest {
     }
 
     @Test
+    void entityPhysicsCheckShortDiagonal(Env env) {
+        var instance = env.createFlatInstance();
+        instance.setBlock(0, 42, 1, Block.STONE);
+
+        var entity = new Entity(EntityType.ZOMBIE);
+        entity.setInstance(instance, new Pos(0, 42, 0.9)).join();
+        assertEquals(instance, entity.getInstance());
+
+        entity.setBoundingBox(BoundingBox.ZERO);
+
+        PhysicsResult res = CollisionUtils.handlePhysics(entity, new Vec(0, 0, 1.3));
+        assertEqualsPoint(new Pos(0, 42, 1), res.newPosition());
+    }
+
+    @Test
     void entityPhysicsCheckSlab(Env env) {
         var instance = env.createFlatInstance();
 
@@ -402,7 +417,7 @@ class EntityBlockPhysicsIntegrationTest {
     }
 
     @Test
-    void entityPhysicsCheckEntityHit() {
+    void entityPhysicsCheckEntityHit(Env env) {
         Point z1 = new Pos(0, 0, 0);
         Point z2 = new Pos(15, 0, 0);
         Point z3 = new Pos(11, 0, 0);
@@ -410,12 +425,12 @@ class EntityBlockPhysicsIntegrationTest {
 
         BoundingBox bb = new Entity(EntityType.ZOMBIE).getBoundingBox();
 
-        SweepResult sweepResultFinal = new SweepResult(1, 0, 0, 0, null, null);
+        SweepResult sweepResultFinal = new SweepResult(1, 0, 0, 0, null, 0, 0, 0);
 
         bb.intersectBoxSwept(z1, movement, z2, bb, sweepResultFinal);
         bb.intersectBoxSwept(z1, movement, z3, bb, sweepResultFinal);
 
-        assertEqualsPoint(new Pos(10.4, 0.52, 0), sweepResultFinal.collidedPosition);
+        assertEqualsPoint(new Pos(10.4, 0.52, 0), new Vec(sweepResultFinal.collidedPositionX, sweepResultFinal.collidedPositionY, sweepResultFinal.collidedPositionZ));
         assertEquals(sweepResultFinal.collidedShape, bb);
     }
 
@@ -630,6 +645,13 @@ class EntityBlockPhysicsIntegrationTest {
 
         PhysicsResult res = CollisionUtils.handlePhysics(entity, new Vec(0.3, 0, 0));
         assertEqualsPoint(new Pos(0.7, 42, 0), res.newPosition());
+    }
+
+    @Test
+    void tmp(Env env) {
+        BoundingBox boundingBox = new BoundingBox(3,2.8,3);
+        Vec velocity = new Vec(1,3,5);
+        Pos entityPosition = new Pos(0,0,0);
     }
 
     // Checks C include all checks for crossing one intermediate block (3 block checks)
