@@ -8,7 +8,6 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.exception.ExceptionManager;
 import net.minestom.server.extensions.ExtensionManager;
-import net.minestom.server.gamedata.tags.TagManager;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.block.BlockManager;
 import net.minestom.server.item.armor.TrimManager;
@@ -262,10 +261,6 @@ public final class MinecraftServer {
 
     public static @Nullable ExtensionManager getExtensionManager() {
         return serverProcess.extension();
-    }
-
-    public static TagManager getTagManager() {
-        return serverProcess.tag();
     }
 
     public static TrimManager getTrimManager() {

@@ -1,24 +1,36 @@
 package net.minestom.server.network.packet.server.common;
 
-import net.minestom.server.MinecraftServer;
-import net.minestom.server.gamedata.tags.Tag;
+import net.minestom.server.gametag.BlockTag;
+import net.minestom.server.gametag.EntityTag;
+import net.minestom.server.gametag.FluidTag;
+import net.minestom.server.gametag.GameEventTag;
+import net.minestom.server.gametag.ItemTag;
+import net.minestom.server.gametag.Tag;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.ServerPacketIdentifier;
-import org.jetbrains.annotations.ApiStatus;
+import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.EnumMap;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
 public record TagsPacket(
-        @NotNull Map<Tag.BasicType, List<Tag>> tagsMap) implements ServerPacket.Configuration, ServerPacket.Play {
-    @ApiStatus.Internal
-    public static final CachedPacket DEFAULT_TAGS = new CachedPacket(new TagsPacket(MinecraftServer.getTagManager().getTagMap()));
+        @NotNull Map<NamespaceID, List<Tag>> tagsMap) implements ServerPacket.Configuration, ServerPacket.Play {
+
+    public static @NotNull Map<NamespaceID, List<Tag>> createDefaultTags() {
+        Map<NamespaceID, List<Tag>> tagsMap = new HashMap<>();
+        tagsMap.put(NamespaceID.from(BlockTag.IDENTIFIER), new ArrayList<>(BlockTag.values()));
+        tagsMap.put(NamespaceID.from(ItemTag.IDENTIFIER), new ArrayList<>(ItemTag.values()));
+        tagsMap.put(NamespaceID.from(FluidTag.IDENTIFIER), new ArrayList<>(FluidTag.values()));
+        tagsMap.put(NamespaceID.from(EntityTag.IDENTIFIER), new ArrayList<>(EntityTag.values()));
+        // tagsMap.put(NamespaceID.from(GameEventTag.IDENTIFIER), new ArrayList<>(GameEventTag.values()));
+        return tagsMap;
+    }
 
     public TagsPacket {
         tagsMap = Map.copyOf(tagsMap);
@@ -34,14 +46,14 @@ public record TagsPacket(
         for (var entry : tagsMap.entrySet()) {
             final var type = entry.getKey();
             final var tags = entry.getValue();
-            writer.write(STRING, type.getIdentifier());
+            writer.write(STRING, type.asString());
             writer.write(VAR_INT, tags.size());
             for (var tag : tags) {
-                writer.write(STRING, tag.getName().asString());
-                final var values = tag.getValues();
+                writer.write(STRING, tag.namespace().asString());
+                final var values = tag.tagValues();
                 writer.write(VAR_INT, values.size());
                 for (var name : values) {
-                    writer.write(VAR_INT, type.getFunction().apply(name.asString()));
+                    writer.write(VAR_INT, tag.getMapper().apply(name));
                 }
             }
         }
@@ -57,16 +69,17 @@ public record TagsPacket(
         return ServerPacketIdentifier.TAGS;
     }
 
-    private static Map<Tag.BasicType, List<Tag>> readTagsMap(@NotNull NetworkBuffer reader) {
-        Map<Tag.BasicType, List<Tag>> tagsMap = new EnumMap<>(Tag.BasicType.class);
+    private static Map<NamespaceID, List<Tag>> readTagsMap(@NotNull NetworkBuffer reader) {
+        Map<NamespaceID, List<Tag>> tagsMap = new HashMap<>();
         // Read amount of tag types
         final int typeCount = reader.read(VAR_INT);
         for (int i = 0; i < typeCount; i++) {
             // Read tag type
-            final Tag.BasicType tagType = Tag.BasicType.fromIdentifer(reader.read(STRING));
-            if (tagType == null) {
-                throw new IllegalArgumentException("Tag type could not be resolved");
-            }
+            final String id = reader.read(STRING);
+            // final Tag.BasicType tagType = Tag.BasicType.fromIdentifer(reader.read(STRING));
+            // if (tagType == null) {
+            //     throw new IllegalArgumentException("Tag type could not be resolved");
+            // }
 
             final int tagCount = reader.read(VAR_INT);
             for (int j = 0; j < tagCount; j++) {

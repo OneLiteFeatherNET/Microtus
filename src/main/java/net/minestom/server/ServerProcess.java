@@ -7,7 +7,6 @@ import net.minestom.server.command.CommandManager;
 import net.minestom.server.event.GlobalEventHandler;
 import net.minestom.server.exception.ExceptionManager;
 import net.minestom.server.extensions.ExtensionManager;
-import net.minestom.server.gamedata.tags.TagManager;
 import net.minestom.server.instance.Chunk;
 import net.minestom.server.instance.InstanceManager;
 import net.minestom.server.instance.block.BlockManager;
@@ -108,11 +107,6 @@ public interface ServerProcess extends Snapshotable {
      * Loads and handle extensions.
      */
     @Nullable ExtensionManager extension();
-
-    /**
-     * Handles registry tags.
-     */
-    @NotNull TagManager tag();
 
     @NotNull TrimManager trim();
 
