@@ -55,15 +55,11 @@ public non-sealed class PlayerInventory extends AbstractInventory implements Equ
 
     @Override
     public @NotNull ItemStack getEquipment(@NotNull EquipmentSlot slot) {
-        if (slot == EquipmentSlot.BODY) return ItemStack.AIR;
         return getItemStack(getSlotId(slot));
     }
 
     @Override
     public void setEquipment(@NotNull EquipmentSlot slot, @NotNull ItemStack itemStack) {
-        if (slot == EquipmentSlot.BODY)
-            Check.fail("PlayerInventory does not support body equipment");
-
         safeItemInsert(getSlotId(slot), itemStack);
     }
 
