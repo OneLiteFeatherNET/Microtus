@@ -20,12 +20,9 @@ import net.minestom.testing.Env;
 import net.minestom.testing.TestConnection;
 import net.minestom.testing.extension.MicrotusExtension;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -48,6 +45,8 @@ class PlayerMovementIntegrationTest {
         p1.addPacketToQueue(new ClientPlayerPositionPacket(new Pos(0.2, 40, 0), true));
         p1.interpretPacketQueue();
         assertEquals(new Pos(0.2, 40, 0), p1.getPosition());
+        p1.remove();
+        env.destroyInstance(instance);
     }
 
     // FIXME
@@ -120,6 +119,8 @@ class PlayerMovementIntegrationTest {
         player.addPacketToQueue(new ClientPlayerPositionPacket(new Vec(16.5, 40, -16.5), true));
         player.interpretPacketQueue();
         chunkDataPacketCollector.assertCount(viewDiameter * 2 - 1);
+        player.remove();
+        env.destroyInstance(flatInstance);
     }
 
     @Test
@@ -141,9 +142,10 @@ class PlayerMovementIntegrationTest {
         player.addPacketToQueue(new ClientPlayerPositionPacket(new Vec(160.5, 40, 160.5), true));
         player.interpretPacketQueue();
         chunkDataPacketCollector.assertCount(MathUtils.square(viewDistance * 2 + 1));
+        player.remove();
+        env.destroyInstance(flatInstance);
     }
 
-    @Disabled("This test is flaky")
     @Test
     public void testSettingsViewDistanceExpansionAndShrink(Env env) {
         int startingViewDistance = 8;
@@ -155,9 +157,10 @@ class PlayerMovementIntegrationTest {
         var player = connection.connect(instance, startingPlayerPos).join();
 
         int chunkDifference = ChunkUtils.getChunkCount(endViewDistance) - ChunkUtils.getChunkCount(startingViewDistance);
-
         // Preload chunks, otherwise our first tracker.assertCount call will fail randomly due to chunks being loaded off the main thread
-        ChunkUtils.forChunksInRange(0, 0, endViewDistance, instance::loadChunk);
+        Set<CompletableFuture<Chunk>> chunks = new HashSet<>();
+        ChunkUtils.forChunksInRange(0, 0, endViewDistance, (v1, v2) -> chunks.add(instance.loadChunk(v1, v2)));
+        CompletableFuture.allOf(chunks.toArray(CompletableFuture[]::new)).join();
 
         var tracker = connection.trackIncoming(ChunkDataPacket.class);
         player.addPacketToQueue(new ClientSettingsPacket("en_US", endViewDistance, ChatMessageType.FULL, false, (byte) 0, Player.MainHand.RIGHT, false, true));
@@ -170,5 +173,7 @@ class PlayerMovementIntegrationTest {
 
         int chunkDifference1 = ChunkUtils.getChunkCount(endViewDistance) - ChunkUtils.getChunkCount(finalViewDistance);
         tracker1.assertCount(chunkDifference1);
+        player.remove();
+        env.destroyInstance(instance);
     }
 }
