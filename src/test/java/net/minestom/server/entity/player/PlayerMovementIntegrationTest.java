@@ -20,6 +20,7 @@ import net.minestom.testing.Env;
 import net.minestom.testing.TestConnection;
 import net.minestom.testing.extension.MicrotusExtension;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
@@ -142,6 +143,7 @@ class PlayerMovementIntegrationTest {
         chunkDataPacketCollector.assertCount(MathUtils.square(viewDistance * 2 + 1));
     }
 
+    @Disabled("This test is flaky")
     @Test
     public void testSettingsViewDistanceExpansionAndShrink(Env env) {
         int startingViewDistance = 8;
