@@ -98,6 +98,8 @@ loadScripts(document, 'script');</script>
 <hr>
 <div class="type-signature"><span class="modifiers">public enum </span><span class="element-name type-name-label">BlockFace</span>
 <span class="extends-implements">extends <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/Enum.html" title="class or interface in java.lang" class="external-link">Enum</a>&lt;<a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a>&gt;</span></div>
+<div class="block">The enumeration contains all faces which a block can have in the game.
+ It's possible that specific blocks doesn't have all faces</div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -157,20 +159,27 @@ loadScripts(document, 'script');</script>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#getOppositeFace()" class="member-name-link">getOppositeFace</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isSimilar(net.minestom.server.instance.block.BlockFace)" class="member-name-link">isSimilar</a><wbr>(@NotNull <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a>&nbsp;other)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="../../utils/Direction.html" title="enum class in net.minestom.server.utils">Direction</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toDirection()" class="member-name-link">toDirection</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valueOf(java.lang.String)" class="member-name-link">valueOf</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static @NotNull <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a>[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#getValues()" class="member-name-link">getValues</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="block">Returns the static accessor which caches all entries from the values call.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>boolean</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#isSimilar(net.minestom.server.instance.block.BlockFace)" class="member-name-link">isSimilar</a><wbr>(@NotNull <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a>&nbsp;other)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="../../utils/Direction.html" title="enum class in net.minestom.server.utils">Direction</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#toDirection()" class="member-name-link">toDirection</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the <a href="../../utils/Direction.html" title="enum class in net.minestom.server.utils"><code>Direction</code></a> which correspond with the face.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#valueOf(java.lang.String)" class="member-name-link">valueOf</a><wbr>(<a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/String.html" title="class or interface in java.lang" class="external-link">String</a>&nbsp;name)</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns the enum constant of this class with the specified name.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a>[]</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#values()" class="member-name-link">values</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code>static <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a>[]</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4"><code><a href="#values()" class="member-name-link">values</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab1 method-summary-table-tab4">
 <div class="block">Returns an array containing the constants of this enum class, in
 the order they are declared.</div>
 </div>
@@ -272,7 +281,13 @@ not permitted.)</div>
 <li>
 <section class="detail" id="toDirection()">
 <h3>toDirection</h3>
-<div class="member-signature"><span class="modifiers">public</span>&nbsp;<span class="return-type"><a href="../../utils/Direction.html" title="enum class in net.minestom.server.utils">Direction</a></span>&nbsp;<span class="element-name">toDirection</span>()</div>
+<div class="member-signature"><span class="annotations">@NotNull
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull <a href="../../utils/Direction.html" title="enum class in net.minestom.server.utils">Direction</a></span>&nbsp;<span class="element-name">toDirection</span>()</div>
+<div class="block">Returns the <a href="../../utils/Direction.html" title="enum class in net.minestom.server.utils"><code>Direction</code></a> which correspond with the face.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the given direction</dd>
+</dl>
 </section>
 </li>
 <li>
@@ -312,6 +327,18 @@ not permitted.)</div>
 <dd><code>direction</code> - the direction</dd>
 <dt>Returns:</dt>
 <dd>the corresponding BlockFace</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="getValues()">
+<h3>getValues</h3>
+<div class="member-signature"><span class="annotations">@NotNull
+</span><span class="modifiers">public static</span>&nbsp;<span class="return-type">@NotNull <a href="BlockFace.html" title="enum class in net.minestom.server.instance.block">BlockFace</a>[]</span>&nbsp;<span class="element-name">getValues</span>()</div>
+<div class="block">Returns the static accessor which caches all entries from the values call.</div>
+<dl class="notes">
+<dt>Returns:</dt>
+<dd>the given array</dd>
 </dl>
 </section>
 </li>
