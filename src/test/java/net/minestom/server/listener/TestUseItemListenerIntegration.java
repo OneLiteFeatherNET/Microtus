@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MicrotusExtension.class)
-public class TestUseItemListenerIntegration {
+class TestUseItemListenerIntegration {
 
     @Test
     void useItemNonSpecial(Env env) {

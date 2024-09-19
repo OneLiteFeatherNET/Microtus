@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BlockPredicateTest {
+class BlockPredicateTest {
 
     static {
         MinecraftServer.init();
@@ -25,7 +25,7 @@ public class BlockPredicateTest {
         private static final Block SUS_GRAVEL = Block.SUSPICIOUS_GRAVEL.withHandler(SuspiciousGravelBlockHandler.INSTANCE);
 
         @Test
-        public void testMatching() {
+        void testMatching() {
             var predicate = new BlockPredicate(CompoundBinaryTag.builder()
                     .putString("LootTable", "minecraft:test")
                     .build());
@@ -36,7 +36,7 @@ public class BlockPredicateTest {
         }
 
         @Test
-        public void testEmptyTarget() {
+        void testEmptyTarget() {
             var predicate = new BlockPredicate(CompoundBinaryTag.builder()
                     .putString("LootTable", "minecraft:test")
                     .build());
@@ -46,7 +46,7 @@ public class BlockPredicateTest {
         }
 
         @Test
-        public void testEmptySource() {
+        void testEmptySource() {
             var itemNbt = ItemStack.of(Material.STONE).toItemNBT();
             var predicate = new BlockPredicate(CompoundBinaryTag.builder()
                     .putString("LootTable", "minecraft:test")
@@ -60,7 +60,7 @@ public class BlockPredicateTest {
         }
 
         @Test
-        public void testNoMatchDeep() {
+        void testNoMatchDeep() {
             var itemNbt1 = ItemStack.of(Material.STONE).toItemNBT();
             var itemNbt2 = ItemStack.of(Material.STONE).withAmount(2).toItemNBT();
             var predicate = new BlockPredicate(CompoundBinaryTag.builder()
@@ -75,7 +75,7 @@ public class BlockPredicateTest {
         }
 
         @Test
-        public void testNoBlockEntity() {
+        void testNoBlockEntity() {
             // Never match if the block has no client block entity
 
             var predicate = new BlockPredicate(CompoundBinaryTag.builder().build());
@@ -84,7 +84,7 @@ public class BlockPredicateTest {
         }
 
         @Test
-        public void testNoExposedTags() {
+        void testNoExposedTags() {
             var predicate = new BlockPredicate(CompoundBinaryTag.builder().putString("LootTable", "minecraft:stone").build());
             // No exposed tags because no block handler so cannot match
             assertFalse(predicate.test(Block.SUSPICIOUS_GRAVEL.withHandler(SuspiciousGravelBlockHandler.INSTANCE_NO_TAGS)
@@ -99,7 +99,7 @@ public class BlockPredicateTest {
     // Combinations
 
     @Test
-    public void emptyMatchAnything() {
+    void emptyMatchAnything() {
         var predicate = new BlockPredicate(null, null, null);
         assertTrue(predicate.test(Block.STONE_STAIRS));
         assertTrue(predicate.test(Block.STONE_STAIRS.withProperty("facing", "east")));
@@ -111,14 +111,14 @@ public class BlockPredicateTest {
     }
 
     @Test
-    public void blockAlone() {
+    void blockAlone() {
         var predicate = new BlockPredicate(new BlockTypeFilter.Blocks(Block.STONE));
         assertTrue(predicate.test(Block.STONE));
         assertFalse(predicate.test(Block.DIRT));
     }
 
     @Test
-    public void propsAlone() {
+    void propsAlone() {
         var predicate = new BlockPredicate(PropertiesPredicate.exact("facing", "east"));
         assertTrue(predicate.test(Block.STONE_STAIRS.withProperty("facing", "east")));
         assertTrue(predicate.test(Block.FURNACE.withProperty("facing", "east")));
@@ -126,7 +126,7 @@ public class BlockPredicateTest {
     }
 
     @Test
-    public void nbtAlone() {
+    void nbtAlone() {
         var predicate = new BlockPredicate(CompoundBinaryTag.builder().putString("LootTable", "minecraft:stone").build());
         assertTrue(predicate.test(Block.SUSPICIOUS_GRAVEL.withHandler(SuspiciousGravelBlockHandler.INSTANCE)
                 .withNbt(CompoundBinaryTag.builder().putString("LootTable", "minecraft:stone").build())));

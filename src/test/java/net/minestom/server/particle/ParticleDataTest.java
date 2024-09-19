@@ -7,38 +7,38 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class ParticleDataTest {
+class ParticleDataTest {
 
     @Test
-    public void testDustParticleDefault() {
+    void testDustParticleDefault() {
         Particle particle = Particle.DUST;
         ParticlePacket packet = new ParticlePacket(particle, true, 0, 0, 0, 0, 0, 0, 0, 0);
         assertDoesNotThrow(() -> packet.write(new NetworkBuffer()));
     }
 
     @Test
-    public void testDustParticleInvalid() {
+    void testDustParticleInvalid() {
         var particle = Particle.DUST.withProperties(null, 1);
         ParticlePacket packet = new ParticlePacket(particle, true, 0, 0, 0, 0, 0, 0, 0, 0);
         assertThrows(NullPointerException.class, () -> packet.write(new NetworkBuffer()));
     }
 
     @Test
-    public void testParticleValid() {
+    void testParticleValid() {
         var particle = Particle.ENTITY_EFFECT;
         ParticlePacket packet = new ParticlePacket(particle, true, 0, 0, 0, 0, 0, 0, 0, 0);
         assertDoesNotThrow(() -> packet.write(new NetworkBuffer()));
     }
 
     @Test
-    public void testParticleData() {
+    void testParticleData() {
         var particle = Particle.ENTITY_EFFECT;
         ParticlePacket packet = new ParticlePacket(particle, true, 0, 0, 0, 0, 0, 0, 0, 0);
         assertDoesNotThrow(() -> packet.write(new NetworkBuffer()));
     }
 
     @Test
-    public void invalidBlock() {
+    void invalidBlock() {
         var particle = Particle.BLOCK.withBlock(null);
         ParticlePacket packet = new ParticlePacket(particle, true, 0, 0, 0, 0, 0, 0, 0, 0);
         assertThrows(NullPointerException.class, () -> packet.write(new NetworkBuffer()));
