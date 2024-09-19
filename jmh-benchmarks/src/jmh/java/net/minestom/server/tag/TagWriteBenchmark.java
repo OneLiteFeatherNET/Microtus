@@ -15,6 +15,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class TagWriteBenchmark {
     static final Tag<String> TAG = Tag.String("key");
+    static final String VALUE = "value";
 
     TagHandler tagHandler;
     Tag<String> secondTag;
@@ -26,38 +27,38 @@ public class TagWriteBenchmark {
     public void setup() {
         // Tag benchmark
         this.tagHandler = TagHandler.newHandler();
-        tagHandler.setTag(TAG, "value");
+        tagHandler.setTag(TAG, VALUE);
         secondTag = Tag.String("key");
         // Concurrent map benchmark
         map = new HashMap<>();
-        map.put("key", "value");
+        map.put("key", VALUE);
         // Hash map benchmark
         concurrentMap = new ConcurrentHashMap<>();
-        concurrentMap.put("key", "value");
+        concurrentMap.put("key", VALUE);
     }
 
     @Benchmark
     public void writeConstantTag() {
-        tagHandler.setTag(TAG, "value");
+        tagHandler.setTag(TAG, VALUE);
     }
 
     @Benchmark
     public void writeDifferentTag() {
-        tagHandler.setTag(secondTag, "value");
+        tagHandler.setTag(secondTag, VALUE);
     }
 
     @Benchmark
     public void writeNewTag() {
-        tagHandler.setTag(Tag.String("key"), "value");
+        tagHandler.setTag(Tag.String("key"), VALUE);
     }
 
     @Benchmark
     public void writeConcurrentMap() {
-        concurrentMap.put("key", "value");
+        concurrentMap.put("key", VALUE);
     }
 
     @Benchmark
     public void writeMap() {
-        map.put("key", "value");
+        map.put("key", VALUE);
     }
 }

@@ -16,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 @State(Scope.Benchmark)
 public class TagReadBenchmark {
     static final Tag<String> TAG = Tag.String("key");
+    static final String VALUE = "value";
 
     @Param({"false", "true"})
     public boolean present;
@@ -30,14 +31,14 @@ public class TagReadBenchmark {
     public void setup() {
         // Tag benchmark
         this.tagHandler = TagHandler.newHandler();
-        if (present) tagHandler.setTag(TAG, "value");
+        if (present) tagHandler.setTag(TAG, VALUE);
         secondTag = Tag.String("key");
         // Concurrent map benchmark
         map = new HashMap<>();
-        if (present) map.put("key", "value");
+        if (present) map.put("key", VALUE);
         // Hash map benchmark
         concurrentMap = new ConcurrentHashMap<>();
-        if (present) concurrentMap.put("key", "value");
+        if (present) concurrentMap.put("key", VALUE);
     }
 
     @Benchmark
