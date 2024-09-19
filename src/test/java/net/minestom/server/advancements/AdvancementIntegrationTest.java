@@ -8,6 +8,8 @@ import net.minestom.testing.extension.MicrotusExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Set;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MicrotusExtension.class)
@@ -34,10 +36,10 @@ class AdvancementIntegrationTest {
         tab.addViewer(player);
         assertEquals(1, tab.getViewers().size());
         assertTrue(tab.getViewers().contains(player));
-
-        assertNotNull(AdvancementTab.getTabs(player));
-        assertEquals(1, AdvancementTab.getTabs(player).size());
-        assertTrue(AdvancementTab.getTabs(player).contains(tab));
+        Set<AdvancementTab> tabs = AdvancementTab.getTabs(player);
+        assertNotNull(tabs);
+        assertEquals(1, tabs.size());
+        assertTrue(tabs.contains(tab));
 
         // Remove viewer
         tab.removeViewer(player);
