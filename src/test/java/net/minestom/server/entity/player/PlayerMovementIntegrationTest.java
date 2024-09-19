@@ -147,7 +147,7 @@ class PlayerMovementIntegrationTest {
     }
 
     @Test
-    public void testSettingsViewDistanceExpansionAndShrink(Env env) {
+    void testSettingsViewDistanceExpansionAndShrink(Env env) {
         int startingViewDistance = 8;
         byte endViewDistance = 12;
         byte finalViewDistance = 10;

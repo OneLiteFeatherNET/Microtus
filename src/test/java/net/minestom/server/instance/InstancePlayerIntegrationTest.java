@@ -10,7 +10,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MicrotusExtension.class)
-public class InstancePlayerIntegrationTest {
+class InstancePlayerIntegrationTest {
 
     @Test
     void testInstanceDestroyWithPlayersInside(Env env) {

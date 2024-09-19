@@ -24,7 +24,7 @@ class ThreadDispatcherTest {
         assertThrows(Exception.class, () -> dispatcher.threads().add(new TickThread(1)));
 
         var partition = new Object();
-        Tickable element = (time) -> counter.incrementAndGet();
+        Tickable element = time -> counter.incrementAndGet();
         dispatcher.createPartition(partition);
         dispatcher.updateElement(element, partition);
         assertEquals(0, counter.get());
@@ -52,8 +52,8 @@ class ThreadDispatcherTest {
         ThreadDispatcher<Tickable> dispatcher = ThreadDispatcher.singleThread();
         assertEquals(1, dispatcher.threads().size());
 
-        Tickable partition = (time) -> counter1.incrementAndGet();
-        Tickable element = (time) -> counter2.incrementAndGet();
+        Tickable partition = time -> counter1.incrementAndGet();
+        Tickable element = time -> counter2.incrementAndGet();
         dispatcher.createPartition(partition);
         dispatcher.updateElement(element, partition);
         assertEquals(0, counter1.get());
@@ -83,7 +83,7 @@ class ThreadDispatcherTest {
         final AtomicInteger counter = new AtomicInteger();
         Set<Thread> threads = new CopyOnWriteArraySet<>();
         Set<Tickable> partitions = IntStream.range(0, threadCount)
-                .mapToObj(value -> (Tickable) (time) -> {
+                .mapToObj(value -> (Tickable) time -> {
                     final Thread thread = Thread.currentThread();
                     assertInstanceOf(TickThread.class, thread);
                     assertEquals(1, ((TickThread) thread).entries().size());

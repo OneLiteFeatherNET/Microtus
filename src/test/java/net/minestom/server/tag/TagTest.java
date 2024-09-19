@@ -8,10 +8,10 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class TagTest {
+class TagTest {
 
     @Test
-    public void intGet() {
+    void intGet() {
         var mutable = CompoundBinaryTag.builder().putInt("key", 5);
         var tag = Tag.Integer("key");
         var handler = TagHandler.fromCompound(CompoundBinaryTag.empty());
@@ -25,7 +25,7 @@ public class TagTest {
     }
 
     @Test
-    public void intNull() {
+    void intNull() {
         var handler = TagHandler.fromCompound(CompoundBinaryTag.builder().putInt("key", 5).build());
         // Removal
         var tag = Tag.Integer("key");
@@ -35,7 +35,7 @@ public class TagTest {
     }
 
     @Test
-    public void intRemove() {
+    void intRemove() {
         var handler = TagHandler.fromCompound(CompoundBinaryTag.builder().putInt("key", 5).build());
         // Removal
         var tag = Tag.Integer("key");
@@ -45,7 +45,7 @@ public class TagTest {
     }
 
     @Test
-    public void getAndSet() {
+    void getAndSet() {
         var handler = TagHandler.newHandler();
         var tag = Tag.Integer("key");
         assertNull(handler.getTag(tag));
@@ -54,14 +54,14 @@ public class TagTest {
     }
 
     @Test
-    public void snbt() {
+    void snbt() {
         var compound = CompoundBinaryTag.builder().putInt("key", 5).build();
         var reader = TagHandler.fromCompound(compound);
         assertEquals(TagStringIOExt.writeTag(reader.asCompound()), TagStringIOExt.writeTag(compound), "SNBT is not the same");
     }
 
     @Test
-    public void fromNbt() {
+    void fromNbt() {
         var compound = CompoundBinaryTag.builder().putInt("key", 5).build();
         var handler = TagHandler.fromCompound(compound);
         assertEquals(5, handler.getTag(Tag.Integer("key")));
@@ -69,7 +69,7 @@ public class TagTest {
     }
 
     @Test
-    public void fromNbtCache() {
+    void fromNbtCache() {
         // Ensure that TagHandler#asCompound reuse the same compound used for construction
         var compound = CompoundBinaryTag.builder().putInt("key", 5).build();
         var handler = TagHandler.fromCompound(compound);
@@ -77,7 +77,7 @@ public class TagTest {
     }
 
     @Test
-    public void defaultValue() {
+    void defaultValue() {
         var nullable = Tag.String("key");
         var notNull = nullable.defaultValue("Hey");
         assertNotSame(nullable, notNull);
@@ -92,7 +92,7 @@ public class TagTest {
     }
 
     @Test
-    public void invalidType() {
+    void invalidType() {
         var tag1 = Tag.Integer("key");
         var tag2 = Tag.String("key");
 
@@ -105,7 +105,7 @@ public class TagTest {
     }
 
     @Test
-    public void item() {
+    void item() {
         var item = ItemStack.of(Material.DIAMOND);
         var tag = Tag.ItemStack("item");
         var handler = TagHandler.newHandler();
@@ -114,7 +114,7 @@ public class TagTest {
     }
 
     @Test
-    public void tagResizing() {
+    void tagResizing() {
         var tag1 = Tag.Integer("tag1");
         var tag2 = Tag.Integer("tag2");
         var handler = TagHandler.newHandler();
@@ -127,7 +127,7 @@ public class TagTest {
     }
 
     @Test
-    public void nbtResizing() {
+    void nbtResizing() {
         var handler = TagHandler.fromCompound(CompoundBinaryTag.builder()
                 .putInt("tag1", 5)
                 .putInt("tag2", 1)
@@ -138,7 +138,7 @@ public class TagTest {
     }
 
     @Test
-    public void rehashing() {
+    void rehashing() {
         var handler = TagHandler.newHandler();
         for (int i = 0; i < 1000; i++) {
             handler.setTag(Tag.Integer("rehashing" + i), i);

@@ -11,7 +11,7 @@ import java.util.List;
 import static net.kyori.adventure.nbt.StringBinaryTag.stringBinaryTag;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestNbtComponentSerializer {
+class TestNbtComponentSerializer {
 
     @Test
     void testReadStringChildren() {

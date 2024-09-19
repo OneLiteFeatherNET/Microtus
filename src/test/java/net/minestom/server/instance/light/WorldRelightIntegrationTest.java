@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import java.util.Map;
 
 import static java.util.Map.entry;
-import static net.minestom.server.instance.BlockLightMergeIntegrationTest.assertLightInstance;
+import static net.minestom.server.assertions.LightAssertions.assertLightInstance;
 
 @ExtendWith(MicrotusExtension.class)
 class WorldRelightIntegrationTest {

@@ -10,9 +10,9 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-public class AreaEffectCloudTest {
+class AreaEffectCloudTest {
     @Test
-    public void createWithDustParticle() {
+    void createWithDustParticle() {
         int colour = 0x5505FF01;
 
         int b = (colour & 0x000000FF);
@@ -39,7 +39,7 @@ public class AreaEffectCloudTest {
     }
 
     @Test
-    public void createWithDustTransition() {
+    void createWithDustTransition() {
         int colour = 0xFF05FF01;
         int colourAfter = 0xFF05FF01;
 
@@ -74,7 +74,7 @@ public class AreaEffectCloudTest {
     }
 
     @Test
-    public void createWithBlockParticle() {
+    void createWithBlockParticle() {
         Block block = Block.GRASS_BLOCK;
         Particle particle = Particle.BLOCK.withBlock(block);
 
@@ -90,7 +90,7 @@ public class AreaEffectCloudTest {
     }
 
     @Test
-    public void createWithBlockMarkerParticle() {
+    void createWithBlockMarkerParticle() {
         Block block = Block.GRASS_BLOCK;
         Particle particle = Particle.BLOCK_MARKER.withBlock(block);
 
@@ -106,7 +106,7 @@ public class AreaEffectCloudTest {
     }
 
     @Test
-    public void createWithItemParticle() {
+    void createWithItemParticle() {
         Particle particle = Particle.ITEM.withItem(ItemStack.of(Material.ACACIA_LOG));
 
         Entity entity = new Entity(EntityTypes.AREA_EFFECT_CLOUD);
@@ -121,7 +121,7 @@ public class AreaEffectCloudTest {
     }
 
     @Test
-    public void createWithSculkChargeParticle() {
+    void createWithSculkChargeParticle() {
         Particle particle = Particle.SCULK_CHARGE.withRoll(3);
 
         Entity entity = new Entity(EntityTypes.AREA_EFFECT_CLOUD);

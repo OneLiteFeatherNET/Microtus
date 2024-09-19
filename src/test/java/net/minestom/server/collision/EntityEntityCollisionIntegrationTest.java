@@ -4,15 +4,17 @@ import net.minestom.server.coordinate.Vec;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.testing.Env;
-import net.minestom.testing.EnvTest;
+import net.minestom.testing.extension.MicrotusExtension;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@EnvTest
-public class EntityEntityCollisionIntegrationTest {
+@ExtendWith(MicrotusExtension.class)
+class EntityEntityCollisionIntegrationTest {
+
     @Test
-    public void entitySingleCollisionTest(Env env) {
+    void entitySingleCollisionTest(Env env) {
         var instance = env.createFlatInstance();
 
         for (int i = -2; i <= 2; ++i)
@@ -34,7 +36,7 @@ public class EntityEntityCollisionIntegrationTest {
     }
 
     @Test
-    public void entityMultipleCollisionTest(Env env) {
+    void entityMultipleCollisionTest(Env env) {
         var instance = env.createFlatInstance();
 
         for (int i = -2; i <= 2; ++i)
