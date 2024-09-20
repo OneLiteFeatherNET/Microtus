@@ -1,7 +1,6 @@
 package net.minestom.server.item.banner;
 
 import net.kyori.adventure.key.Key;
-import net.minestom.server.registry.ProtocolObject;
 import net.minestom.server.registry.StaticProtocolObject;
 import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
