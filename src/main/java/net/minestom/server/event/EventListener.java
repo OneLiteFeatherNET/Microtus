@@ -129,8 +129,7 @@ public interface EventListener<T extends Event> {
                 @Override
                 public @NotNull Result run(@NotNull T event) {
                     // Event cancellation
-                    if (ignoreCancelled && event instanceof CancellableEvent &&
-                            ((CancellableEvent) event).isCancelled()) {
+                    if (ignoreCancelled && event instanceof CancellableEvent cancellableEvent && cancellableEvent.isCancelled()) {
                         return Result.INVALID;
                     }
                     // Expiration predicate

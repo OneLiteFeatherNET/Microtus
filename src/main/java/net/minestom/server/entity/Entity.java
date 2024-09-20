@@ -78,6 +78,7 @@ import java.util.function.UnaryOperator;
  * <p>
  * To create your own entity you probably want to extend {@link LivingEntity} or {@link EntityCreature} instead.
  */
+@SuppressWarnings("java:S3252")
 public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, EventHandler<EntityEvent>, Taggable,
         PermissionHandler, HoverEventSource<ShowEntity>, Sound.Emitter, Shape, AcquirableSource<Entity> {
     private static final AtomicInteger LAST_ENTITY_ID = new AtomicInteger();

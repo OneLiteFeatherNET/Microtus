@@ -42,7 +42,7 @@ public interface EventBinding<E extends Event> {
             final var copy = Map.copyOf(mapped);
             final var eventTypes = copy.keySet();
 
-            Map<Class<? extends Event>, Consumer<E>> consumers = new HashMap<>(eventTypes.size());
+            Map<Class<? extends Event>, Consumer<E>> consumers = HashMap.newHashMap(eventTypes.size());
             for (var eventType : eventTypes) {
                 final var consumer = copy.get(eventType);
                 consumers.put(eventType, event -> {

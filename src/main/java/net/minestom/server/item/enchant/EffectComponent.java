@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class EffectComponent {
-    static final Map<String, DataComponent<?>> NAMESPACES = new HashMap<>(32);
+    static final Map<String, DataComponent<?>> NAMESPACES = HashMap.newHashMap(32);
     static final ObjectArray<DataComponent<?>> IDS = ObjectArray.singleThread(32);
 
     public static final DataComponent<List<ConditionalEffect<ValueEffect>>> DAMAGE_PROTECTION = register("damage_protection", ConditionalEffect.nbtType(ValueEffect.NBT_TYPE).list());

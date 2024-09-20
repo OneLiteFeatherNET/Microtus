@@ -18,7 +18,7 @@ public record BoundingBox(Vec relativeStart, Vec relativeEnd) implements Shape {
     private static final BoundingBox SNEAKING = new BoundingBox(0.6, 1.5, 0.6);
     private static final BoundingBox SMALL = new BoundingBox(0.6, 0.6, 0.6);
 
-    final static BoundingBox ZERO = new BoundingBox(Vec.ZERO, Vec.ZERO);
+    static final BoundingBox ZERO = new BoundingBox(Vec.ZERO, Vec.ZERO);
 
     public BoundingBox(double width, double height, double depth, Point offset) {
         this(Vec.fromPoint(offset), new Vec(width, height, depth).add(offset));

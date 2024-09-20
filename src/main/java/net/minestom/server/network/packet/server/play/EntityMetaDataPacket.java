@@ -58,8 +58,8 @@ public record EntityMetaDataPacket(int entityId,
         return this.entries.values()
                 .stream()
                 .map(Metadata.Entry::value)
-                .filter(entry -> entry instanceof Component)
-                .map(entry -> (Component) entry)
+                .filter(Component.class::isInstance)
+                .map(Component.class::cast)
                 .toList();
     }
 

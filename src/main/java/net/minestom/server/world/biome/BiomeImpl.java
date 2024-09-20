@@ -17,7 +17,7 @@ record BiomeImpl(
         @Nullable Registry.BiomeEntry registry
 ) implements Biome {
     // https://minecraft.wiki/w/Rain
-    private final static Double SNOW_TEMPERATURE = 0.15;
+    private static final double SNOW_TEMPERATURE = 0.15;
 
     static final BinaryTagSerializer<Biome> REGISTRY_NBT_TYPE = BinaryTagSerializer.COMPOUND.map(
             tag -> {

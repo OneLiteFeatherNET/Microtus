@@ -10,10 +10,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 final class EntityCollision {
-    static @NotNull List<EntityCollisionResult> checkCollision(@NotNull Instance instance, @NotNull BoundingBox boundingBox, @NotNull Point point, @NotNull Vec entityVelocity, double extendRadius, @NotNull Function<Entity, Boolean> entityFilter, @Nullable PhysicsResult physicsResult) {
+    static @NotNull List<EntityCollisionResult> checkCollision(@NotNull Instance instance, @NotNull BoundingBox boundingBox, @NotNull Point point, @NotNull Vec entityVelocity, double extendRadius, @NotNull Predicate<Entity> entityFilter, @Nullable PhysicsResult physicsResult) {
         double minimumRes = physicsResult != null ? physicsResult.res().res : Double.MAX_VALUE;
 
         List<EntityCollisionResult> result = new ArrayList<>();
@@ -24,7 +24,7 @@ final class EntityCollision {
         for (Entity e : instance.getNearbyEntities(point, extendRadius + maxDistance + projectileDistance)) {
             SweepResult sweepResult = new SweepResult(minimumRes, 0, 0, 0, null, 0, 0, 0, 0, 0, 0);
 
-            if (!entityFilter.apply(e)) continue;
+            if (!entityFilter.test(e)) continue;
             if (!e.hasEntityCollision()) continue;
 
             // Overlapping with entity, math can't be done we return the entity
