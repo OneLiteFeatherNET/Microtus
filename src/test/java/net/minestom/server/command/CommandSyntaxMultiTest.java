@@ -4,7 +4,6 @@ import net.minestom.server.command.builder.Command;
 import net.minestom.server.command.builder.arguments.Argument;
 import org.junit.jupiter.api.Test;
 
-import java.lang.String;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;

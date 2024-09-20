@@ -2,7 +2,6 @@ package net.minestom.server.entity.ai.target;
 
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityCreature;
-import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.ai.TargetSelector;
 import net.minestom.server.instance.Instance;
 import org.jetbrains.annotations.NotNull;
