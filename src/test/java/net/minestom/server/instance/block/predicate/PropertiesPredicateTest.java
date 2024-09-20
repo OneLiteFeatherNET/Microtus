@@ -13,10 +13,10 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.params.provider.Arguments.arguments;
 
-public class PropertiesPredicateTest {
+class PropertiesPredicateTest {
 
     @Test
-    public void testMultiMatch() {
+    void testMultiMatch() {
         var predicate = new PropertiesPredicate(Map.of("facing", new PropertiesPredicate.ValuePredicate.Exact("east"),
                 "shape", new PropertiesPredicate.ValuePredicate.Exact("inner_left")));
         assertTrue(predicate.test(Block.STONE_STAIRS.withProperties(Map.of("facing", "east", "shape", "inner_left"))));
@@ -39,7 +39,7 @@ public class PropertiesPredicateTest {
 
         @ParameterizedTest(name = "{0}")
         @MethodSource("exactTests")
-        public void matchExact(String name, String expected, String actual, boolean valid) {
+        void matchExact(String name, String expected, String actual, boolean valid) {
             var predicate = new PropertiesPredicate.ValuePredicate.Exact(expected);
             assertEquals(valid, predicate.test(actual));
         }
@@ -66,7 +66,7 @@ public class PropertiesPredicateTest {
 
         @ParameterizedTest(name = "{0}")
         @MethodSource("rangeTests")
-        public void matchRange(String name, String min, String max, String value, boolean valid) {
+        void matchRange(String name, String min, String max, String value, boolean valid) {
             var predicate = new PropertiesPredicate.ValuePredicate.Range(min, max);
             assertEquals(valid, predicate.test(value));
         }

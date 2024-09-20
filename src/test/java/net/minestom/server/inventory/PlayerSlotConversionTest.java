@@ -28,11 +28,11 @@ class PlayerSlotConversionTest {
 
     @Test
     void armor() {
-        assertEquals(HELMET_SLOT, 41);
-        assertEquals(CHESTPLATE_SLOT, 42);
-        assertEquals(LEGGINGS_SLOT, 43);
-        assertEquals(BOOTS_SLOT, 44);
-        assertEquals(OFFHAND_SLOT, 45);
+        assertEquals(41, HELMET_SLOT);
+        assertEquals(42, CHESTPLATE_SLOT);
+        assertEquals(43, LEGGINGS_SLOT);
+        assertEquals(44, BOOTS_SLOT);
+        assertEquals(45, OFFHAND_SLOT);
 
         // Convert 5-8 & 45 into 41-45
         assertEquals(HELMET_SLOT, convertPlayerInventorySlot(5, OFFSET));
@@ -44,11 +44,11 @@ class PlayerSlotConversionTest {
 
     @Test
     void craft() {
-        assertEquals(CRAFT_RESULT, 36);
-        assertEquals(CRAFT_SLOT_1, 37);
-        assertEquals(CRAFT_SLOT_2, 38);
-        assertEquals(CRAFT_SLOT_3, 39);
-        assertEquals(CRAFT_SLOT_4, 40);
+        assertEquals(36, CRAFT_RESULT);
+        assertEquals(37, CRAFT_SLOT_1);
+        assertEquals(38, CRAFT_SLOT_2);
+        assertEquals(39, CRAFT_SLOT_3);
+        assertEquals(40, CRAFT_SLOT_4);
 
         // Convert 0-4 into 36-40
         assertEquals(CRAFT_RESULT, convertPlayerInventorySlot(0, OFFSET));

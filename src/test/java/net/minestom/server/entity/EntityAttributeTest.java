@@ -17,10 +17,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MicrotusExtension.class)
-public class EntityAttributeTest {
+class EntityAttributeTest {
 
     @Test
-    public void testEntityUpdatesAttributes(Env env) {
+    void testEntityUpdatesAttributes(Env env) {
         var instance = env.createFlatInstance();
         instance.loadChunk(0, 0).join();
 
@@ -46,7 +46,7 @@ public class EntityAttributeTest {
     }
 
     @Test
-    public void testPlayerUpdatesAttributes(Env env) {
+    void testPlayerUpdatesAttributes(Env env) {
         var instance = env.createFlatInstance();
         var connection = env.createConnection();
         var player = connection.connect(instance, new Pos(0, 42, 1)).join();
@@ -74,7 +74,7 @@ public class EntityAttributeTest {
     }
 
     @Test
-    public void testDirectlyAddAttributes(Env env) {
+    void testDirectlyAddAttributes(Env env) {
         var instance = env.createFlatInstance();
         var connection = env.createConnection();
         var player = connection.connect(instance, new Pos(0, 42, 1)).join();

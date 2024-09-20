@@ -17,7 +17,7 @@ import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class BlockPredicatesTest extends AbstractItemComponentTest<BlockPredicates> {
+class BlockPredicatesTest extends AbstractItemComponentTest<BlockPredicates> {
 
     @Override
     protected @NotNull DataComponent<BlockPredicates> component() {
@@ -34,7 +34,7 @@ public class BlockPredicatesTest extends AbstractItemComponentTest<BlockPredicat
     }
 
     @Test
-    public void testSingleBlockNbtInput() throws IOException {
+    void testSingleBlockNbtInput() throws IOException {
         var tag = TagStringIOExt.readTag("{blocks:'minecraft:stone'}");
         var component = ItemComponent.CAN_PLACE_ON.read(BinaryTagSerializer.Context.EMPTY, tag);
         var expected = new BlockPredicates(new BlockPredicate(Block.STONE));
@@ -42,7 +42,7 @@ public class BlockPredicatesTest extends AbstractItemComponentTest<BlockPredicat
     }
 
     @Test
-    public void testMultiMatch() {
+    void testMultiMatch() {
         // Just sanity check that it actually runs both of the predicates
         var predicate = new BlockPredicates(List.of(BlockPredicate.NONE, BlockPredicate.ALL), true);
         assertTrue(predicate.test(Block.AIR));

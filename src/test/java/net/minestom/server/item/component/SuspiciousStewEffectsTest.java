@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class SuspiciousStewEffectsTest extends AbstractItemComponentTest<SuspiciousStewEffects> {
+class SuspiciousStewEffectsTest extends AbstractItemComponentTest<SuspiciousStewEffects> {
 
     @Override
     protected @NotNull DataComponent<SuspiciousStewEffects> component() {

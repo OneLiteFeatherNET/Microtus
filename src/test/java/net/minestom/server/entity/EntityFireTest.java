@@ -13,9 +13,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MicrotusExtension.class)
-public class EntityFireTest {
+class EntityFireTest {
     @Test
-    public void duration(Env env) {
+    void duration(Env env) {
         var instance = env.createFlatInstance();
         instance.loadChunk(0, 0).join();
 
@@ -33,11 +33,11 @@ public class EntityFireTest {
         }
 
         assertFalse(entity.getEntityMeta().isOnFire());
-        assertEquals(entity.getFireTicks(), 0);
+        assertEquals(0, entity.getFireTicks());
     }
 
     @Test
-    public void nonNegativeFireDuration(Env env) {
+    void nonNegativeFireDuration(Env env) {
         var instance = env.createFlatInstance();
         instance.loadChunk(0, 0).join();
 
@@ -60,11 +60,11 @@ public class EntityFireTest {
         });
 
         entity.setFireTicks(1);
-        assertEquals(entity.getFireTicks(), 0);
+        assertEquals(0, entity.getFireTicks());
     }
 
     @Test
-    public void setFireMetadata(Env env) {
+    void setFireMetadata(Env env) {
         var instance = env.createFlatInstance();
         instance.loadChunk(0, 0).join();
 
@@ -85,7 +85,7 @@ public class EntityFireTest {
     }
 
     @Test
-    public void extinguishEvent(Env env) {
+    void extinguishEvent(Env env) {
         var instance = env.createFlatInstance();
         instance.loadChunk(0, 0).join();
 

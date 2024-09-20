@@ -1,6 +1,6 @@
 package net.minestom.server.instance;
 
-import net.minestom.server.MinecraftServer;
+import net.minestom.server.ServerFlag;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.network.packet.server.play.ChunkDataPacket;
 import net.minestom.server.utils.chunk.ChunkUtils;
@@ -38,7 +38,7 @@ class ChunkViewerIntegrationTest {
 
     @Test
     void renderDistance(Env env) {
-        final int viewRadius = MinecraftServer.getChunkViewDistance();
+        final int viewRadius = ServerFlag.CHUNK_VIEW_DISTANCE;
         final int count = ChunkUtils.getChunkCount(viewRadius);
         var instance = env.createFlatInstance();
         var connection = env.createConnection();

@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MicrotusExtension.class)
-public class PathfinderIntegrationTest {
+class PathfinderIntegrationTest {
 
     /**
      * Validate that the path is valid
@@ -30,9 +30,9 @@ public class PathfinderIntegrationTest {
      */
     private boolean validateNodes(List<PNode> nodes, Instance instance) {
         if (nodes == null) fail("Path is null");
-        if (nodes.size() == 0) fail("Path is empty");
+        if (nodes.isEmpty()) fail("Path is empty");
 
-        nodes.forEach((node) -> {
+        nodes.forEach(node -> {
             if (instance.getBlock(node.blockX(), node.blockY(), node.blockZ()).isSolid()) {
                 fail("Node is inside a block");
             }
@@ -42,7 +42,7 @@ public class PathfinderIntegrationTest {
     }
 
     @Test
-    public void testTall(Env env) {
+    void testTall(Env env) {
         var i = env.createFlatInstance();
 
         ChunkUtils.forChunksInRange(0, 0, 10, (x, z) -> {
@@ -64,7 +64,7 @@ public class PathfinderIntegrationTest {
     }
 
     @Test
-    public void testStraightLine(Env env) {
+    void testStraightLine(Env env) {
         var i = env.createFlatInstance();
 
         ChunkUtils.forChunksInRange(0, 0, 10, (x, z) -> {
@@ -83,7 +83,7 @@ public class PathfinderIntegrationTest {
     }
 
     @Test
-    public void testShort(Env env) {
+    void testShort(Env env) {
         var i = env.createFlatInstance();
 
         ChunkUtils.forChunksInRange(0, 0, 10, (x, z) -> {
@@ -103,7 +103,7 @@ public class PathfinderIntegrationTest {
     }
 
     @Test
-    public void testBug(Env env) {
+    void testBug(Env env) {
         var i = env.createFlatInstance();
 
         ChunkUtils.forChunksInRange(0, 0, 10, (x, z) -> {
@@ -127,20 +127,19 @@ public class PathfinderIntegrationTest {
     }
 
     @Test
-    public void testPFNodeEqual(Env env) {
+    void testPFNodeEqual(Env env) {
         PNode node1 = new PNode(new Pos(0.777, 0, 0), 2, 0, PNode.NodeType.WALK, null);
         PNode node2 = new PNode(new Pos(0.777, 0, 0), 0, 3, PNode.NodeType.WALK, node1);
 
         Set<PNode> nodes = new HashSet<>();
         nodes.add(node1);
         nodes.add(node2);
-
-        assert node1.equals(node2);
-        assert nodes.size() == 1;
+        assertEquals(node1, node2);
+        assertEquals(1, nodes.size());
     }
 
     @Test
-    public void testStraightLineBlocked(Env env) {
+    void testStraightLineBlocked(Env env) {
         var i = env.createFlatInstance();
 
         ChunkUtils.forChunksInRange(0, 0, 10, (x, z) -> {
@@ -190,7 +189,7 @@ public class PathfinderIntegrationTest {
     }
 
     @Test
-    public void testGravitySnap(Env env) {
+    void testGravitySnap(Env env) {
         var i = env.createFlatInstance();
 
         ChunkUtils.forChunksInRange(0, 0, 10, (x, z) -> {

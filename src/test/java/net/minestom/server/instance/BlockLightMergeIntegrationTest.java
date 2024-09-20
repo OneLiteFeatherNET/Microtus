@@ -7,15 +7,12 @@ import net.minestom.testing.extension.MicrotusExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static java.util.Map.entry;
 import static net.minestom.server.assertions.LightAssertions.assertLightInstance;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.fail;
 
 @ExtendWith(MicrotusExtension.class)
 class BlockLightMergeIntegrationTest {

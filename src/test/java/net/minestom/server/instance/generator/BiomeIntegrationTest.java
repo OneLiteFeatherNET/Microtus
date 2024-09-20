@@ -14,18 +14,18 @@ import java.util.Arrays;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(MicrotusExtension.class)
-public class BiomeIntegrationTest {
+class BiomeIntegrationTest {
 
-    private static int PLAINS_ID, BADLANDS_ID;
+    private static int plainsId, badLandsId;
 
     @BeforeAll
-    public static void prepareTest(Env env) {
-        PLAINS_ID = env.process().biome().getId(Biome.PLAINS);
-        BADLANDS_ID = env.process().biome().getId(Biome.BADLANDS);
+    static void prepareTest(Env env) {
+        plainsId = env.process().biome().getId(Biome.PLAINS);
+        badLandsId = env.process().biome().getId(Biome.BADLANDS);
     }
 
     @Test
-    public void chunkBiomeSet(Env env) {
+    void chunkBiomeSet(Env env) {
         final int minSection = -1;
         final int maxSection = 5;
         final int chunkX = 3;
@@ -42,13 +42,13 @@ public class BiomeIntegrationTest {
         generator.generate(chunkUnits);
 
         // Reminder because I (matt) forgot: biome palettes are 4x4x4 sections, so x=2 is really x=8 in the chunk.
-        assertEquals(BADLANDS_ID, sections[0].biomes().get(0, 0, 0));
-        assertEquals(PLAINS_ID, sections[1].biomes().get(1, 0, 0));
-        assertEquals(BADLANDS_ID, sections[1].biomes().get(2, 0, 0));
+        assertEquals(badLandsId, sections[0].biomes().get(0, 0, 0));
+        assertEquals(plainsId, sections[1].biomes().get(1, 0, 0));
+        assertEquals(badLandsId, sections[1].biomes().get(2, 0, 0));
     }
 
     @Test
-    public void chunkBiomeFill(Env env) {
+    void chunkBiomeFill(Env env) {
         final int minSection = -1;
         final int maxSection = 5;
         final int chunkX = 3;
@@ -64,7 +64,7 @@ public class BiomeIntegrationTest {
         generator.generate(chunkUnits);
         for (var section : sections) {
             section.biomes().getAll((x, y, z, value) ->
-                    assertEquals(PLAINS_ID, value));
+                    assertEquals(plainsId, value));
         }
     }
 }

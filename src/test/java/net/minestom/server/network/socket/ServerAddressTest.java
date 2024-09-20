@@ -11,7 +11,6 @@ import java.nio.file.Files;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class ServerAddressTest {
 

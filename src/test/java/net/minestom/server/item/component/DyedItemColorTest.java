@@ -13,7 +13,7 @@ import java.util.Map;
 import static java.util.Map.entry;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class DyedItemColorTest extends AbstractItemComponentTest<DyedItemColor> {
+class DyedItemColorTest extends AbstractItemComponentTest<DyedItemColor> {
 
     @Override
     protected @NotNull DataComponent<DyedItemColor> component() {

@@ -6,70 +6,70 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-public class BlockTypeFilterTest {
+class BlockTypeFilterTest {
 
     static {
         MinecraftServer.init();
     }
 
     @Test
-    public void testBlockExact() {
+    void testBlockExact() {
         var filter = new BlockTypeFilter.Blocks(Block.STONE);
         var block = Block.STONE;
         assertTrue(filter.test(block));
     }
 
     @Test
-    public void testBlockExactMulti() {
+    void testBlockExactMulti() {
         var filter = new BlockTypeFilter.Blocks(Block.STONE, Block.STONE_STAIRS);
         var block = Block.STONE_STAIRS;
         assertTrue(filter.test(block));
     }
 
     @Test
-    public void testBlockExactMultiMissing() {
+    void testBlockExactMultiMissing() {
         var filter = new BlockTypeFilter.Blocks(Block.STONE, Block.STONE_STAIRS);
         var block = Block.DIRT;
         assertFalse(filter.test(block));
     }
 
     @Test
-    public void testBlockExactDifferentPropertyA() {
+    void testBlockExactDifferentPropertyA() {
         var filter = new BlockTypeFilter.Blocks(Block.STONE_STAIRS);
         var block = Block.STONE_STAIRS.withProperty("shape", "inner_left");
         assertTrue(filter.test(block));
     }
 
     @Test
-    public void testBlockExactDifferentPropertyB() {
+    void testBlockExactDifferentPropertyB() {
         var filter = new BlockTypeFilter.Blocks(Block.STONE_STAIRS.withProperty("shape", "inner_left"));
         var block = Block.STONE_STAIRS;
         assertTrue(filter.test(block));
     }
 
     @Test
-    public void testTag() {
+    void testTag() {
         var filter = new BlockTypeFilter.Tag("minecraft:doors");
         var block = Block.OAK_DOOR;
         assertTrue(filter.test(block));
     }
 
     @Test
-    public void testTagDifferentProperty() {
+    void testTagDifferentProperty() {
         var filter = new BlockTypeFilter.Tag("minecraft:doors");
         var block = Block.OAK_DOOR.withProperty("half", "upper");
         assertTrue(filter.test(block));
     }
 
     @Test
-    public void testTagMissing() {
+    void testTagMissing() {
         var filter = new BlockTypeFilter.Tag("minecraft:doors");
         var block = Block.STONE;
         assertFalse(filter.test(block));
     }
 
     @Test
-    public void testTagUnknown() {
+    void testTagUnknown() {
         assertThrows(NullPointerException.class, () -> new BlockTypeFilter.Tag("minecraft:not_a_tag"));
     }
 }

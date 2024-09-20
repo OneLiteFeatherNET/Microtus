@@ -47,7 +47,7 @@ class BlockTest {
             assertEquals(possible, block.withProperties(possible.properties()));
         }
 
-        assertEquals(block.withProperty("facing", "north").getProperty("facing"), "north");
+        assertEquals("north", block.withProperty("facing", "north").getProperty("facing"));
         assertNotEquals(block.withProperty("facing", "north"), block.withProperty("facing", "south"));
     }
 
@@ -65,7 +65,7 @@ class BlockTest {
         Block b2 = Block.CHEST;
         assertEquals(b1.withNbt(nbt), b2.withNbt(nbt));
 
-        assertEquals(b1.withProperty("facing", "north").getProperty("facing"), "north");
+        assertEquals("north", b1.withProperty("facing", "north").getProperty("facing"));
         assertEquals(b1.withProperty("facing", "north"), b2.withProperty("facing", "north"));
     }
 
