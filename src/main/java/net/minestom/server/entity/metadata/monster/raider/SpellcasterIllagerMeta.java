@@ -30,7 +30,7 @@ public class SpellcasterIllagerMeta extends AbstractIllagerMeta {
         DISAPPEAR,
         BLINDNESS;
 
-        private final static Spell[] VALUES = values();
+        private static final Spell[] VALUES = values();
     }
 
 }

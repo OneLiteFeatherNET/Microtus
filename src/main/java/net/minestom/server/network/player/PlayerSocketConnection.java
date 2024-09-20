@@ -43,7 +43,7 @@ import java.util.zip.DataFormatException;
  */
 @ApiStatus.Internal
 public class PlayerSocketConnection extends PlayerConnection {
-    private final static Logger LOGGER = LoggerFactory.getLogger(PlayerSocketConnection.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PlayerSocketConnection.class);
     private static final ObjectPool<BinaryBuffer> POOL = ObjectPool.BUFFER_POOL;
 
     private final Worker worker;

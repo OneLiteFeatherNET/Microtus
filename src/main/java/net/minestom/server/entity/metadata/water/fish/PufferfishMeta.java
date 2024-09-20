@@ -38,7 +38,6 @@ public class PufferfishMeta extends AbstractFishMeta {
         SEMI_PUFFED,
         FULLY_PUFFED;
 
-        private final static State[] VALUES = values();
+        private static final State[] VALUES = values();
     }
-
 }

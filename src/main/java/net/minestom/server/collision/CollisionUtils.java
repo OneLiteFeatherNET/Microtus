@@ -15,7 +15,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
-import java.util.function.Function;
+import java.util.function.Predicate;
 
 @ApiStatus.Internal
 public final class CollisionUtils {
@@ -51,7 +51,7 @@ public final class CollisionUtils {
      *                     This is used to extend the search radius for entities we collide with
      *                     For players this is (0.3^2 + 0.3^2 + 1.8^2) ^ (1/3) ~= 1.51
      */
-    public static @NotNull Collection<EntityCollisionResult> checkEntityCollisions(@NotNull Instance instance, @NotNull BoundingBox boundingBox, @NotNull Point pos, @NotNull Vec velocity, double extendRadius, @NotNull Function<Entity, Boolean> entityFilter, @Nullable PhysicsResult physicsResult) {
+    public static @NotNull Collection<EntityCollisionResult> checkEntityCollisions(@NotNull Instance instance, @NotNull BoundingBox boundingBox, @NotNull Point pos, @NotNull Vec velocity, double extendRadius, @NotNull Predicate<Entity> entityFilter, @Nullable PhysicsResult physicsResult) {
         return EntityCollision.checkCollision(instance, boundingBox, pos, velocity, extendRadius, entityFilter, physicsResult);
     }
 
@@ -65,7 +65,7 @@ public final class CollisionUtils {
      * @param physicsResult optional physics result
      * @return the entity collision results
      */
-    public static @NotNull Collection<EntityCollisionResult> checkEntityCollisions(@NotNull Entity entity, @NotNull Vec velocity, double extendRadius, @NotNull Function<Entity, Boolean> entityFilter, @Nullable PhysicsResult physicsResult) {
+    public static @NotNull Collection<EntityCollisionResult> checkEntityCollisions(@NotNull Entity entity, @NotNull Vec velocity, double extendRadius, @NotNull Predicate<Entity> entityFilter, @Nullable PhysicsResult physicsResult) {
         return EntityCollision.checkCollision(entity.getInstance(), entity.getBoundingBox(), entity.getPosition(), velocity, extendRadius, entityFilter, physicsResult);
     }
 
