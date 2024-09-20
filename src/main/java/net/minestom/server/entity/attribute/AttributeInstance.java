@@ -181,7 +181,7 @@ public final class AttributeInstance {
             result *= (1.0f + modifier.amount());
         }
 
-        return Math.clamp(result, getAttribute().minValue(), getAttribute().maxValue());
+        return Math.clamp(result, attribute().minValue(), attribute().maxValue());
     }
 
     /**
