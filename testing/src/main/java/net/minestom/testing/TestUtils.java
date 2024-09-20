@@ -63,4 +63,8 @@ public final class TestUtils {
         }
         return formattedString.toString().trim();
     }
+
+    private TestUtils() {
+        // Do nothing since this is a utility class
+    }
 }
