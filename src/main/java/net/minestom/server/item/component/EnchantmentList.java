@@ -33,7 +33,7 @@ public record EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Int
         public @NotNull EnchantmentList read(@NotNull NetworkBuffer buffer) {
             int size = buffer.read(NetworkBuffer.VAR_INT);
             Check.argCondition(size < 0 || size > Short.MAX_VALUE, "Invalid enchantment list size: {0}", size);
-            Map<DynamicRegistry.Key<Enchantment>, Integer> enchantments = new HashMap<>(size);
+            Map<DynamicRegistry.Key<Enchantment>, Integer> enchantments = HashMap.newHashMap(size);
             for (int i = 0; i < size; i++) {
                 DynamicRegistry.Key<Enchantment> enchantment = buffer.read(Enchantment.NETWORK_TYPE);
                 enchantments.put(enchantment, buffer.read(NetworkBuffer.VAR_INT));
@@ -63,7 +63,7 @@ public record EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Int
 
             // We have two variants of the enchantment list, one with {levels: {...}, show_in_tooltip: boolean} and one with {...}.
             CompoundBinaryTag levels = tag.keySet().contains("levels") ? tag.getCompound("levels") : tag;
-            Map<DynamicRegistry.Key<Enchantment>, Integer> enchantments = new HashMap<>(levels.size());
+            Map<DynamicRegistry.Key<Enchantment>, Integer> enchantments = HashMap.newHashMap(levels.size());
             for (Map.Entry<String, ? extends BinaryTag> entry : levels) {
                 DynamicRegistry.Key<Enchantment> enchantment = Enchantment.NBT_TYPE.read(context, stringBinaryTag(entry.getKey()));
                 int level = BinaryTagSerializer.INT.read(entry.getValue());

@@ -1,7 +1,6 @@
 package net.minestom.server.entity.pathfinding.followers;
 
 import net.minestom.server.collision.CollisionUtils;
-import net.minestom.server.collision.PhysicsResult;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -45,10 +44,9 @@ public class WaterNodeFollower implements NodeFollower {
         }
 
         var instance = entity.getInstance();
-        if (instance != null)
-            if (instance.getBlock(position).isLiquid()) {
-                speed *= WATER_SPEED_MULTIPLIER;
-            }
+        if (instance != null && instance.getBlock(position).isLiquid()) {
+            speed *= WATER_SPEED_MULTIPLIER;
+        }
 
         final double radians = Math.atan2(dz, dx);
         final double speedX = Math.cos(radians) * speed;

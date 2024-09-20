@@ -13,7 +13,12 @@ import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Manager used to register {@link Command commands}.
@@ -117,10 +122,8 @@ public final class CommandManager {
         final ExecutableCommand executable = parsedCommand.executable();
         final ExecutableCommand.Result executeResult = executable.execute(sender);
         final CommandResult result = resultConverter(executable, executeResult, command);
-        if (result.getType() == CommandResult.Type.UNKNOWN) {
-            if (unknownCommandCallback != null) {
-                this.unknownCommandCallback.apply(sender, command);
-            }
+        if (result.getType() == CommandResult.Type.UNKNOWN && unknownCommandCallback != null) {
+            this.unknownCommandCallback.apply(sender, command);
         }
         return result;
     }

@@ -1,7 +1,6 @@
 package net.minestom.server.extras.query.response;
 
 import net.minestom.server.MinecraftServer;
-import net.minestom.server.network.ConnectionState;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -24,7 +23,7 @@ public enum QueryKey {
     HOST_PORT("hostport", () -> String.valueOf(MinecraftServer.getServer().getPort())),
     HOST_IP("hostip", () -> Objects.requireNonNullElse(MinecraftServer.getServer().getAddress(), "localhost"));
 
-    static QueryKey[] VALUES = QueryKey.values();
+    static final QueryKey[] VALUES = QueryKey.values();
 
     private final String key;
     private final Supplier<String> value;

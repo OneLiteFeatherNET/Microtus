@@ -3,12 +3,13 @@ package net.minestom.server.ping;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.event.server.ServerListPingEvent;
-import net.minestom.server.network.ConnectionManager;
-import net.minestom.server.network.ConnectionState;
 import net.minestom.server.utils.identity.NamedAndIdentified;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * Represents the data sent to the player when responding to a ping event.
