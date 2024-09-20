@@ -34,4 +34,7 @@ final class TagSerializerImpl {
             }
         };
     }
+
+    private TagSerializerImpl() {
+    }
 }
