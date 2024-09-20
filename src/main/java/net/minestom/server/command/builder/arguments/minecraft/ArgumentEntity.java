@@ -165,21 +165,20 @@ public class ArgumentEntity extends Argument<EntityFinder> {
         final String structureData = structure.substring(1, structure.length() - 1);
         //System.out.println("structure data: " + structureData);
 
-        String currentArgument = "";
+        StringBuilder currentArgument = new StringBuilder();
         for (int i = 0; i < structureData.length(); i++) {
             final char c = structureData.charAt(i);
             if (c == '=') {
-
                 // Replace all unnecessary spaces
-                currentArgument = currentArgument.trim();
+                String argument = currentArgument.toString().trim();
 
-                if (!VALID_ARGUMENTS.contains(currentArgument))
-                    throw new ArgumentSyntaxException("Argument name '" + currentArgument + "' does not exist", input, INVALID_ARGUMENT_NAME);
+                if (!VALID_ARGUMENTS.contains(argument))
+                    throw new ArgumentSyntaxException("Argument name '" + argument + "' does not exist", input, INVALID_ARGUMENT_NAME);
 
-                i = parseArgument(sender, entityFinder, currentArgument, input, structureData, i);
-                currentArgument = ""; // Reset current argument
+                i = parseArgument(sender, entityFinder, argument, input, structureData, i);
+                currentArgument.setLength(0); // Reset current argument
             } else {
-                currentArgument += c;
+                currentArgument.append(c);
             }
         }
 
