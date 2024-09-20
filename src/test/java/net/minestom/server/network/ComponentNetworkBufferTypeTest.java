@@ -12,7 +12,7 @@ import static net.minestom.server.network.NetworkBuffer.COMPONENT;
 import static net.minestom.server.network.NetworkBuffer.NBT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class ComponentNetworkBufferTypeTest {
+class ComponentNetworkBufferTypeTest {
     // All of these tests use NbtComponentSerializerImpl as the source of truth. If there is an inaccuracy in that
     // implementation, these tests will not be accurate. This will be replaced with the adventure serializer once
     // it is merged into adventure (see https://github.com/KyoriPowered/adventure/pull/1084). This can be considered

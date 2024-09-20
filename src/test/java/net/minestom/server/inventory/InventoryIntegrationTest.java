@@ -17,12 +17,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MicrotusExtension.class)
-public class InventoryIntegrationTest {
+class InventoryIntegrationTest {
 
     private static final ItemStack MAGIC_STACK = ItemStack.of(Material.DIAMOND, 3);
 
     @Test
-    public void setSlotDuplicateTest(Env env) {
+    void setSlotDuplicateTest(Env env) {
         var instance = env.createFlatInstance();
         var connection = env.createConnection();
         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
@@ -46,7 +46,7 @@ public class InventoryIntegrationTest {
     }
 
     @Test
-    public void setCursorItemDuplicateTest(Env env) {
+    void setCursorItemDuplicateTest(Env env) {
         var instance = env.createFlatInstance();
         var connection = env.createConnection();
         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
@@ -70,7 +70,7 @@ public class InventoryIntegrationTest {
     }
 
     @Test
-    public void clearInventoryTest(Env env) {
+    void clearInventoryTest(Env env) {
         var instance = env.createFlatInstance();
         var connection = env.createConnection();
         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
@@ -113,7 +113,7 @@ public class InventoryIntegrationTest {
     }
 
     @Test
-    public void clearingPlayerInventoryClearsCursorTest(Env env) {
+    void clearingPlayerInventoryClearsCursorTest(Env env) {
 
         var instance = env.createFlatInstance();
         var connection = env.createConnection();
@@ -146,7 +146,7 @@ public class InventoryIntegrationTest {
     }
 
     @Test
-    public void closeInventoryTest(Env env) {
+    void closeInventoryTest(Env env) {
         var instance = env.createFlatInstance();
         var connection = env.createConnection();
         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
@@ -158,7 +158,7 @@ public class InventoryIntegrationTest {
     }
 
     @Test
-    public void openInventoryOnItemDropFromInventoryClosingTest(Env env) {
+    void openInventoryOnItemDropFromInventoryClosingTest(Env env) {
         var instance = env.createFlatInstance();
         var connection = env.createConnection();
         var player = connection.connect(instance, new Pos(0, 42, 0)).join();
@@ -181,7 +181,7 @@ public class InventoryIntegrationTest {
     }
 
     @Test
-    public void testInnerInventorySlotSending(Env env) {
+    void testInnerInventorySlotSending(Env env) {
         // Inner inventory changes are sent along with the open inventory
         // Otherwise, they are sent separately
 

@@ -82,7 +82,7 @@ class InstanceBlockIntegrationTest {
     }
 
     @Test
-    public void handlerPresentInPlacementRuleUpdate(Env env) {
+    void handlerPresentInPlacementRuleUpdate(Env env) {
         AtomicReference<Block> currentBlock = new AtomicReference<>();
         env.process().block().registerHandler(SuspiciousGravelBlockHandler.INSTANCE.getNamespaceId(), () -> SuspiciousGravelBlockHandler.INSTANCE);
         env.process().block().registerBlockPlacementRule(new BlockPlacementRule(Block.SUSPICIOUS_GRAVEL) {

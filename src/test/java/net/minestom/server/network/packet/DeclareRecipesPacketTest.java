@@ -11,10 +11,10 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-public class DeclareRecipesPacketTest {
+class DeclareRecipesPacketTest {
 
     @Test
-    public void cannotWriteAirIngredient() {
+    void cannotWriteAirIngredient() {
         var packet = new DeclareRecipesPacket(List.of(
                 new DeclareRecipesPacket.DeclaredShapelessCraftingRecipe(
                         "recipe1", "group1", RecipeCategory.Crafting.BUILDING,

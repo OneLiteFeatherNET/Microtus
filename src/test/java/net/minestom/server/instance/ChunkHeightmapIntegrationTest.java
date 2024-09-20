@@ -17,7 +17,7 @@ class ChunkHeightmapIntegrationTest {
         var chunk = instance.getChunk(0, 0);
 
         var heightmap = chunk.motionBlockingHeightmap().getHeight(0, 0);
-        assertEquals(heightmap, 39);
+        assertEquals(39, heightmap);
     }
 
     @Test
@@ -29,13 +29,13 @@ class ChunkHeightmapIntegrationTest {
         {
             instance.setBlock(0, 40, 0, Block.STONE);
             var heightmap = chunk.motionBlockingHeightmap().getHeight(0, 0);
-            assertEquals(heightmap, 40);
+            assertEquals(40, heightmap);
         }
 
         {
             instance.setBlock(0, 45, 0, Block.STONE);
             var heightmap = chunk.motionBlockingHeightmap().getHeight(0, 0);
-            assertEquals(heightmap, 45);
+            assertEquals(45, heightmap);
         }
     }
 
@@ -48,13 +48,13 @@ class ChunkHeightmapIntegrationTest {
         {
             instance.setBlock(0, 45, 0, Block.STONE);
             var heightmap = chunk.motionBlockingHeightmap().getHeight(0, 0);
-            assertEquals(heightmap, 45);
+            assertEquals(45, heightmap);
         }
 
         {
             instance.setBlock(0, 45, 0, Block.AIR);
             var heightmap = chunk.motionBlockingHeightmap().getHeight(0, 0);
-            assertEquals(heightmap, 39);
+            assertEquals(39, heightmap);
         }
     }
 }

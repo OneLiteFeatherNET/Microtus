@@ -13,7 +13,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-public class UnbreakableTest extends AbstractItemComponentTest<Unbreakable> {
+class UnbreakableTest extends AbstractItemComponentTest<Unbreakable> {
     @Override
     protected @NotNull DataComponent<Unbreakable> component() {
         return ItemComponent.UNBREAKABLE;

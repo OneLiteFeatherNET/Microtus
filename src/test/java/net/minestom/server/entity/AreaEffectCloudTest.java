@@ -8,6 +8,7 @@ import net.minestom.server.item.Material;
 import net.minestom.server.particle.Particle;
 import org.junit.jupiter.api.Test;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class AreaEffectCloudTest {
@@ -86,7 +87,7 @@ class AreaEffectCloudTest {
         assert gotParticle == particle;
 
         Particle.Block gotBlock = (Particle.Block) gotParticle;
-        assert gotBlock.block() == block;
+        assertEquals(block, gotBlock.block());
     }
 
     @Test
@@ -102,7 +103,7 @@ class AreaEffectCloudTest {
         assert gotParticle == particle;
 
         Particle.BlockMarker gotBlock = (Particle.BlockMarker) gotParticle;
-        assert gotBlock.block() == block;
+        assertEquals(block, gotBlock.block());
     }
 
     @Test
@@ -117,7 +118,7 @@ class AreaEffectCloudTest {
         assert gotParticle == particle;
 
         Particle.Item gotBlock = (Particle.Item) gotParticle;
-        assert gotBlock.item().material() == Material.ACACIA_LOG;
+        assertEquals(Material.ACACIA_LOG, gotBlock.item().material());
     }
 
     @Test
@@ -132,6 +133,6 @@ class AreaEffectCloudTest {
         assert gotParticle == particle;
 
         Particle.SculkCharge gotBlock = (Particle.SculkCharge) gotParticle;
-        assert gotBlock.roll() == 3;
+        assertEquals(3, gotBlock.roll());
     }
 }

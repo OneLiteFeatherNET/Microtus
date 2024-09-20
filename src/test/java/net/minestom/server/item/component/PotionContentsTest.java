@@ -16,7 +16,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class PotionContentsTest extends AbstractItemComponentTest<PotionContents> {
+class PotionContentsTest extends AbstractItemComponentTest<PotionContents> {
 
     @Override
     protected @NotNull DataComponent<PotionContents> component() {

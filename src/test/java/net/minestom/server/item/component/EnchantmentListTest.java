@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class EnchantmentListTest extends AbstractItemComponentTest<EnchantmentList> {
+class EnchantmentListTest extends AbstractItemComponentTest<EnchantmentList> {
     // This is not a test, but it creates a compile error if the component type is changed away from Unit,
     // as a reminder that tests should be added for that new component type.
     private static final List<DataComponent<EnchantmentList>> SHARED_COMPONENTS = List.of(
