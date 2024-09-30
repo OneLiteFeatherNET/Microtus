@@ -449,6 +449,7 @@ public class ExtensionManager {
     private List<DiscoveredExtension> generateLoadOrder(@NotNull List<DiscoveredExtension> discoveredExtensions) {
         // Extension --> Extensions it depends on.
         Map<DiscoveredExtension, List<DiscoveredExtension>> dependencyMap = new HashMap<>();
+        Map<DiscoveredExtension, List<DiscoveredExtension>> softDependencyMap = new HashMap<>();
 
         // Put dependencies in dependency map
         {
@@ -464,6 +465,7 @@ public class ExtensionManager {
             for (DiscoveredExtension discoveredExtension : discoveredExtensions) {
 
                 List<DiscoveredExtension> dependencies = new ArrayList<>(discoveredExtension.getDependencies().length);
+                List<DiscoveredExtension> softDependencies = new ArrayList<>(discoveredExtension.getSoftDependencies().length);
 
                 // Map the dependencies into DiscoveredExtensions.
                 for (String dependencyName : discoveredExtension.getDependencies()) {
@@ -493,6 +495,31 @@ public class ExtensionManager {
                     dependencies.add(dependencyExtension);
 
                 }
+
+                // Map the dependencies into DiscoveredExtensions.
+                for (String dependencyName : discoveredExtension.getSoftDependencies()) {
+
+                    DiscoveredExtension dependencyExtension = extensionMap.get(dependencyName.toLowerCase());
+                    // Specifies an extension we don't have.
+                    if (dependencyExtension == null) {
+
+                        // attempt to see if it is not already loaded (happens with dynamic (re)loading)
+                        if (extensions.containsKey(dependencyName.toLowerCase())) {
+
+                            softDependencies.add(extensions.get(dependencyName.toLowerCase()).getOrigin());
+                            continue; // Go to the next loop in this dependency loop, this iteration is done.
+
+                        }
+                    }
+                    // This will add null for an unknown-extension
+                    softDependencies.add(dependencyExtension);
+
+                }
+
+                softDependencyMap.put(
+                        discoveredExtension,
+                        softDependencies
+                );
 
                 dependencyMap.put(
                         discoveredExtension,

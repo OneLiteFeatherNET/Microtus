@@ -1,5 +1,6 @@
 package net.minestom.server.instance.block.jukebox;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.registry.DynamicRegistry;
@@ -14,8 +15,8 @@ import org.jetbrains.annotations.Nullable;
 
 public sealed interface JukeboxSong extends ProtocolObject, JukeboxSongs permits JukeboxSongImpl {
 
-    @NotNull NetworkBuffer.Type<DynamicRegistry.Key<JukeboxSong>> NETWORK_TYPE = NetworkBuffer.RegistryKey(Registries::jukeboxSong);
-    @NotNull BinaryTagSerializer<DynamicRegistry.Key<JukeboxSong>> NBT_TYPE = BinaryTagSerializer.registryKey(Registries::jukeboxSong);
+    @NotNull NetworkBuffer.Type<Key> NETWORK_TYPE = NetworkBuffer.RegistryKey(Registries::jukeboxSong);
+    @NotNull BinaryTagSerializer<Key> NBT_TYPE = BinaryTagSerializer.registryKey(Registries::jukeboxSong);
 
     static @NotNull JukeboxSong create(
             @NotNull SoundEvent soundEvent,

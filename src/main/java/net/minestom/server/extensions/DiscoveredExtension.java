@@ -40,6 +40,9 @@ public final class DiscoveredExtension {
     /** List of extension names that this depends on. */
     private String[] dependencies;
 
+    /** List of extension names that can depends on. */
+    private String[] softDependencies;
+
     /** List of Repositories and URLs that this depends on. */
     private ExternalDependencies externalDependencies;
 
@@ -89,6 +92,11 @@ public final class DiscoveredExtension {
     @NotNull
     public String[] getDependencies() {
         return dependencies;
+    }
+
+    @NotNull
+    public String[] getSoftDependencies() {
+        return softDependencies;
     }
 
     @NotNull
@@ -179,6 +187,11 @@ public final class DiscoveredExtension {
         // No dependencies were specified
         if (extension.dependencies == null) {
             extension.dependencies = new String[0];
+        }
+
+        // No soft dependencies were specified
+        if (extension.softDependencies == null) {
+            extension.softDependencies = new String[0];
         }
 
         // No external dependencies were specified;

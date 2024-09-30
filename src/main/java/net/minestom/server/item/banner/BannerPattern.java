@@ -1,9 +1,7 @@
 package net.minestom.server.item.banner;
 
 import net.kyori.adventure.key.Key;
-import net.minestom.server.registry.ProtocolObject;
 import net.minestom.server.registry.StaticProtocolObject;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +17,7 @@ public sealed interface BannerPattern extends StaticProtocolObject, BannerPatter
         return BannerPatternImpl.getSafe(namespaceID);
     }
 
-    static @Nullable BannerPattern fromNamespaceId(@NotNull NamespaceID namespaceID) {
+    static @Nullable BannerPattern fromNamespaceId(@NotNull Key namespaceID) {
         return fromNamespaceId(namespaceID.asString());
     }
 

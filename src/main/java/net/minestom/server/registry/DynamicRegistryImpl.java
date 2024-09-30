@@ -9,7 +9,6 @@ import net.minestom.server.gamedata.DataPack;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.configuration.RegistryDataPacket;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
@@ -19,7 +18,11 @@ import org.jetbrains.annotations.UnknownNullability;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.locks.ReentrantLock;
@@ -28,33 +31,12 @@ import java.util.concurrent.locks.ReentrantLock;
 final class DynamicRegistryImpl<T> implements DynamicRegistry<T> {
     private static final UnsupportedOperationException UNSAFE_REMOVE_EXCEPTION = new UnsupportedOperationException("Unsafe remove is disabled. Enable by setting the system property 'minestom.registry.unsafe-ops' to 'true'");
 
-    record KeyImpl<T>(@NotNull NamespaceID namespace) implements Key<T> {
-
-        @Override
-        public String toString() {
-            return namespace.asString();
-        }
-
-        @Override
-        public int hashCode() {
-            return namespace.hashCode();
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            KeyImpl<?> key = (KeyImpl<?>) obj;
-            return namespace.equals(key.namespace);
-        }
-    }
-
     private final CachedPacket vanillaRegistryDataPacket = new CachedPacket(() -> createRegistryDataPacket(true));
 
     private final ReentrantLock lock = new ReentrantLock(); // Protects writes
     private final List<T> entryById = new CopyOnWriteArrayList<>();
-    private final Map<NamespaceID, T> entryByName = new ConcurrentHashMap<>();
-    private final List<NamespaceID> idByName = new CopyOnWriteArrayList<>();
+    private final Map<net.kyori.adventure.key.Key, T> entryByName = new ConcurrentHashMap<>();
+    private final List<net.kyori.adventure.key.Key> idByName = new CopyOnWriteArrayList<>();
     private final List<DataPack> packById = new CopyOnWriteArrayList<>();
 
     private final String id;
@@ -83,25 +65,25 @@ final class DynamicRegistryImpl<T> implements DynamicRegistry<T> {
     }
 
     @Override
-    public @Nullable T get(@NotNull NamespaceID namespace) {
+    public @Nullable T get(@NotNull net.kyori.adventure.key.Key namespace) {
         return entryByName.get(namespace);
     }
 
     @Override
-    public @Nullable Key<T> getKey(@NotNull T value) {
+    public @Nullable net.kyori.adventure.key.Key getKey(@NotNull T value) {
         int index = entryById.indexOf(value);
-        return index == -1 ? null : getKey(index);
+        return index == -1 ? null : getKey(index).key();
     }
 
     @Override
-    public @Nullable Key<T> getKey(int id) {
+    public @Nullable net.kyori.adventure.key.Key getKey(int id) {
         if (id < 0 || id >= entryById.size())
             return null;
-        return Key.of(idByName.get(id));
+        return idByName.get(id);
     }
 
     @Override
-    public @Nullable NamespaceID getName(int id) {
+    public @Nullable net.kyori.adventure.key.Key getName(int id) {
         if (id < 0 || id >= entryById.size())
             return null;
         return idByName.get(id);
@@ -115,7 +97,7 @@ final class DynamicRegistryImpl<T> implements DynamicRegistry<T> {
     }
 
     @Override
-    public int getId(@NotNull NamespaceID id) {
+    public int getId(@NotNull net.kyori.adventure.key.Key id) {
         return idByName.indexOf(id);
     }
 
@@ -125,7 +107,7 @@ final class DynamicRegistryImpl<T> implements DynamicRegistry<T> {
     }
 
     @Override
-    public @NotNull DynamicRegistry.Key<T> register(@NotNull NamespaceID namespaceId, @NotNull T object, @Nullable DataPack pack) {
+    public @NotNull net.kyori.adventure.key.Key register(@NotNull net.kyori.adventure.key.Key namespaceId, @NotNull T object, @Nullable DataPack pack) {
         // This check is disabled in tests because we remake server processes over and over.
         // todo: re-enable this check
 //        Check.stateCondition((!DebugUtils.INSIDE_TEST && MinecraftServer.process() != null && !MinecraftServer.isStarted()) && !ServerFlag.REGISTRY_LATE_REGISTER,
@@ -144,14 +126,14 @@ final class DynamicRegistryImpl<T> implements DynamicRegistry<T> {
             idByName.add(namespaceId);
             packById.add(id, pack);
             vanillaRegistryDataPacket.invalidate();
-            return Key.of(namespaceId);
+            return namespaceId;
         } finally {
             lock.unlock();
         }
     }
 
     @Override
-    public boolean remove(@NotNull NamespaceID namespaceId) throws UnsupportedOperationException {
+    public boolean remove(@NotNull net.kyori.adventure.key.Key namespaceId) throws UnsupportedOperationException {
         if (!ServerFlag.REGISTRY_UNSAFE_OPS) throw UNSAFE_REMOVE_EXCEPTION;
 
         lock.lock();
@@ -197,7 +179,7 @@ final class DynamicRegistryImpl<T> implements DynamicRegistry<T> {
                 data = (CompoundBinaryTag) nbtType.write(context, entry);
             }
             //noinspection DataFlowIssue
-            entries.add(new RegistryDataPacket.Entry(getKey(i).name(), data));
+            entries.add(new RegistryDataPacket.Entry(getKey(i).asString(), data));
         }
         return new RegistryDataPacket(id, entries);
     }
