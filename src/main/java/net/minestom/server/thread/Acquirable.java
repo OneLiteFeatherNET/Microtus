@@ -1,11 +1,11 @@
 package net.minestom.server.thread;
 
 import net.minestom.server.entity.Entity;
-import net.minestom.server.utils.async.AsyncUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -116,8 +116,7 @@ public sealed interface Acquirable<T> permits AcquirableImpl {
      * @see #sync(Consumer)
      */
     default void async(@NotNull Consumer<T> consumer) {
-        // TODO per-thread list
-        AsyncUtils.runAsync(() -> sync(consumer));
+        CompletableFuture.runAsync(() -> sync(consumer));
     }
 
     /**

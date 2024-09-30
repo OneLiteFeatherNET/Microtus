@@ -10,7 +10,7 @@ import java.util.function.IntUnaryOperator;
  * <p>
  * 0 is the default value.
  */
-public interface Palette extends NetworkBuffer.Writer {
+public interface Palette extends NetworkBuffer.Writer, Cloneable {
     static Palette blocks() {
         return newPalette(16, 8, 4);
     }

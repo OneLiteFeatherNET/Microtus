@@ -10,10 +10,11 @@ import net.minestom.server.instance.Section;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
 import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.snapshot.ChunkSnapshot;
+import net.minestom.server.snapshot.SnapshotUpdater;
 import net.minestom.server.utils.ArrayUtils;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.NamespaceID;
-import net.minestom.server.utils.async.AsyncUtils;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.validate.Check;
 import net.minestom.server.world.biome.Biome;
@@ -55,7 +56,7 @@ public class AnvilLoader implements IChunkLoader {
     private final ReentrantLock perRegionLoadedChunksLock = new ReentrantLock();
 
     // thread local to avoid contention issues with locks
-    private final ThreadLocal<Int2ObjectMap<CompoundBinaryTag>> blockStateId2ObjectCacheTLS = ThreadLocal.withInitial(Int2ObjectArrayMap::new);
+    private volatile Int2ObjectMap<CompoundBinaryTag> blockStateId2ObjectCacheTLS = new Int2ObjectArrayMap<>();
 
     public AnvilLoader(@NotNull Path path) {
         this.path = path;
@@ -314,73 +315,76 @@ public class AnvilLoader implements IChunkLoader {
 
     @Override
     public @NotNull CompletableFuture<Void> saveInstance(@NotNull Instance instance) {
-        final CompoundBinaryTag nbt = instance.tagHandler().asCompound();
-        if (nbt.size() == 0) {
-            // Instance has no data
-            return AsyncUtils.VOID_FUTURE;
-        }
-        try (OutputStream os = Files.newOutputStream(levelPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
-            BinaryTagIO.writer().writeNamed(Map.entry("", nbt), os, BinaryTagIO.Compression.GZIP);
-        } catch (IOException e) {
-            MinecraftServer.getExceptionManager().handleException(e);
-        }
-        return AsyncUtils.VOID_FUTURE;
+        return CompletableFuture.completedFuture(instance).thenAccept(givenInstance -> {
+            final CompoundBinaryTag nbt = givenInstance.tagHandler().asCompound();
+            if (nbt.size() == 0) {
+                // Instance has no data
+                return;
+            }
+            try (OutputStream os = Files.newOutputStream(levelPath, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING)) {
+                BinaryTagIO.writer().writeNamed(Map.entry("", nbt), os, BinaryTagIO.Compression.GZIP);
+            } catch (IOException e) {
+                MinecraftServer.getExceptionManager().handleException(e);
+            }
+        });
     }
 
     @Override
     public @NotNull CompletableFuture<Void> saveChunk(@NotNull Chunk chunk) {
-        final int chunkX = chunk.getChunkX();
-        final int chunkZ = chunk.getChunkZ();
+        return CompletableFuture.completedFuture(chunk).thenAccept(supplyiedChunk -> {
+            final int chunkX = supplyiedChunk.getChunkX();
+            final int chunkZ = supplyiedChunk.getChunkZ();
+            final ChunkSnapshot snapshot = SnapshotUpdater.update(chunk);
 
-        // Find the region file or create an empty one if missing
-        RegionFile mcaFile;
-        fileCreationLock.lock();
-        try {
-            mcaFile = getMCAFile(chunkX, chunkZ);
-            if (mcaFile == null) {
-                final int regionX = ChunkUtils.toRegionCoordinate(chunkX);
-                final int regionZ = ChunkUtils.toRegionCoordinate(chunkZ);
-                final String regionFileName = RegionFile.getFileName(regionX, regionZ);
-                try {
-                    Path regionFile = regionPath.resolve(regionFileName);
-                    if (!Files.exists(regionFile)) {
-                        Files.createDirectories(regionFile.getParent());
-                        Files.createFile(regionFile);
+            // Find the region file or create an empty one if missing
+            RegionFile mcaFile;
+            fileCreationLock.lock();
+            try {
+                mcaFile = getMCAFile(chunkX, chunkZ);
+                if (mcaFile == null) {
+                    final int regionX = ChunkUtils.toRegionCoordinate(chunkX);
+                    final int regionZ = ChunkUtils.toRegionCoordinate(chunkZ);
+                    final String regionFileName = RegionFile.getFileName(regionX, regionZ);
+                    try {
+                        Path regionFile = regionPath.resolve(regionFileName);
+                        if (!Files.exists(regionFile)) {
+                            Files.createDirectories(regionFile.getParent());
+                            Files.createFile(regionFile);
+                        }
+
+                        mcaFile = new RegionFile(regionFile);
+                        alreadyLoaded.put(regionFileName, mcaFile);
+                    } catch (IOException e) {
+                        LOGGER.error("Failed to create region file for " + chunkX + ", " + chunkZ, e);
+                        MinecraftServer.getExceptionManager().handleException(e);
+                        throw new RuntimeException(e);
                     }
-
-                    mcaFile = new RegionFile(regionFile);
-                    alreadyLoaded.put(regionFileName, mcaFile);
-                } catch (IOException e) {
-                    LOGGER.error("Failed to create region file for " + chunkX + ", " + chunkZ, e);
-                    MinecraftServer.getExceptionManager().handleException(e);
-                    return AsyncUtils.VOID_FUTURE;
                 }
+            } finally {
+                fileCreationLock.unlock();
             }
-        } finally {
-            fileCreationLock.unlock();
-        }
 
-        try {
-            final CompoundBinaryTag.Builder chunkData = CompoundBinaryTag.builder();
+            try {
+                final CompoundBinaryTag.Builder chunkData = CompoundBinaryTag.builder();
 
-            chunkData.putInt("DataVersion", MinecraftServer.DATA_VERSION);
-            chunkData.putInt("xPos", chunkX);
-            chunkData.putInt("zPos", chunkZ);
-            chunkData.putInt("yPos", chunk.getMinSection());
-            chunkData.putString("status", "minecraft:full");
-            chunkData.putLong("LastUpdate", chunk.getInstance().getWorldAge());
+                chunkData.putInt("DataVersion", MinecraftServer.DATA_VERSION);
+                chunkData.putInt("xPos", chunkX);
+                chunkData.putInt("zPos", chunkZ);
+                chunkData.putInt("yPos", supplyiedChunk.getMinSection());
+                chunkData.putString("status", "minecraft:full");
+                chunkData.putLong("LastUpdate", supplyiedChunk.getInstance().getWorldAge());
 
-            saveSectionData(chunk, chunkData);
+                saveSectionData(snapshot, chunkData);
 
-            mcaFile.writeChunkData(chunkX, chunkZ, chunkData.build());
-        } catch (IOException e) {
-            LOGGER.error("Failed to save chunk " + chunkX + ", " + chunkZ, e);
-            MinecraftServer.getExceptionManager().handleException(e);
-        }
-        return AsyncUtils.VOID_FUTURE;
+                mcaFile.writeChunkData(chunkX, chunkZ, chunkData.build());
+            } catch (IOException e) {
+                LOGGER.error("Failed to save chunk " + chunkX + ", " + chunkZ, e);
+                MinecraftServer.getExceptionManager().handleException(e);
+            }
+        });
     }
 
-    private void saveSectionData(@NotNull Chunk chunk, @NotNull CompoundBinaryTag.Builder chunkData) {
+    private void saveSectionData(@NotNull ChunkSnapshot chunk, @NotNull CompoundBinaryTag.Builder chunkData) {
         final ListBinaryTag.Builder<CompoundBinaryTag> sections = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
         final ListBinaryTag.Builder<CompoundBinaryTag> blockEntities = ListBinaryTag.builder(BinaryTagTypes.COMPOUND);
 
@@ -392,102 +396,95 @@ public class AnvilLoader implements IChunkLoader {
         IntList blockPaletteIndices = new IntArrayList(); // Map block indices by state id to avoid doing a deep comparison on every block tag
         int[] blockIndices = new int[Chunk.CHUNK_SECTION_SIZE * Chunk.CHUNK_SECTION_SIZE * Chunk.CHUNK_SECTION_SIZE];
 
-        synchronized (chunk) {
-            for (int sectionY = chunk.getMinSection(); sectionY < chunk.getMaxSection(); sectionY++) {
-                final Section section = chunk.getSection(sectionY);
+        for (int sectionY = chunk.minSection(); sectionY < chunk.maxSection(); sectionY++) {
+            final Section section = chunk.getSection(sectionY);
 
-                final CompoundBinaryTag.Builder sectionData = CompoundBinaryTag.builder();
-                sectionData.putByte("Y", (byte) sectionY);
+            final CompoundBinaryTag.Builder sectionData = CompoundBinaryTag.builder();
+            sectionData.putByte("Y", (byte) sectionY);
 
-                // Lighting
-                byte[] skyLight = section.skyLight().array();
-                if (skyLight != null && skyLight.length > 0)
-                    sectionData.putByteArray("SkyLight", skyLight);
-                byte[] blockLight = section.blockLight().array();
-                if (blockLight != null && blockLight.length > 0)
-                    sectionData.putByteArray("BlockLight", blockLight);
+            // Lighting
+            byte[] skyLight = section.skyLight().array();
+            if (skyLight != null && skyLight.length > 0)
+                sectionData.putByteArray("SkyLight", skyLight);
+            byte[] blockLight = section.blockLight().array();
+            if (blockLight != null && blockLight.length > 0)
+                sectionData.putByteArray("BlockLight", blockLight);
 
-                // Build block, biome palettes & collect block entities
-                for (int sectionLocalY = 0; sectionLocalY < Chunk.CHUNK_SECTION_SIZE; sectionLocalY++) {
-                    for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
-                        for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
-                            final int y = sectionLocalY + (sectionY * Chunk.CHUNK_SECTION_SIZE);
+            // Build block, biome palettes & collect block entities
+            for (int sectionLocalY = 0; sectionLocalY < Chunk.CHUNK_SECTION_SIZE; sectionLocalY++) {
+                for (int z = 0; z < Chunk.CHUNK_SIZE_Z; z++) {
+                    for (int x = 0; x < Chunk.CHUNK_SIZE_X; x++) {
+                        final int y = sectionLocalY + (sectionY * Chunk.CHUNK_SECTION_SIZE);
 
-                            final int blockIndex = x + sectionLocalY * 16 * 16 + z * 16;
-                            final Block block = chunk.getBlock(x, y, z);
+                        final int blockIndex = x + sectionLocalY * 16 * 16 + z * 16;
+                        final Block block = chunk.getBlock(x, y, z);
 
-                            // Add block state
-                            final int blockStateId = block.stateId();
-                            final CompoundBinaryTag blockState = getBlockState(block);
-                            int blockPaletteIndex = blockPaletteIndices.indexOf(blockStateId);
-                            if (blockPaletteIndex == -1) {
-                                blockPaletteIndex = blockPaletteEntries.size();
-                                blockPaletteEntries.add(blockState);
-                                blockPaletteIndices.add(blockStateId);
-                            }
-                            blockIndices[blockIndex] = blockPaletteIndex;
+                        // Add block state
+                        final int blockStateId = block.stateId();
+                        final CompoundBinaryTag blockState = getBlockState(block);
+                        int blockPaletteIndex = blockPaletteIndices.indexOf(blockStateId);
+                        if (blockPaletteIndex == -1) {
+                            blockPaletteIndex = blockPaletteEntries.size();
+                            blockPaletteEntries.add(blockState);
+                            blockPaletteIndices.add(blockStateId);
+                        }
+                        blockIndices[blockIndex] = blockPaletteIndex;
 
-                            // Add biome (biome are stored for 4x4x4 volumes, avoid unnecessary work)
-                            if (x % 4 == 0 && sectionLocalY % 4 == 0 && z % 4 == 0) {
-                                int biomeIndex = (x / 4) + (sectionLocalY / 4) * 4 * 4 + (z / 4) * 4;
-                                final DynamicRegistry.Key<Biome> biomeKey = chunk.getBiome(x, y, z);
-                                final BinaryTag biomeName = StringBinaryTag.stringBinaryTag(biomeKey.name());
+                        // Add biome (biome are stored for 4x4x4 volumes, avoid unnecessary work)
+                        if (x % 4 == 0 && sectionLocalY % 4 == 0 && z % 4 == 0) {
+                            int biomeIndex = (x / 4) + (sectionLocalY / 4) * 4 * 4 + (z / 4) * 4;
+                            final DynamicRegistry.Key<Biome> biomeKey = chunk.getBiome(x, y, z);
+                            final BinaryTag biomeName = StringBinaryTag.stringBinaryTag(biomeKey.name());
 
-                                int biomePaletteIndex = biomePalette.indexOf(biomeName);
-                                if (biomePaletteIndex == -1) {
-                                    biomePaletteIndex = biomePalette.size();
-                                    biomePalette.add(biomeName);
-                                }
-
-                                biomeIndices[biomeIndex] = biomePaletteIndex;
+                            int biomePaletteIndex = biomePalette.indexOf(biomeName);
+                            if (biomePaletteIndex == -1) {
+                                biomePaletteIndex = biomePalette.size();
+                                biomePalette.add(biomeName);
                             }
 
-                            // Add block entity if present
-                            final BlockHandler handler = block.handler();
-                            final CompoundBinaryTag originalNBT = block.nbt();
-                            if (originalNBT != null || handler != null) {
-                                CompoundBinaryTag.Builder blockEntityTag = CompoundBinaryTag.builder();
-                                if (originalNBT != null) {
-                                    blockEntityTag.put(originalNBT);
-                                }
-                                if (handler != null) {
-                                    blockEntityTag.putString("id", handler.getNamespaceId().asString());
-                                }
-                                blockEntityTag.putInt("x", x + Chunk.CHUNK_SIZE_X * chunk.getChunkX());
-                                blockEntityTag.putInt("y", y);
-                                blockEntityTag.putInt("z", z + Chunk.CHUNK_SIZE_Z * chunk.getChunkZ());
-                                blockEntityTag.putByte("keepPacked", (byte) 0);
-                                blockEntities.add(blockEntityTag.build());
-                            }
+                            biomeIndices[biomeIndex] = biomePaletteIndex;
+                        }
+
+                        // Add block entity if present
+                        final CompoundBinaryTag originalNBT = block.nbt();
+                        if (originalNBT != null) {
+                            CompoundBinaryTag.Builder blockEntityTag = CompoundBinaryTag.builder();
+                            blockEntityTag.put(originalNBT);
+                            blockEntityTag.putString("id", block.namespace().asString());
+                            blockEntityTag.putInt("x", x + Chunk.CHUNK_SIZE_X * chunk.chunkX());
+                            blockEntityTag.putInt("y", y);
+                            blockEntityTag.putInt("z", z + Chunk.CHUNK_SIZE_Z * chunk.chunkZ());
+                            blockEntityTag.putByte("keepPacked", (byte) 0);
+                            blockEntities.add(blockEntityTag.build());
                         }
                     }
                 }
-
-                // Save the block and biome palettes
-                final CompoundBinaryTag.Builder blockStates = CompoundBinaryTag.builder();
-                blockStates.put("palette", ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, blockPaletteEntries));
-                if (blockPaletteEntries.size() > 1) {
-                    // If there is only one entry we do not need to write the packed indices
-                    var bitsPerEntry = (int) Math.max(1, Math.ceil(Math.log(blockPaletteEntries.size()) / Math.log(2)));
-                    blockStates.putLongArray("data", ArrayUtils.pack(blockIndices, bitsPerEntry));
-                }
-                sectionData.put("block_states", blockStates.build());
-
-                final CompoundBinaryTag.Builder biomes = CompoundBinaryTag.builder();
-                biomes.put("palette", ListBinaryTag.listBinaryTag(BinaryTagTypes.STRING, biomePalette));
-                if (biomePalette.size() > 1) {
-                    // If there is only one entry we do not need to write the packed indices
-                    var bitsPerEntry = (int) Math.max(1, Math.ceil(Math.log(biomePalette.size()) / Math.log(2)));
-                    biomes.putLongArray("data", ArrayUtils.pack(biomeIndices, bitsPerEntry));
-                }
-                sectionData.put("biomes", biomes.build());
-
-                biomePalette.clear();
-                blockPaletteEntries.clear();
-                blockPaletteIndices.clear();
-
-                sections.add(sectionData.build());
             }
+
+            // Save the block and biome palettes
+            final CompoundBinaryTag.Builder blockStates = CompoundBinaryTag.builder();
+            blockStates.put("palette", ListBinaryTag.listBinaryTag(BinaryTagTypes.COMPOUND, blockPaletteEntries));
+            if (blockPaletteEntries.size() > 1) {
+                // If there is only one entry we do not need to write the packed indices
+                var bitsPerEntry = (int) Math.max(1, Math.ceil(Math.log(blockPaletteEntries.size()) / Math.log(2)));
+                blockStates.putLongArray("data", ArrayUtils.pack(blockIndices, bitsPerEntry));
+            }
+            sectionData.put("block_states", blockStates.build());
+
+            final CompoundBinaryTag.Builder biomes = CompoundBinaryTag.builder();
+            biomes.put("palette", ListBinaryTag.listBinaryTag(BinaryTagTypes.STRING, biomePalette));
+            if (biomePalette.size() > 1) {
+                // If there is only one entry we do not need to write the packed indices
+                var bitsPerEntry = (int) Math.max(1, Math.ceil(Math.log(biomePalette.size()) / Math.log(2)));
+                biomes.putLongArray("data", ArrayUtils.pack(biomeIndices, bitsPerEntry));
+            }
+            sectionData.put("biomes", biomes.build());
+
+            biomePalette.clear();
+            blockPaletteEntries.clear();
+            blockPaletteIndices.clear();
+
+            sections.add(sectionData.build());
         }
 
         chunkData.put("sections", sections.build());
@@ -495,7 +492,7 @@ public class AnvilLoader implements IChunkLoader {
     }
 
     private CompoundBinaryTag getBlockState(final Block block) {
-        return blockStateId2ObjectCacheTLS.get().computeIfAbsent(block.stateId(), _unused -> {
+        return blockStateId2ObjectCacheTLS.computeIfAbsent(block.stateId(), _unused -> {
             final CompoundBinaryTag.Builder tag = CompoundBinaryTag.builder();
             tag.putString("Name", block.name());
 

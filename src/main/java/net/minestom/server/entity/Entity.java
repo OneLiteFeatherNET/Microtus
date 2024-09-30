@@ -48,7 +48,6 @@ import net.minestom.server.timer.Scheduler;
 import net.minestom.server.timer.TaskSchedule;
 import net.minestom.server.utils.ArrayUtils;
 import net.minestom.server.utils.PacketUtils;
-import net.minestom.server.utils.async.AsyncUtils;
 import net.minestom.server.utils.block.BlockIterator;
 import net.minestom.server.utils.chunk.ChunkCache;
 import net.minestom.server.utils.chunk.ChunkUtils;
@@ -313,7 +312,7 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
         } else {
             // Position is in the same chunk, keep it sync
             endCallback.run();
-            return AsyncUtils.empty();
+            return CompletableFuture.completedFuture(null);
         }
     }
 

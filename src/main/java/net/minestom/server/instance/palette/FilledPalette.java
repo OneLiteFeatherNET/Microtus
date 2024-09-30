@@ -41,8 +41,8 @@ record FilledPalette(byte dim, int value) implements SpecializedPalette.Immutabl
     }
 
     @Override
-    public @NotNull SpecializedPalette clone() {
-        return this;
+    public @NotNull FilledPalette clone() {
+        return new FilledPalette(dim, value);
     }
 
     @Override

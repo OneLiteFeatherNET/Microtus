@@ -87,7 +87,6 @@ import net.minestom.server.thread.Acquirable;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.PacketUtils;
-import net.minestom.server.utils.async.AsyncUtils;
 import net.minestom.server.utils.chunk.ChunkUpdateLimitChecker;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import net.minestom.server.utils.function.IntegerBiConsumer;
@@ -630,67 +629,68 @@ public class Player extends LivingEntity implements CommandSender, Localizable, 
      */
     @Override
     public CompletableFuture<Void> setInstance(@NotNull Instance instance, @NotNull Pos spawnPosition) {
-        final Instance currentInstance = this.instance;
-        Check.argCondition(currentInstance == instance, "Instance should be different than the current one");
-        if (SharedInstance.areLinked(currentInstance, instance) && spawnPosition.sameChunk(this.position)) {
-            // The player already has the good version of all the chunks.
-            // We just need to refresh his entity viewing list and add him to the instance
-            spawnPlayer(instance, spawnPosition, false, false, false);
-            return AsyncUtils.VOID_FUTURE;
-        }
-        // Must update the player chunks
-        chunkUpdateLimitChecker.clearHistory();
-        final boolean dimensionChange = currentInstance != null && !Objects.equals(currentInstance.getDimensionName(), instance.getDimensionName());
-        final Consumer<Instance> runnable = (i) -> spawnPlayer(i, spawnPosition,
-                currentInstance == null, dimensionChange, true);
-
-        // Reset chunk queue state
-        needsChunkPositionSync = true;
-        targetChunksPerTick = 9f;
-        pendingChunkCount = 0f;
-
-        // Ensure that surrounding chunks are loaded
-        List<CompletableFuture<Chunk>> futures = new ArrayList<>();
-        ChunkUtils.forChunksInRange(spawnPosition, settings.getEffectiveViewDistance(), (chunkX, chunkZ) -> {
-            final CompletableFuture<Chunk> future = instance.loadOptionalChunk(chunkX, chunkZ);
-            if (!future.isDone()) futures.add(future);
-        });
-        if (futures.isEmpty()) {
-            // All chunks are already loaded
-            runnable.accept(instance);
-            return AsyncUtils.VOID_FUTURE;
-        }
-
-        // One or more chunks need to be loaded
-        final Thread runThread = Thread.currentThread();
-        CountDownLatch latch = new CountDownLatch(1);
-        Scheduler scheduler = MinecraftServer.getSchedulerManager();
-        CompletableFuture<Void> future = new CompletableFuture<>() {
-            @Override
-            public Void join() {
-                // Prevent deadlock
-                if (runThread == Thread.currentThread()) {
-                    try {
-                        latch.await();
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
-                    scheduler.process();
-                    assert isDone();
-                }
-                return super.join();
+        return CompletableFuture.runAsync(() -> {
+            final Instance currentInstance = this.instance;
+            Check.argCondition(currentInstance == instance, "Instance should be different than the current one");
+            if (SharedInstance.areLinked(currentInstance, instance) && spawnPosition.sameChunk(this.position)) {
+                // The player already has the good version of all the chunks.
+                // We just need to refresh his entity viewing list and add him to the instance
+                spawnPlayer(instance, spawnPosition, false, false, false);
+                return;
             }
-        };
+            // Must update the player chunks
+            chunkUpdateLimitChecker.clearHistory();
+            final boolean dimensionChange = currentInstance != null && !Objects.equals(currentInstance.getDimensionName(), instance.getDimensionName());
+            final Consumer<Instance> runnable = (i) -> spawnPlayer(i, spawnPosition,
+                    currentInstance == null, dimensionChange, true);
 
-        CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
-                .thenRun(() -> {
-                    scheduler.scheduleNextProcess(() -> {
-                        runnable.accept(instance);
-                        future.complete(null);
+            // Reset chunk queue state
+            needsChunkPositionSync = true;
+            targetChunksPerTick = 9f;
+            pendingChunkCount = 0f;
+
+            // Ensure that surrounding chunks are loaded
+            List<CompletableFuture<Chunk>> futures = new ArrayList<>();
+            ChunkUtils.forChunksInRange(spawnPosition, settings.getEffectiveViewDistance(), (chunkX, chunkZ) -> {
+                final CompletableFuture<Chunk> future = instance.loadOptionalChunk(chunkX, chunkZ);
+                if (!future.isDone()) futures.add(future);
+            });
+            if (futures.isEmpty()) {
+                // All chunks are already loaded
+                runnable.accept(instance);
+                return;
+            }
+
+            // One or more chunks need to be loaded
+            final Thread runThread = Thread.currentThread();
+            CountDownLatch latch = new CountDownLatch(1);
+            Scheduler scheduler = MinecraftServer.getSchedulerManager();
+            CompletableFuture<Void> future = new CompletableFuture<>() {
+                @Override
+                public Void join() {
+                    // Prevent deadlock
+                    if (runThread == Thread.currentThread()) {
+                        try {
+                            latch.await();
+                        } catch (InterruptedException e) {
+                            throw new RuntimeException(e);
+                        }
+                        scheduler.process();
+                        assert isDone();
+                    }
+                    return super.join();
+                }
+            };
+
+            CompletableFuture.allOf(futures.toArray(CompletableFuture[]::new))
+                    .thenRun(() -> {
+                        scheduler.scheduleNextProcess(() -> {
+                            runnable.accept(instance);
+                            future.complete(null);
+                        });
+                        latch.countDown();
                     });
-                    latch.countDown();
-                });
-        return future;
+        });
     }
 
     /**

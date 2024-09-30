@@ -9,8 +9,8 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 @ApiStatus.Internal
@@ -34,20 +34,15 @@ public final class ChunkUtils {
      */
     public static @NotNull CompletableFuture<Void> optionalLoadAll(@NotNull Instance instance, long @NotNull [] chunks,
                                                                    @Nullable Consumer<Chunk> eachCallback) {
-        CompletableFuture<Void> completableFuture = new CompletableFuture<>();
-        AtomicInteger counter = new AtomicInteger(0);
-        for (long visibleChunk : chunks) {
-            // WARNING: if autoload is disabled and no chunks are loaded beforehand, player will be stuck.
-            instance.loadOptionalChunk(getChunkCoordX(visibleChunk), getChunkCoordZ(visibleChunk))
-                    .thenAccept((chunk) -> {
-                        if (eachCallback != null) eachCallback.accept(chunk);
-                        if (counter.incrementAndGet() == chunks.length) {
-                            // This is the last chunk to be loaded , spawn player
-                            completableFuture.complete(null);
-                        }
-                    });
-        }
-        return completableFuture;
+        // Stream of completable future of chunks
+        var completableFutures = Arrays.stream(chunks)
+                .mapToObj(index -> instance.loadOptionalChunk(getChunkCoordX(index), getChunkCoordZ(index)))
+                .map(future -> future.thenApply(chunk -> {
+                    if (eachCallback != null) eachCallback.accept(chunk);
+                    return chunk;
+                })).toArray(CompletableFuture[]::new);
+
+        return CompletableFuture.allOf(completableFutures);
     }
 
     public static boolean isLoaded(@Nullable Chunk chunk) {

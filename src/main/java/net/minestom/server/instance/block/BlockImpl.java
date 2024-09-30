@@ -33,12 +33,12 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
     private static final int MAX_STATES = Integer.SIZE / BITS_PER_INDEX;
 
     // Block state -> block object
-    private static final ObjectArray<Block> BLOCK_STATE_MAP = ObjectArray.singleThread();
+    private static volatile ObjectArray<Block> BLOCK_STATE_MAP = ObjectArray.singleThread();
     // Block id -> valid property keys (order is important for lookup)
-    private static final ObjectArray<PropertyType[]> PROPERTIES_TYPE = ObjectArray.singleThread();
+    private static volatile ObjectArray<PropertyType[]> PROPERTIES_TYPE = ObjectArray.singleThread();
     // Block id -> Map<Properties, Block>
-    private static final ObjectArray<Int2ObjectArrayMap<BlockImpl>> POSSIBLE_STATES = ObjectArray.singleThread();
-    private static final Registry.Container<Block> CONTAINER = Registry.createStaticContainer(Registry.Resource.BLOCKS,
+    private static volatile ObjectArray<Int2ObjectArrayMap<BlockImpl>> POSSIBLE_STATES = ObjectArray.singleThread();
+    private static volatile Registry.Container<Block> CONTAINER = Registry.createStaticContainer(Registry.Resource.BLOCKS,
             (namespace, properties) -> {
                 final int blockId = properties.getInt("id");
                 final Registry.Properties stateObject = properties.section("states");

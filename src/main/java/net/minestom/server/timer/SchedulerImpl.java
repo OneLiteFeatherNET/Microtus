@@ -2,6 +2,7 @@ package net.minestom.server.timer;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectAVLTreeMap;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.utils.async.NamedThreadFactory;
 import org.jctools.queues.MpscUnboundedArrayQueue;
 import org.jetbrains.annotations.NotNull;
 
@@ -16,11 +17,7 @@ import java.util.function.Supplier;
 
 final class SchedulerImpl implements Scheduler {
     private static final AtomicInteger TASK_COUNTER = new AtomicInteger();
-    private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor(r -> {
-        Thread thread = new Thread(r);
-        thread.setDaemon(true);
-        return thread;
-    });
+    private static final ScheduledExecutorService SCHEDULER = Executors.newSingleThreadScheduledExecutor(NamedThreadFactory.of("lighting-thread", true, true));
 
     private final MpscUnboundedArrayQueue<TaskImpl> tasksToExecute = new MpscUnboundedArrayQueue<>(64);
     private final MpscUnboundedArrayQueue<TaskImpl> tickEndTasksToExecute = new MpscUnboundedArrayQueue<>(64);

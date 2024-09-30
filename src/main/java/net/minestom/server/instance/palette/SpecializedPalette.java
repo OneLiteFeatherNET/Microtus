@@ -15,9 +15,6 @@ interface SpecializedPalette extends Palette {
         throw new UnsupportedOperationException();
     }
 
-    @Override
-    @NotNull SpecializedPalette clone();
-
     interface Immutable extends SpecializedPalette {
         @Override
         default void set(int x, int y, int z, int value) {

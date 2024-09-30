@@ -1,6 +1,5 @@
 package net.minestom.server.instance;
 
-import net.minestom.server.utils.async.AsyncUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -17,7 +16,12 @@ final class NoopChunkLoaderImpl implements IChunkLoader {
     }
 
     @Override
+    public @NotNull CompletableFuture<Void> saveInstance(@NotNull Instance instance) {
+        return CompletableFuture.completedFuture(null);
+    }
+
+    @Override
     public @NotNull CompletableFuture<Void> saveChunk(@NotNull Chunk chunk) {
-        return AsyncUtils.VOID_FUTURE;
+        return CompletableFuture.completedFuture(null);
     }
 }

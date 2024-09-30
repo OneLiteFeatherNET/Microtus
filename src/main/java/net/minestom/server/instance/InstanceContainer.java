@@ -3,6 +3,7 @@ package net.minestom.server.instance;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.ServerFlag;
 import net.minestom.server.coordinate.BlockVec;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Vec;
@@ -27,7 +28,7 @@ import net.minestom.server.network.packet.server.play.UnloadChunkPacket;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.PacketUtils;
-import net.minestom.server.utils.async.AsyncUtils;
+import net.minestom.server.utils.async.NamedThreadFactory;
 import net.minestom.server.utils.block.BlockUtils;
 import net.minestom.server.utils.chunk.ChunkCache;
 import net.minestom.server.utils.chunk.ChunkSupplier;
@@ -40,14 +41,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.vectrix.flare.fastutil.Long2ObjectSyncMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import java.util.function.Supplier;
 
 import static net.minestom.server.utils.chunk.ChunkUtils.*;
 
@@ -88,6 +98,8 @@ public class InstanceContainer extends Instance {
     // Fields for instance copy
     protected InstanceContainer srcInstance; // only present if this instance has been created using a copy
     private long lastBlockChangeTime; // Time at which the last block change happened (#setBlock)
+    private ExecutorService loadChunkExecutor;
+    private ExecutorService createChunkExecutor;
 
     public InstanceContainer(@NotNull UUID uniqueId, @NotNull DynamicRegistry.Key<DimensionType> dimensionType) {
         this(uniqueId, dimensionType, null, dimensionType.namespace());
@@ -116,6 +128,12 @@ public class InstanceContainer extends Instance {
         setChunkSupplier(DynamicChunk::new);
         setChunkLoader(Objects.requireNonNullElse(loader, DEFAULT_LOADER));
         this.chunkLoader.loadInstance(this);
+        if (this.chunkLoader != null && this.chunkLoader.supportsParallelLoading()) {
+            this.loadChunkExecutor = Executors.newSingleThreadExecutor(NamedThreadFactory.of("Chunk-Loader"));
+        } else {
+            this.loadChunkExecutor = Executors.newScheduledThreadPool(ServerFlag.PARALLEL_CHUNK_LOAD_SIZE, NamedThreadFactory.of("Chunk-Loader"));
+        }
+        this.createChunkExecutor = Executors.newThreadPerTaskExecutor(NamedThreadFactory.of("Chunk-Generator", true));
     }
 
     @Override
@@ -250,12 +268,12 @@ public class InstanceContainer extends Instance {
 
     @Override
     public @NotNull CompletableFuture<Chunk> loadChunk(int chunkX, int chunkZ) {
-        return loadOrRetrieve(chunkX, chunkZ, () -> retrieveChunk(chunkX, chunkZ));
+        return loadOrRetrieve(chunkX, chunkZ, retrieveChunk(chunkX, chunkZ));
     }
 
     @Override
     public @NotNull CompletableFuture<Chunk> loadOptionalChunk(int chunkX, int chunkZ) {
-        return loadOrRetrieve(chunkX, chunkZ, () -> hasEnabledAutoChunkLoad() ? retrieveChunk(chunkX, chunkZ) : AsyncUtils.empty());
+        return loadOrRetrieve(chunkX, chunkZ, hasEnabledAutoChunkLoad() ? retrieveChunk(chunkX, chunkZ) : null);
     }
 
     @Override
@@ -296,54 +314,37 @@ public class InstanceContainer extends Instance {
     }
 
     protected @NotNull CompletableFuture<@NotNull Chunk> retrieveChunk(int chunkX, int chunkZ) {
-        CompletableFuture<Chunk> completableFuture = new CompletableFuture<>();
         final long index = getChunkIndex(chunkX, chunkZ);
-        final CompletableFuture<Chunk> prev = loadingChunks.putIfAbsent(index, completableFuture);
-        if (prev != null) return prev;
         final IChunkLoader loader = chunkLoader;
-        final Runnable retriever = () -> loader.loadChunk(this, chunkX, chunkZ)
-                .thenCompose(chunk -> {
-                    if (chunk != null) {
-                        // Chunk has been loaded from storage
-                        return CompletableFuture.completedFuture(chunk);
-                    } else {
-                        // Loader couldn't load the chunk, generate it
-                        return createChunk(chunkX, chunkZ).whenComplete((c, a) -> c.onGenerate());
-                    }
-                })
-                // cache the retrieved chunk
-                .thenAccept(chunk -> {
-                    // TODO run in the instance thread?
-                    cacheChunk(chunk);
-                    chunk.onLoad();
+        var toLoadFuture = chunkLoader.loadChunk(this, chunkX, chunkZ);
+        final CompletableFuture<Chunk> prev = loadingChunks.putIfAbsent(index, toLoadFuture);
+        if (prev != null) return prev;
+        return toLoadFuture.thenCompose(chunk -> {
+            if (chunk != null) {
+                // Chunk has been loaded from storage
+                return CompletableFuture.completedFuture(chunk);
+            } else {
+                // Loader couldn't load the chunk, generate it
+                return createChunk(chunkX, chunkZ).whenComplete((c, a) -> c.onGenerate());
+            }
+        }).thenComposeAsync(chunk -> {
+            cacheChunk(chunk);
+            chunk.onLoad();
 
-                    EventDispatcher.call(new InstanceChunkLoadEvent(this, chunk));
-                    final CompletableFuture<Chunk> future = this.loadingChunks.remove(index);
-                    assert future == completableFuture : "Invalid future: " + future;
-                    completableFuture.complete(chunk);
-                })
-                .exceptionally(throwable -> {
-                    MinecraftServer.getExceptionManager().handleException(throwable);
-                    return null;
-                });
-        if (loader.supportsParallelLoading()) {
-            CompletableFuture.runAsync(retriever);
-        } else {
-            retriever.run();
-        }
-        return completableFuture;
+            EventDispatcher.call(new InstanceChunkLoadEvent(this, chunk));
+            return this.loadingChunks.remove(index);
+        }, this.loadChunkExecutor);
     }
 
     Map<Long, List<GeneratorImpl.SectionModifierImpl>> generationForks = new ConcurrentHashMap<>();
+
 
     protected @NotNull CompletableFuture<@NotNull Chunk> createChunk(int chunkX, int chunkZ) {
         final Chunk chunk = chunkSupplier.createChunk(this, chunkX, chunkZ);
         Check.notNull(chunk, "Chunks supplied by a ChunkSupplier cannot be null.");
         Generator generator = generator();
         if (generator != null && chunk.shouldGenerate()) {
-            CompletableFuture<Chunk> resultFuture = new CompletableFuture<>();
-            // TODO: virtual thread once Loom is available
-            ForkJoinPool.commonPool().submit(() -> {
+            return CompletableFuture.completedFuture(chunk).thenApplyAsync(originChunk -> {
                 GeneratorImpl.GenSection[] genSections = new GeneratorImpl.GenSection[chunk.getSections().size()];
                 Arrays.setAll(genSections, i -> {
                     Section section = chunk.getSections().get(i);
@@ -394,10 +395,9 @@ public class InstanceContainer extends Instance {
                 } finally {
                     // End generation
                     refreshLastBlockChangeTime();
-                    resultFuture.complete(chunk);
                 }
+                return originChunk;
             });
-            return resultFuture;
         } else {
             // No chunk generator, execute the callback with the empty chunk
             processFork(chunk);
@@ -670,13 +670,13 @@ public class InstanceContainer extends Instance {
         }
     }
 
-    private CompletableFuture<Chunk> loadOrRetrieve(int chunkX, int chunkZ, Supplier<CompletableFuture<Chunk>> supplier) {
+    private CompletableFuture<Chunk> loadOrRetrieve(int chunkX, int chunkZ, CompletableFuture<Chunk> chunkCompletableFuture) {
         final Chunk chunk = getChunk(chunkX, chunkZ);
         if (chunk != null) {
             // Chunk already loaded
             return CompletableFuture.completedFuture(chunk);
         }
-        return supplier.get();
+        return chunkCompletableFuture;
     }
 
     private void cacheChunk(@NotNull Chunk chunk) {

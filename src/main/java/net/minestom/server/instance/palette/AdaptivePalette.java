@@ -13,7 +13,7 @@ import java.util.function.IntUnaryOperator;
  */
 final class AdaptivePalette implements Palette, Cloneable {
     final byte dimension, defaultBitsPerEntry, maxBitsPerEntry;
-    SpecializedPalette palette;
+    Palette palette;
 
     AdaptivePalette(byte dimension, byte maxBitsPerEntry, byte bitsPerEntry) {
         validateDimension(dimension);
@@ -95,24 +95,20 @@ final class AdaptivePalette implements Palette, Cloneable {
     }
 
     @Override
-    public @NotNull Palette clone() {
-        try {
-            AdaptivePalette adaptivePalette = (AdaptivePalette) super.clone();
-            adaptivePalette.palette = palette.clone();
-            return adaptivePalette;
-        } catch (CloneNotSupportedException e) {
-            throw new RuntimeException(e);
-        }
+    public @NotNull AdaptivePalette clone() {
+        AdaptivePalette adaptivePalette = new AdaptivePalette(dimension, maxBitsPerEntry, defaultBitsPerEntry);
+        adaptivePalette.palette = palette.clone();
+        return adaptivePalette;
     }
 
     @Override
     public void write(@NotNull NetworkBuffer writer) {
-        final SpecializedPalette optimized = optimizedPalette();
+        final Palette optimized = optimizedPalette();
         this.palette = optimized;
         optimized.write(writer);
     }
 
-    SpecializedPalette optimizedPalette() {
+    Palette optimizedPalette() {
         var currentPalette = this.palette;
         if (currentPalette instanceof FlexiblePalette flexiblePalette) {
             final int count = flexiblePalette.count();
@@ -137,7 +133,7 @@ final class AdaptivePalette implements Palette, Cloneable {
     }
 
     Palette flexiblePalette() {
-        SpecializedPalette currentPalette = this.palette;
+        Palette currentPalette = this.palette;
         if (currentPalette instanceof FilledPalette filledPalette) {
             currentPalette = new FlexiblePalette(this);
             currentPalette.fill(filledPalette.value());

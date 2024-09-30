@@ -24,7 +24,6 @@ import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
 import net.minestom.server.network.plugin.LoginPluginMessageProcessor;
 import net.minestom.server.network.plugin.LoginPluginResponse;
-import net.minestom.server.utils.async.AsyncUtils;
 import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.SecretKey;
@@ -36,6 +35,7 @@ import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static net.minestom.server.network.NetworkBuffer.STRING;
@@ -79,7 +79,7 @@ public final class LoginListener {
         } else {
             final boolean bungee = BungeeCordProxy.isEnabled();
             // Offline
-            AsyncUtils.runAsync(() -> {
+            CompletableFuture.runAsync(() -> {
                 try {
                     final UUID playerUuid;
                     if (bungee && isSocketConnection)
@@ -98,7 +98,7 @@ public final class LoginListener {
     public static void loginEncryptionResponseListener(@NotNull ClientEncryptionResponsePacket packet, @NotNull PlayerConnection connection) {
         // Encryption is only support for socket connection
         if (!(connection instanceof PlayerSocketConnection socketConnection)) return;
-        AsyncUtils.runAsync(() -> {
+        CompletableFuture.runAsync(() -> {
             final String loginUsername = socketConnection.getLoginUsername();
             if (loginUsername == null || loginUsername.isEmpty()) {
                 // Shouldn't happen

@@ -13,6 +13,7 @@ import net.minestom.server.instance.palette.Palette;
 import net.minestom.server.network.packet.server.CachedPacket;
 import net.minestom.server.network.packet.server.play.data.LightData;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.utils.async.NamedThreadFactory;
 import net.minestom.server.utils.chunk.ChunkUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,7 +36,7 @@ import static net.minestom.server.instance.light.LightCompute.EMPTY_CONTENT;
  */
 public class LightingChunk extends DynamicChunk {
 
-    private static final ExecutorService pool = Executors.newWorkStealingPool();
+    private static final ExecutorService pool = Executors.newSingleThreadExecutor(NamedThreadFactory.of("lighting-thread", true));
 
     private int[] occlusionMap;
     final CachedPacket partialLightCache = new CachedPacket(this::createLightPacket);

@@ -33,8 +33,8 @@ final class RegionFile implements AutoCloseable {
 
     private static final int COMPRESSION_ZLIB = 2;
 
-    private static final BinaryTagIO.Reader TAG_READER = BinaryTagIO.unlimitedReader();
-    private static final BinaryTagIO.Writer TAG_WRITER = BinaryTagIO.writer();
+    private static volatile BinaryTagIO.Reader TAG_READER = BinaryTagIO.unlimitedReader();
+    private static volatile BinaryTagIO.Writer TAG_WRITER = BinaryTagIO.writer();
 
     public static @NotNull String getFileName(int regionX, int regionZ) {
         return "r." + regionX + "." + regionZ + ".mca";

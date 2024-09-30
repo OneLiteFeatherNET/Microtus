@@ -26,7 +26,6 @@ import net.minestom.server.network.player.PlayerSocketConnection;
 import net.minestom.server.network.plugin.LoginPluginMessageProcessor;
 import net.minestom.server.registry.StaticProtocolObject;
 import net.minestom.server.utils.StringUtils;
-import net.minestom.server.utils.async.AsyncUtils;
 import net.minestom.server.utils.validate.Check;
 import org.jctools.queues.MessagePassingQueue;
 import org.jctools.queues.MpscUnboundedArrayQueue;
@@ -212,7 +211,7 @@ public final class ConnectionManager {
 
     @ApiStatus.Internal
     public @NotNull CompletableFuture<Void> transitionLoginToConfig(@NotNull Player player) {
-        return AsyncUtils.runAsync(() -> {
+        return CompletableFuture.runAsync(() -> {
             final PlayerConnection playerConnection = player.getPlayerConnection();
 
             // Compression
@@ -274,7 +273,7 @@ public final class ConnectionManager {
         // Request known packs immediately, but don't wait for the response until required (sending registry data).
         final var knownPacksFuture = connection.requestKnownPacks(List.of(SelectKnownPacksPacket.MINECRAFT_CORE));
 
-        return AsyncUtils.runAsync(() -> {
+        return CompletableFuture.runAsync(() -> {
             var event = new AsyncPlayerConfigurationEvent(player, isFirstConfig);
             EventDispatcher.call(event);
             if (!player.isOnline()) return; // Player was kicked during config.

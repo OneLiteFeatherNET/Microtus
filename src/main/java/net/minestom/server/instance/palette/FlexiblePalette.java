@@ -16,7 +16,7 @@ import static net.minestom.server.network.NetworkBuffer.*;
 /**
  * Palette able to take any value anywhere. May consume more memory than required.
  */
-final class FlexiblePalette implements SpecializedPalette, Cloneable {
+final class FlexiblePalette implements SpecializedPalette {
     private static final ThreadLocal<int[]> WRITE_CACHE = ThreadLocal.withInitial(() -> new int[4096]);
 
     // Specific to this palette type
@@ -194,18 +194,13 @@ final class FlexiblePalette implements SpecializedPalette, Cloneable {
     }
 
     @Override
-    public @NotNull SpecializedPalette clone() {
-        try {
-            FlexiblePalette palette = (FlexiblePalette) super.clone();
-            palette.values = values != null ? values.clone() : null;
-            palette.paletteToValueList = paletteToValueList.clone();
-            palette.valueToPaletteMap = valueToPaletteMap.clone();
-            palette.count = count;
-            return palette;
-        } catch (CloneNotSupportedException e) {
-            MinecraftServer.getExceptionManager().handleException(e);
-            throw new IllegalStateException("Weird thing happened");
-        }
+    public @NotNull FlexiblePalette clone() {
+        FlexiblePalette palette = new FlexiblePalette(new AdaptivePalette(adaptivePalette.dimension, adaptivePalette.maxBitsPerEntry, bitsPerEntry), bitsPerEntry);
+        palette.values = values.clone();
+        palette.paletteToValueList = paletteToValueList.clone();
+        palette.valueToPaletteMap = valueToPaletteMap.clone();
+        palette.count = count;
+        return palette;
     }
 
     @Override

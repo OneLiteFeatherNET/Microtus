@@ -1,10 +1,15 @@
 package net.minestom.server.thread;
 
-import net.minestom.server.utils.async.AsyncUtils;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -36,7 +41,7 @@ public class AcquirableCollection<E> implements Collection<Acquirable<E>> {
     }
 
     public void acquireAsync(@NotNull Consumer<E> consumer) {
-        AsyncUtils.runAsync(() -> acquireSync(consumer));
+        CompletableFuture.runAsync(() -> acquireSync(consumer));
     }
 
     public @NotNull Stream<E> unwrap() {

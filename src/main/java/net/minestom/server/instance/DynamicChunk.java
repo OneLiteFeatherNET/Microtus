@@ -21,6 +21,7 @@ import net.minestom.server.network.packet.server.play.data.ChunkData;
 import net.minestom.server.network.packet.server.play.data.LightData;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.snapshot.ChunkSnapshot;
+import net.minestom.server.snapshot.EntitySnapshot;
 import net.minestom.server.snapshot.SnapshotImpl;
 import net.minestom.server.snapshot.SnapshotUpdater;
 import net.minestom.server.utils.ArrayUtils;
@@ -53,8 +54,8 @@ public class DynamicChunk extends Chunk {
     protected Heightmap worldSurface = new WorldSurfaceHeightmap(this);
 
     // Key = ChunkUtils#getBlockIndex
-    protected final Int2ObjectOpenHashMap<Block> entries = new Int2ObjectOpenHashMap<>(0);
-    protected final Int2ObjectOpenHashMap<Block> tickableMap = new Int2ObjectOpenHashMap<>(0);
+    protected volatile Int2ObjectOpenHashMap<Block> entries = new Int2ObjectOpenHashMap<>(0);
+    protected volatile Int2ObjectOpenHashMap<Block> tickableMap = new Int2ObjectOpenHashMap<>(0);
 
     private long lastChange;
     final CachedPacket chunkCache = new CachedPacket(this::createChunkPacket);
@@ -68,7 +69,7 @@ public class DynamicChunk extends Chunk {
     }
 
     @Override
-    public void setBlock(int x, int y, int z, @NotNull Block block,
+    public synchronized void setBlock(int x, int y, int z, @NotNull Block block,
                          @Nullable BlockHandler.Placement placement,
                          @Nullable BlockHandler.Destroy destroy) {
         final DimensionType instanceDim = instance.getCachedDimensionType();
@@ -77,8 +78,6 @@ public class DynamicChunk extends Chunk {
                     instanceDim.minY(), instanceDim.maxY(), y);
             return;
         }
-        assertLock();
-
         this.lastChange = System.currentTimeMillis();
         this.chunkCache.invalidate();
 
@@ -131,8 +130,7 @@ public class DynamicChunk extends Chunk {
     }
 
     @Override
-    public void setBiome(int x, int y, int z, @NotNull DynamicRegistry.Key<Biome> biome) {
-        assertLock();
+    public synchronized void setBiome(int x, int y, int z, @NotNull DynamicRegistry.Key<Biome> biome) {
         this.chunkCache.invalidate();
         Section section = getSectionAt(y);
 
@@ -190,8 +188,7 @@ public class DynamicChunk extends Chunk {
     }
 
     @Override
-    public @Nullable Block getBlock(int x, int y, int z, @NotNull Condition condition) {
-        assertLock();
+    public @Nullable synchronized Block getBlock(int x, int y, int z, @NotNull Condition condition) {
         if (y < minSection * CHUNK_SECTION_SIZE || y >= maxSection * CHUNK_SECTION_SIZE)
             return Block.AIR; // Out of bounds
 
@@ -211,8 +208,7 @@ public class DynamicChunk extends Chunk {
     }
 
     @Override
-    public @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z) {
-        assertLock();
+    public synchronized @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z) {
         final Section section = getSectionAt(y);
         final int id = section.biomePalette()
                 .get(toSectionRelativeCoordinate(x) / 4, toSectionRelativeCoordinate(y) / 4, toSectionRelativeCoordinate(z) / 4);
@@ -332,9 +328,5 @@ public class DynamicChunk extends Chunk {
         return new SnapshotImpl.Chunk(minSection, chunkX, chunkZ,
                 clonedSections, entries.clone(), entityIds, updater.reference(instance),
                 tagHandler().readableCopy());
-    }
-
-    private void assertLock() {
-        assert Thread.holdsLock(this) : "Chunk must be locked before access";
     }
 }

@@ -1,11 +1,14 @@
 package net.minestom.server.instance.batch;
 
+import net.minestom.server.ServerFlag;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.instance.block.Block;
+import net.minestom.server.utils.async.NamedThreadFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -28,7 +31,7 @@ import java.util.concurrent.ForkJoinPool;
  */
 public interface Batch<C> extends Block.Setter {
 
-    ExecutorService BLOCK_BATCH_POOL = ForkJoinPool.commonPool();
+    ExecutorService BLOCK_BATCH_POOL = Executors.newFixedThreadPool(ServerFlag.BATCH_POOL_SIZE, NamedThreadFactory.of("block-batch-pool", true));
 
     /**
      * Gets if the batch is ready to be applied to an instance.
