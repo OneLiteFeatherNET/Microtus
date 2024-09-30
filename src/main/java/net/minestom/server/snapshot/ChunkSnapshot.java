@@ -1,5 +1,6 @@
 package net.minestom.server.snapshot;
 
+import net.minestom.server.instance.Section;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.tag.TagReadable;
 import net.minestom.server.world.biome.Biome;
@@ -12,6 +13,12 @@ public sealed interface ChunkSnapshot extends Snapshot, Block.Getter, Biome.Gett
     int chunkX();
 
     int chunkZ();
+
+    int minSection();
+
+    int maxSection();
+
+    Section getSection(int index);
 
     @NotNull InstanceSnapshot instance();
 

@@ -77,7 +77,7 @@ public final class SnapshotImpl {
         }
     }
 
-    public record Chunk(int minSection, int chunkX, int chunkZ,
+    public record Chunk(int minSection, int maxSection, int chunkX, int chunkZ,
                         Section[] sections,
                         Int2ObjectOpenHashMap<Block> blockEntries,
                         int[] entitiesIds,
@@ -108,6 +108,11 @@ public final class SnapshotImpl {
             DynamicRegistry.Key<Biome> key = MinecraftServer.getBiomeRegistry().getKey(id);
             Check.notNull(key, "Biome with id {0} is not registered", id);
             return key;
+        }
+
+        @Override
+        public Section getSection(int index) {
+            return sections[index - minSection];
         }
 
         @Override
