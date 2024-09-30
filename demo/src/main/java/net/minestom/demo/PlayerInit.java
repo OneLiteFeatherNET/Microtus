@@ -167,7 +167,7 @@ public class PlayerInit {
                 player.getInventory().addItemStack(bundle);
 
                 player.getInventory().addItemStack(ItemStack.builder(Material.COMPASS)
-                        .set(ItemComponent.LODESTONE_TRACKER, new LodestoneTracker(player.getInstance().getDimensionType().value(), new Vec(10, 10, 10), true))
+                        .set(ItemComponent.LODESTONE_TRACKER, new LodestoneTracker(player.getInstance().getDimensionType(), new Vec(10, 10, 10), true))
                         .build());
 
                 player.getInventory().addItemStack(ItemStack.builder(Material.STONE_SWORD)

@@ -53,7 +53,7 @@ public final class InstanceManager {
      * @return the created {@link InstanceContainer}
      */
     public @NotNull InstanceContainer createInstanceContainer(@NotNull Key dimensionType, @Nullable IChunkLoader loader) {
-        final InstanceContainer instanceContainer = new InstanceContainer(registries.dimensionType(), UUID.randomUUID(), dimensionType, loader);
+        final InstanceContainer instanceContainer = new InstanceContainer(registries.dimensionType(), UUID.randomUUID(), dimensionType, dimensionType, loader);
         registerInstance(instanceContainer);
         return instanceContainer;
     }

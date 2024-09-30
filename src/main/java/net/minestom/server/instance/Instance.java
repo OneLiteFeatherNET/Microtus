@@ -77,6 +77,7 @@ public abstract class Instance implements Block.Getter, Block.Setter,
 
     private final Key dimensionType;
     private final DimensionType cachedDimensionType; // Cached to prevent self-destruction if the registry is changed, and to avoid the lookups.
+    private final Key dimensionName;
 
     // World border of the instance
     private WorldBorder worldBorder;
@@ -125,8 +126,8 @@ public abstract class Instance implements Block.Getter, Block.Setter,
      * @param uniqueId      the {@link UUID} of the instance
      * @param dimensionType the {@link DimensionType} of the instance
      */
-    public Instance(@NotNull UUID uniqueId, @NotNull Key dimensionType) {
-        this(MinecraftServer.getDimensionTypeRegistry(), uniqueId, dimensionType);
+    public Instance(@NotNull UUID uniqueId, @NotNull Key dimensionType, Key dimensionName) {
+        this(MinecraftServer.getDimensionTypeRegistry(), uniqueId, dimensionType, dimensionName);
     }
 
     /**
@@ -135,8 +136,9 @@ public abstract class Instance implements Block.Getter, Block.Setter,
      * @param uniqueId      the {@link UUID} of the instance
      * @param dimensionType the {@link DimensionType} of the instance
      */
-    public Instance(@NotNull DynamicRegistry<DimensionType> dimensionTypeRegistry, @NotNull UUID uniqueId, @NotNull Key dimensionType) {
+    public Instance(@NotNull DynamicRegistry<DimensionType> dimensionTypeRegistry, @NotNull UUID uniqueId, @NotNull Key dimensionType, @NotNull Key dimensionName) {
         this.uniqueId = uniqueId;
+        this.dimensionName = dimensionName;
         this.dimensionType = dimensionType;
         this.cachedDimensionType = dimensionTypeRegistry.get(dimensionType);
         Check.argCondition(cachedDimensionType == null, "The dimension " + dimensionType + " is not registered! Please add it to the registry (`MinecraftServer.getDimensionTypeRegistry().registry(dimensionType)`).");
@@ -155,6 +157,10 @@ public abstract class Instance implements Block.Getter, Block.Setter,
             // Local nodes require a server process
             this.eventNode = null;
         }
+    }
+
+    public Key getDimensionName() {
+        return dimensionName;
     }
 
     /**
