@@ -75,8 +75,7 @@ public class CodeGenerator implements CodeExporter {
         }
 
         ClassName typeClass = ClassName.bestGuess(packageName + "." + typeName); // Use bestGuess to handle nested class
-        ClassName registryKeyClass = ClassName.get("net.minestom.server.registry", "DynamicRegistry", "Key");
-        ParameterizedTypeName typedRegistryKeyClass = ParameterizedTypeName.get(registryKeyClass, typeClass);
+        ClassName registryKeyClass = ClassName.get("net.kyori.adventure.key", "Key");
 
         JsonObject json;
         json = GSON.fromJson(new InputStreamReader(resourceFile), JsonObject.class);
@@ -97,11 +96,11 @@ public class CodeGenerator implements CodeExporter {
                 constantName = "_" + constantName;
             }
             blockConstantsClass.addField(
-                    FieldSpec.builder(typedRegistryKeyClass, constantName)
+                    FieldSpec.builder(registryKeyClass, constantName)
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                             .initializer(
-                                    // TypeClass.STONE = NamespaceID.from("minecraft:stone")
-                                    "$T.of($S)",
+                                    // TypeClass.STONE = Key.key("minecraft:stone")
+                                    "$T.key($S)",
                                     registryKeyClass,
                                     namespace
                             )
