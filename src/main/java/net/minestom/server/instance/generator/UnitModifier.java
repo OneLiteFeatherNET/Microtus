@@ -1,8 +1,8 @@
 package net.minestom.server.instance.generator;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,7 +61,7 @@ public interface UnitModifier extends Block.Setter, Biome.Setter {
      *
      * @param biome the biome to fill
      */
-    void fillBiome(@NotNull DynamicRegistry.Key<Biome> biome);
+    void fillBiome(@NotNull Key biome);
 
     interface Supplier {
         @NotNull Block get(int x, int y, int z);

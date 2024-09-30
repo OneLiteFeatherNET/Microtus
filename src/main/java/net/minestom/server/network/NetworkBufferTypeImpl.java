@@ -1,5 +1,6 @@
 package net.minestom.server.network;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
@@ -260,6 +261,7 @@ interface NetworkBufferTypeImpl<T> extends NetworkBuffer.Type<T> {
     record RawBytesType() implements NetworkBufferTypeImpl<byte[]> {
         @Override
         public void write(@NotNull NetworkBuffer buffer, byte[] value) {
+            if (value.length == 0) return;
             buffer.ensureSize(value.length);
             buffer.nioBuffer.put(buffer.writeIndex(), value);
             buffer.writeIndex += value.length;
@@ -626,9 +628,9 @@ interface NetworkBufferTypeImpl<T> extends NetworkBuffer.Type<T> {
         }
     }
 
-    record RegistryTypeType<T extends ProtocolObject>(@NotNull Function<Registries, DynamicRegistry<T>> selector) implements NetworkBufferTypeImpl<DynamicRegistry.Key<T>> {
+    record RegistryTypeType<T extends ProtocolObject>(@NotNull Function<Registries, DynamicRegistry<T>> selector) implements NetworkBufferTypeImpl<Key> {
         @Override
-        public void write(@NotNull NetworkBuffer buffer, DynamicRegistry.Key<T> value) {
+        public void write(@NotNull NetworkBuffer buffer, Key value) {
             Check.stateCondition(buffer.registries == null, "Buffer does not have registries");
             final DynamicRegistry<T> registry = selector.apply(buffer.registries);
             final int id = registry.getId(value);
@@ -637,11 +639,11 @@ interface NetworkBufferTypeImpl<T> extends NetworkBuffer.Type<T> {
         }
 
         @Override
-        public DynamicRegistry.Key<T> read(@NotNull NetworkBuffer buffer) {
+        public Key read(@NotNull NetworkBuffer buffer) {
             Check.stateCondition(buffer.registries == null, "Buffer does not have registries");
             DynamicRegistry<T> registry = selector.apply(buffer.registries);
             final int id = buffer.read(VAR_INT);
-            final DynamicRegistry.Key<T> key = registry.getKey(id);
+            final Key key = registry.getKey(id);
             Check.argCondition(key == null, "No such ID in registry: {0} > {1}", registry, id);
             return key;
         }

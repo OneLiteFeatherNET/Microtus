@@ -1,5 +1,6 @@
 package net.minestom.server.inventory.type;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.inventory.Inventory;
@@ -72,7 +73,7 @@ public class EnchantmentTableInventory extends Inventory {
      * @param enchantmentSlot the enchantment slot
      * @return the enchantment shown in the slot, null if it is hidden
      */
-    public DynamicRegistry.Key<Enchantment> getEnchantmentShown(@NotNull EnchantmentSlot enchantmentSlot) {
+    public Key getEnchantmentShown(@NotNull EnchantmentSlot enchantmentSlot) {
         final int id = enchantmentShown[enchantmentSlot.ordinal()];
         if (id == -1) return null;
         return ENCHANTMENT_REGISTRY.getKey(id);
@@ -86,7 +87,7 @@ public class EnchantmentTableInventory extends Inventory {
      * @param enchantmentSlot the enchantment slot
      * @param enchantment     the enchantment
      */
-    public void setEnchantmentShown(@NotNull EnchantmentSlot enchantmentSlot, @Nullable DynamicRegistry.Key<Enchantment> enchantment) {
+    public void setEnchantmentShown(@NotNull EnchantmentSlot enchantmentSlot, @Nullable Key enchantment) {
         final short id = enchantment == null ? -1 : (short) ENCHANTMENT_REGISTRY.getId(enchantment);
         switch (enchantmentSlot) {
             case TOP -> sendProperty(InventoryProperty.ENCHANTMENT_TABLE_ENCH_ID_TOP, id);

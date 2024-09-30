@@ -1,5 +1,6 @@
 package net.minestom.server.entity;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
@@ -145,7 +146,7 @@ public final class Metadata {
         return new MetadataImpl.EntryImpl<>(TYPE_CAT_VARIANT, value, CatMeta.Variant.NETWORK_TYPE);
     }
 
-    public static Entry<DynamicRegistry.Key<WolfMeta.Variant>> WolfVariant(@NotNull DynamicRegistry.Key<WolfMeta.Variant> value) {
+    public static Entry<Key> WolfVariant(@NotNull Key value) {
         return new MetadataImpl.EntryImpl<>(TYPE_WOLF_VARIANT, value, WolfMeta.Variant.NETWORK_TYPE);
     }
 
@@ -153,7 +154,7 @@ public final class Metadata {
         return new MetadataImpl.EntryImpl<>(TYPE_FROG_VARIANT, value, FrogMeta.Variant.NETWORK_TYPE);
     }
 
-    public static Entry<DynamicRegistry.Key<PaintingMeta.Variant>> PaintingVariant(@NotNull DynamicRegistry.Key<PaintingMeta.Variant> value) {
+    public static Entry<Key> PaintingVariant(@NotNull Key value) {
         return new MetadataImpl.EntryImpl<>(TYPE_PAINTING_VARIANT, value, PaintingMeta.Variant.NETWORK_TYPE);
     }
 

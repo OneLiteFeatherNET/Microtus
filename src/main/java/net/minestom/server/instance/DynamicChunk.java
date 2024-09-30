@@ -1,6 +1,7 @@
 package net.minestom.server.instance;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.nbt.LongArrayBinaryTag;
 import net.minestom.server.MinecraftServer;
@@ -131,12 +132,12 @@ public class DynamicChunk extends Chunk {
     }
 
     @Override
-    public void setBiome(int x, int y, int z, @NotNull DynamicRegistry.Key<Biome> biome) {
+    public void setBiome(int x, int y, int z, @NotNull Key biome) {
         assertLock();
         this.chunkCache.invalidate();
         Section section = getSectionAt(y);
 
-        var id = BIOME_REGISTRY.getId(biome.namespace());
+        var id = BIOME_REGISTRY.getId(biome);
         if (id == -1) throw new IllegalStateException("Biome has not been registered: " + biome.namespace());
 
         section.biomePalette().set(
@@ -211,13 +212,13 @@ public class DynamicChunk extends Chunk {
     }
 
     @Override
-    public @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z) {
+    public @NotNull Key getBiome(int x, int y, int z) {
         assertLock();
         final Section section = getSectionAt(y);
         final int id = section.biomePalette()
                 .get(toSectionRelativeCoordinate(x) / 4, toSectionRelativeCoordinate(y) / 4, toSectionRelativeCoordinate(z) / 4);
 
-        DynamicRegistry.Key<Biome> biome = BIOME_REGISTRY.getKey(id);
+        var biome = BIOME_REGISTRY.getKey(id);
         Check.notNull(biome, "Biome with id {0} is not registered", id);
         return biome;
     }

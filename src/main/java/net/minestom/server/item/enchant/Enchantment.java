@@ -1,5 +1,6 @@
 package net.minestom.server.item.enchant;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.component.DataComponent;
@@ -16,8 +17,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public sealed interface Enchantment extends ProtocolObject, Enchantments permits EnchantmentImpl {
-    @NotNull NetworkBuffer.Type<DynamicRegistry.Key<Enchantment>> NETWORK_TYPE = NetworkBuffer.RegistryKey(Registries::enchantment);
-    @NotNull BinaryTagSerializer<DynamicRegistry.Key<Enchantment>> NBT_TYPE = BinaryTagSerializer.registryKey(Registries::enchantment);
+    @NotNull NetworkBuffer.Type<Key> NETWORK_TYPE = NetworkBuffer.RegistryKey(Registries::enchantment);
+    @NotNull BinaryTagSerializer<Key> NBT_TYPE = BinaryTagSerializer.registryKey(Registries::enchantment);
 
     static @NotNull Builder builder() {
         return new Builder();

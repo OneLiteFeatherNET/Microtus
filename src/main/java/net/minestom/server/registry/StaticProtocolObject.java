@@ -2,7 +2,6 @@ package net.minestom.server.registry;
 
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.key.Keyed;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +21,7 @@ public interface StaticProtocolObject extends ProtocolObject, Keyed {
      * @return the namespace ID
      */
     @Contract(pure = true)
-    @NotNull NamespaceID namespace();
+    @NotNull Key namespace();
 
     /**
      * Gets the name of this object.

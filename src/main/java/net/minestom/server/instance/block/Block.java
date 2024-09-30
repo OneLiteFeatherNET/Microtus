@@ -1,5 +1,6 @@
 package net.minestom.server.instance.block;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.Instance;
@@ -9,8 +10,11 @@ import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.StaticProtocolObject;
 import net.minestom.server.tag.Tag;
 import net.minestom.server.tag.TagReadable;
-import net.minestom.server.utils.NamespaceID;
-import org.jetbrains.annotations.*;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.UnknownNullability;
+import org.jetbrains.annotations.Unmodifiable;
 
 import java.util.Collection;
 import java.util.Map;
@@ -157,7 +161,7 @@ public sealed interface Block extends StaticProtocolObject, TagReadable, Blocks 
     @NotNull Registry.BlockEntry registry();
 
     @Override
-    default @NotNull NamespaceID namespace() {
+    default @NotNull Key namespace() {
         return registry().namespace();
     }
 
@@ -198,7 +202,7 @@ public sealed interface Block extends StaticProtocolObject, TagReadable, Blocks 
         return BlockImpl.getSafe(namespaceID);
     }
 
-    static @Nullable Block fromNamespaceId(@NotNull NamespaceID namespaceID) {
+    static @Nullable Block fromNamespaceId(@NotNull Key namespaceID) {
         return fromNamespaceId(namespaceID.asString());
     }
 
