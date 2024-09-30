@@ -207,7 +207,7 @@ class PlayerIntegrationTest {
         player.damage(DamageType.OUT_OF_WORLD, 30);
 
         assertNotNull(player.getDeathLocation());
-        assertEquals(dimensionNamespace, player.getDeathLocation().dimension());
+        assertEquals(dimensionNamespace, player.getDeathLocation().dimension().asString());
         assertEquals(5, player.getDeathLocation().blockPosition().x());
     }
 

@@ -448,7 +448,7 @@ public class AnvilLoader implements IChunkLoader {
                             if (x % 4 == 0 && sectionLocalY % 4 == 0 && z % 4 == 0) {
                                 int biomeIndex = (x / 4) + (sectionLocalY / 4) * 4 * 4 + (z / 4) * 4;
                                 final var biomeKey = chunk.getBiome(x, y, z);
-                                final BinaryTag biomeName = StringBinaryTag.stringBinaryTag(biomeKey.value());
+                                final BinaryTag biomeName = StringBinaryTag.stringBinaryTag(biomeKey.asString());
 
                                 int biomePaletteIndex = biomePalette.indexOf(biomeName);
                                 if (biomePaletteIndex == -1) {

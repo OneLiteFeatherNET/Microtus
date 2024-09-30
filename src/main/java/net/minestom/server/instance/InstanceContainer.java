@@ -97,21 +97,34 @@ public class InstanceContainer extends Instance {
     protected InstanceContainer srcInstance; // only present if this instance has been created using a copy
     private long lastBlockChangeTime; // Time at which the last block change happened (#setBlock)
 
+    /**
+     * Creates a new instance container.
+     * @param uniqueId the unique id of the instance
+     * @param dimensionType the dimension type of the instance
+     * @deprecated use {@link #InstanceContainer(DynamicRegistry, UUID, Key, Key, IChunkLoader)} instead. This constructor will be removed in future versions. It uses the dimension type as the dimension name that can cause with some errors.
+     * @see #InstanceContainer(DynamicRegistry, UUID, Key, Key, IChunkLoader)
+     */
+    @Deprecated
     public InstanceContainer(@NotNull UUID uniqueId, @NotNull Key dimensionType) {
-        this(uniqueId, dimensionType, null);
+        this(uniqueId, dimensionType, null, dimensionType);
     }
 
-    public InstanceContainer(@NotNull UUID uniqueId, @NotNull Key dimensionType, @Nullable IChunkLoader loader) {
-        this(MinecraftServer.getDimensionTypeRegistry(), uniqueId, dimensionType, loader);
+    public InstanceContainer(@NotNull UUID uniqueId, @NotNull Key dimensionType, @NotNull Key dimensionName) {
+        this(uniqueId, dimensionType, null, dimensionName);
+    }
+
+    public InstanceContainer(@NotNull UUID uniqueId, @NotNull Key dimensionType, @Nullable IChunkLoader loader, @NotNull Key dimensionName) {
+        this(MinecraftServer.getDimensionTypeRegistry(), uniqueId, dimensionType, dimensionName, loader);
     }
 
     public InstanceContainer(
             @NotNull DynamicRegistry<DimensionType> dimensionTypeRegistry,
             @NotNull UUID uniqueId,
             @NotNull Key dimensionType,
+            @NotNull Key dimensionName,
             @Nullable IChunkLoader loader
     ) {
-        super(dimensionTypeRegistry, uniqueId, dimensionType);
+        super(dimensionTypeRegistry, uniqueId, dimensionType, dimensionName);
         setChunkSupplier(DynamicChunk::new);
         setChunkLoader(Objects.requireNonNullElse(loader, DEFAULT_LOADER));
         this.chunkLoader.loadInstance(this);
@@ -524,7 +537,7 @@ public class InstanceContainer extends Instance {
      * @see #getSrcInstance() to retrieve the "creation source" of the copied instance
      */
     public synchronized InstanceContainer copy() {
-        InstanceContainer copiedInstance = new InstanceContainer(UUID.randomUUID(), getDimensionType());
+        InstanceContainer copiedInstance = new InstanceContainer(UUID.randomUUID(), getDimensionType(), getDimensionName());
         copiedInstance.srcInstance = this;
         copiedInstance.tagHandler = this.tagHandler.copy();
         copiedInstance.lastBlockChangeTime = this.lastBlockChangeTime;

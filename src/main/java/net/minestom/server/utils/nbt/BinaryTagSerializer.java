@@ -268,7 +268,7 @@ public interface BinaryTagSerializer<T> {
         return new BinaryTagSerializer<>() {
             @Override
             public @NotNull BinaryTag write(@NotNull Context context, Key value) {
-                return stringBinaryTag(value.value());
+                return stringBinaryTag(value.asString());
             }
 
             @Override
@@ -477,7 +477,7 @@ public interface BinaryTagSerializer<T> {
                 if (!(result instanceof CompoundBinaryTag resultCompound))
                     throw new IllegalArgumentException("Expected compound tag for tagged union");
 
-                return CompoundBinaryTag.builder().put(resultCompound).putString(key, type.value()).build();
+                return CompoundBinaryTag.builder().put(resultCompound).putString(key, type.asString()).build();
             }
 
             @Override

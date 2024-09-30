@@ -76,7 +76,7 @@ public record BiomeEffects(int fogColor, int skyColor, int waterColor, int water
 
         public @NotNull CompoundBinaryTag toNbt() {
             var builder = CompoundBinaryTag.builder()
-                    .putString("sound_id", sound.value());
+                    .putString("sound_id", sound.asString());
 
             if (range != null) builder.putFloat("range", range);
             return builder.build();
