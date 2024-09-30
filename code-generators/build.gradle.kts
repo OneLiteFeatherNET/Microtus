@@ -5,6 +5,7 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven("https://s01.oss.sonatype.org/content/repositories/releases/")
 }
 
 dependencies {
