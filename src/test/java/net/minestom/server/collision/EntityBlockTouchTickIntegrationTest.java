@@ -1,6 +1,6 @@
 package net.minestom.server.collision;
 
-import net.minestom.testing.Env;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -8,7 +8,7 @@ import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.EntityType;
 import net.minestom.server.instance.block.Block;
 import net.minestom.server.instance.block.BlockHandler;
-import net.minestom.server.utils.NamespaceID;
+import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -34,8 +34,8 @@ class EntityBlockTouchTickIntegrationTest {
             }
 
             @Override
-            public @NotNull NamespaceID getNamespaceId() {
-                return NamespaceID.from("minestom:test");
+            public @NotNull Key getNamespaceId() {
+                return Key.key("minestom:test");
             }
         };
 
@@ -73,8 +73,8 @@ class EntityBlockTouchTickIntegrationTest {
             }
 
             @Override
-            public @NotNull NamespaceID getNamespaceId() {
-                return NamespaceID.from("minestom:test");
+            public @NotNull Key getNamespaceId() {
+                return Key.key("minestom:test");
             }
         };
 
@@ -113,8 +113,8 @@ class EntityBlockTouchTickIntegrationTest {
             }
 
             @Override
-            public @NotNull NamespaceID getNamespaceId() {
-                return NamespaceID.from("minestom:test");
+            public @NotNull Key getNamespaceId() {
+                return Key.key("minestom:test");
             }
         };
 
@@ -161,8 +161,8 @@ class EntityBlockTouchTickIntegrationTest {
             }
 
             @Override
-            public @NotNull NamespaceID getNamespaceId() {
-                return NamespaceID.from("minestom:test");
+            public @NotNull Key getNamespaceId() {
+                return Key.key("minestom:test");
             }
         };
 

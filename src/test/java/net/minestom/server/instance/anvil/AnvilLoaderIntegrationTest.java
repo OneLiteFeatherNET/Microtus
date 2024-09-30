@@ -108,7 +108,7 @@ class AnvilLoaderIntegrationTest {
                 for (int y = 0; y < 16; y++) {
                     for (int x = 0; x < 16; x++) {
                         for (int z = 0; z < 16; z++) {
-                            DynamicRegistry.Key<Biome> b = chunk.getBiome(x, y, z);
+                            var b = chunk.getBiome(x, y, z);
                             assertEquals(Biome.PLAINS, b);
                         }
                     }

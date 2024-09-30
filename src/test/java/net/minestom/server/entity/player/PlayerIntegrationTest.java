@@ -1,17 +1,33 @@
 package net.minestom.server.entity.player;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
-import net.minestom.server.entity.*;
+import net.minestom.server.entity.Entity;
+import net.minestom.server.entity.EntityType;
+import net.minestom.server.entity.GameMode;
+import net.minestom.server.entity.Player;
+import net.minestom.server.entity.RelativeFlags;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.event.player.PlayerGameModeChangeEvent;
 import net.minestom.server.message.ChatMessageType;
 import net.minestom.server.network.packet.client.common.ClientSettingsPacket;
 import net.minestom.server.network.packet.server.ServerPacket;
-import net.minestom.server.network.packet.server.play.*;
-import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.network.packet.server.play.DeclareCommandsPacket;
+import net.minestom.server.network.packet.server.play.EntityAttributesPacket;
+import net.minestom.server.network.packet.server.play.EntityMetaDataPacket;
+import net.minestom.server.network.packet.server.play.EntityStatusPacket;
+import net.minestom.server.network.packet.server.play.FacePlayerPacket;
+import net.minestom.server.network.packet.server.play.JoinGamePacket;
+import net.minestom.server.network.packet.server.play.PlayerAbilitiesPacket;
+import net.minestom.server.network.packet.server.play.PlayerInfoUpdatePacket;
+import net.minestom.server.network.packet.server.play.PlayerPositionAndLookPacket;
+import net.minestom.server.network.packet.server.play.ServerDifficultyPacket;
+import net.minestom.server.network.packet.server.play.SetExperiencePacket;
+import net.minestom.server.network.packet.server.play.SpawnPositionPacket;
+import net.minestom.server.network.packet.server.play.UpdateHealthPacket;
 import net.minestom.server.world.DimensionType;
 import net.minestom.testing.Collector;
 import net.minestom.testing.Env;
@@ -146,7 +162,7 @@ class PlayerIntegrationTest {
     @Test
     void refreshPlayerTest(Env env) {
         final int TEST_PERMISSION_LEVEL = 2;
-        final var testDimension = env.process().dimensionType().register(NamespaceID.from("minestom:test_dimension"), DimensionType.builder().build());
+        final var testDimension = env.process().dimensionType().register(Key.key("minestom:test_dimension"), DimensionType.builder().build());
 
         var instance = env.createFlatInstance();
         var instance2 = env.process().instance().createInstanceContainer(testDimension);
@@ -181,7 +197,7 @@ class PlayerIntegrationTest {
     @Test
     void deathLocationTest(Env env) {
         String dimensionNamespace = "minestom:test_dimension";
-        final var testDimension = env.process().dimensionType().register(NamespaceID.from(dimensionNamespace), DimensionType.builder().build());
+        final var testDimension = env.process().dimensionType().register(Key.key(dimensionNamespace), DimensionType.builder().build());
 
         var instance = env.process().instance().createInstanceContainer(testDimension);
         var connection = env.createConnection();
