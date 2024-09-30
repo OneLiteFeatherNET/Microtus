@@ -1,5 +1,6 @@
 package net.minestom.demo;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.FeatureFlag;
@@ -60,7 +61,6 @@ import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.notifications.Notification;
 import net.minestom.server.utils.MathUtils;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.time.TimeUnit;
 
 import java.time.Duration;
@@ -130,9 +130,9 @@ public class PlayerInit {
                     static boolean b = false;
                 }
                 if (A.b) {
-                    event.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).removeModifier(NamespaceID.from("test"));
+                    event.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).removeModifier(Key.key("test"));
                 } else {
-                    event.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).addModifier(new AttributeModifier(NamespaceID.from("test"), 0.5, AttributeOperation.ADD_VALUE));
+                    event.getPlayer().getAttribute(Attribute.GENERIC_MOVEMENT_SPEED).addModifier(new AttributeModifier(Key.key("test"), 0.5, AttributeOperation.ADD_VALUE));
                 }
                 A.b = !A.b;
             })
@@ -167,7 +167,7 @@ public class PlayerInit {
                 player.getInventory().addItemStack(bundle);
 
                 player.getInventory().addItemStack(ItemStack.builder(Material.COMPASS)
-                        .set(ItemComponent.LODESTONE_TRACKER, new LodestoneTracker(player.getInstance().getDimensionName(), new Vec(10, 10, 10), true))
+                        .set(ItemComponent.LODESTONE_TRACKER, new LodestoneTracker(player.getInstance().getDimensionType().value(), new Vec(10, 10, 10), true))
                         .build());
 
                 player.getInventory().addItemStack(ItemStack.builder(Material.STONE_SWORD)
