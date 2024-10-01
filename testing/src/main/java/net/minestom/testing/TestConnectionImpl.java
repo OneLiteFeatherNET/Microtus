@@ -23,37 +23,39 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 final class TestConnectionImpl implements TestConnection {
-    private final Env env;
-    private final ServerProcess process;
-    private final PlayerConnectionImpl playerConnection = new PlayerConnectionImpl();
+    private volatile ServerProcess process;
+    private volatile PlayerConnectionImpl playerConnection = new PlayerConnectionImpl();
 
     private final List<IncomingCollector<ServerPacket>> incomingTrackers = new CopyOnWriteArrayList<>();
 
     TestConnectionImpl(Env env) {
-        this.env = env;
         this.process = env.process();
     }
 
     @Override
     public @NotNull CompletableFuture<Player> connect(@NotNull Instance instance, @NotNull Pos pos) {
-        // Use player provider to disable queued chunk sending
-        process.connection().setPlayerProvider(TestPlayerImpl::new);
+        return CompletableFuture.supplyAsync(() -> {
+            // Use player provider to disable queued chunk sending
+            process.connection().setPlayerProvider(TestPlayerImpl::new);
 
-        playerConnection.setConnectionState(ConnectionState.LOGIN);
-        var player = process.connection().createPlayer(playerConnection, UUID.randomUUID(), "RandName");
-        player.eventNode().addListener(AsyncPlayerConfigurationEvent.class, event -> {
-            event.setSpawningInstance(instance);
-            event.getPlayer().setRespawnPoint(pos);
+            playerConnection.setConnectionState(ConnectionState.LOGIN);
+            var player = process.connection().createPlayer(playerConnection, UUID.randomUUID(), "RandName");
+            player.eventNode().addListener(AsyncPlayerConfigurationEvent.class, event -> {
+                event.setSpawningInstance(instance);
+                event.getPlayer().setRespawnPoint(pos);
+            });
+            // Force the player through the entirety of the login process manually
+            System.out.println("Completing login process for player " + player.getUsername());
+            System.out.println("Connect player on thread " + Thread.currentThread().getName());
+            CompletableFuture.allOf(
+                    CompletableFuture.completedFuture(process.connection()).thenCompose(connectionManager -> connectionManager.doConfiguration(player, true)),
+                    CompletableFuture.runAsync(() -> playerConnection.receiveKnownPacksResponse(List.of(SelectKnownPacksPacket.MINECRAFT_CORE)))
+            ).join();
+
+            process.connection().transitionConfigToPlay(player);
+            process.connection().updateWaitingPlayers();
+            return player;
         });
-
-        // Force the player through the entirety of the login process manually
-        var configFuture = process.connection().doConfiguration(player, true);
-        playerConnection.receiveKnownPacksResponse(List.of(SelectKnownPacksPacket.MINECRAFT_CORE));
-        configFuture.join();
-
-        process.connection().transitionConfigToPlay(player);
-        process.connection().updateWaitingPlayers();
-        return CompletableFuture.completedFuture(player);
     }
 
     @Override
