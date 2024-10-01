@@ -103,6 +103,7 @@ dependencies {
     api(libs.bstats.base)
     // Maven
     api(libs.maven.resolver)
+    api(libs.maven.resolver.supplier)
     api(libs.maven.connector)
     api(libs.maven.transport.http)
 

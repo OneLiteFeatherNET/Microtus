@@ -33,10 +33,8 @@ dependencies {
         // Adventure, for user-interface
         api(libs.bundles.adventure)
 
-        // Kotlin Libraries
-        api(libs.bundles.kotlin)
-
         api(libs.maven.resolver)
+        api(libs.maven.resolver.supplier)
         api(libs.maven.connector)
         api(libs.maven.transport.http)
 

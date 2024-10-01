@@ -8,29 +8,29 @@ dependencyResolutionManagement {
         create("libs") {
             // Important dependencies
             version("adventure", "4.17.0")
-            version("kotlin", "2.0.0")
             version("data", "1.21-rv3")
-            version("jetbrainsAnnotations", "24.1.0")
-            version("logback", "1.4.5")
-            version("slf4j", "2.0.7")
-            version("maven-resolver", "1.9.18")
-            version("maven-resolver-provider", "3.9.6")
+            version("jetbrainsAnnotations", "25.0.0")
+            version("logback", "1.5.8")
+            version("slf4j", "2.0.16")
+            version("maven-resolver", "2.0.0")
+            version("maven-resolver-provider", "3.9.9")
+            version("maven-resolver-transport", "1.9.22")
 
             // Terminal / Logging
-            version("tinylog", "2.6.2")
-            version("jline", "3.25.1")
+            version("tinylog", "2.7.0")
+            version("jline", "3.27.0")
 
             // Performance / Data Structures
             version("caffeine", "3.1.8")
-            version("fastutil", "8.5.12")
+            version("fastutil", "8.5.14")
             version("flare", "2.0.1")
             version("gson", "2.11.0")
             version("jcTools", "4.0.2")
 
             // Test
-            version("junit-jupiter", "5.10.1")
-            version("junit-platform", "1.10.1")
-            version("mockito", "5.12.0")
+            version("junit-jupiter", "5.11.1")
+            version("junit-platform", "1.11.1")
+            version("mockito", "5.14.0")
 
             // Code Generation
             version("javaPoet", "1.13.0")
@@ -61,12 +61,9 @@ dependencyResolutionManagement {
 
             // Maven
             library("maven.connector", "org.apache.maven.resolver", "maven-resolver-connector-basic").versionRef("maven-resolver")
-            library("maven.transport.http", "org.apache.maven.resolver", "maven-resolver-transport-http").versionRef("maven-resolver")
+            library("maven.transport.http", "org.apache.maven.resolver", "maven-resolver-transport-http").versionRef("maven-resolver-transport")
             library("maven.resolver", "org.apache.maven", "maven-resolver-provider").versionRef("maven-resolver-provider")
-
-            // Kotlin
-            library("kotlin-reflect", "org.jetbrains.kotlin", "kotlin-reflect").versionRef("kotlin")
-            library("kotlin-stdlib-jdk8", "org.jetbrains.kotlin", "kotlin-stdlib-jdk8").versionRef("kotlin")
+            library("maven.resolver.supplier", "org.apache.maven.resolver", "maven-resolver-supplier").versionRef("maven-resolver-transport")
 
             // Miscellaneous
             library("minestomData", "net.minestom", "data").versionRef("data")
@@ -116,7 +113,6 @@ dependencyResolutionManagement {
             // BStats
             library("bstats-base", "org.bstats", "bstats-base").versionRef("bstats")
 
-            bundle("kotlin", listOf("kotlin-stdlib-jdk8", "kotlin-reflect"))
             bundle("flare", listOf("flare", "flare-fastutil"))
             bundle("adventure", listOf("adventure-api", "adventure-nbt", "adventure-mini-message", "adventure-serializer-gson", "adventure-serializer-legacy", "adventure-serializer-plain", "adventure-text-logger-slf4j"))
             bundle("logging", listOf("tinylog-api", "tinylog-impl", "tinylog-slf4j"))
