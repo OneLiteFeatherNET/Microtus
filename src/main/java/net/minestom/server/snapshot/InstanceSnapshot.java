@@ -1,10 +1,9 @@
 package net.minestom.server.snapshot;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.instance.block.Block;
-import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.tag.TagReadable;
-import net.minestom.server.world.DimensionType;
 import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -17,7 +16,7 @@ import static net.minestom.server.utils.chunk.ChunkUtils.getChunkCoordinate;
 
 public sealed interface InstanceSnapshot extends Snapshot, Block.Getter, Biome.Getter, TagReadable
         permits SnapshotImpl.Instance {
-    @NotNull DynamicRegistry.Key<DimensionType> dimensionType();
+    @NotNull Key dimensionType();
 
     long worldAge();
 
@@ -30,7 +29,7 @@ public sealed interface InstanceSnapshot extends Snapshot, Block.Getter, Biome.G
     }
 
     @Override
-    default @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z) {
+    default @NotNull Key getBiome(int x, int y, int z) {
         ChunkSnapshot chunk = chunk(getChunkCoordinate(x), getChunkCoordinate(z));
         return Objects.requireNonNull(chunk).getBiome(x, y, z);
     }
