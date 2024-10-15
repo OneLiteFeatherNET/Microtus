@@ -16,7 +16,20 @@ public interface TestConnection {
 
     /**
      * Sets the custom player provider for this test connection.
-     *
+     * <br>
+     * For a successful test you need to override the sendChunk method in the player implementation.
+     * Example:
+     * <pre>{@code
+     * public class CustomGamePlayerImpl extends Player {
+     *    public CustomGamePlayerImpl(UUID uuid, String username, PlayerConnection playerConnection) {
+     *      super(uuid, username, playerConnection);
+     *    }
+     *    @Override
+     *    public void sendChunk(Chunk chunk) {
+     *      sendPacket(chunk.getFullDataPacket());
+     *    }
+     * }
+     * }</pre>
      * @param provider the custom player provider
      */
     void setCustomPlayerProvider(@NotNull PlayerProvider provider);
