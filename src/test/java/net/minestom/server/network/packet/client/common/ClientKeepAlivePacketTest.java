@@ -16,8 +16,6 @@ class ClientKeepAlivePacketTest {
 
         var packet = new ClientKeepAlivePacket(networkBuffer);
 
-        assertEquals(packet.id(), 0L);
+        assertEquals(0L, packet.id());
     }
-
-
 }

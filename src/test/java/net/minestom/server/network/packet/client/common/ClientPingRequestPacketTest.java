@@ -16,7 +16,6 @@ class ClientPingRequestPacketTest {
 
         var packet = new ClientPingRequestPacket(networkBuffer);
 
-        assertEquals(packet.number(), 0L);
+        assertEquals(0L, packet.number());
     }
-
 }
