@@ -1,5 +1,6 @@
 package net.minestom.server.item.component;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.color.DyeColor;
@@ -18,7 +19,7 @@ public record BannerPatterns(@NotNull List<Layer> layers) {
     public static final NetworkBuffer.Type<BannerPatterns> NETWORK_TYPE = Layer.NETWORK_TYPE.list(MAX_LAYERS).map(BannerPatterns::new, BannerPatterns::layers);
     public static final BinaryTagSerializer<BannerPatterns> NBT_TYPE = Layer.NBT_TYPE.list().map(BannerPatterns::new, BannerPatterns::layers);
 
-    public record Layer(@NotNull DynamicRegistry.Key<BannerPattern> pattern, @NotNull DyeColor color) {
+    public record Layer(@NotNull Key pattern, @NotNull DyeColor color) {
         public static final NetworkBuffer.Type<Layer> NETWORK_TYPE = new NetworkBuffer.Type<>() {
             @Override
             public void write(@NotNull NetworkBuffer buffer, Layer value) {
@@ -58,7 +59,7 @@ public record BannerPatterns(@NotNull List<Layer> layers) {
         this(List.of(layer));
     }
 
-    public BannerPatterns(@NotNull DynamicRegistry.Key<BannerPattern> pattern, @NotNull DyeColor color) {
+    public BannerPatterns(@NotNull Key pattern, @NotNull DyeColor color) {
         this(new Layer(pattern, color));
     }
 

@@ -3,6 +3,7 @@ package net.minestom.server.instance;
 import it.unimi.dsi.fastutil.objects.ObjectArraySet;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.kyori.adventure.pointer.Pointers;
 import net.kyori.adventure.sound.Sound;
@@ -43,7 +44,6 @@ import net.minestom.server.thread.ThreadDispatcher;
 import net.minestom.server.timer.Schedulable;
 import net.minestom.server.timer.Scheduler;
 import net.minestom.server.utils.ArrayUtils;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.PacketUtils;
 import net.minestom.server.utils.chunk.ChunkCache;
 import net.minestom.server.utils.chunk.ChunkSupplier;
@@ -75,9 +75,9 @@ public abstract class Instance implements Block.Getter, Block.Setter,
 
     private boolean registered;
 
-    private final DynamicRegistry.Key<DimensionType> dimensionType;
+    private final Key dimensionType;
     private final DimensionType cachedDimensionType; // Cached to prevent self-destruction if the registry is changed, and to avoid the lookups.
-    private final String dimensionName;
+    private final Key dimensionName;
 
     // World border of the instance
     private WorldBorder worldBorder;
@@ -120,24 +120,13 @@ public abstract class Instance implements Block.Getter, Block.Setter,
     private final Pointers pointers;
 
     private Pos worldSpawnPosition = Pos.ZERO;
-
     /**
      * Creates a new instance.
      *
      * @param uniqueId      the {@link UUID} of the instance
      * @param dimensionType the {@link DimensionType} of the instance
      */
-    public Instance(@NotNull UUID uniqueId, @NotNull DynamicRegistry.Key<DimensionType> dimensionType) {
-        this(uniqueId, dimensionType, dimensionType.namespace());
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param uniqueId      the {@link UUID} of the instance
-     * @param dimensionType the {@link DimensionType} of the instance
-     */
-    public Instance(@NotNull UUID uniqueId, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, @NotNull NamespaceID dimensionName) {
+    public Instance(@NotNull UUID uniqueId, @NotNull Key dimensionType, Key dimensionName) {
         this(MinecraftServer.getDimensionTypeRegistry(), uniqueId, dimensionType, dimensionName);
     }
 
@@ -147,12 +136,12 @@ public abstract class Instance implements Block.Getter, Block.Setter,
      * @param uniqueId      the {@link UUID} of the instance
      * @param dimensionType the {@link DimensionType} of the instance
      */
-    public Instance(@NotNull DynamicRegistry<DimensionType> dimensionTypeRegistry, @NotNull UUID uniqueId, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, @NotNull NamespaceID dimensionName) {
+    public Instance(@NotNull DynamicRegistry<DimensionType> dimensionTypeRegistry, @NotNull UUID uniqueId, @NotNull Key dimensionType, @NotNull Key dimensionName) {
         this.uniqueId = uniqueId;
+        this.dimensionName = dimensionName;
         this.dimensionType = dimensionType;
         this.cachedDimensionType = dimensionTypeRegistry.get(dimensionType);
         Check.argCondition(cachedDimensionType == null, "The dimension " + dimensionType + " is not registered! Please add it to the registry (`MinecraftServer.getDimensionTypeRegistry().registry(dimensionType)`).");
-        this.dimensionName = dimensionName.asString();
 
         this.worldBorder = WorldBorder.DEFAULT_BORDER;
         targetBorderDiameter = this.worldBorder.diameter();
@@ -168,6 +157,10 @@ public abstract class Instance implements Block.Getter, Block.Setter,
             // Local nodes require a server process
             this.eventNode = null;
         }
+    }
+
+    public Key getDimensionName() {
+        return dimensionName;
     }
 
     /**
@@ -413,21 +406,13 @@ public abstract class Instance implements Block.Getter, Block.Setter,
      *
      * @return the dimension of the instance
      */
-    public DynamicRegistry.Key<DimensionType> getDimensionType() {
+    public Key getDimensionType() {
         return dimensionType;
     }
 
     @ApiStatus.Internal
     public @NotNull DimensionType getCachedDimensionType() {
         return cachedDimensionType;
-    }
-
-    /**
-     * Gets the instance dimension name.
-     * @return the dimension name of the instance
-     */
-    public @NotNull String getDimensionName() {
-        return dimensionName;
     }
 
     /**

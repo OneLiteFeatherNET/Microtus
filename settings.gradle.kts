@@ -1,6 +1,7 @@
 dependencyResolutionManagement {
     repositories {
         maven("https://s01.oss.sonatype.org/content/repositories/snapshots")
+        maven("https://s01.oss.sonatype.org/content/repositories/releases/")
         maven("https://jitpack.io")
         mavenCentral()
     }
@@ -9,7 +10,7 @@ dependencyResolutionManagement {
             // Important dependencies
             version("adventure", "4.17.0")
             version("kotlin", "2.0.0")
-            version("data", "1.21-rv3")
+            version("data", "1.21-rv7")
             version("jetbrainsAnnotations", "24.1.0")
             version("logback", "1.4.5")
             version("slf4j", "2.0.7")
@@ -69,7 +70,7 @@ dependencyResolutionManagement {
             library("kotlin-stdlib-jdk8", "org.jetbrains.kotlin", "kotlin-stdlib-jdk8").versionRef("kotlin")
 
             // Miscellaneous
-            library("minestomData", "net.minestom", "data").versionRef("data")
+            library("minestomData", "net.onelitefeather.microtus", "data").versionRef("data")
             library("jetbrainsAnnotations", "org.jetbrains", "annotations").versionRef("jetbrainsAnnotations");
 
             // Logging

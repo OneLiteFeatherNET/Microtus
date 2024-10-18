@@ -1,5 +1,6 @@
 package net.minestom.server.entity.damage;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.registry.ProtocolObject;
 import net.minestom.server.registry.Registries;
@@ -11,7 +12,7 @@ import org.jetbrains.annotations.Nullable;
 
 public sealed interface DamageType extends ProtocolObject, DamageTypes permits DamageTypeImpl {
 
-    @NotNull BinaryTagSerializer<DynamicRegistry.Key<DamageType>> NBT_TYPE = BinaryTagSerializer.registryKey(Registries::damageType);
+    @NotNull BinaryTagSerializer<Key> NBT_TYPE = BinaryTagSerializer.registryKey(Registries::damageType);
 
     static @NotNull DamageType create(
             float exhaustion,
