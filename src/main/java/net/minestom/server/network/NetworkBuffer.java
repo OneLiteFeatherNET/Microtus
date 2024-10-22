@@ -1,5 +1,6 @@
 package net.minestom.server.network;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
@@ -49,7 +50,7 @@ public final class NetworkBuffer {
     public static final Type<int[]> VAR_INT_ARRAY = new NetworkBufferTypeImpl.VarIntArrayType();
     public static final Type<long[]> VAR_LONG_ARRAY = new NetworkBufferTypeImpl.VarLongArrayType();
 
-    public static <T extends ProtocolObject> @NotNull Type<DynamicRegistry.Key<T>> RegistryKey(@NotNull Function<Registries, DynamicRegistry<T>> selector) {
+    public static <T extends ProtocolObject> @NotNull Type<Key> RegistryKey(@NotNull Function<Registries, DynamicRegistry<T>> selector) {
         return new NetworkBufferTypeImpl.RegistryTypeType<>(selector);
     }
 

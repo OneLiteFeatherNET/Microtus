@@ -37,7 +37,7 @@ public final class FluidGenerator extends MinestomCodeGenerator {
             return;
         }
         // Important classes we use alot
-        ClassName namespaceIDClassName = ClassName.get("net.minestom.server.utils", "NamespaceID");
+        ClassName namespaceIDClassName = ClassName.get("net.kyori.adventure.key", "Key");
         ClassName registriesClassName = ClassName.get("net.minestom.server.registry", "FluidRegistries");
 
         JsonObject fluids = GSON.fromJson(new InputStreamReader(fluidsFile), JsonObject.class);
@@ -124,7 +124,7 @@ public final class FluidGenerator extends MinestomCodeGenerator {
         fluids.entrySet().forEach(entry -> {
             final String fluidName = entry.getKey();
             fluidClass.addEnumConstant(toConstant(fluidName), TypeSpec.anonymousClassBuilder(
-                            "$T.from($S)",
+                            "$T.key($S)",
                             namespaceIDClassName,
                             fluidName
                     ).build()

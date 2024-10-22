@@ -1,5 +1,6 @@
 package net.minestom.server.item.enchant;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.entity.damage.DamageType;
 import net.minestom.server.gamedata.DataPack;
@@ -80,7 +81,7 @@ public non-sealed interface EntityEffect extends Enchantment.Effect {
     }
 
     record DamageEntity(
-            @NotNull DynamicRegistry.Key<DamageType> damageType,
+            @NotNull Key damageType,
             @NotNull LevelBasedValue minDamage,
             @NotNull LevelBasedValue maxDamage
     ) implements EntityEffect, LocationEffect {
