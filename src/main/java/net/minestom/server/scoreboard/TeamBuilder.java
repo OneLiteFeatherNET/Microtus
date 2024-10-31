@@ -2,144 +2,70 @@ package net.minestom.server.scoreboard;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.minestom.server.MinecraftServer;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket.CollisionRule;
 import net.minestom.server.network.packet.server.play.TeamsPacket.NameTagVisibility;
+import net.minestom.server.utils.validate.Check;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A builder which represents a fluent Object to built teams.
  */
-public class TeamBuilder {
+public final class TeamBuilder implements Team.Builder {
+
+    private final String teamName;
+    /**
+     * The display name of the team.
+     */
+    private Component displayName;
+    /**
+     * A BitMask.
+     */
+    private byte friendlyFlags;
+    /**
+     * The visibility of the team.
+     */
+    private TeamsPacket.NameTagVisibility nameTagVisibility;
+    /**
+     * The collision rule of the team.
+     */
+    private TeamsPacket.CollisionRule collisionRule;
 
     /**
-     * The management for the teams
+     * Used to color the name of players on the team <br>
+     * The color of a team defines how the names of the team members are visualized.
      */
-    private final TeamManager teamManager;
+    private NamedTextColor teamColor;
+
     /**
-     * The team to create
+     * Shown before the names of the players who belong to this team.
      */
-    private final Team team;
+    private Component prefix;
+    /**
+     * Shown after the names of the player who belong to this team.
+     */
+    private Component suffix;
     /**
      * True, if it should send an update packet
      */
     private boolean updateTeam;
 
-    /**
-     * Creates an team builder.
-     *
-     * @param name        The name of the new team
-     * @param teamManager The manager for the team
-     */
-    public TeamBuilder(String name, TeamManager teamManager) {
-        this(teamManager.exists(name) ? teamManager.getTeam(name) : new Team(name), teamManager);
-    }
+    private boolean allowFriendlyFire;
+    private boolean seeInvisiblePlayers;
 
-    /**
-     * Creates an team builder.
-     *
-     * @param team        The new team
-     * @param teamManager The manager for the team
-     */
-    private TeamBuilder(Team team, TeamManager teamManager) {
-        this.team = team;
-        this.teamManager = teamManager;
+    TeamBuilder(@NotNull String teamName) {
+        Check.argCondition(teamName.trim().isEmpty(), "The team name cannot be empty");
+        this.teamName = teamName;
+        this.displayName = Component.empty();
+        this.friendlyFlags = 0x00;
+        this.nameTagVisibility = TeamsPacket.NameTagVisibility.ALWAYS;
+        this.collisionRule = TeamsPacket.CollisionRule.ALWAYS;
+
+        this.teamColor = NamedTextColor.WHITE;
+        this.prefix = Component.empty();
+        this.suffix = Component.empty();
         this.updateTeam = false;
-    }
-
-    /**
-     * Updates the prefix of the {@link Team}.
-     *
-     * @param prefix The new prefix
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updatePrefix(Component prefix) {
-        this.team.updatePrefix(prefix);
-        return this;
-    }
-
-    /**
-     * Updates the color of the {@link Team}.
-     *
-     * @param color The new color
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updateTeamColor(NamedTextColor color) {
-        this.team.updateTeamColor(color);
-        return this;
-    }
-
-    /**
-     * Updates the suffix of the {@link Team}.
-     *
-     * @param suffix The new suffix
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updateSuffix(Component suffix) {
-        this.team.updateSuffix(suffix);
-        return this;
-    }
-
-    /**
-     * Updates the display name of the {@link Team}.
-     *
-     * @param displayName The new display name
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updateTeamDisplayName(Component displayName) {
-        this.team.updateTeamDisplayName(displayName);
-        return this;
-    }
-
-    /**
-     * Updates the {@link CollisionRule} of the {@link Team}.
-     *
-     * @param rule The new rule
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updateCollisionRule(CollisionRule rule) {
-        this.team.updateCollisionRule(rule);
-        return this;
-    }
-
-    /**
-     * Updates the {@link NameTagVisibility} of the {@link Team}.
-     *
-     * @param visibility The new tag visibility
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updateNameTagVisibility(NameTagVisibility visibility) {
-        this.team.updateNameTagVisibility(visibility);
-        return this;
-    }
-
-    /**
-     * Updates the friendly flags of the {@link Team}.
-     *
-     * @param flag The new friendly flag
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updateFriendlyFlags(byte flag) {
-        this.team.updateFriendlyFlags(flag);
-        return this;
-    }
-
-    /**
-     * Updates the friendly flags for allow friendly fire.
-     *
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updateAllowFriendlyFire() {
-        this.team.updateAllowFriendlyFire(true);
-        return this;
-    }
-
-    /**
-     * Updates the friendly flags to sees invisible players of own team.
-     *
-     * @return this builder, for chaining
-     */
-    public TeamBuilder updateSeeInvisiblePlayers() {
-        this.team.updateSeeInvisiblePlayers(true);
-        return this;
     }
 
     /**
@@ -150,8 +76,9 @@ public class TeamBuilder {
      * @param prefix The new prefix
      * @return this builder, for chaining
      */
-    public TeamBuilder prefix(Component prefix) {
-        this.team.setPrefix(prefix);
+    @Override
+    public @NotNull TeamBuilder prefix(@NotNull Component prefix) {
+        this.prefix = prefix;
         return this;
     }
 
@@ -163,8 +90,9 @@ public class TeamBuilder {
      * @param suffix The new suffix
      * @return this builder, for chaining
      */
-    public TeamBuilder suffix(Component suffix) {
-        this.team.setSuffix(suffix);
+    @Override
+    public @NotNull TeamBuilder suffix(@NotNull Component suffix) {
+        this.suffix = suffix;
         return this;
     }
 
@@ -176,8 +104,9 @@ public class TeamBuilder {
      * @param color The new team color
      * @return this builder, for chaining
      */
-    public TeamBuilder teamColor(NamedTextColor color) {
-        this.team.setTeamColor(color);
+    @Override
+    public @NotNull TeamBuilder color(@NotNull NamedTextColor color) {
+        this.teamColor = color;
         return this;
     }
 
@@ -189,8 +118,9 @@ public class TeamBuilder {
      * @param displayName The new display name
      * @return this builder, for chaining
      */
-    public TeamBuilder teamDisplayName(Component displayName) {
-        this.team.setTeamDisplayName(displayName);
+    @Override
+    public @NotNull TeamBuilder displayName(@NotNull Component displayName) {
+        this.displayName = displayName;
         return this;
     }
 
@@ -202,8 +132,9 @@ public class TeamBuilder {
      * @param rule The new rule
      * @return this builder, for chaining
      */
-    public TeamBuilder collisionRule(CollisionRule rule) {
-        this.team.setCollisionRule(rule);
+    @Override
+    public @NotNull TeamBuilder collisionRule(@NotNull CollisionRule rule) {
+        this.collisionRule = rule;
         return this;
     }
 
@@ -215,8 +146,9 @@ public class TeamBuilder {
      * @param visibility The new tag visibility
      * @return this builder, for chaining
      */
-    public TeamBuilder nameTagVisibility(NameTagVisibility visibility) {
-        this.team.setNameTagVisibility(visibility);
+    @Override
+    public @NotNull TeamBuilder visibility(@NotNull NameTagVisibility visibility) {
+        this.nameTagVisibility = visibility;
         return this;
     }
 
@@ -228,8 +160,9 @@ public class TeamBuilder {
      * @param flag The new flag
      * @return this builder, for chaining
      */
-    public TeamBuilder friendlyFlags(byte flag) {
-        this.team.setFriendlyFlags(flag);
+    @Override
+    public @NotNull TeamBuilder friendlyFlags(byte flag) {
+        this.friendlyFlags = flag;
         return this;
     }
 
@@ -240,8 +173,9 @@ public class TeamBuilder {
      *
      * @return this builder, for chaining
      */
-    public TeamBuilder allowFriendlyFire() {
-        this.team.setAllowFriendlyFire(true);
+    @Override
+    public @NotNull TeamBuilder allowFriendlyFire() {
+        this.allowFriendlyFire = true;
         return this;
     }
 
@@ -252,8 +186,9 @@ public class TeamBuilder {
      *
      * @return this builder, for chaining
      */
-    public TeamBuilder seeInvisiblePlayers() {
-        this.team.setSeeInvisiblePlayers(true);
+    @Override
+    public @NotNull TeamBuilder seeInvisiblePlayers() {
+        this.seeInvisiblePlayers = true;
         return this;
     }
 
@@ -262,7 +197,8 @@ public class TeamBuilder {
      *
      * @return this builder, for chaining
      */
-    public TeamBuilder updateTeamPacket() {
+    @Override
+    public @NotNull TeamBuilder updateTeamPacket() {
         this.updateTeam = true;
         return this;
     }
@@ -272,13 +208,27 @@ public class TeamBuilder {
      *
      * @return the built team
      */
-    public Team build() {
-        if (!this.teamManager.exists(this.team)) this.teamManager.registerNewTeam(this.team);
-        if (this.updateTeam) {
-            this.team.sendUpdatePacket();
-            this.updateTeam = false;
-        }
-        return this.team;
-    }
+    public @NotNull Team build(boolean autoRegister) {
+        Team team = new ScoreboardTeam(
+                this.teamName,
+                this.displayName,
+                this.friendlyFlags,
+                this.nameTagVisibility,
+                this.collisionRule,
+                this.teamColor,
+                this.prefix,
+                this.suffix
+        );
+        team.setAllowFriendlyFire(this.allowFriendlyFire);
+        team.setSeeInvisiblePlayers(this.seeInvisiblePlayers);
+        if (!autoRegister) return team;
 
+        TeamManager teamManager = MinecraftServer.getTeamManager();
+
+        if (!teamManager.exists(team)) teamManager.registerNewTeam(team);
+        if (this.updateTeam) {
+            team.sendUpdatePacket();
+        }
+        return team;
+    }
 }
