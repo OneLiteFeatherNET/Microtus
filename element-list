@@ -52,6 +52,7 @@ net.minestom.server.entity.pathfinding
 net.minestom.server.entity.pathfinding.followers
 net.minestom.server.entity.pathfinding.generators
 net.minestom.server.entity.vehicle
+net.minestom.server.entity.villager
 net.minestom.server.event
 net.minestom.server.event.book
 net.minestom.server.event.entity
