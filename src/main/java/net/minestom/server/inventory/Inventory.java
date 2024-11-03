@@ -246,7 +246,7 @@ public non-sealed class Inventory extends AbstractInventory implements Viewable 
         final InventoryClickResult clickResult = clickProcessor.shiftClick(
                 isInWindow ? this : playerInventory,
                 isInWindow ? playerInventory : this,
-                getStartSlotForShiftClick(slot, player), isInWindow ? playerInventory.getInnerSize() : getInnerSize(), 1, // Microtus - fix shift click for inventory
+                getStartSlotForShiftClick(clickSlot, player), isInWindow ? playerInventory.getInnerSize() : getInnerSize(), 1, // Microtus - fix shift click for inventory
                 player, clickSlot, clicked, cursor, button); // Microtus
         if (clickResult.isCancel()) {
             updateAll(player);
