@@ -145,6 +145,10 @@ public final class Registry {
         return new VillagerType(namespace, main, null);
     }
 
+    public static GameEventEntry gameEventEntry(String namespace, Properties properties) {
+        return new GameEventEntry(namespace, properties, null);
+    }
+
     @ApiStatus.Internal
     public static Map<String, Map<String, Object>> load(Resource resource) {
         Map<String, Map<String, Object>> map = new HashMap<>();
@@ -555,6 +559,12 @@ public final class Registry {
 
         public boolean hasPrecipitation() {
             return hasPrecipitation;
+        }
+    }
+
+    public static final record GameEventEntry(NamespaceID namespace, Properties main, Properties custom) implements Entry {
+        public GameEventEntry(String namespace, Properties main, Properties custom) {
+            this(NamespaceID.from(namespace), main, custom);
         }
     }
 
