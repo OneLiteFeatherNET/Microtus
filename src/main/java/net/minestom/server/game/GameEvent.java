@@ -9,29 +9,59 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 
+/**
+ * Represents a game event.
+ * Used for a wide variety of events, from weather to bed use to game mode to demo messages.
+ *
+ * @version 1.0.0
+ * @since 1.6.0
+ * @author themeinerlp
+ */
 public sealed interface GameEvent extends StaticProtocolObject permits GameEventImpl {
 
     /**
-     * Returns the entity registry.
+     * Returns the game event registry.
      *
-     * @return the entity registry or null if it was created with a builder
+     * @return the game event registry or null if not found
      */
     @Contract(pure = true)
     @Nullable
     Registry.GameEventEntry registry();
 
+    /**
+     * Gets the namespace ID of this game event.
+     *
+     * @return the namespace ID
+     */
     @Override
     @NotNull
     NamespaceID namespace();
 
+    /**
+     * Gets the game events from the registry.
+     *
+     * @return the game events
+     */
     static @NotNull Collection<@NotNull GameEvent> values() {
         return GameEventImpl.values();
     }
 
+    /**
+     * Gets a game event by its namespace ID.
+     *
+     * @param namespaceID the namespace ID
+     * @return the game event or null if not found
+     */
     static @Nullable GameEvent fromNamespaceId(@NotNull String namespaceID) {
         return GameEventImpl.getSafe(namespaceID);
     }
 
+    /**
+     * Gets a game event by its namespace ID.
+     *
+     * @param namespaceID the namespace ID
+     * @return the game event or null if not found
+     */
     static @Nullable GameEvent fromNamespaceId(@NotNull NamespaceID namespaceID) {
         return fromNamespaceId(namespaceID.asString());
     }
