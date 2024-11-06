@@ -5,15 +5,18 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.adventure.AdventurePacketConvertor;
 import net.minestom.server.adventure.ComponentHolder;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.network.packet.server.ServerPacket.ComponentHolding;
 import net.minestom.server.network.packet.server.ServerPacket;
 import net.minestom.server.network.packet.server.ServerPacketIdentifier;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
@@ -231,17 +234,20 @@ public record TeamsPacket(String teamName, Action action) implements ServerPacke
          */
         ALWAYS("always"),
         /**
+         * The name tag is invisible
+         */
+        NEVER("never"),
+        /**
          * Hides the name tag for other teams
          */
         HIDE_FOR_OTHER_TEAMS("hideForOtherTeams"),
         /**
          * Hides the name tag for the own team
          */
-        HIDE_FOR_OWN_TEAM("hideForOwnTeam"),
-        /**
-         * The name tag is invisible
-         */
-        NEVER("never");
+        HIDE_FOR_OWN_TEAM("hideForOwnTeam");
+
+        private static final Map<String, NameTagVisibility> BY_NAME = Arrays.stream(values())
+                .collect(Collectors.toMap(visibility -> visibility.identifier, Function.identity()));
 
         /**
          * The identifier for the client
@@ -253,18 +259,18 @@ public record TeamsPacket(String teamName, Action action) implements ServerPacke
          *
          * @param identifier The client identifier
          */
-        NameTagVisibility(String identifier) {
+        NameTagVisibility(@NotNull String identifier) {
             this.identifier = identifier;
         }
 
-        @NotNull
-        public static NameTagVisibility fromIdentifier(String identifier) {
-            for (NameTagVisibility v : values()) {
-                if (v.getIdentifier().equals(identifier))
-                    return v;
-            }
-            Check.fail("Identifier for NameTagVisibility is invalid: " + identifier);
-            return null;
+        /**
+         * Gets the {@link NameTagVisibility} from the client identifier
+         *
+         * @param identifier The client identifier
+         * @return The {@link NameTagVisibility} from the client identifier
+         */
+        public static @Nullable NameTagVisibility fromIdentifier(@NotNull String identifier) {
+            return BY_NAME.get(identifier);
         }
 
         /**
@@ -272,9 +278,17 @@ public record TeamsPacket(String teamName, Action action) implements ServerPacke
          *
          * @return the identifier
          */
-        @NotNull
-        public String getIdentifier() {
+        public @NotNull String getIdentifier() {
             return identifier;
+        }
+
+        /**
+         * Gets the display name of the visibility
+         *
+         * @return the display name as {@link Component}
+         */
+        public @NotNull Component getDisplayName() {
+            return Component.translatable("team.visibility." + identifier);
         }
     }
 
@@ -287,17 +301,20 @@ public record TeamsPacket(String teamName, Action action) implements ServerPacke
          */
         ALWAYS("always"),
         /**
+         * Cannot push an object, but neither can they be pushed
+         */
+        NEVER("never"),
+        /**
          * Can push objects of other teams, but teammates cannot
          */
         PUSH_OTHER_TEAMS("pushOtherTeams"),
         /**
          * Can only push objects of the same team
          */
-        PUSH_OWN_TEAM("pushOwnTeam"),
-        /**
-         * Cannot push an object, but neither can they be pushed
-         */
-        NEVER("never");
+        PUSH_OWN_TEAM("pushOwnTeam");
+
+        private static final Map<String, CollisionRule> BY_NAME = Arrays.stream(values())
+                .collect(Collectors.toMap(rule -> rule.identifier, Function.identity()));
 
         /**
          * The identifier for the client
@@ -309,17 +326,18 @@ public record TeamsPacket(String teamName, Action action) implements ServerPacke
          *
          * @param identifier The identifier for the client
          */
-        CollisionRule(String identifier) {
+        CollisionRule(@NotNull String identifier) {
             this.identifier = identifier;
         }
 
-        public static @NotNull CollisionRule fromIdentifier(String identifier) {
-            for (CollisionRule v : values()) {
-                if (v.getIdentifier().equals(identifier))
-                    return v;
-            }
-            Check.fail("Identifier for CollisionRule is invalid: " + identifier);
-            return null;
+        /**
+         * Gets the {@link CollisionRule} from the client identifier
+         *
+         * @param identifier The client identifier
+         * @return The {@link CollisionRule} from the client identifier
+         */
+        public static @Nullable CollisionRule fromIdentifier(@NotNull String identifier) {
+            return BY_NAME.get(identifier);
         }
 
         /**
@@ -329,6 +347,15 @@ public record TeamsPacket(String teamName, Action action) implements ServerPacke
          */
         public @NotNull String getIdentifier() {
             return identifier;
+        }
+
+        /**
+         * Gets the display name of the rule
+         *
+         * @return the display name as {@link Component}
+         */
+        public @NotNull Component getDisplayName() {
+            return Component.translatable("team.collision." + identifier);
         }
     }
 }
