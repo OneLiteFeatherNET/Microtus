@@ -10,6 +10,7 @@ import net.minestom.server.network.packet.server.play.TeamsPacket.CollisionRule;
 import net.minestom.server.network.packet.server.play.TeamsPacket.NameTagVisibility;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.UnmodifiableView;
 
 import java.util.Collection;
 import java.util.Set;
@@ -77,7 +78,7 @@ public interface Team extends PacketGroupingAudience {
      *
      * @param teamDisplayName The new display name
      */
-    void updateTeamDisplayName(Component teamDisplayName);
+    void updateTeamDisplayName(@NotNull Component teamDisplayName);
 
     /**
      * Changes the {@link NameTagVisibility} of the team and sends an update packet.
@@ -105,14 +106,14 @@ public interface Team extends PacketGroupingAudience {
      *
      * @param prefix The new prefix
      */
-    void updatePrefix(Component prefix);
+    void updatePrefix(@NotNull Component prefix);
 
     /**
      * Changes the suffix of the team and sends an update packet.
      *
      * @param suffix The new suffix
      */
-    void updateSuffix(Component suffix);
+    void updateSuffix(@NotNull Component suffix);
 
     /**
      * Changes the friendly flags of the team.
@@ -197,6 +198,13 @@ public interface Team extends PacketGroupingAudience {
     @NotNull NameTagVisibility getNameTagVisibility();
 
     /**
+     * Gets the death message visibility of the team.
+     *
+     * @return the death message visibility
+     */
+    @NotNull NameTagVisibility getDeathMessageVisibility();
+
+    /**
      * Gets the collision rule of the team.
      *
      * @return the collision rule
@@ -224,8 +232,16 @@ public interface Team extends PacketGroupingAudience {
      */
     @NotNull Component getSuffix();
 
-    @NotNull Collection<Player> getPlayers();
+    /**
+     * Gets the players who are on the team.
+     *
+     * @return the players on the team
+     */
+    @NotNull @UnmodifiableView Collection<Player> getPlayers();
 
+    /**
+     * This interface represents a builder for a {@link Team}.
+     */
     sealed interface Builder permits TeamBuilder {
 
         /**
@@ -278,13 +294,20 @@ public interface Team extends PacketGroupingAudience {
 
         /**
          * Changes the {@link NameTagVisibility} of the {@link Team} without an update packet.
+         * @param visibility the new death message visibility
+         * @return this builder, for chaining
+         */
+        @NotNull Builder deathMessageVisibility(@NotNull NameTagVisibility visibility);
+
+        /**
+         * Changes the {@link NameTagVisibility} of the {@link Team} without an update packet.
          * <br><br>
          * <b>Warning: </b> If you do not call {@link #updateTeamPacket()}, this is only changed of the <b>server side</b>.
          *
          * @param visibility The new tag visibility
          * @return this builder, for chaining
          */
-        @NotNull Builder visibility(@NotNull NameTagVisibility visibility);
+        @NotNull Builder nameTagVisibility(@NotNull NameTagVisibility visibility);
 
         /**
          * Changes the friendly flags of the {@link Team} without an update packet.

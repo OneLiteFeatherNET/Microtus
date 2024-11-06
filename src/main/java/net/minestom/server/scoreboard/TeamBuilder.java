@@ -27,6 +27,9 @@ public final class TeamBuilder implements Team.Builder {
      * The visibility of the team.
      */
     private TeamsPacket.NameTagVisibility nameTagVisibility;
+
+    private TeamsPacket.NameTagVisibility deathMessageVisibility;
+
     /**
      * The collision rule of the team.
      */
@@ -60,6 +63,7 @@ public final class TeamBuilder implements Team.Builder {
         this.displayName = Component.empty();
         this.friendlyFlags = 0x00;
         this.nameTagVisibility = TeamsPacket.NameTagVisibility.ALWAYS;
+        this.deathMessageVisibility = TeamsPacket.NameTagVisibility.ALWAYS;
         this.collisionRule = TeamsPacket.CollisionRule.ALWAYS;
 
         this.teamColor = NamedTextColor.WHITE;
@@ -140,6 +144,17 @@ public final class TeamBuilder implements Team.Builder {
 
     /**
      * Changes the {@link NameTagVisibility} of the {@link Team} without an update packet.
+     * @param visibility the new death message visibility
+     * @return this builder, for chaining
+     */
+    @Override
+    public Team.@NotNull Builder deathMessageVisibility(@NotNull NameTagVisibility visibility) {
+        this.deathMessageVisibility = visibility;
+        return this;
+    }
+
+    /**
+     * Changes the {@link NameTagVisibility} of the {@link Team} without an update packet.
      * <br><br>
      * <b>Warning: </b> If you do not call {@link #updateTeamPacket()}, this is only changed of the <b>server side</b>.
      *
@@ -147,7 +162,7 @@ public final class TeamBuilder implements Team.Builder {
      * @return this builder, for chaining
      */
     @Override
-    public @NotNull TeamBuilder visibility(@NotNull NameTagVisibility visibility) {
+    public @NotNull TeamBuilder nameTagVisibility(@NotNull NameTagVisibility visibility) {
         this.nameTagVisibility = visibility;
         return this;
     }
@@ -214,6 +229,7 @@ public final class TeamBuilder implements Team.Builder {
                 this.displayName,
                 this.friendlyFlags,
                 this.nameTagVisibility,
+                this.deathMessageVisibility,
                 this.collisionRule,
                 this.teamColor,
                 this.prefix,

@@ -47,12 +47,22 @@ class TeamTest {
     void testPacketDataSet() {
         Team team = Team.builder(TEST_NAME)
                 .collisionRule(TeamsPacket.CollisionRule.NEVER)
-                .visibility(TeamsPacket.NameTagVisibility.NEVER)
+                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
                 .build();
 
         // Standard values are ALWAYS
         assertNotEquals(TeamsPacket.CollisionRule.ALWAYS, team.getCollisionRule());
         assertNotEquals(TeamsPacket.NameTagVisibility.ALWAYS, team.getNameTagVisibility());
+    }
+
+    @Test
+    void testDeathMessageVisibilityChange() {
+        Team team = Team.builder(TEST_NAME)
+                .deathMessageVisibility(TeamsPacket.NameTagVisibility.HIDE_FOR_OTHER_TEAMS)
+                .build();
+        assertNotNull(team);
+        // Standard value is ALWAYS
+        assertNotEquals(TeamsPacket.NameTagVisibility.ALWAYS, team.getDeathMessageVisibility());
     }
 
     @Test

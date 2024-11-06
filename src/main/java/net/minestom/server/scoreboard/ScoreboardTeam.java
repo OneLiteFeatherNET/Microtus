@@ -20,52 +20,21 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 public class ScoreboardTeam implements Team {
 
-    /**
-     * A collection of all registered entities who are on the team.
-     */
     private final Set<String> members;
-
-    /**
-     * The registry name of the team.
-     */
-    private final String teamName;
-    /**
-     * The display name of the team.
-     */
-    private Component teamDisplayName;
-    /**
-     * A BitMask.
-     */
-    private byte friendlyFlags;
-    /**
-     * The visibility of the team.
-     */
-    private TeamsPacket.NameTagVisibility nameTagVisibility;
-    /**
-     * The collision rule of the team.
-     */
-    private TeamsPacket.CollisionRule collisionRule;
-
-    /**
-     * Used to color the name of players on the team <br>
-     * The color of a team defines how the names of the team members are visualized.
-     */
-    private NamedTextColor teamColor;
-
-    /**
-     * Shown before the names of the players who belong to this team.
-     */
-    private Component prefix;
-    /**
-     * Shown after the names of the player who belong to this team.
-     */
-    private Component suffix;
-
     private final Set<Player> playerMembers = ConcurrentHashMap.newKeySet();
-    private boolean isPlayerMembersUpToDate;
-
+    private final String teamName;
     // Adventure
+    private boolean isPlayerMembersUpToDate;
     private final Pointers pointers;
+
+    private TeamsPacket.NameTagVisibility nameTagVisibility;
+    private TeamsPacket.NameTagVisibility deathMessageVisibility;
+    private TeamsPacket.CollisionRule collisionRule;
+    private NamedTextColor teamColor;
+    private Component teamDisplayName;
+    private Component prefix;
+    private Component suffix;
+    private byte friendlyFlags;
 
     //TODO: Data Objects to reduce parameters?
     /**
@@ -85,6 +54,7 @@ public class ScoreboardTeam implements Team {
             @NotNull Component teamDisplayName,
             byte friendlyFlags,
             @NotNull TeamsPacket.NameTagVisibility nameTagVisibility,
+            @NotNull TeamsPacket.NameTagVisibility deathMessageVisibility,
             @NotNull TeamsPacket.CollisionRule collisionRule,
             @NotNull NamedTextColor teamColor,
             @NotNull Component prefix,
@@ -94,6 +64,7 @@ public class ScoreboardTeam implements Team {
         this.teamDisplayName = teamDisplayName;
         this.friendlyFlags = friendlyFlags;
         this.nameTagVisibility = nameTagVisibility;
+        this.deathMessageVisibility = deathMessageVisibility;
         this.collisionRule = collisionRule;
         this.teamColor = teamColor;
         this.prefix = prefix;
@@ -368,6 +339,15 @@ public class ScoreboardTeam implements Team {
      */
     public @NotNull TeamsPacket.NameTagVisibility getNameTagVisibility() {
         return nameTagVisibility;
+    }
+
+    /**
+     * Gets the death message visibility of the team.
+     *
+     * @return the death message visibility
+     */
+    public @NotNull TeamsPacket.NameTagVisibility getDeathMessageVisibility() {
+        return deathMessageVisibility;
     }
 
     /**
