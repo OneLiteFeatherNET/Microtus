@@ -4,6 +4,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.pointer.Pointers;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
@@ -36,16 +37,17 @@ public final class ScoreboardTeam implements Team {
     private Component prefix;
     private Component suffix;
 
-    private  boolean allowFriendlyFire;
+    private boolean allowFriendlyFire;
     private boolean seeInvisiblePlayers;
 
     //TODO: Data Objects to reduce parameters?
+
     /**
      * Creates a new {@link Team} with the given parameters.
      *
-     * @param teamName          the registry name of the team
-     * @param teamDisplayName   the display name of the team
-     * @param nameTagVisibility the visibility of the team
+     * @param teamName          registry name of the team
+     * @param teamDisplayName   display name of the team
+     * @param nameTagVisibility visibility of the team
      * @param collisionRule     the collision rule of the team
      * @param teamColor         the color of the team
      * @param prefix            the prefix of the team
@@ -77,7 +79,7 @@ public final class ScoreboardTeam implements Team {
 
         this.pointers = Pointers.builder()
                 .withDynamic(Identity.NAME, this::getName)
-                .withDynamic(Identity.DISPLAY_NAME, this::getTeamDisplayName)
+                .withDynamic(Identity.DISPLAY_NAME, this::getDIsplayName)
                 .build();
     }
 
@@ -87,7 +89,7 @@ public final class ScoreboardTeam implements Team {
      * This member collection can contain {@link Player} or {@link LivingEntity}.
      * For players use their username, for entities use their UUID
      *
-     * @param member The member to be added
+     * @param member the member to be added
      */
     @Override
     public void addMember(@NotNull String member) {
@@ -100,7 +102,7 @@ public final class ScoreboardTeam implements Team {
      * This member collection can contain {@link Player} or {@link LivingEntity}.
      * For players use their username, for entities use their UUID
      *
-     * @param toAdd The members to be added
+     * @param toAdd the members to be added
      */
     @Override
     public void addMembers(@NotNull Collection<@NotNull String> toAdd) {
@@ -123,7 +125,7 @@ public final class ScoreboardTeam implements Team {
      * This member collection can contain {@link Player} or {@link LivingEntity}.
      * For players use their username, for entities use their UUID
      *
-     * @param member The member to be removed
+     * @param member the member to be removed
      */
     @Override
     public void removeMember(@NotNull String member) {
@@ -136,7 +138,7 @@ public final class ScoreboardTeam implements Team {
      * This member collection can contain {@link Player} or {@link LivingEntity}.
      * For players use their username, for entities use their UUID
      *
-     * @param toRemove The members to be removed
+     * @param toRemove the members to be removed
      */
     @Override
     public void removeMembers(@NotNull Collection<@NotNull String> toRemove) {
@@ -156,9 +158,10 @@ public final class ScoreboardTeam implements Team {
     /**
      * Changes the display name of the team and sends an update packet.
      *
-     * @param teamDisplayName The new display name
+     * @param teamDisplayName new display name
      */
-    public void updateTeamDisplayName(@NotNull Component teamDisplayName) {
+    @Override
+    public void updateDisplayName(@NotNull Component teamDisplayName) {
         this.teamDisplayName = teamDisplayName;
         sendUpdatePacket();
     }
@@ -166,7 +169,7 @@ public final class ScoreboardTeam implements Team {
     /**
      * Changes the {@link TeamsPacket.NameTagVisibility} of the team and sends an update packet.
      *
-     * @param nameTagVisibility The new tag visibility
+     * @param nameTagVisibility the new tag visibility
      */
     @Override
     public void updateNameTagVisibility(@NotNull TeamsPacket.NameTagVisibility nameTagVisibility) {
@@ -177,7 +180,7 @@ public final class ScoreboardTeam implements Team {
     /**
      * Changes the collision rule of the team and sends an update packet.
      *
-     * @param collisionRule The new collision rule
+     * @param collisionRule the new collision rule
      */
     @Override
     public void updateCollisionRule(@NotNull TeamsPacket.CollisionRule collisionRule) {
@@ -186,9 +189,20 @@ public final class ScoreboardTeam implements Team {
     }
 
     /**
+     * Changes the death message visibility of the team and sends an update packet.
+     *
+     * @param deathMessageVisibility the new death message visibility
+     */
+    @Override
+    public void updateDeathMessageVisibility(@NotNull TeamsPacket.NameTagVisibility deathMessageVisibility) {
+        this.deathMessageVisibility = deathMessageVisibility;
+        sendUpdatePacket();
+    }
+
+    /**
      * Changes the color of the team and sends an update packet.
      *
-     * @param color The new team color
+     * @param color the new team color
      */
     @Override
     public void updateTeamColor(@NotNull NamedTextColor color) {
@@ -199,7 +213,7 @@ public final class ScoreboardTeam implements Team {
     /**
      * Changes the prefix of the team and sends an update packet.
      *
-     * @param prefix The new prefix
+     * @param prefix new prefix
      */
     @Override
     public void updatePrefix(@NotNull Component prefix) {
@@ -210,7 +224,7 @@ public final class ScoreboardTeam implements Team {
     /**
      * Changes the suffix of the team and sends an update packet.
      *
-     * @param suffix The new suffix
+     * @param suffix new suffix
      */
     @Override
     public void updateSuffix(@NotNull Component suffix) {
@@ -218,29 +232,51 @@ public final class ScoreboardTeam implements Team {
         sendUpdatePacket();
     }
 
+    /**
+     * Toggles the friendly fire flag and sends an update packet.
+     * It negates the current value.
+     */
     @Override
     public void updateFriendlyFireFlag() {
         this.allowFriendlyFire = !this.allowFriendlyFire;
         sendUpdatePacket();
     }
 
+    /**
+     * Toggles the see invisible players flag and sends an update packet.
+     * It negates the current value.
+     */
     @Override
     public void updateSeeInvisiblePlayersFlag() {
         this.seeInvisiblePlayers = !this.seeInvisiblePlayers;
         sendUpdatePacket();
     }
 
+    /**
+     * Gets the friendly fire flag.
+     *
+     * @return {@code true} if friendly fire is allowed, otherwise {@code false}
+     */
     @Override
     public boolean allowFriendlyFire() {
         return this.allowFriendlyFire;
     }
 
+    /**
+     * Gets the see invisible players flag.
+     *
+     * @return {@code true} if invisible players are visible, otherwise {@code false}
+     */
     @Override
     public boolean canSeeInvisiblePlayers() {
         return this.seeInvisiblePlayers;
     }
 
-
+    /**
+     * Packs the options of the team into a single byte.
+     *
+     * @return the packed options
+     */
     private byte packOptions() {
         byte optionBit = 0;
 
@@ -289,7 +325,7 @@ public final class ScoreboardTeam implements Team {
     }
 
     /**
-     * Creates an destruction packet to remove the team.
+     * Creates a destruction packet to remove the team.
      *
      * @return the packet to remove the team
      */
@@ -311,7 +347,7 @@ public final class ScoreboardTeam implements Team {
      *
      * @return the display name
      */
-    public @NotNull Component getTeamDisplayName() {
+    public @NotNull Component getDIsplayName() {
         return teamDisplayName;
     }
 
@@ -347,7 +383,7 @@ public final class ScoreboardTeam implements Team {
      *
      * @return the team color
      */
-    public @NotNull NamedTextColor getTeamColor() {
+    public @NotNull TextColor getColor() {
         return teamColor;
     }
 

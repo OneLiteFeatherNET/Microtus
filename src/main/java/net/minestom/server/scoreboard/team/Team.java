@@ -2,6 +2,7 @@ package net.minestom.server.scoreboard.team;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
@@ -39,7 +40,7 @@ public interface Team extends PacketGroupingAudience {
      * This member collection can contain {@link Player} or {@link LivingEntity}.
      * For players use their username, for entities use their UUID
      *
-     * @param member The member to be added
+     * @param member the member to be added
      */
     void addMember(@NotNull String member);
 
@@ -49,7 +50,7 @@ public interface Team extends PacketGroupingAudience {
      * This member collection can contain {@link Player} or {@link LivingEntity}.
      * For players use their username, for entities use their UUID
      *
-     * @param toAdd The members to be added
+     * @param toAdd the members to be added
      */
     void addMembers(@NotNull Collection<@NotNull String> toAdd);
 
@@ -59,7 +60,7 @@ public interface Team extends PacketGroupingAudience {
      * This member collection can contain {@link Player} or {@link LivingEntity}.
      * For players use their username, for entities use their UUID
      *
-     * @param member The member to be removed
+     * @param member the member to be removed
      */
     void removeMember(@NotNull String member);
 
@@ -69,49 +70,56 @@ public interface Team extends PacketGroupingAudience {
      * This member collection can contain {@link Player} or {@link LivingEntity}.
      * For players use their username, for entities use their UUID
      *
-     * @param toRemove The members to be removed
+     * @param toRemove the members to be removed
      */
     void removeMembers(@NotNull Collection<@NotNull String> toRemove);
 
     /**
      * Changes the display name of the team and sends an update packet.
      *
-     * @param teamDisplayName The new display name
+     * @param teamDisplayName the new display name
      */
-    void updateTeamDisplayName(@NotNull Component teamDisplayName);
+    void updateDisplayName(@NotNull Component teamDisplayName);
 
     /**
      * Changes the {@link NameTagVisibility} of the team and sends an update packet.
      *
-     * @param nameTagVisibility The new tag visibility
+     * @param nameTagVisibility the new tag visibility
      */
     void updateNameTagVisibility(@NotNull NameTagVisibility nameTagVisibility);
 
     /**
      * Changes the collision rule of the team and sends an update packet.
      *
-     * @param collisionRule The new collision rule
+     * @param collisionRule the new collision rule
      */
     void updateCollisionRule(@NotNull CollisionRule collisionRule);
 
     /**
+     * Changes the death message visibility of the team and sends an update packet.
+     *
+     * @param deathMessageVisibility the new death message visibility
+     */
+    void updateDeathMessageVisibility(@NotNull NameTagVisibility deathMessageVisibility);
+
+    /**
      * Changes the color of the team and sends an update packet.
      *
-     * @param color The new team color
+     * @param color the new team color
      */
     void updateTeamColor(@NotNull NamedTextColor color);
 
     /**
      * Changes the prefix of the team and sends an update packet.
      *
-     * @param prefix The new prefix
+     * @param prefix the new prefix
      */
     void updatePrefix(@NotNull Component prefix);
 
     /**
      * Changes the suffix of the team and sends an update packet.
      *
-     * @param suffix The new suffix
+     * @param suffix the new suffix
      */
     void updateSuffix(@NotNull Component suffix);
 
@@ -177,7 +185,7 @@ public interface Team extends PacketGroupingAudience {
      *
      * @return the display name
      */
-    @NotNull Component getTeamDisplayName();
+    @NotNull Component getDIsplayName();
 
     /**
      * Gets the tag visibility of the team.
@@ -205,7 +213,7 @@ public interface Team extends PacketGroupingAudience {
      *
      * @return the team color
      */
-    @NotNull NamedTextColor getTeamColor();
+    @NotNull TextColor getColor();
 
     /**
      * Gets the prefix of the team.
@@ -226,9 +234,7 @@ public interface Team extends PacketGroupingAudience {
      *
      * @return the players on the team
      */
-    @NotNull
-    @UnmodifiableView
-    Collection<Player> getPlayers();
+    @NotNull @UnmodifiableView Collection<Player> getPlayers();
 
     /**
      * This interface represents a builder for a {@link Team}.
