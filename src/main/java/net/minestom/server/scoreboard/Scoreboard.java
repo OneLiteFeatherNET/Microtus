@@ -63,6 +63,12 @@ public interface Scoreboard extends Viewable, PacketGroupingAudience {
      */
     @NotNull String getObjectiveName();
 
+    /**
+     * Get the title as {@link Component} of the scoreboard.
+     * @return the title of the scoreboard
+     */
+    @NotNull Component getTitle();
+
     @Override
     default @NotNull Collection<Player> getPlayers() {
         return this.getViewers();

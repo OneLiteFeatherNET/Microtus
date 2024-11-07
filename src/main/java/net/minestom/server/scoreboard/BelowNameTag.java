@@ -31,7 +31,7 @@ public class BelowNameTag implements Scoreboard {
      * @param name  The objective name of the scoreboard
      * @param value The value of the scoreboard
      */
-    public BelowNameTag(String name, Component value) {
+    public BelowNameTag(@NotNull String name, @NotNull Component value) {
         this.objectiveName = BELOW_NAME_TAG_PREFIX + name;
         this.scoreboardObjectivePacket = this.getCreationObjectivePacket(value, ScoreboardObjectivePacket.Type.INTEGER);
     }
@@ -60,6 +60,11 @@ public class BelowNameTag implements Scoreboard {
             player.setBelowNameTag(null);
         }
         return result;
+    }
+
+    @Override
+    public @NotNull Component getTitle() {
+        return Component.empty();
     }
 
     @NotNull

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -142,13 +143,15 @@ public class Sidebar implements Scoreboard {
      * @param id The identifier of the line
      * @return a {@link ScoreboardLine} or {@code null}
      */
-    @Nullable
-    public ScoreboardLine getLine(@NotNull String id) {
-        for (ScoreboardLine line : lines) {
-            if (line.id.equals(id))
-                return line;
+    public @Nullable ScoreboardLine getLine(@NotNull String id) {
+        ScoreboardLine line = null;
+        Iterator<ScoreboardLine> iterator = lines.iterator();
+        while (iterator.hasNext() && line == null) {
+            ScoreboardLine next = iterator.next();
+            if (!next.id.equals(id)) continue;
+            line = next;
         }
-        return null;
+        return line;
     }
 
     /**
@@ -213,6 +216,11 @@ public class Sidebar implements Scoreboard {
     @Override
     public Set<Player> getViewers() {
         return Collections.unmodifiableSet(viewers);
+    }
+
+    @Override
+    public @NotNull Component getTitle() {
+        return title;
     }
 
     @Override

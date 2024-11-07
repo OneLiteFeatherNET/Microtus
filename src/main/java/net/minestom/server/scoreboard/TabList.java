@@ -25,9 +25,8 @@ public class TabList implements Scoreboard {
 
     private ScoreboardObjectivePacket.Type type;
 
-    public TabList(String name, ScoreboardObjectivePacket.Type type) {
+    public TabList(@NotNull String name, @NotNull ScoreboardObjectivePacket.Type type) {
         this.objectiveName = TAB_LIST_PREFIX + name;
-
         this.type = type;
     }
 
@@ -45,7 +44,7 @@ public class TabList implements Scoreboard {
      *
      * @param type The new type for the objective
      */
-    public void setType(ScoreboardObjectivePacket.Type type) {
+    public void setType(@NotNull ScoreboardObjectivePacket.Type type) {
         this.type = type;
     }
 
@@ -68,14 +67,18 @@ public class TabList implements Scoreboard {
         return result;
     }
 
-    @NotNull
     @Override
-    public Set<Player> getViewers() {
+    public @NotNull Component getTitle() {
+        return Component.empty();
+    }
+
+    @Override
+    public @NotNull Set<Player> getViewers() {
         return unmodifiableViewers;
     }
 
     @Override
-    public String getObjectiveName() {
+    public @NotNull String getObjectiveName() {
         return this.objectiveName;
     }
 }
