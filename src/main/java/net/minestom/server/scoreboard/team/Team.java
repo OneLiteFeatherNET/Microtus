@@ -1,4 +1,4 @@
-package net.minestom.server.scoreboard;
+package net.minestom.server.scoreboard.team;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;

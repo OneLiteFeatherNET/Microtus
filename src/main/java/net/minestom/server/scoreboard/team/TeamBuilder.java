@@ -1,4 +1,4 @@
-package net.minestom.server.scoreboard;
+package net.minestom.server.scoreboard.team;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -6,11 +6,17 @@ import net.minestom.server.MinecraftServer;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
 import net.minestom.server.network.packet.server.play.TeamsPacket.CollisionRule;
 import net.minestom.server.network.packet.server.play.TeamsPacket.NameTagVisibility;
+import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A builder which represents a fluent Object to built teams.
+ * The {@link TeamBuilder} implements {@link Team.Builder} interface to provide a fluent way to create a {@link Team}.
+ * To avoid invalid data some values have a default value, which can be changed with the corresponding method.
+ *
+ * @version 1.1.0
+ * @see Team.Builder
+ * @since 1.0.0
  */
 public final class TeamBuilder implements Team.Builder {
 
@@ -27,6 +33,11 @@ public final class TeamBuilder implements Team.Builder {
     private boolean allowFriendlyFire;
     private boolean seeInvisiblePlayers;
 
+    /**
+     * Creates a new {@link TeamBuilder} with the team name.
+     *
+     * @param teamName the name or the team
+     */
     TeamBuilder(@NotNull String teamName) {
         Check.argCondition(teamName.trim().isEmpty(), "The team name cannot be empty");
         this.teamName = teamName;
@@ -113,6 +124,7 @@ public final class TeamBuilder implements Team.Builder {
 
     /**
      * Changes the {@link NameTagVisibility} of the {@link Team} without an update packet.
+     *
      * @param visibility the new death message visibility
      * @return this builder, for chaining
      */

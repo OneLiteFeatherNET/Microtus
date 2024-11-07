@@ -1,9 +1,11 @@
-package net.minestom.server.scoreboard;
+package net.minestom.server.scoreboard.team;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
+import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import org.jetbrains.annotations.NotNull;
@@ -11,6 +13,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -173,6 +179,55 @@ class TeamTest {
             assertFalse(unpackFriendlyFire(id));
             assertFalse(unpackSeeInvisible(id));
         });
+    }
+
+    @Test
+    void testTeamDisplayUpdate() {
+        Team team = Team.builder(TEST_NAME).build();
+        assertNotNull(team);
+        assertEquals(Component.empty(), team.getTeamDisplayName());
+        assertEquals(Component.empty(), team.getPrefix());
+        assertEquals(Component.empty(), team.getSuffix());
+        assertEquals(NamedTextColor.WHITE, team.getTeamColor());
+
+        team.updatePrefix(Component.text("Prefix"));
+        team.updateSuffix(Component.text("Suffix"));
+        team.updateTeamColor(NamedTextColor.RED);
+
+        assertNotEquals(Component.empty(), team.getPrefix());
+        assertNotEquals(Component.empty(), team.getSuffix());
+        assertEquals(NamedTextColor.RED, team.getTeamColor());
+    }
+
+    @Test
+    void testGetPlayersFromTeam(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team team = Team.builder(TEST_NAME).build();
+        for (int i = 0; i < 5; i++) {
+            team.addMember(UUID.randomUUID().toString());
+        }
+
+        Set<Player> players = HashSet.newHashSet(3);
+        for (int i = 0; i < 3; i++) {
+            Player player = env.createPlayer(instance);
+            player.setUsernameField("Bob" + i);
+            players.add(player);
+        }
+
+        team.addMembers(players.stream().map(Player::getUsername).toList());
+
+        assertEquals(8, team.getMembers().size());
+
+        Collection<Player> givenPlayers = team.getPlayers();
+
+        assertNotNull(givenPlayers);
+        assertEquals(players.size(), givenPlayers.size());
+
+        for (Player player : players) {
+            assertTrue(givenPlayers.contains(player));
+        }
+
+        env.destroyInstance(instance, true);
     }
 
     /**

@@ -2,6 +2,7 @@ package net.minestom.server.scoreboard;
 
 import net.minestom.server.entity.LivingEntity;
 import net.minestom.server.entity.Player;
+import net.minestom.server.scoreboard.team.Team;
 import net.minestom.server.utils.PacketUtils;
 import net.minestom.server.utils.UniqueIdUtils;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +14,11 @@ import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 /**
- * An object which manages all the {@link Team}'s
+ * The {@link TeamManager} should be used to manage all {@link Team}'s instance.
+ * It provides some method to register, delete and get specific data from it.
+ *
+ * @version 1.1.0
+ * @since 1.0.0
  */
 public final class TeamManager {
 
@@ -58,8 +63,8 @@ public final class TeamManager {
      * @return {@code true} if the team was deleted, otherwise {@code false}
      */
     public boolean deleteTeam(@NotNull Team team) {
-        return this.teams.removeIf(givenTeams -> {
-            if (!givenTeams.equals(team)) return false;
+        return this.teams.removeIf(givenTeam -> {
+            if (!givenTeam.equals(team)) return false;
             // Sends to all online players a team destroy packet
             PacketUtils.broadcastPlayPacket(team.createTeamDestructionPacket());
             return true;

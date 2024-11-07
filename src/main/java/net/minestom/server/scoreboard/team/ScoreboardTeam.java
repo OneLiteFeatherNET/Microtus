@@ -1,4 +1,4 @@
-package net.minestom.server.scoreboard;
+package net.minestom.server.scoreboard.team;
 
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.pointer.Pointers;
@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -252,6 +253,19 @@ public final class ScoreboardTeam implements Team {
         }
 
         return optionBit;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ScoreboardTeam that = (ScoreboardTeam) o;
+        return Objects.equals(teamName, that.teamName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(teamName);
     }
 
     /**

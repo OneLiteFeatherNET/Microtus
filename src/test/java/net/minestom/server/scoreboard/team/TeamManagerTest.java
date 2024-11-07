@@ -1,7 +1,8 @@
-package net.minestom.server.scoreboard;
+package net.minestom.server.scoreboard.team;
 
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
+import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.testing.Env;
 import net.minestom.testing.extension.MicrotusExtension;
 import org.jetbrains.annotations.NotNull;
