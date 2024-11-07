@@ -18,15 +18,15 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public class ScoreboardTeam implements Team {
+public final class ScoreboardTeam implements Team {
 
     private final Set<String> members;
     private final Set<Player> playerMembers = ConcurrentHashMap.newKeySet();
     private final String teamName;
     // Adventure
-    private boolean isPlayerMembersUpToDate;
     private final Pointers pointers;
 
+    private boolean isPlayerMembersUpToDate;
     private TeamsPacket.NameTagVisibility nameTagVisibility;
     private TeamsPacket.NameTagVisibility deathMessageVisibility;
     private TeamsPacket.CollisionRule collisionRule;
@@ -34,7 +34,9 @@ public class ScoreboardTeam implements Team {
     private Component teamDisplayName;
     private Component prefix;
     private Component suffix;
-    private byte friendlyFlags;
+
+    private  boolean allowFriendlyFire;
+    private boolean seeInvisiblePlayers;
 
     //TODO: Data Objects to reduce parameters?
     /**
@@ -42,7 +44,6 @@ public class ScoreboardTeam implements Team {
      *
      * @param teamName          the registry name of the team
      * @param teamDisplayName   the display name of the team
-     * @param friendlyFlags     a bitmask
      * @param nameTagVisibility the visibility of the team
      * @param collisionRule     the collision rule of the team
      * @param teamColor         the color of the team
@@ -52,17 +53,17 @@ public class ScoreboardTeam implements Team {
     ScoreboardTeam(
             @NotNull String teamName,
             @NotNull Component teamDisplayName,
-            byte friendlyFlags,
             @NotNull TeamsPacket.NameTagVisibility nameTagVisibility,
             @NotNull TeamsPacket.NameTagVisibility deathMessageVisibility,
             @NotNull TeamsPacket.CollisionRule collisionRule,
             @NotNull NamedTextColor teamColor,
             @NotNull Component prefix,
-            @NotNull Component suffix
+            @NotNull Component suffix,
+            boolean allowFriendlyFire,
+            boolean seeInvisiblePlayers
     ) {
         this.teamName = teamName;
         this.teamDisplayName = teamDisplayName;
-        this.friendlyFlags = friendlyFlags;
         this.nameTagVisibility = nameTagVisibility;
         this.deathMessageVisibility = deathMessageVisibility;
         this.collisionRule = collisionRule;
@@ -70,6 +71,8 @@ public class ScoreboardTeam implements Team {
         this.prefix = prefix;
         this.suffix = suffix;
         this.members = new CopyOnWriteArraySet<>();
+        this.allowFriendlyFire = allowFriendlyFire;
+        this.seeInvisiblePlayers = seeInvisiblePlayers;
 
         this.pointers = Pointers.builder()
                 .withDynamic(Identity.NAME, this::getName)
@@ -85,6 +88,7 @@ public class ScoreboardTeam implements Team {
      *
      * @param member The member to be added
      */
+    @Override
     public void addMember(@NotNull String member) {
         addMembers(List.of(member));
     }
@@ -97,6 +101,7 @@ public class ScoreboardTeam implements Team {
      *
      * @param toAdd The members to be added
      */
+    @Override
     public void addMembers(@NotNull Collection<@NotNull String> toAdd) {
         // Adds a new member to the team
         this.members.addAll(toAdd);
@@ -119,6 +124,7 @@ public class ScoreboardTeam implements Team {
      *
      * @param member The member to be removed
      */
+    @Override
     public void removeMember(@NotNull String member) {
         removeMembers(List.of(member));
     }
@@ -131,6 +137,7 @@ public class ScoreboardTeam implements Team {
      *
      * @param toRemove The members to be removed
      */
+    @Override
     public void removeMembers(@NotNull Collection<@NotNull String> toRemove) {
         // Initializes remove player packet
         final TeamsPacket removePlayerPacket = new TeamsPacket(teamName,
@@ -160,6 +167,7 @@ public class ScoreboardTeam implements Team {
      *
      * @param nameTagVisibility The new tag visibility
      */
+    @Override
     public void updateNameTagVisibility(@NotNull TeamsPacket.NameTagVisibility nameTagVisibility) {
         this.nameTagVisibility = nameTagVisibility;
         sendUpdatePacket();
@@ -170,21 +178,10 @@ public class ScoreboardTeam implements Team {
      *
      * @param collisionRule The new collision rule
      */
+    @Override
     public void updateCollisionRule(@NotNull TeamsPacket.CollisionRule collisionRule) {
         this.collisionRule = collisionRule;
         sendUpdatePacket();
-    }
-
-    /**
-     * Changes the color of the team.
-     * <br><br>
-     * <b>Warning:</b> This is only changed on the <b>server side</b>.
-     *
-     * @param color The new team color
-     * @see #updateTeamColor(NamedTextColor)
-     */
-    public void setTeamColor(@NotNull NamedTextColor color) {
-        this.teamColor = color;
     }
 
     /**
@@ -192,8 +189,9 @@ public class ScoreboardTeam implements Team {
      *
      * @param color The new team color
      */
+    @Override
     public void updateTeamColor(@NotNull NamedTextColor color) {
-        this.setTeamColor(color);
+        this.teamColor = color;
         sendUpdatePacket();
     }
 
@@ -202,6 +200,7 @@ public class ScoreboardTeam implements Team {
      *
      * @param prefix The new prefix
      */
+    @Override
     public void updatePrefix(@NotNull Component prefix) {
         this.prefix = prefix;
         sendUpdatePacket();
@@ -212,68 +211,47 @@ public class ScoreboardTeam implements Team {
      *
      * @param suffix The new suffix
      */
+    @Override
     public void updateSuffix(@NotNull Component suffix) {
         this.suffix = suffix;
         sendUpdatePacket();
     }
 
-    /**
-     * Changes the friendly flags of the team.
-     * <br><br>
-     * <b>Warning:</b> This is only changed on the <b>server side</b>.
-     *
-     * @param flag The new friendly flag
-     */
-    public void setFriendlyFlags(byte flag) {
-        this.friendlyFlags = flag;
+    @Override
+    public void updateFriendlyFireFlag() {
+        this.allowFriendlyFire = !this.allowFriendlyFire;
+        sendUpdatePacket();
     }
 
-    /**
-     * Changes the friendly flags of the team and sends an update packet.
-     *
-     * @param flag The new friendly flag
-     */
-    public void updateFriendlyFlags(byte flag) {
-        this.setFriendlyFlags(flag);
-        this.sendUpdatePacket();
+    @Override
+    public void updateSeeInvisiblePlayersFlag() {
+        this.seeInvisiblePlayers = !this.seeInvisiblePlayers;
+        sendUpdatePacket();
     }
 
-    private boolean getFriendlyFlagBit(byte index) {
-        return (this.friendlyFlags & index) == index;
+    @Override
+    public boolean allowFriendlyFire() {
+        return this.allowFriendlyFire;
     }
 
-    private void setFriendlyFlagBit(byte index, boolean value) {
-        if (value) {
-            this.friendlyFlags |= index;
-        } else {
-            this.friendlyFlags &= ~index;
+    @Override
+    public boolean canSeeInvisiblePlayers() {
+        return this.seeInvisiblePlayers;
+    }
+
+
+    private byte packOptions() {
+        byte optionBit = 0;
+
+        if (this.allowFriendlyFire()) {
+            optionBit |= ALLOW_FRIENDLY_FIRE_BIT;
         }
-    }
 
-    public void setAllowFriendlyFire(boolean value) {
-        this.setFriendlyFlagBit(ALLOW_FRIENDLY_FIRE_BIT, value);
-    }
+        if (this.canSeeInvisiblePlayers()) {
+            optionBit |= SEE_INVISIBLE_PLAYERS_BIT;
+        }
 
-    public void updateAllowFriendlyFire(boolean value) {
-        this.setAllowFriendlyFire(value);
-        this.sendUpdatePacket();
-    }
-
-    public boolean isAllowFriendlyFire() {
-        return this.getFriendlyFlagBit(ALLOW_FRIENDLY_FIRE_BIT);
-    }
-
-    public void setSeeInvisiblePlayers(boolean value) {
-        this.setFriendlyFlagBit(SEE_INVISIBLE_PLAYERS_BIT, value);
-    }
-
-    public void updateSeeInvisiblePlayers(boolean value) {
-        this.setSeeInvisiblePlayers(value);
-        this.sendUpdatePacket();
-    }
-
-    public boolean isSeeInvisiblePlayers() {
-        return this.getFriendlyFlagBit(SEE_INVISIBLE_PLAYERS_BIT);
+        return optionBit;
     }
 
     /**
@@ -291,7 +269,7 @@ public class ScoreboardTeam implements Team {
      * @return the packet to add the team
      */
     public @NotNull TeamsPacket createTeamsCreationPacket() {
-        final var info = new TeamsPacket.CreateTeamAction(teamDisplayName, friendlyFlags,
+        final var info = new TeamsPacket.CreateTeamAction(teamDisplayName, this.packOptions(),
                 nameTagVisibility, collisionRule, teamColor, prefix, suffix, members);
         return new TeamsPacket(teamName, info);
     }
@@ -321,15 +299,6 @@ public class ScoreboardTeam implements Team {
      */
     public @NotNull Component getTeamDisplayName() {
         return teamDisplayName;
-    }
-
-    /**
-     * Gets the friendly flags of the team.
-     *
-     * @return the friendly flags
-     */
-    public byte getFriendlyFlags() {
-        return friendlyFlags;
     }
 
     /**
@@ -390,7 +359,7 @@ public class ScoreboardTeam implements Team {
      * Sends an {@link TeamsPacket.UpdateTeamAction} action packet.
      */
     public void sendUpdatePacket() {
-        final var info = new TeamsPacket.UpdateTeamAction(teamDisplayName, friendlyFlags,
+        final var info = new TeamsPacket.UpdateTeamAction(teamDisplayName, this.packOptions(),
                 nameTagVisibility, collisionRule, teamColor, prefix, suffix);
         PacketUtils.broadcastPlayPacket(new TeamsPacket(teamName, info));
     }

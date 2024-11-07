@@ -116,37 +116,33 @@ public interface Team extends PacketGroupingAudience {
     void updateSuffix(@NotNull Component suffix);
 
     /**
-     * Changes the friendly flags of the team.
-     * <br><br>
-     * <b>Warning:</b> This is only changed on the <b>server side</b>.
-     *
-     * @param flag The new friendly flag
+     * Changes the friendly flags for allow friendly fire and sends an update packet.
      */
-    void setFriendlyFlags(byte flag);
+    void updateFriendlyFireFlag();
 
     /**
-     * Changes the friendly flags of the team and sends an update packet.
-     *
-     * @param flag The new friendly flag
+     * Changes the friendly flags to sees invisible players of own team and sends an update packet.
      */
-    void updateFriendlyFlags(byte flag);
-
-    void setAllowFriendlyFire(boolean value);
-
-    void updateAllowFriendlyFire(boolean value);
-
-    boolean isAllowFriendlyFire();
-
-    void setSeeInvisiblePlayers(boolean value);
-
-    void updateSeeInvisiblePlayers(boolean value);
-
-    boolean isSeeInvisiblePlayers();
+    void updateSeeInvisiblePlayersFlag();
 
     /**
      * Sends an {@link TeamsPacket.UpdateTeamAction} action packet.
      */
     void sendUpdatePacket();
+
+    /**
+     * Gets if the team can see invisible players.
+     *
+     * @return true if the team can see invisible players
+     */
+    boolean allowFriendlyFire();
+
+    /**
+     * Gets if the team can see invisible players.
+     *
+     * @return true if the team can see invisible players
+     */
+    boolean canSeeInvisiblePlayers();
 
     /**
      * Gets the registry name of the team.
@@ -182,13 +178,6 @@ public interface Team extends PacketGroupingAudience {
      * @return the display name
      */
     @NotNull Component getTeamDisplayName();
-
-    /**
-     * Gets the friendly flags of the team.
-     *
-     * @return the friendly flags
-     */
-    byte getFriendlyFlags();
 
     /**
      * Gets the tag visibility of the team.
@@ -237,7 +226,9 @@ public interface Team extends PacketGroupingAudience {
      *
      * @return the players on the team
      */
-    @NotNull @UnmodifiableView Collection<Player> getPlayers();
+    @NotNull
+    @UnmodifiableView
+    Collection<Player> getPlayers();
 
     /**
      * This interface represents a builder for a {@link Team}.
@@ -294,6 +285,7 @@ public interface Team extends PacketGroupingAudience {
 
         /**
          * Changes the {@link NameTagVisibility} of the {@link Team} without an update packet.
+         *
          * @param visibility the new death message visibility
          * @return this builder, for chaining
          */
@@ -308,16 +300,6 @@ public interface Team extends PacketGroupingAudience {
          * @return this builder, for chaining
          */
         @NotNull Builder nameTagVisibility(@NotNull NameTagVisibility visibility);
-
-        /**
-         * Changes the friendly flags of the {@link Team} without an update packet.
-         * <br><br>
-         * <b>Warning: </b> If you do not call {@link #updateTeamPacket()}, this is only changed of the <b>server side</b>.
-         *
-         * @param flag The new flag
-         * @return this builder, for chaining
-         */
-        @NotNull Builder friendlyFlags(byte flag);
 
         /**
          * Changes the friendly flags for allow friendly fire without an update packet.

@@ -15,45 +15,15 @@ import org.jetbrains.annotations.NotNull;
 public final class TeamBuilder implements Team.Builder {
 
     private final String teamName;
-    /**
-     * The display name of the team.
-     */
+
     private Component displayName;
-    /**
-     * A BitMask.
-     */
-    private byte friendlyFlags;
-    /**
-     * The visibility of the team.
-     */
     private TeamsPacket.NameTagVisibility nameTagVisibility;
-
     private TeamsPacket.NameTagVisibility deathMessageVisibility;
-
-    /**
-     * The collision rule of the team.
-     */
     private TeamsPacket.CollisionRule collisionRule;
-
-    /**
-     * Used to color the name of players on the team <br>
-     * The color of a team defines how the names of the team members are visualized.
-     */
     private NamedTextColor teamColor;
-
-    /**
-     * Shown before the names of the players who belong to this team.
-     */
     private Component prefix;
-    /**
-     * Shown after the names of the player who belong to this team.
-     */
     private Component suffix;
-    /**
-     * True, if it should send an update packet
-     */
     private boolean updateTeam;
-
     private boolean allowFriendlyFire;
     private boolean seeInvisiblePlayers;
 
@@ -61,7 +31,6 @@ public final class TeamBuilder implements Team.Builder {
         Check.argCondition(teamName.trim().isEmpty(), "The team name cannot be empty");
         this.teamName = teamName;
         this.displayName = Component.empty();
-        this.friendlyFlags = 0x00;
         this.nameTagVisibility = TeamsPacket.NameTagVisibility.ALWAYS;
         this.deathMessageVisibility = TeamsPacket.NameTagVisibility.ALWAYS;
         this.collisionRule = TeamsPacket.CollisionRule.ALWAYS;
@@ -168,20 +137,6 @@ public final class TeamBuilder implements Team.Builder {
     }
 
     /**
-     * Changes the friendly flags of the {@link Team} without an update packet.
-     * <br><br>
-     * <b>Warning: </b> If you do not call {@link #updateTeamPacket()}, this is only changed of the <b>server side</b>.
-     *
-     * @param flag The new flag
-     * @return this builder, for chaining
-     */
-    @Override
-    public @NotNull TeamBuilder friendlyFlags(byte flag) {
-        this.friendlyFlags = flag;
-        return this;
-    }
-
-    /**
      * Changes the friendly flags for allow friendly fire without an update packet.
      * <br><br>
      * <b>Warning: </b> If you do not call {@link #updateTeamPacket()}, this is only changed of the <b>server side</b>.
@@ -227,16 +182,15 @@ public final class TeamBuilder implements Team.Builder {
         Team team = new ScoreboardTeam(
                 this.teamName,
                 this.displayName,
-                this.friendlyFlags,
                 this.nameTagVisibility,
                 this.deathMessageVisibility,
                 this.collisionRule,
                 this.teamColor,
                 this.prefix,
-                this.suffix
+                this.suffix,
+                this.allowFriendlyFire,
+                this.seeInvisiblePlayers
         );
-        team.setAllowFriendlyFire(this.allowFriendlyFire);
-        team.setSeeInvisiblePlayers(this.seeInvisiblePlayers);
         if (!autoRegister) return team;
 
         TeamManager teamManager = MinecraftServer.getTeamManager();
