@@ -1,6 +1,5 @@
 package net.minestom.server.scoreboard;
 
-import it.unimi.dsi.fastutil.bytes.ByteConsumer;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
@@ -11,6 +10,8 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import java.util.function.Consumer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -91,7 +92,6 @@ class TeamTest {
         assertTrue(team.getMembers().isEmpty());
 
         env.destroyInstance(instance, true);
-
     }
 
     @Test
@@ -182,7 +182,7 @@ class TeamTest {
      * @param flag        the expected flag
      * @param flagChecker the flag checker
      */
-    private void assertTeamCreationFlag(@NotNull TeamsPacket teamsPacket, byte flag, @NotNull ByteConsumer flagChecker) {
+    private void assertTeamCreationFlag(@NotNull TeamsPacket teamsPacket, byte flag, @NotNull Consumer<Byte> flagChecker) {
         assertNotNull(teamsPacket);
         assertInstanceOf(TeamsPacket.CreateTeamAction.class, teamsPacket.action());
 
