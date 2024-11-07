@@ -17,6 +17,7 @@ import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.PacketProcessor;
 import net.minestom.server.network.socket.Server;
 import net.minestom.server.recipe.RecipeManager;
+import net.minestom.server.registry.DeprecatedServerProcessDynamicRegistry;
 import net.minestom.server.registry.Registries;
 import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.server.snapshot.Snapshotable;
@@ -29,7 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.net.SocketAddress;
 
 @ApiStatus.NonExtendable
-public interface ServerProcess extends Registries, Snapshotable {
+public interface ServerProcess extends DeprecatedServerProcessDynamicRegistry, Snapshotable {
     /**
      * Handles incoming connections/players.
      */
@@ -60,6 +61,11 @@ public interface ServerProcess extends Registries, Snapshotable {
      * Handles registered teams.
      */
     @NotNull TeamManager team();
+
+    /**
+     * Provides the registries
+     */
+    @NotNull Registries registries();
 
     /**
      * Gets the global event handler.

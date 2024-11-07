@@ -37,7 +37,9 @@ import net.minestom.server.network.ConnectionManager;
 import net.minestom.server.network.PacketProcessor;
 import net.minestom.server.network.socket.Server;
 import net.minestom.server.recipe.RecipeManager;
+import net.minestom.server.registry.DynamicRegistries;
 import net.minestom.server.registry.DynamicRegistry;
+import net.minestom.server.registry.Registries;
 import net.minestom.server.scoreboard.TeamManager;
 import net.minestom.server.snapshot.*;
 import net.minestom.server.terminal.MinestomTerminal;
@@ -59,22 +61,7 @@ final class ServerProcessImpl implements ServerProcess {
 
     private final ExceptionManager exception;
 
-    private final DynamicRegistry<BinaryTagSerializer<? extends LevelBasedValue>> enchantmentLevelBasedValues;
-    private final DynamicRegistry<BinaryTagSerializer<? extends ValueEffect>> enchantmentValueEffects;
-    private final DynamicRegistry<BinaryTagSerializer<? extends EntityEffect>> enchantmentEntityEffects;
-    private final DynamicRegistry<BinaryTagSerializer<? extends LocationEffect>> enchantmentLocationEffects;
-
-    private final DynamicRegistry<ChatType> chatType;
-    private final DynamicRegistry<DimensionType> dimensionType;
-    private final DynamicRegistry<Biome> biome;
-    private final DynamicRegistry<DamageType> damageType;
-    private final DynamicRegistry<TrimMaterial> trimMaterial;
-    private final DynamicRegistry<TrimPattern> trimPattern;
-    private final DynamicRegistry<BannerPattern> bannerPattern;
-    private final DynamicRegistry<WolfMeta.Variant> wolfVariant;
-    private final DynamicRegistry<Enchantment> enchantment;
-    private final DynamicRegistry<PaintingMeta.Variant> paintingVariant;
-    private final DynamicRegistry<JukeboxSong> jukeboxSong;
+   private final DynamicRegistries dynamicRegistries;
 
     private final ExtensionManager extension;
     private final ConnectionManager connection;
@@ -107,28 +94,12 @@ final class ServerProcessImpl implements ServerProcess {
     public ServerProcessImpl() throws IOException {
         this.exception = new ExceptionManager();
         this.extension = new ExtensionManager(this);
-        // The order of initialization here is relevant, we must load the enchantment util registries before the vanilla data is loaded.
-        this.enchantmentLevelBasedValues = LevelBasedValue.createDefaultRegistry();
-        this.enchantmentValueEffects = ValueEffect.createDefaultRegistry();
-        this.enchantmentEntityEffects = EntityEffect.createDefaultRegistry();
-        this.enchantmentLocationEffects = LocationEffect.createDefaultRegistry();
-
-        this.chatType = ChatType.createDefaultRegistry();
-        this.dimensionType = DimensionType.createDefaultRegistry();
-        this.biome = Biome.createDefaultRegistry();
-        this.damageType = DamageType.createDefaultRegistry();
-        this.trimMaterial = TrimMaterial.createDefaultRegistry();
-        this.trimPattern = TrimPattern.createDefaultRegistry();
-        this.bannerPattern = BannerPattern.createDefaultRegistry();
-        this.wolfVariant = WolfMeta.Variant.createDefaultRegistry();
-        this.enchantment = Enchantment.createDefaultRegistry(this);
-        this.paintingVariant = PaintingMeta.Variant.createDefaultRegistry();
-        this.jukeboxSong = JukeboxSong.createDefaultRegistry();
+        this.dynamicRegistries = new DynamicRegistries();
 
         this.connection = new ConnectionManager();
         this.packetListener = new PacketListenerManager();
         this.packetProcessor = new PacketProcessor(packetListener);
-        this.instance = new InstanceManager(this);
+        this.instance = new InstanceManager(this.dynamicRegistries);
         this.block = new BlockManager();
         this.command = new CommandManager();
         this.recipe = new RecipeManager();
@@ -154,62 +125,62 @@ final class ServerProcessImpl implements ServerProcess {
 
     @Override
     public @NotNull DynamicRegistry<DamageType> damageType() {
-        return damageType;
+        return dynamicRegistries.damageType();
     }
 
     @Override
     public @NotNull DynamicRegistry<TrimMaterial> trimMaterial() {
-        return trimMaterial;
+        return dynamicRegistries.trimMaterial();
     }
 
     @Override
     public @NotNull DynamicRegistry<TrimPattern> trimPattern() {
-        return trimPattern;
+        return dynamicRegistries.trimPattern();
     }
 
     @Override
     public @NotNull DynamicRegistry<BannerPattern> bannerPattern() {
-        return bannerPattern;
+        return dynamicRegistries.bannerPattern();
     }
 
     @Override
     public @NotNull DynamicRegistry<WolfMeta.Variant> wolfVariant() {
-        return wolfVariant;
+        return dynamicRegistries.wolfVariant();
     }
 
     @Override
     public @NotNull DynamicRegistry<Enchantment> enchantment() {
-        return enchantment;
+        return dynamicRegistries.enchantment();
     }
 
     @Override
     public @NotNull DynamicRegistry<PaintingMeta.Variant> paintingVariant() {
-        return paintingVariant;
+        return dynamicRegistries.paintingVariant();
     }
 
     @Override
     public @NotNull DynamicRegistry<JukeboxSong> jukeboxSong() {
-        return jukeboxSong;
+        return dynamicRegistries.jukeboxSong();
     }
 
     @Override
     public @NotNull DynamicRegistry<BinaryTagSerializer<? extends LevelBasedValue>> enchantmentLevelBasedValues() {
-        return enchantmentLevelBasedValues;
+        return dynamicRegistries.enchantmentLevelBasedValues();
     }
 
     @Override
     public @NotNull DynamicRegistry<BinaryTagSerializer<? extends ValueEffect>> enchantmentValueEffects() {
-        return enchantmentValueEffects;
+        return dynamicRegistries.enchantmentValueEffects();
     }
 
     @Override
     public @NotNull DynamicRegistry<BinaryTagSerializer<? extends EntityEffect>> enchantmentEntityEffects() {
-        return enchantmentEntityEffects;
+        return dynamicRegistries.enchantmentEntityEffects();
     }
 
     @Override
     public @NotNull DynamicRegistry<BinaryTagSerializer<? extends LocationEffect>> enchantmentLocationEffects() {
-        return enchantmentLocationEffects;
+        return dynamicRegistries.enchantmentLocationEffects();
     }
 
     @Override
@@ -240,6 +211,11 @@ final class ServerProcessImpl implements ServerProcess {
     @Override
     public @NotNull TeamManager team() {
         return team;
+    }
+
+    @Override
+    public @NotNull Registries registries() {
+        return dynamicRegistries;
     }
 
     @Override
@@ -279,17 +255,17 @@ final class ServerProcessImpl implements ServerProcess {
 
     @Override
     public @NotNull DynamicRegistry<ChatType> chatType() {
-        return chatType;
+        return dynamicRegistries.chatType();
     }
 
     @Override
     public @NotNull DynamicRegistry<DimensionType> dimensionType() {
-        return dimensionType;
+        return dynamicRegistries.dimensionType();
     }
 
     @Override
     public @NotNull DynamicRegistry<Biome> biome() {
-        return biome;
+        return dynamicRegistries.biome();
     }
 
     @Override
