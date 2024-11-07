@@ -2,6 +2,7 @@ package net.minestom.server.scoreboard.team;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.network.packet.server.play.TeamsPacket;
@@ -19,6 +20,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.function.Consumer;
 
+import static net.minestom.server.network.packet.server.play.TeamsPacket.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DisplayName("Testing Team functionality for Scoreboards")
@@ -46,7 +48,7 @@ class TeamTest {
         assertInstanceOf(ScoreboardTeam.class, team);
 
         assertEquals(TEST_NAME, team.getName());
-        assertEquals(Component.empty(), team.getTeamDisplayName());
+        assertEquals(Component.empty(), team.getDIsplayName());
         assertEquals(Component.empty(), team.getPrefix());
         assertEquals(Component.empty(), team.getSuffix());
     }
@@ -54,23 +56,41 @@ class TeamTest {
     @Test
     void testPacketDataSet() {
         Team team = Team.builder(TEST_NAME)
-                .collisionRule(TeamsPacket.CollisionRule.NEVER)
-                .nameTagVisibility(TeamsPacket.NameTagVisibility.NEVER)
+                .collisionRule(CollisionRule.NEVER)
+                .nameTagVisibility(NameTagVisibility.NEVER)
                 .build();
 
         // Standard values are ALWAYS
-        assertNotEquals(TeamsPacket.CollisionRule.ALWAYS, team.getCollisionRule());
-        assertNotEquals(TeamsPacket.NameTagVisibility.ALWAYS, team.getNameTagVisibility());
+        assertNotEquals(CollisionRule.ALWAYS, team.getCollisionRule());
+        assertNotEquals(NameTagVisibility.ALWAYS, team.getNameTagVisibility());
     }
 
     @Test
     void testDeathMessageVisibilityChange() {
         Team team = Team.builder(TEST_NAME)
-                .deathMessageVisibility(TeamsPacket.NameTagVisibility.HIDE_FOR_OTHER_TEAMS)
+                .deathMessageVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS)
                 .build();
         assertNotNull(team);
         // Standard value is ALWAYS
-        assertNotEquals(TeamsPacket.NameTagVisibility.ALWAYS, team.getDeathMessageVisibility());
+        assertNotEquals(NameTagVisibility.ALWAYS, team.getDeathMessageVisibility());
+    }
+
+    @Test
+    void testTeamMetaUpdate() {
+        Team team = Team.builder(TEST_NAME).build();
+        assertEquals(CollisionRule.ALWAYS, team.getCollisionRule());
+        assertEquals(NameTagVisibility.ALWAYS, team.getNameTagVisibility());
+        assertEquals(NameTagVisibility.ALWAYS, team.getDeathMessageVisibility());
+
+        team.updateCollisionRule(CollisionRule.NEVER);
+        team.updateNameTagVisibility(NameTagVisibility.HIDE_FOR_OTHER_TEAMS);
+        team.updateDeathMessageVisibility(NameTagVisibility.NEVER);
+        team.updateDisplayName(Component.text("Minestom"));
+
+        assertNotEquals(Component.empty(), team.getDIsplayName());
+        assertEquals(CollisionRule.NEVER, team.getCollisionRule());
+        assertEquals(NameTagVisibility.HIDE_FOR_OTHER_TEAMS, team.getNameTagVisibility());
+        assertNotEquals(NameTagVisibility.ALWAYS, team.getDeathMessageVisibility());
     }
 
     @Test
@@ -114,6 +134,41 @@ class TeamTest {
         Team givenTeam = teamManager.getTeam(TEST_NAME);
         assertNotNull(givenTeam);
         assertEquals(team, givenTeam);
+    }
+
+    @Test
+    void testTeamWithCustomDisplayConfiguration(@NotNull Env env) {
+        Instance instance = env.createFlatInstance();
+        Team team = Team.builder(TEST_NAME)
+                .displayName(Component.text("Minestom"))
+                .prefix(Component.text("Test:"))
+                .suffix(Component.text(":Suffix"))
+                .color(NamedTextColor.RED)
+                .build();
+
+        assertNotEquals(Component.empty(), team.getDIsplayName());
+        assertNotEquals(Component.empty(), team.getPrefix());
+        assertNotEquals(Component.empty(), team.getSuffix());
+        assertEquals(NamedTextColor.RED, team.getColor());
+
+        Player player = env.createPlayer(instance);
+        team.addMember(player.getUsername());
+
+        assertFalse(team.getMembers().isEmpty());
+
+        Component displayName = team.getPrefix()
+                .append(Component.space())
+                .append(Component.text(player.getUsername(), team.getColor()))
+                .append(Component.space())
+                .append(team.getSuffix());
+
+        assertNotNull(displayName);
+
+        //TODO: Include Color code to check
+        String rawDisplayName = PlainTextComponentSerializer.plainText().serialize(displayName);
+        assertEquals("Test: " + player.getUsername() + " :Suffix", rawDisplayName);
+
+        env.destroyInstance(instance, true);
     }
 
     @Test
@@ -185,10 +240,10 @@ class TeamTest {
     void testTeamDisplayUpdate() {
         Team team = Team.builder(TEST_NAME).build();
         assertNotNull(team);
-        assertEquals(Component.empty(), team.getTeamDisplayName());
+        assertEquals(Component.empty(), team.getDIsplayName());
         assertEquals(Component.empty(), team.getPrefix());
         assertEquals(Component.empty(), team.getSuffix());
-        assertEquals(NamedTextColor.WHITE, team.getTeamColor());
+        assertEquals(NamedTextColor.WHITE, team.getColor());
 
         team.updatePrefix(Component.text("Prefix"));
         team.updateSuffix(Component.text("Suffix"));
@@ -196,7 +251,7 @@ class TeamTest {
 
         assertNotEquals(Component.empty(), team.getPrefix());
         assertNotEquals(Component.empty(), team.getSuffix());
-        assertEquals(NamedTextColor.RED, team.getTeamColor());
+        assertEquals(NamedTextColor.RED, team.getColor());
     }
 
     @Test
@@ -231,7 +286,7 @@ class TeamTest {
     }
 
     /**
-     * Asserts that the given {@link TeamsPacket} is a {@link TeamsPacket.CreateTeamAction} and that the flag is set correctly.
+     * Asserts that the given {@link TeamsPacket} is a {@link CreateTeamAction} and that the flag is set correctly.
      *
      * @param teamsPacket the packet to check
      * @param flag        the expected flag
@@ -239,9 +294,9 @@ class TeamTest {
      */
     private void assertTeamCreationFlag(@NotNull TeamsPacket teamsPacket, byte flag, @NotNull Consumer<Byte> flagChecker) {
         assertNotNull(teamsPacket);
-        assertInstanceOf(TeamsPacket.CreateTeamAction.class, teamsPacket.action());
+        assertInstanceOf(CreateTeamAction.class, teamsPacket.action());
 
-        TeamsPacket.CreateTeamAction givenAction = (TeamsPacket.CreateTeamAction) teamsPacket.action();
+        CreateTeamAction givenAction = (CreateTeamAction) teamsPacket.action();
 
         assertEquals(flag, givenAction.friendlyFlags());
         flagChecker.accept(givenAction.friendlyFlags());
@@ -249,6 +304,7 @@ class TeamTest {
 
     /**
      * Unpacks the friendly fire flag from the given byte.
+     *
      * @param flags the flags to unpack
      * @return {@code true} if the friendly fire flag is set
      */
@@ -258,6 +314,7 @@ class TeamTest {
 
     /**
      * Unpacks the see invisible flag from the given byte.
+     *
      * @param flags the flags to unpack
      * @return {@code true} if the see invisible flag is set
      */
