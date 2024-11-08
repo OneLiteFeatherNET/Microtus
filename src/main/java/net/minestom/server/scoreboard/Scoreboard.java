@@ -4,8 +4,6 @@ import net.kyori.adventure.text.Component;
 import net.minestom.server.Viewable;
 import net.minestom.server.adventure.audience.PacketGroupingAudience;
 import net.minestom.server.entity.Player;
-import net.minestom.server.network.packet.server.play.DisplayScoreboardPacket;
-import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -14,36 +12,6 @@ import java.util.Collection;
  * This interface represents all scoreboard of Minecraft.
  */
 public interface Scoreboard extends Viewable, PacketGroupingAudience {
-
-    /**
-     * Creates a creation objective packet.
-     *
-     * @param value The value for the objective
-     * @param type  The type for the objective
-     * @return the creation objective packet
-     */
-    default @NotNull ScoreboardObjectivePacket getCreationObjectivePacket(Component value, ScoreboardObjectivePacket.Type type) {
-        return new ScoreboardObjectivePacket(getObjectiveName(), (byte) 0, value, type, null);
-    }
-
-    /**
-     * Creates the destruction objective packet.
-     *
-     * @return the destruction objective packet
-     */
-    default @NotNull ScoreboardObjectivePacket getDestructionObjectivePacket() {
-        return new ScoreboardObjectivePacket(getObjectiveName(), (byte) 1, null, null, null);
-    }
-
-    /**
-     * Creates the {@link DisplayScoreboardPacket}.
-     *
-     * @param position The position of the scoreboard
-     * @return the created display scoreboard packet
-     */
-    default @NotNull DisplayScoreboardPacket getDisplayScoreboardPacket(byte position) {
-        return new DisplayScoreboardPacket(position, getObjectiveName());
-    }
 
     /**
      * Updates the score of a {@link Player}.
