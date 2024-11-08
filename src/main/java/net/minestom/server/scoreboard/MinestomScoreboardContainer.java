@@ -23,7 +23,7 @@ import java.util.function.Consumer;
 public final class MinestomScoreboardContainer implements ScoreboardContainer {
 
     private final Object2ObjectMap<String, Objective> objectivesByName;
-    private final List<Score> scores ;
+    private final List<Score> scores;
     private final Map<DisplaySlot, Objective> displayObjectives;
     private final Set<Player> viewers;
 
@@ -37,7 +37,7 @@ public final class MinestomScoreboardContainer implements ScoreboardContainer {
     @Override
     public boolean addViewer(@NotNull Player player) {
         if (this.viewers.add(player)) {
-
+            //TODO: Send packets
             return true;
         }
         return false;
@@ -46,7 +46,7 @@ public final class MinestomScoreboardContainer implements ScoreboardContainer {
     @Override
     public boolean removeViewer(@NotNull Player player) {
         if (this.viewers.remove(player)) {
-
+            //TODO: Send packets
         }
         return false;
     }
