@@ -52,8 +52,8 @@ public class TabList implements Scoreboard {
     public boolean addViewer(@NotNull Player player) {
         final boolean result = this.viewers.add(player);
         if (result) {
-            player.sendPacket(this.getCreationObjectivePacket(Component.empty(), this.type));
-            player.sendPacket(this.getDisplayScoreboardPacket((byte) 0));
+            player.sendPacket(ScoreboardPacketFactory.getCreationObjectivePacket(getObjectiveName(), Component.empty(), this.type));
+            player.sendPacket(ScoreboardPacketFactory.getDisplayScoreboardPacket(getObjectiveName(), (byte) 0));
         }
         return result;
     }
@@ -62,7 +62,7 @@ public class TabList implements Scoreboard {
     public boolean removeViewer(@NotNull Player player) {
         final boolean result = this.viewers.remove(player);
         if (result) {
-            player.sendPacket(this.getDestructionObjectivePacket());
+            player.sendPacket(ScoreboardPacketFactory.getDestructionObjectivePacket(getObjectiveName()));
         }
         return result;
     }

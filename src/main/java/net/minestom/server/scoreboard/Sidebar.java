@@ -5,7 +5,11 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minestom.server.entity.Player;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.network.packet.server.play.*;
+import net.minestom.server.network.packet.server.play.DisplayScoreboardPacket;
+import net.minestom.server.network.packet.server.play.ResetScorePacket;
+import net.minestom.server.network.packet.server.play.ScoreboardObjectivePacket;
+import net.minestom.server.network.packet.server.play.TeamsPacket;
+import net.minestom.server.network.packet.server.play.UpdateScorePacket;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,10 +47,8 @@ public class Sidebar implements Scoreboard {
     private static final int MAX_LINES_COUNT = 15;
 
     private final Set<Player> viewers = new CopyOnWriteArraySet<>();
-
     private final Set<ScoreboardLine> lines = new CopyOnWriteArraySet<>();
     private final IntLinkedOpenHashSet availableColors = new IntLinkedOpenHashSet();
-
     private final String objectiveName;
 
     private Component title;
@@ -187,10 +189,10 @@ public class Sidebar implements Scoreboard {
     public boolean addViewer(@NotNull Player player) {
         final boolean result = this.viewers.add(player);
         if (result) {
-            ScoreboardObjectivePacket scoreboardObjectivePacket = this.getCreationObjectivePacket(this.title, ScoreboardObjectivePacket.Type.INTEGER);
-            player.sendPacket(scoreboardObjectivePacket);
+            ScoreboardObjectivePacket objectivePacket = ScoreboardPacketFactory.getCreationObjectivePacket(getObjectiveName(), this.title, ScoreboardObjectivePacket.Type.INTEGER);
+            player.sendPacket(objectivePacket);
         }
-        DisplayScoreboardPacket displayScoreboardPacket = this.getDisplayScoreboardPacket((byte) 1);
+        DisplayScoreboardPacket displayScoreboardPacket = ScoreboardPacketFactory.getDisplayScoreboardPacket(getObjectiveName(), (byte) 1);
         player.sendPacket(displayScoreboardPacket); // Show sidebar scoreboard (wait for scores packet)
         for (ScoreboardLine line : lines) {
             player.sendPacket(line.sidebarTeam.getCreationPacket());
@@ -203,7 +205,7 @@ public class Sidebar implements Scoreboard {
     public boolean removeViewer(@NotNull Player player) {
         final boolean result = this.viewers.remove(player);
         if (!result) return false;
-        ScoreboardObjectivePacket scoreboardObjectivePacket = this.getDestructionObjectivePacket();
+        ScoreboardObjectivePacket scoreboardObjectivePacket = ScoreboardPacketFactory.getDestructionObjectivePacket(getObjectiveName());
         player.sendPacket(scoreboardObjectivePacket);
         for (ScoreboardLine line : lines) {
             player.sendPacket(line.getScoreDestructionPacket(objectiveName)); // Is it necessary?

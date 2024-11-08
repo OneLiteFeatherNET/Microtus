@@ -22,7 +22,6 @@ public class BelowNameTag implements Scoreboard {
     private final Set<Player> viewers = new CopyOnWriteArraySet<>();
     private final Set<Player> unmodifiableViewers = Collections.unmodifiableSet(viewers);
     private final String objectiveName;
-
     private final ScoreboardObjectivePacket scoreboardObjectivePacket;
 
     /**
@@ -33,7 +32,7 @@ public class BelowNameTag implements Scoreboard {
      */
     public BelowNameTag(@NotNull String name, @NotNull Component value) {
         this.objectiveName = BELOW_NAME_TAG_PREFIX + name;
-        this.scoreboardObjectivePacket = this.getCreationObjectivePacket(value, ScoreboardObjectivePacket.Type.INTEGER);
+        this.scoreboardObjectivePacket = ScoreboardPacketFactory.getCreationObjectivePacket(getObjectiveName(), value, ScoreboardObjectivePacket.Type.INTEGER);
     }
 
     @Override
@@ -46,7 +45,7 @@ public class BelowNameTag implements Scoreboard {
         final boolean result = this.viewers.add(player);
         if (result) {
             player.sendPacket(this.scoreboardObjectivePacket);
-            player.sendPacket(this.getDisplayScoreboardPacket((byte) 2));
+            player.sendPacket(ScoreboardPacketFactory.getDisplayScoreboardPacket(getObjectiveName(), (byte) 2));
             player.setBelowNameTag(this);
         }
         return result;
@@ -56,7 +55,7 @@ public class BelowNameTag implements Scoreboard {
     public boolean removeViewer(@NotNull Player player) {
         final boolean result = this.viewers.remove(player);
         if (result) {
-            player.sendPacket(this.getDestructionObjectivePacket());
+            player.sendPacket(ScoreboardPacketFactory.getDestructionObjectivePacket(getObjectiveName()));
             player.setBelowNameTag(null);
         }
         return result;
