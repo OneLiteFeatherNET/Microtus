@@ -14,10 +14,14 @@ import java.util.function.UnaryOperator;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
-public record ScoreboardObjectivePacket(@NotNull String objectiveName, byte mode,
-                                        @Nullable Component objectiveValue,
-                                        @Nullable Type type,
-                                        @Nullable Sidebar.NumberFormat numberFormat) implements ServerPacket.Play, ServerPacket.ComponentHolding {
+public record ScoreboardObjectivePacket(
+        @NotNull String objectiveName,
+        byte mode,
+        @Nullable Component objectiveValue,
+        @Nullable Type type,
+        @Nullable Sidebar.NumberFormat numberFormat
+) implements ServerPacket.Play, ServerPacket.ComponentHolding {
+
     public ScoreboardObjectivePacket(@NotNull NetworkBuffer reader) {
         this(read(reader));
     }
@@ -73,6 +77,7 @@ public record ScoreboardObjectivePacket(@NotNull String objectiveName, byte mode
     /**
      * This enumeration represents all available types for the scoreboard objective
      */
+    @Deprecated
     public enum Type {
         INTEGER,
         HEARTS

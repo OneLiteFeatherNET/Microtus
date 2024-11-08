@@ -10,10 +10,6 @@ import org.jetbrains.annotations.Nullable;
 
 import static net.minestom.server.network.NetworkBuffer.*;
 
-// public record ClientboundSetScorePacket(String owner, String objectiveName,
-// int score, @Nullable Component display, @Nullable NumberFormat numberFormat) implements Packet<ClientGamePacketListener>
-//{
-
 public record UpdateScorePacket(
         @NotNull String entityName,
         @NotNull String objectiveName,
