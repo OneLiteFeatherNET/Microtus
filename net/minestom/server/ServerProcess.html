@@ -88,12 +88,12 @@ loadScripts(document, 'script');</script>
 <section class="class-description" id="class-description">
 <dl class="notes">
 <dt>All Superinterfaces:</dt>
-<dd><code><a href="registry/Registries.html" title="interface in net.minestom.server.registry">Registries</a></code>, <code><a href="snapshot/Snapshotable.html" title="interface in net.minestom.server.snapshot">Snapshotable</a></code></dd>
+<dd><code><a href="registry/DeprecatedServerProcessDynamicRegistry.html" title="interface in net.minestom.server.registry">DeprecatedServerProcessDynamicRegistry</a></code>, <code><a href="registry/Registries.html" title="interface in net.minestom.server.registry">Registries</a></code>, <code><a href="snapshot/Snapshotable.html" title="interface in net.minestom.server.snapshot">Snapshotable</a></code></dd>
 </dl>
 <hr>
 <div class="type-signature"><span class="annotations">@NonExtendable
 </span><span class="modifiers">public interface </span><span class="element-name type-name-label">ServerProcess</span><span class="extends-implements">
-extends <a href="registry/Registries.html" title="interface in net.minestom.server.registry">Registries</a>, <a href="snapshot/Snapshotable.html" title="interface in net.minestom.server.snapshot">Snapshotable</a></span></div>
+extends <a href="registry/DeprecatedServerProcessDynamicRegistry.html" title="interface in net.minestom.server.registry">DeprecatedServerProcessDynamicRegistry</a>, <a href="snapshot/Snapshotable.html" title="interface in net.minestom.server.snapshot">Snapshotable</a></span></div>
 </section>
 <section class="summary">
 <ul class="summary-list">
@@ -195,43 +195,48 @@ extends <a href="registry/Registries.html" title="interface in net.minestom.serv
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Handles registered recipes shown to clients.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="timer/SchedulerManager.html" title="class in net.minestom.server.timer">SchedulerManager</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#scheduler()" class="member-name-link">scheduler</a>()</code></div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="registry/Registries.html" title="interface in net.minestom.server.registry">Registries</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#registries()" class="member-name-link">registries</a>()</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="block">Provides the registries</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="timer/SchedulerManager.html" title="class in net.minestom.server.timer">SchedulerManager</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#scheduler()" class="member-name-link">scheduler</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Main scheduler ticked at the server rate.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="network/socket/Server.html" title="class in net.minestom.server.network.socket">Server</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#server()" class="member-name-link">server</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="network/socket/Server.html" title="class in net.minestom.server.network.socket">Server</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#server()" class="member-name-link">server</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Exposed socket server.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#start(java.net.SocketAddress)" class="member-name-link">start</a><wbr>(@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/SocketAddress.html" title="class or interface in java.net" class="external-link">SocketAddress</a>&nbsp;socketAddress)</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#start(java.net.SocketAddress)" class="member-name-link">start</a><wbr>(@NotNull <a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/net/SocketAddress.html" title="class or interface in java.net" class="external-link">SocketAddress</a>&nbsp;socketAddress)</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="gamedata/tags/TagManager.html" title="class in net.minestom.server.gamedata.tags">TagManager</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#tag()" class="member-name-link">tag</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>void</code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#stop()" class="member-name-link">stop</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">&nbsp;</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="gamedata/tags/TagManager.html" title="class in net.minestom.server.gamedata.tags">TagManager</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#tag()" class="member-name-link">tag</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Handles registry tags.</div>
 </div>
-<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="scoreboard/TeamManager.html" title="class in net.minestom.server.scoreboard">TeamManager</a></code></div>
-<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#team()" class="member-name-link">team</a>()</code></div>
-<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="scoreboard/TeamManager.html" title="class in net.minestom.server.scoreboard">TeamManager</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#team()" class="member-name-link">team</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Handles registered teams.</div>
 </div>
-<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="ServerProcess.Ticker.html" title="interface in net.minestom.server">ServerProcess.Ticker</a></code></div>
-<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#ticker()" class="member-name-link">ticker</a>()</code></div>
-<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code>@NotNull <a href="ServerProcess.Ticker.html" title="interface in net.minestom.server">ServerProcess.Ticker</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3"><code><a href="#ticker()" class="member-name-link">ticker</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab3">
 <div class="block">Handles the server ticks.</div>
 </div>
 </div>
 </div>
 </div>
 <div class="inherited-list">
-<h3 id="methods-inherited-from-class-net.minestom.server.registry.Registries">Methods inherited from interface&nbsp;net.minestom.server.registry.<a href="registry/Registries.html" title="interface in net.minestom.server.registry">Registries</a></h3>
-<code><a href="registry/Registries.html#bannerPattern()">bannerPattern</a>, <a href="registry/Registries.html#biome()">biome</a>, <a href="registry/Registries.html#chatType()">chatType</a>, <a href="registry/Registries.html#damageType()">damageType</a>, <a href="registry/Registries.html#dimensionType()">dimensionType</a>, <a href="registry/Registries.html#enchantment()">enchantment</a>, <a href="registry/Registries.html#enchantmentEntityEffects()">enchantmentEntityEffects</a>, <a href="registry/Registries.html#enchantmentLevelBasedValues()">enchantmentLevelBasedValues</a>, <a href="registry/Registries.html#enchantmentLocationEffects()">enchantmentLocationEffects</a>, <a href="registry/Registries.html#enchantmentValueEffects()">enchantmentValueEffects</a>, <a href="registry/Registries.html#jukeboxSong()">jukeboxSong</a>, <a href="registry/Registries.html#paintingVariant()">paintingVariant</a>, <a href="registry/Registries.html#trimMaterial()">trimMaterial</a>, <a href="registry/Registries.html#trimPattern()">trimPattern</a>, <a href="registry/Registries.html#wolfVariant()">wolfVariant</a></code></div>
+<h3 id="methods-inherited-from-class-net.minestom.server.registry.DeprecatedServerProcessDynamicRegistry">Methods inherited from interface&nbsp;net.minestom.server.registry.<a href="registry/DeprecatedServerProcessDynamicRegistry.html" title="interface in net.minestom.server.registry">DeprecatedServerProcessDynamicRegistry</a></h3>
+<code><a href="registry/DeprecatedServerProcessDynamicRegistry.html#bannerPattern()">bannerPattern</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#biome()">biome</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#chatType()">chatType</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#damageType()">damageType</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#dimensionType()">dimensionType</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#enchantment()">enchantment</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#enchantmentEntityEffects()">enchantmentEntityEffects</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#enchantmentLevelBasedValues()">enchantmentLevelBasedValues</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#enchantmentLocationEffects()">enchantmentLocationEffects</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#enchantmentValueEffects()">enchantmentValueEffects</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#jukeboxSong()">jukeboxSong</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#paintingVariant()">paintingVariant</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#trimMaterial()">trimMaterial</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#trimPattern()">trimPattern</a>, <a href="registry/DeprecatedServerProcessDynamicRegistry.html#wolfVariant()">wolfVariant</a></code></div>
 <div class="inherited-list">
 <h3 id="methods-inherited-from-class-net.minestom.server.snapshot.Snapshotable">Methods inherited from interface&nbsp;net.minestom.server.snapshot.<a href="snapshot/Snapshotable.html" title="interface in net.minestom.server.snapshot">Snapshotable</a></h3>
 <code><a href="snapshot/Snapshotable.html#updateSnapshot(net.minestom.server.snapshot.SnapshotUpdater)">updateSnapshot</a></code></div>
@@ -293,6 +298,14 @@ extends <a href="registry/Registries.html" title="interface in net.minestom.serv
 <div class="member-signature"><span class="annotations">@NotNull
 </span><span class="return-type">@NotNull <a href="scoreboard/TeamManager.html" title="class in net.minestom.server.scoreboard">TeamManager</a></span>&nbsp;<span class="element-name">team</span>()</div>
 <div class="block">Handles registered teams.</div>
+</section>
+</li>
+<li>
+<section class="detail" id="registries()">
+<h3>registries</h3>
+<div class="member-signature"><span class="annotations">@NotNull
+</span><span class="return-type">@NotNull <a href="registry/Registries.html" title="interface in net.minestom.server.registry">Registries</a></span>&nbsp;<span class="element-name">registries</span>()</div>
+<div class="block">Provides the registries</div>
 </section>
 </li>
 <li>
