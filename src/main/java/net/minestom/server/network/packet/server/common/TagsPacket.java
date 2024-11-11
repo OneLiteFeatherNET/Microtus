@@ -45,7 +45,11 @@ public record TagsPacket(
                 final var values = tag.getValues();
                 writer.write(VAR_INT, values.size());
                 for (var name : values) {
-                    writer.write(VAR_INT, type.getFunction().apply(name.asString()));
+                    var applied = type.getFunction().apply(name.asString());
+                    if (applied.isEmpty()) {
+                        continue;
+                    }
+                    writer.write(VAR_INT, applied.get());
                 }
             }
         }
