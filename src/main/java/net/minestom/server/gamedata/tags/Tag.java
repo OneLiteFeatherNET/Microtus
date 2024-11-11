@@ -19,6 +19,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -90,30 +91,30 @@ public final class Tag implements ProtocolObject, Keyed {
 
     public enum BasicType {
         BLOCKS("minecraft:block", Registry.Resource.BLOCK_TAGS,
-                name -> Objects.requireNonNull(Block.fromNamespaceId(name)).id()),
+                name -> Optional.ofNullable(Block.fromNamespaceId(name)).map(Block::id)),
         ITEMS("minecraft:item", Registry.Resource.ITEM_TAGS,
-                name -> Objects.requireNonNull(Material.fromNamespaceId(name)).id()),
+                name -> Optional.ofNullable(Material.fromNamespaceId(name)).map(Material::id)),
         FLUIDS("minecraft:fluid", Registry.Resource.FLUID_TAGS,
-                name -> Objects.requireNonNull(Fluid.fromNamespaceId(name)).id()),
+                name -> Optional.ofNullable(Fluid.fromNamespaceId(name)).map(Fluid::id)),
         ENTITY_TYPES("minecraft:entity_type", Registry.Resource.ENTITY_TYPE_TAGS,
-                name -> Objects.requireNonNull(EntityType.fromNamespaceId(name)).id()),
+                name -> Optional.ofNullable(EntityType.fromNamespaceId(name)).map(EntityType::id)),
         GAME_EVENTS("minecraft:game_event", Registry.Resource.GAMEPLAY_TAGS,
-                name -> Objects.requireNonNull(GameEvent.fromNamespaceId(name)).id()),
+                name -> Optional.ofNullable(EntityType.fromNamespaceId(name)).map(EntityType::id)),
         SOUND_EVENTS("minecraft:sound_event", null, null), // Seems not to be included in server data
         POTION_EFFECTS("minecraft:sound_event", null, null), // Seems not to be included in server data
 
         //todo this is cursed. it does not update as the registry changes. Fix later.
         ENCHANTMENTS("minecraft:enchantment", Registry.Resource.ENCHANTMENT_TAGS,
-                name -> MinecraftServer.getEnchantmentRegistry().getId(DynamicRegistry.Key.of(name)));
+                name -> Optional.of(DynamicRegistry.Key.of(name)).map(DynamicRegistry.Key::namespace).map(MinecraftServer.getEnchantmentRegistry()::getId)),;
 
         private final static BasicType[] VALUES = values();
         private final String identifier;
         private final Registry.Resource resource;
-        private final Function<String, Integer> function;
+        private final Function<String, Optional<Integer>> function;
 
         BasicType(@NotNull String identifier,
                   @Nullable Registry.Resource resource,
-                  @Nullable Function<String, Integer> function) {
+                  @Nullable Function<String, Optional<Integer>> function) {
             this.identifier = identifier;
             this.resource = resource;
             this.function = function;
@@ -127,7 +128,7 @@ public final class Tag implements ProtocolObject, Keyed {
             return resource;
         }
 
-        public Function<String, Integer> getFunction() {
+        public Function<String, Optional<Integer>> getFunction() {
             return function;
         }
 
