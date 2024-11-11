@@ -2,6 +2,7 @@ package net.minestom.testing;
 
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.TagStringIOExt;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.lang.ref.WeakReference;
@@ -11,6 +12,7 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.*;
 
 public final class TestUtils {
+
     public static void waitUntilCleared(WeakReference<?> ref) {
         final int maxTries = 100;
 
@@ -55,9 +57,9 @@ public final class TestUtils {
         assertEqualsIgnoreSpace(s1, s2, true);
     }
 
-    private static String stripExtraSpaces(String s) {
+    private static @NotNull String stripExtraSpaces(@NotNull String string) {
         StringBuilder formattedString = new StringBuilder();
-        java.util.StringTokenizer st = new java.util.StringTokenizer(s);
+        java.util.StringTokenizer st = new java.util.StringTokenizer(string);
         while (st.hasMoreTokens()) {
             formattedString.append(st.nextToken());
         }
