@@ -31,7 +31,7 @@ final class TestConnectionImpl implements TestConnection {
 
     private final List<IncomingCollector<ServerPacket>> incomingTrackers = new CopyOnWriteArrayList<>();
 
-    TestConnectionImpl(Env env) {
+    TestConnectionImpl(@NotNull Env env) {
         this.process = env.process();
     }
 
