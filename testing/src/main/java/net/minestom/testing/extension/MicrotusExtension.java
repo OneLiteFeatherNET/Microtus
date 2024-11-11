@@ -9,7 +9,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 
 /**
- * The {@code MicrotusExtension} class extends {@link TypeBasedParameterResolver<Env>} and implements {@link InvocationInterceptor}.
+ * The {@link MicrotusExtension} class extends {@link TypeBasedParameterResolver<Env>} and implements {@link InvocationInterceptor}.
  * This extension is used to resolve parameters of type {@link Env} and to intercept test method invocations.
  *
  * @since 1.5.0
