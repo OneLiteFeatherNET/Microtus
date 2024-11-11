@@ -11,6 +11,12 @@ import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * The {@link TestUtils} class provides utility methods for testing.
+ *
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 public final class TestUtils {
 
     public static void waitUntilCleared(WeakReference<?> ref) {
