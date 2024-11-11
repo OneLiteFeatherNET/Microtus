@@ -12,6 +12,8 @@ dependencies {
     // Provides the input JSON to generate from
     implementation(libs.minestomData)
 
+    implementation(libs.bundles.adventure)
+
     // Common
     implementation(libs.jetbrainsAnnotations)
     implementation(libs.slf4j)
