@@ -4,6 +4,9 @@
 
 [![license](https://img.shields.io/github/license/OneLiteFeatherNET/Microtus?style=for-the-badge&color=b2204c)](../LICENSE)
 [![wiki](https://img.shields.io/badge/documentation-wiki-74aad6?style=for-the-badge)](https://wiki.microtus.dev/)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=OneLiteFeatherNET_Microtus&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=OneLiteFeatherNET_Microtus)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=OneLiteFeatherNET_Microtus&metric=bugs)](https://sonarcloud.io/summary/new_code?id=OneLiteFeatherNET_Microtus)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=OneLiteFeatherNET_Microtus&metric=duplicated_lines_density)](https://sonarcloud.io/summary/new_code?id=OneLiteFeatherNET_Microtus)
 
 [Microtus](https://en.wikipedia.org/wiki/Microtus) is a fork of the original minestom.
 
