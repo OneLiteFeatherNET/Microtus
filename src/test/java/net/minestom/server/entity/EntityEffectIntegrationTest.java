@@ -14,7 +14,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MicrotusExtension.class)
-public class EntityEffectIntegrationTest {
+class EntityEffectIntegrationTest {
 
     private static final Potion TEST_POTION = new Potion(PotionEffect.SPEED, (byte) 1, 1000);
 
