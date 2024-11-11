@@ -1395,6 +1395,14 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
     }
 
     /**
+     * Returns an indicator if the entity currently has any given effects.
+     * @return true if the entity has any effects, false otherwise
+     */
+    public boolean hasEffects() {
+        return !this.effects.isEmpty();
+    }
+
+    /**
      * Gets the TimedPotion of the specified effect.
      *
      * @param effect the effect type
