@@ -13,7 +13,15 @@ import java.util.function.Consumer;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * The {@link EnvImpl} is the implementation of the {@link Env} interface.
+ * It is used to create connections and more for the testing environment.
+ *
+ * @version 1.0.0
+ * @since 1.0.0
+ */
 final class EnvImpl implements Env {
+
     private final ServerProcess process;
     private final List<FlexibleListenerImpl<?>> listeners = new CopyOnWriteArrayList<>();
 
