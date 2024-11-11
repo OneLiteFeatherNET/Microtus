@@ -1,8 +1,8 @@
 package net.minestom.server.fluid;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.StaticProtocolObject;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,7 +21,7 @@ public sealed interface Fluid extends StaticProtocolObject, Fluids permits Fluid
 
     @Override
     @NotNull
-    NamespaceID namespace();
+    Key namespace();
 
     static @NotNull Collection<@NotNull Fluid> values() {
         return FluidImpl.values();
@@ -31,7 +31,7 @@ public sealed interface Fluid extends StaticProtocolObject, Fluids permits Fluid
         return FluidImpl.getSafe(namespaceID);
     }
 
-    static @Nullable Fluid fromNamespaceId(@NotNull NamespaceID namespaceID) {
+    static @Nullable Fluid fromNamespaceId(@NotNull Key namespaceID) {
         return fromNamespaceId(namespaceID.asString());
     }
 }
