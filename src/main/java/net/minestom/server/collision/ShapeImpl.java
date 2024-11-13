@@ -175,9 +175,16 @@ public record ShapeImpl(CollisionData collisionData, LightData lightData) implem
             final Vec min = new Vec(minX, minY, minZ);
             final Vec max = new Vec(minX + boundXSize, minY + boundYSize, minZ + boundZSize);
             final BoundingBox bb = new BoundingBox(min, max);
-            assert bb.minX() == minX;
-            assert bb.minY() == minY;
-            assert bb.minZ() == minZ;
+
+            if (bb.minX() != minX) {
+                throw new IllegalArgumentException("Unexpected minX value: " + bb.minX() + ", expected: " + minX);
+            }
+            if (bb.minY() != minY) {
+                throw new IllegalArgumentException("Unexpected minY value: " + bb.minY() + ", expected: " + minY);
+            }
+            if (bb.minZ() != minZ) {
+                throw new IllegalArgumentException("Unexpected minZ value: " + bb.minZ() + ", expected: " + minZ);
+            }
             boundingBoxes[i] = bb;
         }
         return boundingBoxes;
