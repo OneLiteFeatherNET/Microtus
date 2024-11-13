@@ -45,12 +45,15 @@ public final class ArrayUtils {
         for (T object : collection) {
             result[i++] = function.applyAsInt(object);
         }
-        assert i == size;
+        if (i != size)
+            throw new RuntimeException("Inconsistent collection processing: index reached collection size unexpectedly.");
         return result;
     }
 
     public static <K, V> Map<K, V> toMap(@NotNull K[] keys, @NotNull V[] values, int length) {
-        assert keys.length >= length && keys.length == values.length;
+        if(keys.length <= length && keys.length != values.length) {
+            throw new IllegalArgumentException("Keys and values have different lengths (" + keys.length + ", " + values.length + ")");
+        }
         return switch (length) {
             case 0 -> Map.of();
             case 1 -> Map.of(keys[0], values[0]);
@@ -95,8 +98,10 @@ public final class ArrayUtils {
         return longs;
     }
 
-    public static void unpack(int[] out, long[] in, int bitsPerEntry) {
-        assert in.length != 0: "unpack input array is zero";
+    public static void unpack(int[] out, long[] input, int bitsPerEntry) {
+        //assert in.length != 0: "unpack input array is zero";
+        if(input.length == 0)
+            throw new IllegalArgumentException("Invalid array length: " + input.length);
 
         var intsPerLong = Math.floor(64d / bitsPerEntry);
         var intsPerLongCeil = (int) Math.ceil(intsPerLong);
@@ -106,7 +111,7 @@ public final class ArrayUtils {
             int longIndex = i / intsPerLongCeil;
             int subIndex = i % intsPerLongCeil;
 
-            out[i] = (int) ((in[longIndex] >>> (bitsPerEntry * subIndex)) & mask);
+            out[i] = (int) ((input[longIndex] >>> (bitsPerEntry * subIndex)) & mask);
         }
     }
 }
