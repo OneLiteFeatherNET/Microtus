@@ -150,7 +150,9 @@ record DataComponentMapImpl(@NotNull Int2ObjectMap<Object> components) implement
                     buffer.write(NetworkBuffer.VAR_INT, entry.getIntKey());
                     //noinspection unchecked
                     DataComponent<Object> type = (DataComponent<Object>) this.idToType.apply(entry.getIntKey());
-                    assert type != null;
+                    if (type == null) {
+                        throw new NullPointerException("DataComponent type should not be null"); //TODO: Check/Find out if this is right
+                    }
                     type.write(buffer, entry.getValue());
                 }
             }
