@@ -407,7 +407,9 @@ final class CommandParserImpl implements CommandParser {
         }
 
         void cursor(int cursor) {
-            assert cursor >= 0 && cursor <= input.length();
+            if (cursor <= 0 && cursor >= input.length()) {
+                throw new IllegalArgumentException("Invalid cursor: " + cursor);
+            }
             this.cursor = cursor;
         }
     }
@@ -431,7 +433,9 @@ final class CommandParserImpl implements CommandParser {
             return new ArgumentResult.IncompatibleType<>();
         }
         // Bruteforce
-        assert argument.allowSpace() && !argument.useRemaining();
+        if (!argument.allowSpace() && argument.useRemaining()) {
+            throw new IllegalArgumentException("Invalid argument: " + argument);
+        }
         StringBuilder current = new StringBuilder(reader.readWord());
         while (true) {
             try {
