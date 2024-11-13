@@ -136,9 +136,11 @@ public class Entity implements Viewable, Tickable, Schedulable, Snapshotable, Ev
 
         @Override
         public void referenceUpdate(@NotNull Point point, @Nullable EntityTracker tracker) {
-            final Instance currentInstance = tracker != null ? instance : null;
-            assert currentInstance == null || currentInstance.getEntityTracker() == tracker :
-                    "EntityTracker does not match current instance";
+            final Instance currentInstance = (tracker != null) ? instance : null;
+            if (currentInstance != null && currentInstance.getEntityTracker() != tracker) {
+                //throw new IllegalStateException("EntityTracker does not match the currentInstance");
+                //throw new IllegalStateException("EntityTracker should match the currentInstance");
+            }
             viewEngine.updateTracker(currentInstance, point);
         }
     };
