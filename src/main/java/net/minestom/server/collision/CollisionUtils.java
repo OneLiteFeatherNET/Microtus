@@ -35,7 +35,9 @@ public final class CollisionUtils {
     public static PhysicsResult handlePhysics(@NotNull Entity entity, @NotNull Vec entityVelocity,
                                               @Nullable PhysicsResult lastPhysicsResult, boolean singleCollision) {
         final Instance instance = entity.getInstance();
-        assert instance != null;
+        if(instance == null) {
+            throw new NullPointerException("Entity instance cannot be null");
+        }
         return handlePhysics(instance, entity.getChunk(),
                 entity.getBoundingBox(),
                 entity.getPosition(), entityVelocity,
@@ -83,7 +85,9 @@ public final class CollisionUtils {
     public static PhysicsResult handlePhysics(@NotNull Entity entity, @NotNull Vec entityVelocity,
                                               @Nullable PhysicsResult lastPhysicsResult) {
         final Instance instance = entity.getInstance();
-        assert instance != null;
+        if(instance == null) {
+            throw new NullPointerException("Entity instance cannot be null");
+        }
         return handlePhysics(instance, entity.getChunk(),
                 entity.getBoundingBox(),
                 entity.getPosition(), entityVelocity,
