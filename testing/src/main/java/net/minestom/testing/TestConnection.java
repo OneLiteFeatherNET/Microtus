@@ -11,6 +11,9 @@ import java.util.concurrent.CompletableFuture;
 
 /**
  * Represents a connection to a test server.
+ *
+ * @version 1.1.0
+ * @since 1.0.0
  */
 public interface TestConnection {
 
@@ -30,6 +33,7 @@ public interface TestConnection {
      *    }
      * }
      * }</pre>
+     *
      * @param provider the custom player provider
      */
     void setCustomPlayerProvider(@NotNull PlayerProvider provider);
@@ -42,6 +46,16 @@ public interface TestConnection {
      * @return a future that completes when the player is connected
      */
     @NotNull CompletableFuture<@NotNull Player> connect(@NotNull Instance instance, @NotNull Pos pos);
+
+    /**
+     * Connects a player to the server at position (0, 0, 0).
+     *
+     * @param instance the instance to spawn the player in
+     * @return a future that completes when the player is connected
+     */
+    default @NotNull CompletableFuture<@NotNull Player> connect(@NotNull Instance instance) {
+        return this.connect(instance, Pos.ZERO);
+    }
 
     /**
      * Tracks incoming packets of a specific type.
