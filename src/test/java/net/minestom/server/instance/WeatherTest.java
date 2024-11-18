@@ -25,15 +25,15 @@ class WeatherTest {
         assertEquals(0, weather.rainLevel());
         assertEquals(0, weather.thunderLevel());
 
-        instance.setWeather(new Weather(1, 0.5f), 1);
-        instance.tick(0);
-
         env.destroyInstance(instance);
     }
 
     @Test
     void testWeatherSendOnJoin(@NotNull Env env) {
         Instance instance = env.createFlatInstance();
+
+        instance.setWeather(new Weather(1, 0.5f), 1);
+        instance.tick(0);
 
         // Weather sent on instance join
         var connection = env.createConnection();
@@ -50,7 +50,7 @@ class WeatherTest {
         assertEquals(ChangeGameStatePacket.Reason.RAIN_LEVEL_CHANGE, state.reason());
         assertEquals(1, state.value());
 
-        state = packets.getLast();
+        state = packets.get(2);
         assertEquals(ChangeGameStatePacket.Reason.THUNDER_LEVEL_CHANGE, state.reason());
         assertEquals(0.5f, state.value());
 
