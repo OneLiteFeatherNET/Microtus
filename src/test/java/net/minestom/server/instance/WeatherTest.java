@@ -37,8 +37,7 @@ class WeatherTest {
 
         // Weather sent on instance join
         var connection = env.createConnection();
-        var tracker = connection.trackIncoming(ChangeGameStatePacket.class)
-                ;
+        var tracker = connection.trackIncoming(ChangeGameStatePacket.class);
         Player player = connection.connect(instance).join();
         assertEquals(Pos.ZERO, player.getPosition());
         tracker.assertCount(4);
