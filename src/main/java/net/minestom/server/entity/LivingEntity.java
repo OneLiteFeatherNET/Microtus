@@ -29,7 +29,7 @@ import net.minestom.server.network.packet.server.LazyPacket;
 import net.minestom.server.network.packet.server.play.*;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.scoreboard.Team;
+import net.minestom.server.scoreboard.team.Team;
 import net.minestom.server.sound.SoundEvent;
 import net.minestom.server.thread.Acquirable;
 import net.minestom.server.utils.NamespaceID;
