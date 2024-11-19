@@ -1,7 +1,7 @@
 package net.minestom.server.scoreboard.objective;
 
 import net.kyori.adventure.text.Component;
-import net.minestom.server.scoreboard.format.NumberFormat;
+import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.score.criteria.ObjectiveCriteria;
 import net.minestom.server.scoreboard.score.criteria.RenderType;
 import org.jetbrains.annotations.Contract;
@@ -56,7 +56,7 @@ public sealed interface Objective permits ScoreboardObjective {
      *
      * @param numberFormat the new number format
      */
-    void updateNumberFormat(@NotNull NumberFormat numberFormat);
+    void updateNumberFormat(@NotNull Sidebar.NumberFormat numberFormat);
 
     /**
      * Gets the name of this objective.
@@ -91,7 +91,7 @@ public sealed interface Objective permits ScoreboardObjective {
      *
      * @return the number format, or {@code null} if not set
      */
-    @Nullable NumberFormat numberFormat();
+    @Nullable Sidebar.NumberFormat numberFormat();
 
     /**
      * Builder definition to create a new {@link Objective} instance.
@@ -136,7 +136,7 @@ public sealed interface Objective permits ScoreboardObjective {
          * @param numberFormat the number format
          * @return this builder, for chaining
          */
-        @NotNull Builder numberFormat(@Nullable NumberFormat numberFormat);
+        @NotNull Builder numberFormat(@Nullable Sidebar.NumberFormat numberFormat);
 
         /**
          * Creates a new {@link Objective} instance with the provided information.

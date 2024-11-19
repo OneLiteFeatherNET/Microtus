@@ -1,7 +1,7 @@
 package net.minestom.server.scoreboard.objective;
 
 import net.kyori.adventure.text.Component;
-import net.minestom.server.scoreboard.format.NumberFormat;
+import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.score.criteria.ObjectiveCriteria;
 import net.minestom.server.scoreboard.score.criteria.RenderType;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ public final class ObjectiveBuilder implements Objective.Builder {
     private ObjectiveCriteria criteria;
     private Component displayName;
     private RenderType renderType;
-    private NumberFormat numberFormat;
+    private Sidebar.NumberFormat numberFormat;
 
     public ObjectiveBuilder() {
         this.renderType = RenderType.INTEGER;
@@ -57,7 +57,7 @@ public final class ObjectiveBuilder implements Objective.Builder {
     }
 
     @Override
-    public Objective.@NotNull Builder numberFormat(@Nullable NumberFormat numberFormat) {
+    public Objective.@NotNull Builder numberFormat(@Nullable Sidebar.NumberFormat numberFormat) {
         this.numberFormat = numberFormat;
         return this;
     }

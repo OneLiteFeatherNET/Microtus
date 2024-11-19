@@ -1,7 +1,7 @@
 package net.minestom.server.scoreboard.objective;
 
 import net.kyori.adventure.text.Component;
-import net.minestom.server.scoreboard.format.NumberFormat;
+import net.minestom.server.scoreboard.Sidebar;
 import net.minestom.server.scoreboard.score.criteria.ObjectiveCriteria;
 import net.minestom.server.scoreboard.score.criteria.RenderType;
 import net.minestom.server.utils.validate.Check;
@@ -14,14 +14,14 @@ public final class ScoreboardObjective implements Objective {
     private final ObjectiveCriteria criteria;
     private Component displayName;
     private RenderType renderType;
-    private NumberFormat numberFormat;
+    private Sidebar.NumberFormat numberFormat;
 
     ScoreboardObjective(
             @NotNull String name,
             @NotNull ObjectiveCriteria criteria,
             @NotNull Component displayName,
             @NotNull RenderType renderType,
-            @NotNull NumberFormat numberFormat
+            @NotNull Sidebar.NumberFormat numberFormat
     ) {
         Check.argCondition(name.trim().isEmpty(), "The name cannot be empty");
         this.name = name;
@@ -42,7 +42,7 @@ public final class ScoreboardObjective implements Objective {
     }
 
     @Override
-    public void updateNumberFormat(@NotNull NumberFormat numberFormat) {
+    public void updateNumberFormat(@NotNull Sidebar.NumberFormat numberFormat) {
         this.numberFormat = numberFormat;
     }
 
@@ -67,7 +67,7 @@ public final class ScoreboardObjective implements Objective {
     }
 
     @Override
-    public @Nullable NumberFormat numberFormat() {
+    public @Nullable Sidebar.NumberFormat numberFormat() {
         return this.numberFormat;
     }
 }
