@@ -18,7 +18,7 @@ record StyledFormatImpl(@NotNull Style style) implements StyledFormat {
     }
 
     @Override
-    public int id() {
-        return 1;
+    public @NotNull NumberFormat.FormatType type() {
+        return FormatType.STYLED;
     }
 }

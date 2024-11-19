@@ -1,59 +1,60 @@
 package net.minestom.server.scoreboard.format;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.StyleBuilderApplicable;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+/**
+ * The {@link NumberFormat} interface represents a number format which can be used to format a number in a scoreboard.
+ * It provides a way to read and write number formats from/to a network buffer.
+ * There are also some default defined number formats which are coming from the game Minecraft itself.
+ *
+ * @version 1.0.0
+ * @since 1.6.0
+ */
 @ApiStatus.Experimental
 public sealed interface NumberFormat extends NetworkBuffer.Writer permits BlankFormat, StyledFormat, FixedFormat {
 
-    /** A blank number format */
     NumberFormat BLANK = new BlankFormat();
 
-    /** A number format with no style */
+    /**
+     * A number format with no style
+     */
     NumberFormat NO_STYLE = new StyledFormatImpl(Style.empty());
 
-    /** A number format with a red color */
+    /**
+     * A number format with a red color
+     */
     NumberFormat SIDEBAR_DEFAULT = new StyledFormatImpl(Style.empty().color(NamedTextColor.RED));
 
-    /** A number format with a yellow color */
+    /**
+     * A number format with a yellow color
+     */
     NumberFormat PLAYER_LIST_DEFAULT = new StyledFormatImpl(Style.empty().color(NamedTextColor.YELLOW));
 
-    int MAX_ID = 2;
-
-    static @NotNull NumberFormat read(@NotNull NetworkBuffer reader) {
-        int id = reader.read(NetworkBuffer.VAR_INT);
-        Check.argCondition(id < 0, "The id cannot be negative");
-        Check.argCondition(id > MAX_ID, "The id can't be higher than " + MAX_ID);
-        return switch (id) {
-            case 0 -> BLANK;
-            case 1 -> styled(Style.empty());
-            case 2 -> {
-                Component component = reader.read(NetworkBuffer.COMPONENT);
-                yield fixed(component);
-            }
-            default -> throw new IllegalStateException("Unexpected value: " + id);
-        };
+    /**
+     * Reads a number format from the network buffer.
+     *
+     * @param reader the network buffer to read from
+     * @return the number format
+     */
+    default @NotNull NumberFormat read(@NotNull NetworkBuffer reader) {
+        return NumberFormatNetworkAdapter.read(reader);
     }
 
+    /**
+     * Writes this number format to the network buffer.
+     *
+     * @param writer the network buffer to write to
+     */
     @Override
     default void write(@NotNull NetworkBuffer writer) {
-        writer.write(NetworkBuffer.VAR_INT, id());
-
-        switch (this) {
-            case StyledFormat styledFormat -> {
-                // writer.write(NetworkBuffer.COMPONENT, styledFormat.style());
-            }
-            case FixedFormat fixedFormat -> writer.write(NetworkBuffer.COMPONENT, fixedFormat.component());
-            default -> {
-            }
-        }
+        NumberFormatNetworkAdapter.write(this, writer);
     }
 
     /**
@@ -87,10 +88,37 @@ public sealed interface NumberFormat extends NetworkBuffer.Writer permits BlankF
     }
 
     /**
-     * Gets the id of this number format.
+     * Gets the type of this number format.
      *
-     * @return the id of this number format
+     * @return the type of this number format
      */
-    int id();
+    @NotNull NumberFormat.FormatType type();
 
+    /**
+     * The enumeration representing the type of number format.
+     *
+     * @version 1.0.0
+     * @see NumberFormat
+     * @since 1.6.0
+     */
+    enum FormatType {
+        BLANK,
+        STYLED,
+        FIXED;
+
+        private static final FormatType[] VALUES = values();
+
+        /**
+         * Gets the format type from its ordinal.
+         *
+         * @param ordinal the ordinal
+         * @return the format type, or null if the ordinal is invalid
+         */
+        static @Nullable NumberFormat.FormatType fromOrdinal(int ordinal) {
+            if (ordinal < 0 || ordinal >= VALUES.length) {
+                return null;
+            }
+            return VALUES[ordinal];
+        }
+    }
 }

@@ -10,7 +10,7 @@ record FixedFormatImpl(@NotNull Component component) implements FixedFormat {
     }
 
     @Override
-    public int id() {
-        return 2;
+    public @NotNull NumberFormat.FormatType type() {
+        return FormatType.FIXED;
     }
 }
