@@ -5,11 +5,14 @@ plugins {
 repositories {
     mavenLocal()
     mavenCentral()
+    maven("https://s01.oss.sonatype.org/content/repositories/releases/")
 }
 
 dependencies {
     // Provides the input JSON to generate from
     implementation(libs.minestomData)
+
+    implementation(libs.bundles.adventure)
 
     // Common
     implementation(libs.jetbrainsAnnotations)

@@ -1,5 +1,6 @@
 package net.minestom.server.item.armor;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.item.Material;
 import net.minestom.server.network.NetworkBuffer;
@@ -17,8 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public sealed interface TrimMaterial extends ProtocolObject permits TrimMaterialImpl {
-    @NotNull NetworkBuffer.Type<DynamicRegistry.Key<TrimMaterial>> NETWORK_TYPE = NetworkBuffer.RegistryKey(Registries::trimMaterial);
-    @NotNull BinaryTagSerializer<DynamicRegistry.Key<TrimMaterial>> NBT_TYPE = BinaryTagSerializer.registryKey(Registries::trimMaterial);
+    @NotNull NetworkBuffer.Type<Key> NETWORK_TYPE = NetworkBuffer.RegistryKey(Registries::trimMaterial);
+    @NotNull BinaryTagSerializer<Key> NBT_TYPE = BinaryTagSerializer.registryKey(Registries::trimMaterial);
 
     static @NotNull TrimMaterial create(
             @NotNull String assetName,

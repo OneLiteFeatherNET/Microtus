@@ -1,5 +1,6 @@
 package net.minestom.server.utils.nbt;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.Style;
@@ -12,7 +13,6 @@ import net.minestom.server.item.ItemStack;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.registry.ProtocolObject;
 import net.minestom.server.registry.Registries;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.UniqueIdUtils;
 import net.minestom.server.utils.Unit;
 import net.minestom.server.utils.validate.Check;
@@ -264,19 +264,19 @@ public interface BinaryTagSerializer<T> {
         }
     };
 
-    static <T extends ProtocolObject> @NotNull BinaryTagSerializer<DynamicRegistry.Key<T>> registryKey(@NotNull Function<Registries, DynamicRegistry<T>> registrySelector) {
+    static <T extends ProtocolObject> @NotNull BinaryTagSerializer<Key> registryKey(@NotNull Function<Registries, DynamicRegistry<T>> registrySelector) {
         return new BinaryTagSerializer<>() {
             @Override
-            public @NotNull BinaryTag write(@NotNull Context context, DynamicRegistry.@NotNull Key<T> value) {
-                return stringBinaryTag(value.name());
+            public @NotNull BinaryTag write(@NotNull Context context, Key value) {
+                return stringBinaryTag(value.asString());
             }
 
             @Override
-            public @NotNull DynamicRegistry.Key<T> read(@NotNull Context context, @NotNull BinaryTag tag) {
+            public @NotNull Key read(@NotNull Context context, @NotNull BinaryTag tag) {
                 if (!(tag instanceof StringBinaryTag s)) throw new IllegalArgumentException("Expected string tag for registry key");
                 final Registries registries = Objects.requireNonNull(context.registries(), "No registries in context");
                 final DynamicRegistry<T> registry = registrySelector.apply(registries);
-                final DynamicRegistry.Key<T> key = DynamicRegistry.Key.of(s.value());
+                final Key key = Key.key(s.value());
                 Check.argCondition(registry.get(key) == null, "Key is not registered: {0} > {1}", registry, s);
                 return key;
             }
@@ -467,7 +467,7 @@ public interface BinaryTagSerializer<T> {
 
                 //noinspection unchecked
                 final BinaryTagSerializer<T> serializer = (BinaryTagSerializer<T>) serializerGetter.apply(value);
-                final DynamicRegistry.Key<BinaryTagSerializer<? extends T>> type = registry.getKey(serializer);
+                final var type = registry.getKey(serializer);
                 Check.notNull(type, "Unregistered serializer for: {0}", value);
                 if (context.forClient() && registry.getPack(type) != DataPack.MINECRAFT_CORE)
                     return null;
@@ -477,7 +477,7 @@ public interface BinaryTagSerializer<T> {
                 if (!(result instanceof CompoundBinaryTag resultCompound))
                     throw new IllegalArgumentException("Expected compound tag for tagged union");
 
-                return CompoundBinaryTag.builder().put(resultCompound).putString(key, type.name()).build();
+                return CompoundBinaryTag.builder().put(resultCompound).putString(key, type.asString()).build();
             }
 
             @Override
@@ -491,7 +491,7 @@ public interface BinaryTagSerializer<T> {
                 final String type = compound.getString(key);
                 Check.argCondition(type.isEmpty(), "Missing {0} field: {1}", key, tag);
                 //noinspection unchecked
-                final BinaryTagSerializer<T> serializer = (BinaryTagSerializer<T>) registry.get(NamespaceID.from(type));
+                final BinaryTagSerializer<T> serializer = (BinaryTagSerializer<T>) registry.get(Key.key(type));
                 Check.notNull(serializer, "Unregistered serializer for: {0}", type);
 
                 return serializer.read(context, tag);

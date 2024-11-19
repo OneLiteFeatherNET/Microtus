@@ -1,5 +1,6 @@
 package net.minestom.server.item.component;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.network.NetworkBuffer;
@@ -36,7 +37,7 @@ public record LodestoneTracker(@Nullable WorldPos target, boolean tracked) {
                     .build()
     );
 
-    public LodestoneTracker(@NotNull String dimension, @NotNull Point blockPosition, boolean tracked) {
+    public LodestoneTracker(@NotNull Key dimension, @NotNull Point blockPosition, boolean tracked) {
         this(new WorldPos(dimension, blockPosition), tracked);
     }
 

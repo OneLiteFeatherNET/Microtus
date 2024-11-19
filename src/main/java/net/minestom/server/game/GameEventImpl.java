@@ -1,7 +1,7 @@
 package net.minestom.server.game;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.registry.Registry;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @since 1.6.0
  * @author themeinerlp
  */
-record GameEventImpl(Registry.GameEventEntry registry, NamespaceID namespace, int id) implements GameEvent {
+record GameEventImpl(Registry.GameEventEntry registry, Key namespace, int id) implements GameEvent {
     private static final AtomicInteger INDEX = new AtomicInteger();
     private static final Registry.Container<GameEvent> CONTAINER = Registry.createStaticContainer(Registry.Resource.GAMEPLAY_TAGS, GameEventImpl::createImpl);
 
