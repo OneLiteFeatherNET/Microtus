@@ -281,7 +281,7 @@ public record Pos(double x, double y, double z, float yaw, float pitch) implemen
 
     @Override
     public @NotNull Point center3D() {
-        return new Pos(x + 0.5, x + 0.5, x + 0.5, yaw, pitch);
+        return new Pos(x + 0.5, y + 0.5, x + 0.5, yaw, pitch);
     }
 
     @FunctionalInterface
