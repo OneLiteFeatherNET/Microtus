@@ -274,6 +274,16 @@ public record Pos(double x, double y, double z, float yaw, float pitch) implemen
         return new Vec(x, y, z);
     }
 
+    @Override
+    public @NotNull Point center2D() {
+        return new Pos(x + 0.5, y, z + 0.5, yaw, pitch);
+    }
+
+    @Override
+    public @NotNull Point center3D() {
+        return new Pos(x + 0.5, y + 0.5, x + 0.5, yaw, pitch);
+    }
+
     @FunctionalInterface
     public interface Operator {
         @NotNull Pos apply(double x, double y, double z, float yaw, float pitch);
