@@ -8,7 +8,7 @@ import java.util.function.DoubleUnaryOperator;
 
 /**
  * Represents an immutable block position.
- *
+ * <p>
  * Usage note: If you accept a block position as an argument to a method,
  * it's usually better to accept a Point rather than a BlockVec to avoid
  * callers continually having to convert.
@@ -179,5 +179,15 @@ public record BlockVec(double x, double y, double z) implements Point {
     @Contract(pure = true)
     public @NotNull Vec asVec() {
         return new Vec(x, y, z);
+    }
+
+    @Override
+    public @NotNull Point center2D() {
+        return new BlockVec(x + 0.5, y, z + 0.5);
+    }
+
+    @Override
+    public @NotNull Point center3D() {
+        return new BlockVec(x + 0.5, y + 0.5, z + 0.5);
     }
 }

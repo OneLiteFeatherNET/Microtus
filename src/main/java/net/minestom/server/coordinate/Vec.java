@@ -461,6 +461,16 @@ public record Vec(double x, double y, double z) implements Point {
         return new Vec(newX, newY, newZ);
     }
 
+    @Override
+    public @NotNull Point center2D() {
+        return new Vec(x + 0.5, y, z + 0.5);
+    }
+
+    @Override
+    public @NotNull Point center3D() {
+        return new Vec(x + 0.5, y + 0.5, z + 0.5);
+    }
+
     /**
      * Calculates a linear interpolation between this vector with another
      * vector.

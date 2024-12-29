@@ -220,6 +220,30 @@ public sealed interface Point permits Vec, Pos, BlockVec {
         return distance(point.x(), point.y(), point.z());
     }
 
+    /**
+     * Returns the center of the block in 2D.
+     *
+     * @return the center of the block
+     */
+    @Contract(pure = true)
+    @NotNull Point center2D();
+
+    /**
+     * Returns the center of the block in 3D.
+     *
+     * @return the center of the block
+     */
+    @Contract(pure = true)
+    @NotNull Point center3D();
+
+    /**
+     * Checks if two points have similar (x/y/z).
+     *
+     * @param x the x coordinate
+     * @param y the y coordinate
+     * @param z the z coordinate
+     * @return true if the two positions are similar
+     */
     default boolean samePoint(double x, double y, double z) {
         return Double.compare(x, x()) == 0 && Double.compare(y, y()) == 0 && Double.compare(z, z()) == 0;
     }
@@ -254,6 +278,14 @@ public sealed interface Point permits Vec, Pos, BlockVec {
         return chunkX() == point.chunkX() && chunkZ() == point.chunkZ();
     }
 
+    /**
+     * Checks if the position is in the same block as the given coordinates.
+     *
+     * @param blockX the block X coordinate
+     * @param blockY the block Y coordinate
+     * @param blockZ the block Z coordinate
+     * @return true if 'this' is in the same block as the given coordinates
+     */
     default boolean sameBlock(int blockX, int blockY, int blockZ) {
         return blockX() == blockX && blockY() == blockY && blockZ() == blockZ;
     }
