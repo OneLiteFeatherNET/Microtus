@@ -211,6 +211,16 @@ implements <a href="Point.html" title="interface in net.minestom.server.coordina
 <div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="Pos.html" title="class in net.minestom.server.coordinate">Pos</a></code></div>
 <div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#asPosition()" class="member-name-link">asPosition</a>()</code></div>
 <div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">&nbsp;</div>
+<div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="Point.html" title="interface in net.minestom.server.coordinate">Point</a></code></div>
+<div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#center2D()" class="member-name-link">center2D</a>()</code></div>
+<div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the center of the block in 2D.</div>
+</div>
+<div class="col-first even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="Point.html" title="interface in net.minestom.server.coordinate">Point</a></code></div>
+<div class="col-second even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#center3D()" class="member-name-link">center3D</a>()</code></div>
+<div class="col-last even-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
+<div class="block">Returns the center of the block in 3D.</div>
+</div>
 <div class="col-first odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code>@NotNull <a href="Vec.html" title="class in net.minestom.server.coordinate">Vec</a></code></div>
 <div class="col-second odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4"><code><a href="#cross(net.minestom.server.coordinate.Vec)" class="member-name-link">cross</a><wbr>(@NotNull <a href="Vec.html" title="class in net.minestom.server.coordinate">Vec</a>&nbsp;o)</code></div>
 <div class="col-last odd-row-color method-summary-table method-summary-table-tab2 method-summary-table-tab4">
@@ -1160,6 +1170,36 @@ implements <a href="Point.html" title="interface in net.minestom.server.coordina
 <dd>a new vector</dd>
 <dt>Throws:</dt>
 <dd><code><a href="https://docs.oracle.com/en/java/javase/21/docs/api/java.base/java/lang/IllegalArgumentException.html" title="class or interface in java.lang" class="external-link">IllegalArgumentException</a></code></dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="center2D()">
+<h3>center2D</h3>
+<div class="member-signature"><span class="annotations">@NotNull
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull <a href="Point.html" title="interface in net.minestom.server.coordinate">Point</a></span>&nbsp;<span class="element-name">center2D</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="Point.html#center2D()">Point</a></code></span></div>
+<div class="block">Returns the center of the block in 2D.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="Point.html#center2D()">center2D</a></code>&nbsp;in interface&nbsp;<code><a href="Point.html" title="interface in net.minestom.server.coordinate">Point</a></code></dd>
+<dt>Returns:</dt>
+<dd>the center of the block</dd>
+</dl>
+</section>
+</li>
+<li>
+<section class="detail" id="center3D()">
+<h3>center3D</h3>
+<div class="member-signature"><span class="annotations">@NotNull
+</span><span class="modifiers">public</span>&nbsp;<span class="return-type">@NotNull <a href="Point.html" title="interface in net.minestom.server.coordinate">Point</a></span>&nbsp;<span class="element-name">center3D</span>()</div>
+<div class="block"><span class="description-from-type-label">Description copied from interface:&nbsp;<code><a href="Point.html#center3D()">Point</a></code></span></div>
+<div class="block">Returns the center of the block in 3D.</div>
+<dl class="notes">
+<dt>Specified by:</dt>
+<dd><code><a href="Point.html#center3D()">center3D</a></code>&nbsp;in interface&nbsp;<code><a href="Point.html" title="interface in net.minestom.server.coordinate">Point</a></code></dd>
+<dt>Returns:</dt>
+<dd>the center of the block</dd>
 </dl>
 </section>
 </li>
