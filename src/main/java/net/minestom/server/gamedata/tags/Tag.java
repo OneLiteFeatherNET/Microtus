@@ -18,7 +18,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -91,23 +90,24 @@ public final class Tag implements ProtocolObject, Keyed {
 
     public enum BasicType {
         BLOCKS("minecraft:block", Registry.Resource.BLOCK_TAGS,
-                name -> Optional.ofNullable(Block.fromNamespaceId(name)).map(Block::id)),
+                blockName -> Optional.ofNullable(Block.fromNamespaceId(blockName)).map(Block::id)),
         ITEMS("minecraft:item", Registry.Resource.ITEM_TAGS,
-                name -> Optional.ofNullable(Material.fromNamespaceId(name)).map(Material::id)),
+                itemName -> Optional.ofNullable(Material.fromNamespaceId(itemName)).map(Material::id)),
         FLUIDS("minecraft:fluid", Registry.Resource.FLUID_TAGS,
-                name -> Optional.ofNullable(Fluid.fromNamespaceId(name)).map(Fluid::id)),
+                fluidName -> Optional.ofNullable(Fluid.fromNamespaceId(fluidName)).map(Fluid::id)),
+        BIOMES("minecraft:worldgen/biome", Registry.Resource.BIOME_TAGS,
+                biomeName -> Optional.of(DynamicRegistry.Key.of(biomeName)).map(DynamicRegistry.Key::namespace).map(MinecraftServer.getBiomeRegistry()::getId)),
         ENTITY_TYPES("minecraft:entity_type", Registry.Resource.ENTITY_TYPE_TAGS,
-                name -> Optional.ofNullable(EntityType.fromNamespaceId(name)).map(EntityType::id)),
+                entityName -> Optional.ofNullable(EntityType.fromNamespaceId(entityName)).map(EntityType::id)),
         GAME_EVENTS("minecraft:game_event", Registry.Resource.GAMEPLAY_TAGS,
-                name -> Optional.ofNullable(EntityType.fromNamespaceId(name)).map(EntityType::id)),
+                eventName -> Optional.ofNullable(GameEvent.fromNamespaceId(eventName)).map(GameEvent::id)),
         SOUND_EVENTS("minecraft:sound_event", null, null), // Seems not to be included in server data
         POTION_EFFECTS("minecraft:sound_event", null, null), // Seems not to be included in server data
-
         //todo this is cursed. it does not update as the registry changes. Fix later.
         ENCHANTMENTS("minecraft:enchantment", Registry.Resource.ENCHANTMENT_TAGS,
-                name -> Optional.of(DynamicRegistry.Key.of(name)).map(DynamicRegistry.Key::namespace).map(MinecraftServer.getEnchantmentRegistry()::getId)),;
+                enchName -> Optional.of(DynamicRegistry.Key.of(enchName)).map(DynamicRegistry.Key::namespace).map(MinecraftServer.getEnchantmentRegistry()::getId)),;
 
-        private final static BasicType[] VALUES = values();
+        private static final BasicType[] VALUES = values();
         private final String identifier;
         private final Registry.Resource resource;
         private final Function<String, Optional<Integer>> function;

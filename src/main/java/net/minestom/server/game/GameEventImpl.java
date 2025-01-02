@@ -17,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 record GameEventImpl(Registry.GameEventEntry registry, NamespaceID namespace, int id) implements GameEvent {
     private static final AtomicInteger INDEX = new AtomicInteger();
-    private static final Registry.Container<GameEvent> CONTAINER = Registry.createStaticContainer(Registry.Resource.GAMEPLAY_TAGS, GameEventImpl::createImpl);
+    private static final Registry.Container<GameEvent> CONTAINER = Registry.createStaticContainer(Registry.Resource.GAME_EVENTS, GameEventImpl::createImpl);
 
     /**
      * Creates a new {@link GameEventImpl} with the given namespace and properties.
@@ -36,7 +36,7 @@ record GameEventImpl(Registry.GameEventEntry registry, NamespaceID namespace, in
      * @param registry the registry
      */
     private GameEventImpl(Registry.GameEventEntry registry) {
-        this(registry, registry.namespace(), INDEX.getAndIncrement());
+        this(registry, registry.namespace(), registry.main().getInt("id"));
     }
 
     /**
