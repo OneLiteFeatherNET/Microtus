@@ -4,6 +4,7 @@ import net.kyori.adventure.key.Key;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class NamespaceIDTest {
 
@@ -39,49 +40,49 @@ class NamespaceIDTest {
 
     @Test
     void atMostOneColon() {
-        assertThrows(AssertionError.class, () -> NamespaceID.from("minecraft:block:wool"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("minecraft:block:wool"));
     }
 
     @Test
     void noSlashInDomain() {
-        assertThrows(AssertionError.class, () -> NamespaceID.from("minecraft/java_edition:any"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("minecraft/java_edition:any"));
     }
 
     @Test
     void noDotInDomain() {
-        assertThrows(AssertionError.class, () -> NamespaceID.from("minecraft.java:game"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("minecraft.java:game"));
     }
 
     @Test
     void noUppercase() {
-        assertThrows(AssertionError.class, () -> NamespaceID.from("Minecraft:any"));
-        assertThrows(AssertionError.class, () -> NamespaceID.from("minecraft:Any"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("Minecraft:any"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("minecraft:Any"));
     }
 
     @Test
     void noSpace() {
-        assertThrows(AssertionError.class, () -> NamespaceID.from("minecraft:a n y"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("minecraft:a n y"));
     }
 
     @Test
     void onlyLatinLowercase() {
-        assertThrows(AssertionError.class, () -> NamespaceID.from("Minecraft:voilà"));
-        assertThrows(AssertionError.class, () -> NamespaceID.from("minecraft:où_ça"));
-        assertThrows(AssertionError.class, () -> NamespaceID.from("minecraft:schrödingers_var"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("Minecraft:voilà"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("minecraft:où_ça"));
+        assertThrows(IllegalArgumentException.class, () -> NamespaceID.from("minecraft:schrödingers_var"));
     }
 
     @Test
     void numbersAllowed() {
-        NamespaceID.from("0xc1:468786471");
+        assertDoesNotThrow(() -> NamespaceID.from("0xc1:468786471"));
     }
 
     @Test
     void dotAllowedInPath() {
-        NamespaceID.from("minecraft:ambient.cave");
+        assertDoesNotThrow(() -> NamespaceID.from("minecraft:ambient.cave"));
     }
 
     @Test
     void slashAllowedInPath() {
-        NamespaceID.from("minecraft:textures/blocks/dirt.png");
+        assertDoesNotThrow(() -> NamespaceID.from("minecraft:textures/blocks/dirt.png"));
     }
 }
