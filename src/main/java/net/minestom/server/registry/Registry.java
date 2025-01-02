@@ -245,6 +245,8 @@ public final class Registry {
         ENTITY_TYPE_TAGS("tags/entity_type.json"),
         FLUID_TAGS("tags/fluid.json"),
         GAMEPLAY_TAGS("tags/game_event.json"),
+        GAME_EVENTS("game_events.json"),
+        BIOME_TAGS("tags/biome.json"),
         ITEM_TAGS("tags/item.json"),
         ENCHANTMENT_TAGS("tags/enchantment.json"),
         DIMENSION_TYPES("dimension_types.json"),
@@ -562,7 +564,7 @@ public final class Registry {
         }
     }
 
-    public static final record GameEventEntry(NamespaceID namespace, Properties main, Properties custom) implements Entry {
+    public record GameEventEntry(NamespaceID namespace, Properties main, Properties custom) implements Entry {
         public GameEventEntry(String namespace, Properties main, Properties custom) {
             this(NamespaceID.from(namespace), main, custom);
         }

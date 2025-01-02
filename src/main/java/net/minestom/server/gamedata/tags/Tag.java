@@ -12,6 +12,7 @@ import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.registry.ProtocolObject;
 import net.minestom.server.registry.Registry;
 import net.minestom.server.utils.NamespaceID;
+import net.minestom.server.world.biome.Biome;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -96,10 +97,12 @@ public final class Tag implements ProtocolObject, Keyed {
                 name -> Optional.ofNullable(Material.fromNamespaceId(name)).map(Material::id)),
         FLUIDS("minecraft:fluid", Registry.Resource.FLUID_TAGS,
                 name -> Optional.ofNullable(Fluid.fromNamespaceId(name)).map(Fluid::id)),
+        BIOMES("minecraft:worldgen/biome", Registry.Resource.BIOME_TAGS,
+                name -> Optional.of(DynamicRegistry.Key.of(name)).map(DynamicRegistry.Key::namespace).map(MinecraftServer.getBiomeRegistry()::getId)),
         ENTITY_TYPES("minecraft:entity_type", Registry.Resource.ENTITY_TYPE_TAGS,
                 name -> Optional.ofNullable(EntityType.fromNamespaceId(name)).map(EntityType::id)),
         GAME_EVENTS("minecraft:game_event", Registry.Resource.GAMEPLAY_TAGS,
-                name -> Optional.ofNullable(EntityType.fromNamespaceId(name)).map(EntityType::id)),
+                name -> Optional.ofNullable(GameEvent.fromNamespaceId(name)).map(GameEvent::id)),
         SOUND_EVENTS("minecraft:sound_event", null, null), // Seems not to be included in server data
         POTION_EFFECTS("minecraft:sound_event", null, null), // Seems not to be included in server data
 
