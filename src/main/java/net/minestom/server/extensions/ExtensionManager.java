@@ -449,6 +449,7 @@ public class ExtensionManager {
     private List<DiscoveredExtension> generateLoadOrder(@NotNull List<DiscoveredExtension> discoveredExtensions) {
         // Extension --> Extensions it depends on.
         Map<DiscoveredExtension, List<DiscoveredExtension>> dependencyMap = new HashMap<>();
+        Map<DiscoveredExtension, List<DiscoveredExtension>> softDependencyMap = new HashMap<>();
 
         // Put dependencies in dependency map
         {

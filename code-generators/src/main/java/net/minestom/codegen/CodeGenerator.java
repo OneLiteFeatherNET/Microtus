@@ -3,7 +3,12 @@ package net.minestom.codegen;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
+import net.kyori.adventure.key.Key;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,8 +80,7 @@ public class CodeGenerator implements CodeExporter {
         }
 
         ClassName typeClass = ClassName.bestGuess(packageName + "." + typeName); // Use bestGuess to handle nested class
-        ClassName registryKeyClass = ClassName.get("net.minestom.server.registry", "DynamicRegistry", "Key");
-        ParameterizedTypeName typedRegistryKeyClass = ParameterizedTypeName.get(registryKeyClass, typeClass);
+        ClassName registryKeyClass = ClassName.get(Key.class);
 
         JsonObject json;
         json = GSON.fromJson(new InputStreamReader(resourceFile), JsonObject.class);
@@ -97,11 +101,11 @@ public class CodeGenerator implements CodeExporter {
                 constantName = "_" + constantName;
             }
             blockConstantsClass.addField(
-                    FieldSpec.builder(typedRegistryKeyClass, constantName)
+                    FieldSpec.builder(registryKeyClass, constantName)
                             .addModifiers(Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
                             .initializer(
-                                    // TypeClass.STONE = NamespaceID.from("minecraft:stone")
-                                    "$T.of($S)",
+                                    // TypeClass.STONE = Key.key("minecraft:stone")
+                                    "$T.key($S)",
                                     registryKeyClass,
                                     namespace
                             )

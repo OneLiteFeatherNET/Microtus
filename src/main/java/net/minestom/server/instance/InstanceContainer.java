@@ -1,6 +1,7 @@
 package net.minestom.server.instance;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMaps;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.BlockVec;
@@ -25,7 +26,6 @@ import net.minestom.server.network.packet.server.play.BlockEntityDataPacket;
 import net.minestom.server.network.packet.server.play.EffectPacket;
 import net.minestom.server.network.packet.server.play.UnloadChunkPacket;
 import net.minestom.server.registry.DynamicRegistry;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.PacketUtils;
 import net.minestom.server.utils.async.AsyncUtils;
 import net.minestom.server.utils.block.BlockUtils;
@@ -40,7 +40,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.vectrix.flare.fastutil.Long2ObjectSyncMap;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -89,28 +97,32 @@ public class InstanceContainer extends Instance {
     protected InstanceContainer srcInstance; // only present if this instance has been created using a copy
     private long lastBlockChangeTime; // Time at which the last block change happened (#setBlock)
 
-    public InstanceContainer(@NotNull UUID uniqueId, @NotNull DynamicRegistry.Key<DimensionType> dimensionType) {
-        this(uniqueId, dimensionType, null, dimensionType.namespace());
+    /**
+     * Creates a new instance container.
+     * @param uniqueId the unique id of the instance
+     * @param dimensionType the dimension type of the instance
+     * @deprecated use {@link #InstanceContainer(DynamicRegistry, UUID, Key, Key, IChunkLoader)} instead. This constructor will be removed in future versions. It uses the dimension type as the dimension name that can cause with some errors.
+     * @see #InstanceContainer(DynamicRegistry, UUID, Key, Key, IChunkLoader)
+     */
+    @Deprecated
+    public InstanceContainer(@NotNull UUID uniqueId, @NotNull Key dimensionType) {
+        this(uniqueId, dimensionType, null, dimensionType);
     }
 
-    public InstanceContainer(@NotNull UUID uniqueId, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, @NotNull NamespaceID dimensionName) {
+    public InstanceContainer(@NotNull UUID uniqueId, @NotNull Key dimensionType, @NotNull Key dimensionName) {
         this(uniqueId, dimensionType, null, dimensionName);
     }
 
-    public InstanceContainer(@NotNull UUID uniqueId, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, @Nullable IChunkLoader loader) {
-        this(uniqueId, dimensionType, loader, dimensionType.namespace());
-    }
-
-    public InstanceContainer(@NotNull UUID uniqueId, @NotNull DynamicRegistry.Key<DimensionType> dimensionType, @Nullable IChunkLoader loader, @NotNull NamespaceID dimensionName) {
-        this(MinecraftServer.getDimensionTypeRegistry(), uniqueId, dimensionType, loader, dimensionName);
+    public InstanceContainer(@NotNull UUID uniqueId, @NotNull Key dimensionType, @Nullable IChunkLoader loader, @NotNull Key dimensionName) {
+        this(MinecraftServer.getDimensionTypeRegistry(), uniqueId, dimensionType, dimensionName, loader);
     }
 
     public InstanceContainer(
             @NotNull DynamicRegistry<DimensionType> dimensionTypeRegistry,
             @NotNull UUID uniqueId,
-            @NotNull DynamicRegistry.Key<DimensionType> dimensionType,
-            @Nullable IChunkLoader loader,
-            @NotNull NamespaceID dimensionName
+            @NotNull Key dimensionType,
+            @NotNull Key dimensionName,
+            @Nullable IChunkLoader loader
     ) {
         super(dimensionTypeRegistry, uniqueId, dimensionType, dimensionName);
         setChunkSupplier(DynamicChunk::new);
@@ -525,7 +537,7 @@ public class InstanceContainer extends Instance {
      * @see #getSrcInstance() to retrieve the "creation source" of the copied instance
      */
     public synchronized InstanceContainer copy() {
-        InstanceContainer copiedInstance = new InstanceContainer(UUID.randomUUID(), getDimensionType());
+        InstanceContainer copiedInstance = new InstanceContainer(UUID.randomUUID(), getDimensionType(), getDimensionName());
         copiedInstance.srcInstance = this;
         copiedInstance.tagHandler = this.tagHandler.copy();
         copiedInstance.lastBlockChangeTime = this.lastBlockChangeTime;

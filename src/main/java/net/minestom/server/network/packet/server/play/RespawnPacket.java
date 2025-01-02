@@ -1,5 +1,6 @@
 package net.minestom.server.network.packet.server.play;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.ServerPacket;
@@ -20,6 +21,18 @@ public record RespawnPacket(
     public static final int COPY_ATTRIBUTES = 0x1;
     public static final int COPY_METADATA = 0x2;
     public static final int COPY_ALL = COPY_ATTRIBUTES | COPY_METADATA;
+
+    public RespawnPacket(
+            int dimensionType, @NotNull Key dimensionName,
+            long hashedSeed, @NotNull GameMode gameMode, @NotNull GameMode previousGameMode,
+            boolean isDebug, boolean isFlat, @Nullable WorldPos deathLocation,
+            int portalCooldown, int copyData
+    ) {
+        this(dimensionType, dimensionName.asString(),
+                hashedSeed, gameMode, previousGameMode,
+                isDebug, isFlat, deathLocation,
+                portalCooldown, copyData);
+    }
 
     public RespawnPacket(@NotNull NetworkBuffer reader) {
         this(reader.read(VAR_INT), reader.read(STRING),

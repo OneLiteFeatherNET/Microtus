@@ -1,10 +1,10 @@
 package net.minestom.server.item.component;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.item.enchant.Enchantment;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static net.kyori.adventure.nbt.StringBinaryTag.stringBinaryTag;
 
-public record EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Integer> enchantments,
+public record EnchantmentList(@NotNull Map<Key, Integer> enchantments,
                               boolean showInTooltip) {
     public static final EnchantmentList EMPTY = new EnchantmentList(Map.of(), true);
 
@@ -22,7 +22,7 @@ public record EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Int
         @Override
         public void write(@NotNull NetworkBuffer buffer, @NotNull EnchantmentList value) {
             buffer.write(NetworkBuffer.VAR_INT, value.enchantments.size());
-            for (Map.Entry<DynamicRegistry.Key<Enchantment>, Integer> entry : value.enchantments.entrySet()) {
+            for (Map.Entry<Key, Integer> entry : value.enchantments.entrySet()) {
                 buffer.write(Enchantment.NETWORK_TYPE, entry.getKey());
                 buffer.write(NetworkBuffer.VAR_INT, entry.getValue());
             }
@@ -33,9 +33,9 @@ public record EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Int
         public @NotNull EnchantmentList read(@NotNull NetworkBuffer buffer) {
             int size = buffer.read(NetworkBuffer.VAR_INT);
             Check.argCondition(size < 0 || size > Short.MAX_VALUE, "Invalid enchantment list size: {0}", size);
-            Map<DynamicRegistry.Key<Enchantment>, Integer> enchantments = HashMap.newHashMap(size);
+            Map<Key, Integer> enchantments = HashMap.newHashMap(size);
             for (int i = 0; i < size; i++) {
-                DynamicRegistry.Key<Enchantment> enchantment = buffer.read(Enchantment.NETWORK_TYPE);
+                Key enchantment = buffer.read(Enchantment.NETWORK_TYPE);
                 enchantments.put(enchantment, buffer.read(NetworkBuffer.VAR_INT));
             }
             boolean showInTooltip = buffer.read(NetworkBuffer.BOOLEAN);
@@ -46,8 +46,8 @@ public record EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Int
         @Override
         public @NotNull BinaryTag write(@NotNull Context context, @NotNull EnchantmentList value) {
             CompoundBinaryTag.Builder levels = CompoundBinaryTag.builder();
-            for (Map.Entry<DynamicRegistry.Key<Enchantment>, Integer> entry : value.enchantments.entrySet()) {
-                levels.put(entry.getKey().name(), BinaryTagSerializer.INT.write(context, entry.getValue()));
+            for (Map.Entry<Key, Integer> entry : value.enchantments.entrySet()) {
+                levels.put(entry.getKey().asString(), BinaryTagSerializer.INT.write(context, entry.getValue()));
             }
 
             return CompoundBinaryTag.builder()
@@ -63,9 +63,9 @@ public record EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Int
 
             // We have two variants of the enchantment list, one with {levels: {...}, show_in_tooltip: boolean} and one with {...}.
             CompoundBinaryTag levels = tag.keySet().contains("levels") ? tag.getCompound("levels") : tag;
-            Map<DynamicRegistry.Key<Enchantment>, Integer> enchantments = HashMap.newHashMap(levels.size());
+            Map<Key, Integer> enchantments = HashMap.newHashMap(levels.size());
             for (Map.Entry<String, ? extends BinaryTag> entry : levels) {
-                DynamicRegistry.Key<Enchantment> enchantment = Enchantment.NBT_TYPE.read(context, stringBinaryTag(entry.getKey()));
+                Key enchantment = Enchantment.NBT_TYPE.read(context, stringBinaryTag(entry.getKey()));
                 int level = BinaryTagSerializer.INT.read(entry.getValue());
                 if (level > 0) enchantments.put(enchantment, level);
             }
@@ -81,30 +81,30 @@ public record EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Int
         enchantments = Map.copyOf(enchantments);
     }
 
-    public EnchantmentList(@NotNull Map<DynamicRegistry.Key<Enchantment>, Integer> enchantments) {
+    public EnchantmentList(@NotNull Map<Key, Integer> enchantments) {
         this(enchantments, true);
     }
 
-    public EnchantmentList(@NotNull DynamicRegistry.Key<Enchantment> enchantment, int level) {
+    public EnchantmentList(@NotNull Key enchantment, int level) {
         this(Map.of(enchantment, level), true);
     }
 
-    public boolean has(@NotNull DynamicRegistry.Key<Enchantment> enchantment) {
+    public boolean has(@NotNull Key enchantment) {
         return enchantments.containsKey(enchantment);
     }
 
-    public int level(@NotNull DynamicRegistry.Key<Enchantment> enchantment) {
+    public int level(@NotNull Key enchantment) {
         return enchantments.getOrDefault(enchantment, 0);
     }
 
-    public @NotNull EnchantmentList with(@NotNull DynamicRegistry.Key<Enchantment> enchantment, int level) {
-        Map<DynamicRegistry.Key<Enchantment>, Integer> newEnchantments = new HashMap<>(enchantments);
+    public @NotNull EnchantmentList with(@NotNull Key enchantment, int level) {
+        Map<Key, Integer> newEnchantments = new HashMap<>(enchantments);
         newEnchantments.put(enchantment, level);
         return new EnchantmentList(newEnchantments, showInTooltip);
     }
 
-    public @NotNull EnchantmentList remove(@NotNull DynamicRegistry.Key<Enchantment> enchantment) {
-        Map<DynamicRegistry.Key<Enchantment>, Integer> newEnchantments = new HashMap<>(enchantments);
+    public @NotNull EnchantmentList remove(@NotNull Key enchantment) {
+        Map<Key, Integer> newEnchantments = new HashMap<>(enchantments);
         newEnchantments.remove(enchantment);
         return new EnchantmentList(newEnchantments, showInTooltip);
     }

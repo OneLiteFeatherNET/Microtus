@@ -1,13 +1,13 @@
 package net.minestom.server.fluid;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.registry.Registry;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public record FluidImpl(Registry.FluidEntry registry, NamespaceID namespace, int id) implements Fluid {
+public record FluidImpl(Registry.FluidEntry registry, Key namespace, int id) implements Fluid {
 
     private static final AtomicInteger INDEX = new AtomicInteger();
     private static final Registry.Container<Fluid> CONTAINER = Registry.createStaticContainer(Registry.Resource.FLUIDS, FluidImpl::createImpl);

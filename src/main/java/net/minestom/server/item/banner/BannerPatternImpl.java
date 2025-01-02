@@ -1,7 +1,7 @@
 package net.minestom.server.item.banner;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.registry.Registry;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 // Microtus -  Banner and Shield Meta
-public record BannerPatternImpl(NamespaceID namespace, int id, String identifier) implements BannerPattern {
+public record BannerPatternImpl(Key namespace, int id, String identifier) implements BannerPattern {
 
     private static Map<String, BannerPatternImpl> IDENTIFIERS = new HashMap<>();
     private static final Registry.Container<BannerPattern> CONTAINER = Registry.createStaticContainer(Registry.Resource.BANNER_PATTERNS, BannerPatternImpl::createImpl);
@@ -17,7 +17,7 @@ public record BannerPatternImpl(NamespaceID namespace, int id, String identifier
     private static BannerPattern createImpl(String namespace, Registry.Properties properties) {
         int id = properties.getInt("id");
         String identifier = properties.getString("identifier");
-        BannerPatternImpl bannerPattern = new BannerPatternImpl(NamespaceID.from(namespace), id, identifier);
+        BannerPatternImpl bannerPattern = new BannerPatternImpl(Key.key(namespace), id, identifier);
         IDENTIFIERS.put(identifier, bannerPattern);
         return bannerPattern;
     }

@@ -1,5 +1,6 @@
 package net.minestom.server.item.component;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.nbt.BinaryTag;
 import net.kyori.adventure.nbt.CompoundBinaryTag;
 import net.minestom.server.MinecraftServer;
@@ -10,7 +11,7 @@ import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import net.minestom.server.utils.validate.Check;
 import org.jetbrains.annotations.NotNull;
 
-public record JukeboxPlayable(@NotNull DynamicRegistry.Key<JukeboxSong> song, boolean showInTooltip) {
+public record JukeboxPlayable(@NotNull Key song, boolean showInTooltip) {
     public static final NetworkBuffer.Type<JukeboxPlayable> NETWORK_TYPE = new NetworkBuffer.Type<>() {
         // For some reason I(matt) cannot discern, the wire format for this type can write the song
         // as either a registry ID or a namespace ID. Minestom always writes as a registry id.
@@ -24,11 +25,11 @@ public record JukeboxPlayable(@NotNull DynamicRegistry.Key<JukeboxSong> song, bo
 
         @Override
         public JukeboxPlayable read(@NotNull NetworkBuffer buffer) {
-            DynamicRegistry.Key<JukeboxSong> song;
+            Key song;
             if (buffer.read(NetworkBuffer.BOOLEAN)) {
                 song = buffer.read(JukeboxSong.NETWORK_TYPE);
             } else {
-                song = DynamicRegistry.Key.of(buffer.read(NetworkBuffer.STRING));
+                song = Key.key(buffer.read(NetworkBuffer.STRING));
                 final DynamicRegistry<JukeboxSong> registry = MinecraftServer.getJukeboxSongRegistry();
                 Check.stateCondition(registry.get(song) != null, "unknown song: {0}", song);
             }
@@ -54,11 +55,11 @@ public record JukeboxPlayable(@NotNull DynamicRegistry.Key<JukeboxSong> song, bo
         }
     };
 
-    public JukeboxPlayable(@NotNull DynamicRegistry.Key<JukeboxSong> song) {
+    public JukeboxPlayable(@NotNull Key song) {
         this(song, true);
     }
 
-    public @NotNull JukeboxPlayable withSong(@NotNull DynamicRegistry.Key<JukeboxSong> song) {
+    public @NotNull JukeboxPlayable withSong(@NotNull Key song) {
         return new JukeboxPlayable(song, showInTooltip);
     }
 

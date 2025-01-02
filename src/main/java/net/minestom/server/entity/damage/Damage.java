@@ -1,5 +1,6 @@
 package net.minestom.server.entity.damage;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Point;
@@ -23,7 +24,7 @@ import org.jetbrains.annotations.Nullable;
 public class Damage implements Taggable {
     private static final DynamicRegistry<DamageType> DAMAGE_TYPE_REGISTRY = MinecraftServer.getDamageTypeRegistry();
 
-    private final DynamicRegistry.Key<DamageType> typeKey;
+    private final Key typeKey;
     private final DamageType type;
     private final Entity source;
     private final Entity attacker;
@@ -41,7 +42,7 @@ public class Damage implements Taggable {
      * @param amount amount of damage
      * @param sourcePosition The position of the source of damage
      */
-    public Damage(@NotNull DynamicRegistry.Key<DamageType> type, @Nullable Entity source, @Nullable Entity attacker, @Nullable Point sourcePosition, float amount) {
+    public Damage(@NotNull Key type, @Nullable Entity source, @Nullable Entity attacker, @Nullable Point sourcePosition, float amount) {
         this.typeKey = type;
         this.type = DAMAGE_TYPE_REGISTRY.get(type);
         Check.argCondition(this.type == null, "Damage type is not registered: {0}", type);
@@ -58,7 +59,7 @@ public class Damage implements Taggable {
      *
      * @return the damage type
      */
-    public @NotNull DynamicRegistry.Key<DamageType> getType() {
+    public @NotNull Key getType() {
         return typeKey;
     }
 
@@ -144,7 +145,7 @@ public class Damage implements Taggable {
         return new EntityDamage(entity, amount);
     }
 
-    public static @NotNull PositionalDamage fromPosition(@NotNull DynamicRegistry.Key<DamageType> type, @NotNull Point sourcePosition, float amount) {
+    public static @NotNull PositionalDamage fromPosition(@NotNull Key type, @NotNull Point sourcePosition, float amount) {
         return new PositionalDamage(type, sourcePosition, amount);
     }
 

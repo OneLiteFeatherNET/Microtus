@@ -3,7 +3,6 @@ package net.minestom.server.entity.villager;
 import net.kyori.adventure.key.Key;
 import net.minestom.server.registry.Registry;
 import net.minestom.server.registry.StaticProtocolObject;
-import net.minestom.server.utils.NamespaceID;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -20,7 +19,7 @@ public sealed interface VillagerType extends StaticProtocolObject, VillagerTypes
         return VillagerTypeImpl.getSafe(namespaceID);
     }
 
-    static @Nullable VillagerType fromNamespaceId(@NotNull NamespaceID namespaceID) {
+    static @Nullable VillagerType fromNamespaceId(@NotNull Key namespaceID) {
         return fromNamespaceId(namespaceID.asString());
     }
 
@@ -37,7 +36,7 @@ public sealed interface VillagerType extends StaticProtocolObject, VillagerTypes
     Registry.VillagerType registry();
 
     @Override
-    default @NotNull NamespaceID namespace() {
+    default @NotNull Key namespace() {
         return registry().namespace();
     }
 }

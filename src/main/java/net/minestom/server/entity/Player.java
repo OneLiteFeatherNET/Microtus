@@ -294,7 +294,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable, 
         this.pendingInstance = null;
 
         this.removed = false;
-        this.dimensionTypeId = DIMENSION_TYPE_REGISTRY.getId(spawnInstance.getDimensionType().namespace());
+        this.dimensionTypeId = DIMENSION_TYPE_REGISTRY.getId(spawnInstance.getDimensionType());
 
         final JoinGamePacket joinGamePacket = new JoinGamePacket(
                 getEntityId(), this.hardcore, List.of(), 0,
@@ -1039,7 +1039,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable, 
     }
 
     @Override
-    public boolean isImmune(@NotNull DynamicRegistry.Key<DamageType> type) {
+    public boolean isImmune(@NotNull Key type) {
         if (!getGameMode().canTakeDamage()) {
             return !DamageType.OUT_OF_WORLD.equals(type);
         }
@@ -1255,7 +1255,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable, 
         setDeathLocation(getInstance().getDimensionName(), position);
     }
 
-    public void setDeathLocation(@NotNull String dimension, @NotNull Pos position) {
+    public void setDeathLocation(@NotNull Key dimension, @NotNull Pos position) {
         this.deathLocation = new WorldPos(dimension, position);
     }
 
@@ -1673,7 +1673,7 @@ public class Player extends LivingEntity implements CommandSender, Localizable, 
      *
      * @param dimensionType the new player dimension
      */
-    protected void sendDimension(@NotNull DynamicRegistry.Key<DimensionType> dimensionType, @NotNull String dimensionName) {
+    protected void sendDimension(@NotNull Key dimensionType, @NotNull Key dimensionName) {
         Check.argCondition(instance.getDimensionName().equals(dimensionName),
                 "The dimension needs to be different than the current one!");
         this.dimensionTypeId = DIMENSION_TYPE_REGISTRY.getId(dimensionType);

@@ -1,5 +1,6 @@
 package net.minestom.server.network.packet.server.play;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.GameMode;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.ServerPacket;
@@ -16,7 +17,7 @@ public record JoinGamePacket(
         int entityId, boolean isHardcore, List<String> worlds, int maxPlayers,
         int viewDistance, int simulationDistance, boolean reducedDebugInfo, boolean enableRespawnScreen,
         boolean doLimitedCrafting, int dimensionType,
-        String world, long hashedSeed, GameMode gameMode, GameMode previousGameMode,
+        Key dimensionName, long hashedSeed, GameMode gameMode, GameMode previousGameMode,
         boolean isDebug, boolean isFlat, @Nullable WorldPos deathLocation, int portalCooldown,
         boolean enforcesSecureChat
 ) implements ServerPacket.Play {
@@ -38,7 +39,7 @@ public record JoinGamePacket(
                 reader.read(BOOLEAN),
                 reader.read(BOOLEAN),
                 reader.read(VAR_INT),
-                reader.read(STRING),
+                Key.key(reader.read(STRING)),
                 reader.read(LONG),
                 GameMode.fromId(reader.read(BYTE)),
                 getNullableGameMode(reader.read(BYTE)),
@@ -62,7 +63,7 @@ public record JoinGamePacket(
         writer.write(BOOLEAN, enableRespawnScreen);
         writer.write(BOOLEAN, doLimitedCrafting);
         writer.write(VAR_INT, dimensionType);
-        writer.write(STRING, world);
+        writer.write(STRING, dimensionName.asString());
         writer.write(LONG, hashedSeed);
         writer.write(BYTE, gameMode.id());
         if (previousGameMode != null) {

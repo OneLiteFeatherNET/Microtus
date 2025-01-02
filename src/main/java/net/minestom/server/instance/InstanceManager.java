@@ -1,5 +1,6 @@
 package net.minestom.server.instance;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
@@ -51,13 +52,13 @@ public final class InstanceManager {
      * @param loader        the chunk loader
      * @return the created {@link InstanceContainer}
      */
-    public @NotNull InstanceContainer createInstanceContainer(@NotNull DynamicRegistry.Key<DimensionType> dimensionType, @Nullable IChunkLoader loader) {
-        final InstanceContainer instanceContainer = new InstanceContainer(registries.dimensionType(), UUID.randomUUID(), dimensionType, loader, dimensionType.namespace());
+    public @NotNull InstanceContainer createInstanceContainer(@NotNull Key dimensionType, @Nullable IChunkLoader loader) {
+        final InstanceContainer instanceContainer = new InstanceContainer(registries.dimensionType(), UUID.randomUUID(), dimensionType, dimensionType, loader);
         registerInstance(instanceContainer);
         return instanceContainer;
     }
 
-    public @NotNull InstanceContainer createInstanceContainer(@NotNull DynamicRegistry.Key<DimensionType> dimensionType) {
+    public @NotNull InstanceContainer createInstanceContainer(@NotNull Key dimensionType) {
         return createInstanceContainer(dimensionType, null);
     }
 

@@ -1,6 +1,7 @@
 package net.minestom.server.snapshot;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.MinecraftServer;
 import net.minestom.server.coordinate.Pos;
 import net.minestom.server.coordinate.Vec;
@@ -46,7 +47,7 @@ public final class SnapshotImpl {
     }
 
     public record Instance(AtomicReference<ServerSnapshot> serverRef,
-                           DynamicRegistry.Key<DimensionType> dimensionType, long worldAge, long time,
+                           Key dimensionType, long worldAge, long time,
                            Map<Long, AtomicReference<ChunkSnapshot>> chunksMap,
                            int[] entitiesIds,
                            TagReadable tagReadable) implements InstanceSnapshot {
@@ -101,11 +102,11 @@ public final class SnapshotImpl {
         }
 
         @Override
-        public @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z) {
+        public @NotNull Key getBiome(int x, int y, int z) {
             final Section section = sections[getChunkCoordinate(y) - minSection];
             final int id = section.biomePalette()
                     .get(toSectionRelativeCoordinate(x) / 4, toSectionRelativeCoordinate(y) / 4, toSectionRelativeCoordinate(z) / 4);
-            DynamicRegistry.Key<Biome> key = MinecraftServer.getBiomeRegistry().getKey(id);
+            var key = MinecraftServer.getBiomeRegistry().getKey(id);
             Check.notNull(key, "Biome with id {0} is not registered", id);
             return key;
         }

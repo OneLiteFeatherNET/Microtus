@@ -1,28 +1,29 @@
 package net.minestom.server.network.packet;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.network.NetworkBuffer;
 import net.minestom.server.network.packet.server.ServerPacketIdentifier;
 import net.minestom.server.network.packet.server.configuration.UpdateEnabledFeaturesPacket;
-import net.minestom.server.utils.NamespaceID;
 import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UpdateEnabledFeaturesPacketTest {
 
     @Test
     void constructorWithBufferReadsCorrectly() {
         NetworkBuffer buffer = new NetworkBuffer();
-        UpdateEnabledFeaturesPacket updateEnabledFeaturesPacket = new UpdateEnabledFeaturesPacket(Set.of(NamespaceID.from("namespace:feature1"), NamespaceID.from("namespace:feature2")));
+        UpdateEnabledFeaturesPacket updateEnabledFeaturesPacket = new UpdateEnabledFeaturesPacket(Set.of(Key.key("namespace:feature1"), Key.key("namespace:feature2")));
         updateEnabledFeaturesPacket.write(buffer);
         UpdateEnabledFeaturesPacket packet = new UpdateEnabledFeaturesPacket(buffer);
 
         assertEquals(2, packet.features().size());
-        assertTrue(packet.features().contains(NamespaceID.from("namespace:feature1")));
-        assertTrue(packet.features().contains(NamespaceID.from("namespace:feature2")));
+        assertTrue(packet.features().contains(Key.key("namespace:feature1")));
+        assertTrue(packet.features().contains(Key.key("namespace:feature2")));
     }
 
 
@@ -45,9 +46,9 @@ class UpdateEnabledFeaturesPacketTest {
 
     @Test
     void constructorWithBufferHandlesMaxFeatures() {
-        Set<NamespaceID> maxFeatures = new HashSet<>();
+        Set<Key> maxFeatures = new HashSet<>();
         for (int i = 0; i < UpdateEnabledFeaturesPacket.MAX_FEATURES; i++) {
-            maxFeatures.add(NamespaceID.from("namespace:feature" + i));
+            maxFeatures.add(Key.key("namespace:feature" + i));
         }
         NetworkBuffer buffer = new NetworkBuffer();
         UpdateEnabledFeaturesPacket updateEnabledFeaturesPacket = new UpdateEnabledFeaturesPacket(maxFeatures);

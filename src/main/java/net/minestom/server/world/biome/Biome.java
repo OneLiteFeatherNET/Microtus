@@ -1,5 +1,6 @@
 package net.minestom.server.world.biome;
 
+import net.kyori.adventure.key.Key;
 import net.minestom.server.coordinate.Point;
 import net.minestom.server.registry.DynamicRegistry;
 import net.minestom.server.registry.ProtocolObject;
@@ -52,17 +53,17 @@ public sealed interface Biome extends Biomes, ProtocolObject permits BiomeImpl {
     }
 
     interface Setter {
-        void setBiome(int x, int y, int z, @NotNull DynamicRegistry.Key<Biome> biome);
+        void setBiome(int x, int y, int z, @NotNull Key biome);
 
-        default void setBiome(@NotNull Point blockPosition, @NotNull DynamicRegistry.Key<Biome> biome) {
+        default void setBiome(@NotNull Point blockPosition, @NotNull Key biome) {
             setBiome(blockPosition.blockX(), blockPosition.blockY(), blockPosition.blockZ(), biome);
         }
     }
 
     interface Getter {
-        @NotNull DynamicRegistry.Key<Biome> getBiome(int x, int y, int z);
+        @NotNull Key getBiome(int x, int y, int z);
 
-        default @NotNull DynamicRegistry.Key<Biome> getBiome(@NotNull Point point) {
+        default @NotNull Key getBiome(@NotNull Point point) {
             return getBiome(point.blockX(), point.blockY(), point.blockZ());
         }
     }

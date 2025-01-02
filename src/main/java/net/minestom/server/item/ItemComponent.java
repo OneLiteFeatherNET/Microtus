@@ -1,14 +1,40 @@
 package net.minestom.server.item;
 
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.RGBLike;
 import net.minestom.server.color.Color;
 import net.minestom.server.color.DyeColor;
 import net.minestom.server.component.DataComponent;
 import net.minestom.server.component.DataComponentMap;
-import net.minestom.server.item.component.*;
+import net.minestom.server.item.component.ArmorTrim;
+import net.minestom.server.item.component.AttributeList;
+import net.minestom.server.item.component.BannerPatterns;
+import net.minestom.server.item.component.Bee;
+import net.minestom.server.item.component.BlockPredicates;
+import net.minestom.server.item.component.CustomData;
+import net.minestom.server.item.component.DebugStickState;
+import net.minestom.server.item.component.DyedItemColor;
+import net.minestom.server.item.component.EnchantmentList;
+import net.minestom.server.item.component.FireworkExplosion;
+import net.minestom.server.item.component.FireworkList;
+import net.minestom.server.item.component.Food;
+import net.minestom.server.item.component.HeadProfile;
+import net.minestom.server.item.component.ItemBlockState;
+import net.minestom.server.item.component.ItemRarity;
+import net.minestom.server.item.component.JukeboxPlayable;
+import net.minestom.server.item.component.LodestoneTracker;
+import net.minestom.server.item.component.MapDecorations;
+import net.minestom.server.item.component.MapPostProcessing;
+import net.minestom.server.item.component.PotDecorations;
+import net.minestom.server.item.component.PotionContents;
+import net.minestom.server.item.component.SeededContainerLoot;
+import net.minestom.server.item.component.SuspiciousStewEffects;
+import net.minestom.server.item.component.Tool;
+import net.minestom.server.item.component.Unbreakable;
+import net.minestom.server.item.component.WritableBookContent;
+import net.minestom.server.item.component.WrittenBookContent;
 import net.minestom.server.network.NetworkBuffer;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.Unit;
 import net.minestom.server.utils.collection.ObjectArray;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
@@ -92,7 +118,7 @@ public final class ItemComponent {
         return NAMESPACES.get(namespaceId);
     }
 
-    public static @Nullable DataComponent<?> fromNamespaceId(@NotNull NamespaceID namespaceId) {
+    public static @Nullable DataComponent<?> fromNamespaceId(@NotNull Key namespaceId) {
         return fromNamespaceId(namespaceId.asString());
     }
 
@@ -105,7 +131,7 @@ public final class ItemComponent {
     }
 
     static <T> DataComponent<T> register(@NotNull String name, @Nullable NetworkBuffer.Type<T> network, @Nullable BinaryTagSerializer<T> nbt) {
-        DataComponent<T> impl = DataComponent.createHeadless(NAMESPACES.size(), NamespaceID.from(name), network, nbt);
+        DataComponent<T> impl = DataComponent.createHeadless(NAMESPACES.size(), Key.key(name), network, nbt);
         NAMESPACES.put(impl.name(), impl);
         IDS.set(impl.id(), impl);
         return impl;

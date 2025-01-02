@@ -1,13 +1,11 @@
 package net.minestom.server.registry;
 
-import net.kyori.adventure.key.Keyed;
+import net.kyori.adventure.key.Key;
 import net.minestom.server.entity.Player;
 import net.minestom.server.gamedata.DataPack;
 import net.minestom.server.network.packet.server.SendablePacket;
-import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.nbt.BinaryTagSerializer;
 import org.jetbrains.annotations.ApiStatus;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,36 +25,6 @@ import java.util.List;
  * @see Registries
  */
 public sealed interface DynamicRegistry<T> permits DynamicRegistryImpl {
-
-    /**
-     * A key for a {@link ProtocolObject} in a {@link DynamicRegistry}.
-     *
-     * @param <T> Unused, except to provide compile-time safety and self documentation.
-     */
-    sealed interface Key<T> extends Keyed permits DynamicRegistryImpl.KeyImpl {
-
-        static <T> @NotNull Key<T> of(@NotNull String namespace) {
-            return new DynamicRegistryImpl.KeyImpl<>(NamespaceID.from(namespace));
-        }
-
-        static <T> @NotNull Key<T> of(@NotNull NamespaceID namespace) {
-            return new DynamicRegistryImpl.KeyImpl<>(namespace);
-        }
-
-        @Contract(pure = true)
-        @NotNull NamespaceID namespace();
-
-        @Contract(pure = true)
-        default @NotNull String name() {
-            return namespace().asString();
-        }
-
-        @Override
-        @Contract(pure = true)
-        default @NotNull net.kyori.adventure.key.Key key() {
-            return namespace();
-        }
-    }
 
     @ApiStatus.Internal
     static <T> @NotNull DynamicRegistry<T> create(@NotNull String id) {
@@ -118,35 +86,23 @@ public sealed interface DynamicRegistry<T> permits DynamicRegistryImpl {
     @NotNull String id();
 
     @Nullable T get(int id);
-    @Nullable T get(@NotNull NamespaceID namespace);
-    default @Nullable T get(@NotNull Key<T> key) {
-        return get(key.namespace());
-    }
+    @Nullable T get(@NotNull net.kyori.adventure.key.Key namespace);
 
-    @Nullable Key<T> getKey(int id);
-    @Nullable Key<T> getKey(@NotNull T value);
-    @Nullable NamespaceID getName(int id);
+    @Nullable net.kyori.adventure.key.Key getKey(int id);
+    @Nullable net.kyori.adventure.key.Key getKey(@NotNull T value);
+    @Nullable net.kyori.adventure.key.Key getName(int id);
     @Nullable DataPack getPack(int id);
-    default @Nullable DataPack getPack(@NotNull Key<T> key) {
+    default @Nullable DataPack getPack(@NotNull net.kyori.adventure.key.Key key) {
         final int id = getId(key);
         return id == -1 ? null : getPack(id);
     }
 
     /**
-     * Returns the protocol ID associated with the given {@link NamespaceID}, or -1 if none is registered.
+     * Returns the protocol ID associated with the given {@link net.kyori.adventure.key.Key}, or -1 if none is registered.
      *
-     * @see #register(NamespaceID, T)
+     * @see #register(net.kyori.adventure.key.Key, T)
      */
-    int getId(@NotNull NamespaceID id);
-
-    /**
-     * Returns the protocol ID associated with the given {@link Key}, or -1 if none is registered.
-     *
-     * @see #register(NamespaceID, T)
-     */
-    default int getId(@NotNull Key<T> key) {
-        return getId(key.namespace());
-    }
+    int getId(@NotNull net.kyori.adventure.key.Key id);
 
 
     /**
@@ -173,21 +129,21 @@ public sealed interface DynamicRegistry<T> permits DynamicRegistryImpl {
      * @param object The entry to register
      * @return The new ID of the registered object
      */
-    default @NotNull DynamicRegistry.Key<T> register(@NotNull String id, @NotNull T object) {
-        return register(NamespaceID.from(id), object, null);
+    default @NotNull net.kyori.adventure.key.Key register(@NotNull String id, @NotNull T object) {
+        return register(net.kyori.adventure.key.Key.key(id), object, null);
     }
 
-    default @NotNull DynamicRegistry.Key<T> register(@NotNull NamespaceID id, @NotNull T object) {
+    default @NotNull net.kyori.adventure.key.Key register(@NotNull net.kyori.adventure.key.Key id, @NotNull T object) {
         return register(id, object, null);
     }
 
     @ApiStatus.Internal
-    default @NotNull DynamicRegistry.Key<T> register(@NotNull String id, @NotNull T object, @Nullable DataPack pack) {
-        return register(NamespaceID.from(id), object, pack);
+    default @NotNull net.kyori.adventure.key.Key register(@NotNull String id, @NotNull T object, @Nullable DataPack pack) {
+        return register(net.kyori.adventure.key.Key.key(id), object, pack);
     }
 
     @ApiStatus.Internal
-    default @NotNull DynamicRegistry.Key<T> register(@NotNull NamespaceID id, @NotNull T object, @Nullable DataPack pack) {
+    default @NotNull net.kyori.adventure.key.Key register(@NotNull net.kyori.adventure.key.Key id, @NotNull T object, @Nullable DataPack pack) {
         return register(id, object);
     }
 
@@ -207,11 +163,11 @@ public sealed interface DynamicRegistry<T> permits DynamicRegistryImpl {
      * @return True if the object was removed, false if it was not present
      * @throws UnsupportedOperationException If the system property <code>minestom.registry.unsafe-remove</code> is not set to <code>true</code>
      */
-    boolean remove(@NotNull NamespaceID namespaceId) throws UnsupportedOperationException;
+    boolean remove(@NotNull net.kyori.adventure.key.Key namespaceId) throws UnsupportedOperationException;
 
     /**
      * <p>Returns a {@link SendablePacket} potentially excluding vanilla entries if possible. It is never possible to
-     * exclude vanilla entries if one has been overridden (e.g. via {@link #register(NamespaceID, T)}.</p>
+     * exclude vanilla entries if one has been overridden (e.g. via {@link #register(net.kyori.adventure.key.Key, T)}.</p>
      *
      * @param excludeVanilla Whether to exclude vanilla entries
      * @return A {@link SendablePacket} containing the registry data
