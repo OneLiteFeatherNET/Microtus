@@ -107,3 +107,11 @@ extension {
 [![YourKit-Logo](https://www.yourkit.com/images/yklogo.png)](https://www.yourkit.com/)
 
 [YourKit](https://www.yourkit.com/), makers of the outstanding java profiler, support open source projects of all kinds with their full featured [Java](https://www.yourkit.com/java/profiler) and [.NET](https://www.yourkit.com/.net/profiler) application profilers. We thank them for granting Microtus an OSS license so that we can make our software the best it can be.
+
+---
+
+We are proud to announce that we are supported by Cloudflare's [Project Alexandria](https://www.cloudflare.com/lp/project-alexandria) sponsorship program. We would not be able to operate without their help! 💖
+
+<a href="https://www.cloudflare.com">
+   <img alt="Cloudflare Logo" src="https://raw.githubusercontent.com/is-a-dev/register/main/media/cloudflare.png" height="96">
+</a>
