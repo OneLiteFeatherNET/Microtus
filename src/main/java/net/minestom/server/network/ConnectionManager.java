@@ -8,6 +8,8 @@ import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
 import net.minestom.server.event.player.AsyncPlayerPreLoginEvent;
+import net.minestom.server.event.player.ModernPlayerConfigurationEvent;
+import net.minestom.server.event.player.ModernPlayerPreLoginEvent;
 import net.minestom.server.instance.Instance;
 import net.minestom.server.listener.preplay.LoginListener;
 import net.minestom.server.network.packet.client.login.ClientLoginStartPacket;
@@ -23,6 +25,8 @@ import net.minestom.server.network.packet.server.login.LoginSuccessPacket;
 import net.minestom.server.network.packet.server.play.StartConfigurationPacket;
 import net.minestom.server.network.player.PlayerConnection;
 import net.minestom.server.network.player.PlayerSocketConnection;
+import net.minestom.server.network.player.tasks.JoinWorldTask;
+import net.minestom.server.network.player.tasks.SyncRegistriesTask;
 import net.minestom.server.network.plugin.LoginPluginMessageProcessor;
 import net.minestom.server.registry.StaticProtocolObject;
 import net.minestom.server.utils.StringUtils;
@@ -205,11 +209,43 @@ public final class ConnectionManager {
     public @NotNull Player createPlayer(@NotNull PlayerConnection connection, @NotNull UUID uuid, @NotNull String username) {
         final Player player = playerProvider.createPlayer(uuid, username, connection);
         this.connectionPlayerMap.put(connection, player);
-        var future = transitionLoginToConfig(player);
-        if (ServerFlag.INSIDE_TEST) future.join();
+        if (!ServerFlag.MODERN_LOGIN_LISTENER) {
+            var future = transitionLoginToConfig(player);
+            if (ServerFlag.INSIDE_TEST) future.join();
+        } else {
+            modernTransitionLoginToConfig(player);
+        }
         return player;
     }
 
+    void modernTransitionLoginToConfig(@NotNull Player player) {
+        final PlayerConnection playerConnection = player.getPlayerConnection();
+        // Compression
+        if (playerConnection instanceof PlayerSocketConnection socketConnection) {
+            final int threshold = MinecraftServer.getCompressionThreshold();
+            if (threshold > 0) socketConnection.startCompression();
+        }
+
+        // Call pre login event
+        ModernPlayerPreLoginEvent event = new ModernPlayerPreLoginEvent(player);
+        EventDispatcher.call(event);
+        if (!player.isOnline())
+            return; // Player has been kicked
+        final String eventUsername = event.getUsername();
+        if (!player.getUsername().equals(eventUsername)) {
+            player.setUsernameField(eventUsername);
+        }
+
+        // Send login success packet (and switch to configuration phase)
+        LoginSuccessPacket loginSuccessPacket = new LoginSuccessPacket(player.getUuid(), player.getUsername(), 0, true);
+        playerConnection.sendPacket(loginSuccessPacket);
+        System.out.println("ModernTransitionLoginToConfig");
+    }
+
+    /**
+     * @deprecated Use {@link #modernTransitionLoginToConfig(Player)} instead.
+     */
+    @Deprecated(forRemoval = true, since = "1.6.0")
     @ApiStatus.Internal
     public @NotNull CompletableFuture<Void> transitionLoginToConfig(@NotNull Player player) {
         return AsyncUtils.runAsync(() -> {
@@ -255,6 +291,32 @@ public final class ConnectionManager {
     public void transitionPlayToConfig(@NotNull Player player) {
         player.sendPacket(new StartConfigurationPacket());
         configurationPlayers.add(player);
+    }
+
+    @ApiStatus.Internal
+    public void modernDoConfiguration(@NotNull Player player, boolean isFirstConfig) {
+        final PlayerConnection connection = player.getPlayerConnection();
+        connection.setConnectionState(ConnectionState.CONFIGURATION);
+
+        player.sendPacket(PluginMessagePacket.getBrandPacket());
+
+        // TODO: Server links missing
+        var event = new ModernPlayerConfigurationEvent(player, isFirstConfig);
+        EventDispatcher.call(event);
+        if (!player.isOnline()) return; // Player was kicked during config.
+
+
+        player.sendPacket(new UpdateEnabledFeaturesPacket(event.getFeatureFlags().stream().map(StaticProtocolObject::namespace).collect(Collectors.toSet()))); // send player features that were enabled or disabled during async config event
+        Instance spawningInstance = event.getSpawningInstance();
+        Check.notNull(spawningInstance, "You need to specify a spawning instance in the ModernPlayerConfigurationEvent");
+        player.setPendingOptions(spawningInstance, event.isHardcore());
+
+        SyncRegistriesTask syncRegistriesTask = new SyncRegistriesTask(List.of(SelectKnownPacksPacket.MINECRAFT_CORE));
+        player.getPlayerConnection().setSynchronizeRegistriesTask(syncRegistriesTask);
+        player.getPlayerConnection().addConfigurationTask(syncRegistriesTask);
+        player.getPlayerConnection().addConfigurationTask(new JoinWorldTask());
+        player.getPlayerConnection().startNextTask();
+        System.out.println("ModernDoConfiguration");
     }
 
     /**

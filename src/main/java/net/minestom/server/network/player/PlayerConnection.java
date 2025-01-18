@@ -5,12 +5,14 @@ import net.minestom.server.crypto.PlayerPublicKey;
 import net.minestom.server.entity.Entity;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
+import net.minestom.server.event.auth.Auth;
 import net.minestom.server.event.player.PlayerDisconnectEvent;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.server.SendablePacket;
 import net.minestom.server.network.packet.server.common.CookieRequestPacket;
 import net.minestom.server.network.packet.server.common.CookieStorePacket;
 import net.minestom.server.network.packet.server.configuration.SelectKnownPacksPacket;
+import net.minestom.server.network.player.tasks.SyncRegistriesTask;
 import net.minestom.server.network.plugin.LoginPluginMessageProcessor;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.validate.Check;
@@ -23,8 +25,10 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * A PlayerConnection is an object needed for all created {@link Player}.
@@ -34,9 +38,16 @@ public abstract class PlayerConnection {
     private Player player;
     private volatile ConnectionState connectionState;
     private PlayerPublicKey playerPublicKey;
+    private final Queue<ConfigurationTask> configurationTasks = new ConcurrentLinkedQueue<>();
+    @Nullable
+    private ConfigurationTask currentTask;
+    private SyncRegistriesTask synchronizeRegistriesTask;
+
     volatile boolean online;
 
     private LoginPluginMessageProcessor loginPluginMessageProcessor = new LoginPluginMessageProcessor(this);
+    private int velocityLoginMessageId = -1;
+    private Auth auth = null;
 
     private CompletableFuture<List<SelectKnownPacksPacket.Entry>> knownPacksFuture = null; // Present only when waiting for a response from the client.
 
@@ -195,6 +206,22 @@ public abstract class PlayerConnection {
         return future;
     }
 
+    public Auth getAuth() {
+        return auth;
+    }
+
+    public void setAuth(Auth auth) {
+        this.auth = auth;
+    }
+
+    public void setVelocityLoginMessageId(int velocityLoginMessageId) {
+        this.velocityLoginMessageId = velocityLoginMessageId;
+    }
+
+    public int getVelocityLoginMessageId() {
+        return velocityLoginMessageId;
+    }
+
     @ApiStatus.Internal
     public void receiveCookieResponse(@NotNull String key, byte @Nullable [] data) {
         CompletableFuture<byte[]> future = pendingCookieRequests.remove(NamespaceID.from(key));
@@ -207,6 +234,7 @@ public abstract class PlayerConnection {
      * Gets the login plugin message processor, only available during the login state.
      */
     @ApiStatus.Internal
+    @Deprecated(forRemoval = true, since = "1.6.0")
     public @NotNull LoginPluginMessageProcessor loginPluginMessageProcessor() {
         return Objects.requireNonNull(this.loginPluginMessageProcessor,
                 "Login plugin message processor is only available during the login state.");
@@ -226,6 +254,40 @@ public abstract class PlayerConnection {
             future.complete(clientPacks);
             knownPacksFuture = null;
         }
+    }
+
+    public void startNextTask() {
+        if (this.currentTask != null) {
+            throw new IllegalStateException("Task " + this.currentTask.type().id() + " has not finished yet");
+        } else {
+            ConfigurationTask configurationTask = this.configurationTasks.poll();
+            if (configurationTask != null) {
+                this.currentTask = configurationTask;
+                configurationTask.start(this::sendPacket);
+            }
+        }
+    }
+
+    public void finishCurrentTask(@NotNull ConfigurationTask.Type taskType) {
+        ConfigurationTask.Type type = this.currentTask != null ? this.currentTask.type() : null;
+        if (!taskType.equals(type)) {
+            throw new IllegalStateException("Unexpected request for task finish, current task: " + type + ", requested: " + taskType);
+        } else {
+            this.currentTask = null;
+            this.startNextTask();
+        }
+    }
+
+    public void addConfigurationTask(@NotNull ConfigurationTask task) {
+        this.configurationTasks.add(task);
+    }
+
+    public void setSynchronizeRegistriesTask(@NotNull SyncRegistriesTask synchronizeRegistriesTask) {
+        this.synchronizeRegistriesTask = synchronizeRegistriesTask;
+    }
+
+    public @NotNull SyncRegistriesTask getSynchronizeRegistriesTask() {
+        return synchronizeRegistriesTask;
     }
 
     @Override

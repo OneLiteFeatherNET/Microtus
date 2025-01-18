@@ -5,6 +5,7 @@ import net.minestom.server.adventure.MinestomAdventure;
 import net.minestom.server.entity.Player;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.ListenerHandle;
+import net.minestom.server.event.auth.MojangAuth;
 import net.minestom.server.event.player.PlayerPacketOutEvent;
 import net.minestom.server.extras.mojangAuth.MojangCrypt;
 import net.minestom.server.network.PacketProcessor;
@@ -126,10 +127,22 @@ public class PlayerSocketConnection extends PlayerConnection {
 
     /**
      * Sets the encryption key and add the codecs to the pipeline.
+     * @throws IllegalStateException if encryption is already enabled for this connection
+     */
+    public void setEncryptionKey(byte[] sharedSecret) {
+        Check.stateCondition(encryptionContext != null, "Encryption is already enabled!");
+        if (getAuth() instanceof MojangAuth mojangAuth) {
+            this.encryptionContext = new EncryptionContext(mojangAuth.getCipher(1, sharedSecret), mojangAuth.getCipher(2, sharedSecret));
+        }
+    }
+
+    /**
+     * Sets the encryption key and add the codecs to the pipeline.
      *
      * @param secretKey the secret key to use in the encryption
      * @throws IllegalStateException if encryption is already enabled for this connection
      */
+    @Deprecated(forRemoval = true, since = "1.6.0")
     public void setEncryptionKey(@NotNull SecretKey secretKey) {
         Check.stateCondition(encryptionContext != null, "Encryption is already enabled!");
         this.encryptionContext = new EncryptionContext(MojangCrypt.getCipher(1, secretKey), MojangCrypt.getCipher(2, secretKey));

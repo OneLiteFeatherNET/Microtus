@@ -13,6 +13,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @ApiStatus.Internal
+@Deprecated(forRemoval = true, since = "1.6.0")
 public class LoginPluginMessageProcessor {
     private static final AtomicInteger REQUEST_ID = new AtomicInteger(0);
 

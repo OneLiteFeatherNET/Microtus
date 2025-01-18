@@ -52,6 +52,7 @@ public final class ServerFlag {
 
     // Online Mode
     public static final @NotNull String AUTH_URL = stringProperty("minestom.auth.url", "https://sessionserver.mojang.com/session/minecraft/hasJoined");
+    public static final @NotNull String MOJANG_AUTH_URL = AUTH_URL.concat("?username=%s&serverId=%s");
 
     // World
     public static final int WORLD_BORDER_SIZE = intProperty("minestom.world-border-size", 29999984);
@@ -76,6 +77,9 @@ public final class ServerFlag {
     public static final boolean REGISTRY_LATE_REGISTER = booleanProperty("minestom.registry.late-register");
     public static final boolean REGISTRY_UNSAFE_OPS = booleanProperty("minestom.registry.unsafe-ops");
     public static final boolean EVENT_NODE_ALLOW_MULTIPLE_PARENTS = booleanProperty("minestom.event.multiple-parents");
+
+    // Modern API
+    public static final boolean MODERN_LOGIN_LISTENER = booleanProperty("minestom.modern-login-listener", false);
 
     public static boolean INSIDE_TEST = booleanProperty("minestom.inside-test", false);
 

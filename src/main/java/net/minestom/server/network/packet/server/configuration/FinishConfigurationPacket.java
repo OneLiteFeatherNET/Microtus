@@ -6,6 +6,9 @@ import net.minestom.server.network.packet.server.ServerPacketIdentifier;
 import org.jetbrains.annotations.NotNull;
 
 public record FinishConfigurationPacket() implements ServerPacket.Configuration {
+
+    public static final FinishConfigurationPacket INSTANCE = new FinishConfigurationPacket();
+
     public FinishConfigurationPacket(@NotNull NetworkBuffer buffer) {
         this();
     }

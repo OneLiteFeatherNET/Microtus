@@ -2,6 +2,7 @@ package net.minestom.server.network.plugin;
 
 import java.util.concurrent.CompletableFuture;
 
+@Deprecated(forRemoval = true, since = "1.6.0")
 public class LoginPluginRequest {
     private final String channel;
     private final byte[] requestPayload;

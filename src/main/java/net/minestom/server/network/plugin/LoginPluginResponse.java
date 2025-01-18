@@ -1,5 +1,9 @@
 package net.minestom.server.network.plugin;
 
+/**
+ * Represents a response from a login plugin.
+ */
+@Deprecated(forRemoval = true, since = "1.6.0")
 public class LoginPluginResponse {
     private final String channel;
     private final boolean understood;
