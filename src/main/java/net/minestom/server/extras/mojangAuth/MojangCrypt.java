@@ -11,6 +11,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.security.*;
 
+@Deprecated(forRemoval = true, since = "1.6.0")
 public final class MojangCrypt {
     private static final Logger LOGGER = LoggerFactory.getLogger(MojangCrypt.class);
 

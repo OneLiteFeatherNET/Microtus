@@ -1,6 +1,7 @@
 package net.minestom.server.listener.manager;
 
 import net.minestom.server.MinecraftServer;
+import net.minestom.server.ServerFlag;
 import net.minestom.server.event.EventDispatcher;
 import net.minestom.server.event.player.PlayerPacketEvent;
 import net.minestom.server.listener.*;
@@ -8,6 +9,11 @@ import net.minestom.server.listener.common.*;
 import net.minestom.server.listener.preplay.ConfigListener;
 import net.minestom.server.listener.preplay.HandshakeListener;
 import net.minestom.server.listener.preplay.LoginListener;
+import net.minestom.server.listener.preplay.ModernConfigListener;
+import net.minestom.server.listener.preplay.ModernEncryptionResponseListener;
+import net.minestom.server.listener.preplay.ModernLoginAckListener;
+import net.minestom.server.listener.preplay.ModernPluginResponseListener;
+import net.minestom.server.listener.preplay.ModernStartLoginListener;
 import net.minestom.server.listener.preplay.StatusListener;
 import net.minestom.server.network.ConnectionState;
 import net.minestom.server.network.packet.client.ClientPacket;
@@ -45,10 +51,18 @@ public final class PacketListenerManager {
         setListener(ConnectionState.STATUS, StatusRequestPacket.class, StatusListener::requestListener);
         setListener(ConnectionState.STATUS, ClientPingRequestPacket.class, StatusListener::pingRequestListener);
 
-        setListener(ConnectionState.LOGIN, ClientLoginStartPacket.class, LoginListener::loginStartListener);
-        setListener(ConnectionState.LOGIN, ClientEncryptionResponsePacket.class, LoginListener::loginEncryptionResponseListener);
-        setListener(ConnectionState.LOGIN, ClientLoginPluginResponsePacket.class, LoginListener::loginPluginResponseListener);
-        setListener(ConnectionState.LOGIN, ClientLoginAcknowledgedPacket.class, LoginListener::loginAckListener);
+        if (ServerFlag.MODERN_LOGIN_LISTENER) {
+            setListener(ConnectionState.LOGIN, ClientLoginStartPacket.class, ModernStartLoginListener::modernLoginStartListener);
+            setListener(ConnectionState.LOGIN, ClientEncryptionResponsePacket.class, ModernEncryptionResponseListener::modernLoginEncryptionResponseListener);
+            setListener(ConnectionState.LOGIN, ClientLoginPluginResponsePacket.class, ModernPluginResponseListener::loginPluginResponseListener);
+            setListener(ConnectionState.LOGIN, ClientLoginAcknowledgedPacket.class, ModernLoginAckListener::loginAckListener);
+        } else {
+            setListener(ConnectionState.LOGIN, ClientLoginStartPacket.class, LoginListener::loginStartListener);
+            setListener(ConnectionState.LOGIN, ClientEncryptionResponsePacket.class, LoginListener::loginEncryptionResponseListener);
+            setListener(ConnectionState.LOGIN, ClientLoginPluginResponsePacket.class, LoginListener::loginPluginResponseListener);
+            setListener(ConnectionState.LOGIN, ClientLoginAcknowledgedPacket.class, LoginListener::loginAckListener);
+        }
+
         setListener(ConnectionState.LOGIN, ClientCookieResponsePacket.class, CookieListener::handleCookieResponse);
 
         setConfigurationListener(ClientSettingsPacket.class, SettingsListener::listener);
@@ -56,8 +70,16 @@ public final class PacketListenerManager {
         setConfigurationListener(ClientKeepAlivePacket.class, KeepAliveListener::listener);
         setConfigurationListener(ClientPongPacket.class, (packet, player) -> {/* empty */});
         setConfigurationListener(ClientResourcePackStatusPacket.class, ResourcePackListener::listener);
-        setConfigurationListener(ClientSelectKnownPacksPacket.class, ConfigListener::selectKnownPacks);
-        setConfigurationListener(ClientFinishConfigurationPacket.class, ConfigListener::finishConfigListener);
+
+        if (ServerFlag.MODERN_LOGIN_LISTENER) {
+            setConfigurationListener(ClientSelectKnownPacksPacket.class, ModernConfigListener::selectKnownPacks);
+            setConfigurationListener(ClientFinishConfigurationPacket.class, ModernConfigListener::finishConfigListener);
+        } else {
+            setConfigurationListener(ClientSelectKnownPacksPacket.class, ConfigListener::selectKnownPacks);
+            setConfigurationListener(ClientFinishConfigurationPacket.class, ConfigListener::finishConfigListener);
+        }
+
+
         setListener(ConnectionState.CONFIGURATION, ClientCookieResponsePacket.class, CookieListener::handleCookieResponse);
 
         setPlayListener(ClientKeepAlivePacket.class, KeepAliveListener::listener);

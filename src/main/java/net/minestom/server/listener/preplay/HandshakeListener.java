@@ -122,9 +122,9 @@ public final class HandshakeListener {
             }
         }
 
-        if (connection instanceof PlayerSocketConnection) {
+        if (connection instanceof PlayerSocketConnection socketConnection) {
             // Give to the connection the server info that the client used
-            ((PlayerSocketConnection) connection).refreshServerInformation(address, packet.serverPort(), packet.protocolVersion());
+            socketConnection.refreshServerInformation(address, packet.serverPort(), packet.protocolVersion());
         }
     }
 

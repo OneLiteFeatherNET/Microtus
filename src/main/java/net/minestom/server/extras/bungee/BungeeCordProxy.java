@@ -10,7 +10,9 @@ import java.util.Set;
  * but managing your firewall is still recommended.
  * <p>
  * Please consider using {@link net.minestom.server.extras.velocity.VelocityProxy} instead.
+ * @deprecated BungeeCord forwarding is deprecated and will be removed in 1.6.0, please use the new {@link net.minestom.server.event.auth.AuthEvent} instead.
  */
+@Deprecated(forRemoval = true, since = "1.6.0")
 public final class BungeeCordProxy {
 
     private static Set<String> bungeeGuardTokens = null;

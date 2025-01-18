@@ -7,6 +7,7 @@ import net.minestom.server.network.packet.client.configuration.ClientFinishConfi
 import net.minestom.server.network.packet.client.configuration.ClientSelectKnownPacksPacket;
 import org.jetbrains.annotations.NotNull;
 
+@Deprecated(forRemoval = true, since = "1.6.0")
 public final class ConfigListener {
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
 

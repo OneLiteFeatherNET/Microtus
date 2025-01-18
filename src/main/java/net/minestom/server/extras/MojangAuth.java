@@ -9,6 +9,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.security.KeyPair;
 
+/**
+ * @deprecated Mojang authentication is no longer supported by Microtus, use the new modern api instead. See {@link net.minestom.server.event.auth.MojangAuth}.
+ */
+@Deprecated(forRemoval = true, since = "1.6.0")
 public final class MojangAuth {
     public static final String AUTH_URL = ServerFlag.AUTH_URL.concat("?username=%s&serverId=%s");
     private static volatile boolean enabled = false;

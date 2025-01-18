@@ -19,7 +19,9 @@ import static net.minestom.server.network.NetworkBuffer.*;
  * Support for <a href="https://velocitypowered.com/">Velocity</a> modern forwarding.
  * <p>
  * Can be enabled by simply calling {@link #enable(String)}.
+ * @deprecated Velocity modern forwarding is deprecated and will be removed in 1.6.0, please use the new {@link net.minestom.server.event.auth.AuthEvent} instead.
  */
+@Deprecated(forRemoval = true, since = "1.6.0")
 public final class VelocityProxy {
     public static final String PLAYER_INFO_CHANNEL = "velocity:player_info";
     private static final int SUPPORTED_FORWARDING_VERSION = 1;

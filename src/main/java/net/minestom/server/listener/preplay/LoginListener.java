@@ -29,17 +29,33 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.crypto.SecretKey;
 import java.math.BigInteger;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.net.SocketAddress;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static net.minestom.server.network.NetworkBuffer.STRING;
 
+/**
+ * Handle login process for players.
+ *
+ * @deprecated Use {@link ModernStartLoginListener} instead, the new way supports more flexible and modern login handling.
+ * @see ModernStartLoginListener
+ */
+@Deprecated(since = "1.6.0", forRemoval = true)
 public final class LoginListener {
     private static final ConnectionManager CONNECTION_MANAGER = MinecraftServer.getConnectionManager();
     private static final Gson GSON = new Gson();
