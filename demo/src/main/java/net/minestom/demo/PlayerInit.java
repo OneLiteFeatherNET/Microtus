@@ -19,10 +19,13 @@ import net.minestom.server.entity.attribute.AttributeOperation;
 import net.minestom.server.entity.damage.Damage;
 import net.minestom.server.event.Event;
 import net.minestom.server.event.EventNode;
+import net.minestom.server.event.auth.Auth;
+import net.minestom.server.event.auth.AuthEvent;
 import net.minestom.server.event.entity.EntityAttackEvent;
 import net.minestom.server.event.item.ItemDropEvent;
 import net.minestom.server.event.item.PickupItemEvent;
 import net.minestom.server.event.player.AsyncPlayerConfigurationEvent;
+import net.minestom.server.event.player.ModernPlayerConfigurationEvent;
 import net.minestom.server.event.player.PlayerBlockInteractEvent;
 import net.minestom.server.event.player.PlayerBlockPlaceEvent;
 import net.minestom.server.event.player.PlayerDeathEvent;
@@ -58,7 +61,6 @@ import net.minestom.server.notifications.Notification;
 import net.minestom.server.potion.CustomPotionEffect;
 import net.minestom.server.potion.PotionEffect;
 import net.minestom.server.sound.SoundEvent;
-import net.minestom.server.notifications.Notification;
 import net.minestom.server.utils.MathUtils;
 import net.minestom.server.utils.NamespaceID;
 import net.minestom.server.utils.time.TimeUnit;
@@ -73,8 +75,12 @@ import java.util.concurrent.atomic.AtomicReference;
 public class PlayerInit {
 
     private final Inventory inventory;
+    private static final Auth AUTH = Auth.mojangBuilder().generateKeyPair().build();
 
     private final EventNode<Event> DEMO_NODE = EventNode.all("demo")
+            .addListener(AuthEvent.class, event -> {
+                event.setAuth(AUTH);
+            })
             .addListener(EntityAttackEvent.class, event -> {
                 final Entity source = event.getEntity();
                 final Entity entity = event.getTarget();
@@ -112,6 +118,20 @@ public class PlayerInit {
             })
             .addListener(PlayerDisconnectEvent.class, event -> System.out.println("DISCONNECTION " + event.getPlayer().getUsername()))
             .addListener(AsyncPlayerConfigurationEvent.class, event -> {
+                final Player player = event.getPlayer();
+
+                // Show off adding and removing feature flags
+                event.addFeatureFlag(FeatureFlag.BUNDLE);
+                event.removeFeatureFlag(FeatureFlag.TRADE_REBALANCE); // not enabled by default, just removed for demonstration
+
+                var instances = MinecraftServer.getInstanceManager().getInstances();
+                Instance instance = instances.stream().skip(new Random().nextInt(instances.size())).findFirst().orElse(null);
+                event.setSpawningInstance(instance);
+                int x = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
+                int z = Math.abs(ThreadLocalRandom.current().nextInt()) % 500 - 250;
+                player.setRespawnPoint(new Pos(0, 40f, 0));
+            })
+            .addListener(ModernPlayerConfigurationEvent.class, event -> {
                 final Player player = event.getPlayer();
 
                 // Show off adding and removing feature flags

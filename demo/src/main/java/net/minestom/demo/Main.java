@@ -35,6 +35,7 @@ public class Main {
 
     public static void main(String[] args) {
         System.setProperty("minestom.experiment.pose-updates", "true");
+        System.setProperty("minestom.modern-login-listener", "true");
 
         MinecraftServer.setCompressionThreshold(0);
 
@@ -159,7 +160,7 @@ public class Main {
 //        VelocityProxy.enable("abcdef");
         //BungeeCordProxy.enable();
 
-        MojangAuth.init();
+        // MojangAuth.init();
 
         // useful for testing - we don't need to worry about event calls so just set this to a long time
         OpenToLAN.open(new OpenToLANConfig().eventCallDelay(Duration.of(1, TimeUnit.DAY)));
