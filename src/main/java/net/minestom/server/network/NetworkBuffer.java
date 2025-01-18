@@ -348,4 +348,14 @@ public final class NetworkBuffer {
         writer.copyTo(0, bytes, 0, bytes.length);
         return bytes;
     }
+
+    public static byte[] makeArray(NetworkBuffer writing) {
+        byte[] bytes = new byte[writing.writeIndex];
+        writing.copyTo(0, bytes, 0, bytes.length);
+        return bytes;
+    }
+
+    public static NetworkBuffer of(@NotNull ByteBuffer buffer) {
+        return new NetworkBuffer(buffer);
+    }
 }
