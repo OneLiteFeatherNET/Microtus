@@ -31,11 +31,15 @@ public record StopSoundPacket(byte flags, @Nullable Sound.Source source,
     public void write(@NotNull NetworkBuffer writer) {
         writer.write(BYTE, flags);
         if (flags == 3 || flags == 1) {
-            assert source != null;
+            if (source == null) {
+                throw new IllegalStateException("Source cannot be null when flags are 3 or 1.");
+            }
             writer.write(VAR_INT, AdventurePacketConvertor.getSoundSourceValue(source));
         }
         if (flags == 2 || flags == 3) {
-            assert sound != null;
+            if (sound == null) {
+                throw new IllegalStateException("Sound cannot be null when flags are 2 or 3.");
+            }
             writer.write(STRING, sound);
         }
     }
