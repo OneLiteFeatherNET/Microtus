@@ -65,7 +65,9 @@ public final class TickThread extends MinestomThread {
         final ReentrantLock lock = this.lock;
         final long tickTime = this.tickTime;
         for (ThreadDispatcher.Partition entry : entries) {
-            assert entry.thread() == this;
+            if (entry.thread() != this) {
+                throw new IllegalStateException("The entry thread does not match the current thread.");
+            }
             final List<Tickable> elements = entry.elements();
             if (elements.isEmpty()) continue;
             for (Tickable element : elements) {
