@@ -183,7 +183,9 @@ public record AdvancementsPacket(boolean reset, @NotNull List<AdvancementMapping
             writer.writeEnum(FrameType.class, frameType);
             writer.write(INT, flags);
             if ((flags & 0x1) != 0) {
-                assert backgroundTexture != null;
+                if (backgroundTexture == null) {
+                    throw new IllegalStateException("Background texture cannot be null when the first flag is set.");
+                }
                 writer.write(STRING, backgroundTexture);
             }
             writer.write(FLOAT, x);
