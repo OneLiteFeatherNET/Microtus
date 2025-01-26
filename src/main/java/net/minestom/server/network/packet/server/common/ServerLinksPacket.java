@@ -48,7 +48,9 @@ public record ServerLinksPacket(@NotNull List<Entry> entries) implements ServerP
                 if (value.knownType != null) {
                     buffer.write(KnownLinkType.NETWORK_TYPE, value.knownType);
                 } else {
-                    assert value.customType != null;
+                    if (value.customType == null) {
+                        throw new IllegalStateException("Custom type cannot be null when known type is not present.");
+                    }
                     buffer.write(NetworkBuffer.COMPONENT, value.customType);
                 }
                 buffer.write(NetworkBuffer.STRING, value.link);
