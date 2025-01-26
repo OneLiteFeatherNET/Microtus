@@ -70,7 +70,9 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
     @Override
     public @NotNull Block withProperty(@NotNull String property, @NotNull String value) {
         final PropertyType[] propertyTypes = PROPERTIES_TYPE.get(id());
-        assert propertyTypes != null;
+        if (propertyTypes == null) {
+            throw new IllegalStateException("Property types cannot be null for id: " + id());
+        }
         final byte keyIndex = findKeyIndex(propertyTypes, property, this);
         final byte valueIndex = findValueIndex(propertyTypes[keyIndex], value, this);
         final long updatedProperties = updateIndex(propertiesArray, keyIndex, valueIndex);
@@ -81,7 +83,9 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
     public @NotNull Block withProperties(@NotNull Map<@NotNull String, @NotNull String> properties) {
         if (properties.isEmpty()) return this;
         final PropertyType[] propertyTypes = PROPERTIES_TYPE.get(id());
-        assert propertyTypes != null;
+        if (propertyTypes == null) {
+            throw new IllegalStateException("Property types cannot be null for id: " + id());
+        }
         long updatedProperties = this.propertiesArray;
         for (Map.Entry<String, String> entry : properties.entrySet()) {
             final byte keyIndex = findKeyIndex(propertyTypes, entry.getKey(), this);
@@ -114,7 +118,9 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
     @Override
     public @Unmodifiable @NotNull Map<String, String> properties() {
         final PropertyType[] propertyTypes = PROPERTIES_TYPE.get(id());
-        assert propertyTypes != null;
+        if (propertyTypes == null) {
+            throw new IllegalStateException("Property types cannot be null for id: " + id());
+        }
         final int length = propertyTypes.length;
         if (length == 0) return Map.of();
         String[] keys = new String[length];
@@ -167,7 +173,9 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
     private Block compute(long updatedProperties) {
         if (updatedProperties == this.propertiesArray) return this;
         final BlockImpl block = possibleProperties().get(updatedProperties);
-        assert block != null;
+        if (block == null) {
+            throw new IllegalStateException("Block cannot be null for updated properties: " + updatedProperties);
+        }
         // Reuse the same block instance if possible
         if (nbt == null && handler == null) return block;
         // Otherwise copy with the nbt and handler
@@ -192,7 +200,9 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
                 for (var entry : stateProperties) {
                     final var k = entry.getKey();
                     final var v = (List<String>) entry.getValue();
-                    assert v.size() < MAX_VALUES;
+                    if (v.size() >= MAX_VALUES) {
+                        throw new IllegalStateException("Too many values for property " + k + " in block " + namespace);
+                    }
                     propertyTypes[i++] = new PropertyType(k, v);
                 }
             } else {
@@ -211,7 +221,9 @@ record BlockImpl(@NotNull Registry.BlockEntry registry,
                 final String query = stateEntry.getKey();
                 final var stateOverride = (Map<String, Object>) stateEntry.getValue();
                 final var propertyMap = BlockUtils.parseProperties(query);
-                assert propertyTypes.length == propertyMap.size();
+                if (propertyTypes.length != propertyMap.size()) {
+                    throw new IllegalStateException("Property types size mismatch for query " + query);
+                }
                 long propertiesValue = 0;
                 for (Map.Entry<String, String> entry : propertyMap.entrySet()) {
                     final byte keyIndex = findKeyIndex(propertyTypes, entry.getKey(), null);
