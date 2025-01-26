@@ -35,7 +35,10 @@ final class TagRecord {
     static final ClassValue<Serializer<? extends Record>> serializers = new ClassValue<>() {
         @Override
         protected Serializer<? extends Record> computeValue(Class<?> type) {
-            assert type.isRecord();
+            if (!type.isRecord()) {
+                throw new IllegalArgumentException("The provided class must be a record: " + type.getName());
+            }
+
             final RecordComponent[] components = type.getRecordComponents();
             final Entry[] entries = Arrays.stream(components)
                     .map(recordComponent -> {
@@ -65,7 +68,9 @@ final class TagRecord {
     };
 
     static <T extends Record> @NotNull Serializer<T> serializer(@NotNull Class<T> type) {
-        assert type.isRecord();
+        if (!type.isRecord()) {
+            throw new IllegalArgumentException("The provided class must be a record: " + type.getName());
+        }
         //noinspection unchecked
         return (Serializer<T>) serializers.get(type);
     }
