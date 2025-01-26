@@ -175,9 +175,9 @@ public record ShapeImpl(CollisionData collisionData, LightData lightData) implem
             final Vec min = new Vec(minX, minY, minZ);
             final Vec max = new Vec(minX + boundXSize, minY + boundYSize, minZ + boundZSize);
             final BoundingBox bb = new BoundingBox(min, max);
-            assert bb.minX() == minX;
-            assert bb.minY() == minY;
-            assert bb.minZ() == minZ;
+            if (bb.minX() != minX || bb.minY() != minY || bb.minZ() != minZ) {
+                throw new IllegalStateException("BoundingBox min values do not match the parsed values.");
+            }
             boundingBoxes[i] = bb;
         }
         return boundingBoxes;
