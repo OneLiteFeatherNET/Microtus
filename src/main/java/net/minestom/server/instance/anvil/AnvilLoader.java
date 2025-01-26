@@ -147,7 +147,9 @@ public class AnvilLoader implements IChunkLoader {
             perRegionLoadedChunksLock.lock();
             try {
                 Set<IntIntImmutablePair> previousVersion = perRegionLoadedChunks.put(new IntIntImmutablePair(regionX, regionZ), new HashSet<>());
-                assert previousVersion == null : "The AnvilLoader cache should not already have data for this region.";
+                if (previousVersion != null) {
+                    throw new IllegalStateException("The AnvilLoader cache should not already have data for this region.");
+                }
                 return new RegionFile(regionPath);
             } catch (IOException e) {
                 MinecraftServer.getExceptionManager().handleException(e);
