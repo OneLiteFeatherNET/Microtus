@@ -45,12 +45,16 @@ public final class ArrayUtils {
         for (T object : collection) {
             result[i++] = function.applyAsInt(object);
         }
-        assert i == size;
+        if (i != size) {
+            throw new IllegalStateException("Index mismatch: expected " + size + " but got " + i);
+        }
         return result;
     }
 
     public static <K, V> Map<K, V> toMap(@NotNull K[] keys, @NotNull V[] values, int length) {
-        assert keys.length >= length && keys.length == values.length;
+        if (keys.length < length || keys.length != values.length) {
+            throw new IllegalArgumentException("Keys and values arrays must have the same length and at least the specified length.");
+        }
         return switch (length) {
             case 0 -> Map.of();
             case 1 -> Map.of(keys[0], values[0]);
@@ -96,7 +100,9 @@ public final class ArrayUtils {
     }
 
     public static void unpack(int[] out, long[] in, int bitsPerEntry) {
-        assert in.length != 0: "unpack input array is zero";
+        if (in.length == 0) {
+            throw new IllegalArgumentException("Unpack input array is zero");
+        }
 
         var intsPerLong = Math.floor(64d / bitsPerEntry);
         var intsPerLongCeil = (int) Math.ceil(intsPerLong);
