@@ -64,7 +64,9 @@ public class BlockUtils {
         if (query.length() == 2) return Map.of();
 
         final int entries = StringUtils.countMatches(query, ',') + 1;
-        assert entries > 0;
+        if (entries <= 0) {
+            throw new IllegalArgumentException("Invalid number of entries in the query");
+        }
         String[] keys = new String[entries];
         String[] values = new String[entries];
         int entryCount = 0;
