@@ -25,3 +25,18 @@ Most of them can be obtained in (most) package managers on different platforms.
 - `git` - Version control system
 - A Java 21 or later JDK:
     - [Adoptium](https://adoptium.net/) has builds for most operating systems
+
+## Deprecation Guidelines
+
+To ensure consistency across the codebase, please use the following template when marking a method, class or functionality as deprecated
+
+```java
+/**
+ * This method does ...
+ * @deprecated As of <product> <version>, because ... use
+ *             {@link #replacementMethod()} instead.
+ */
+@Deprecated
+public void deprecatedMethod() {
+    // ...
+}
