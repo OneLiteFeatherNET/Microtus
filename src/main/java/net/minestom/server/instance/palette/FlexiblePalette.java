@@ -138,7 +138,9 @@ final class FlexiblePalette implements SpecializedPalette, Cloneable {
                 }
             }
         }
-        assert index == maxSize();
+        if (index != maxSize()) {
+            throw new IllegalStateException("Index does not match the expected max size");
+        }
         // Update palette content
         if (fillValue < 0) {
             updateAll(cache);
@@ -167,7 +169,9 @@ final class FlexiblePalette implements SpecializedPalette, Cloneable {
             cache[index] = newValue != value ? getPaletteIndex(newValue) : value;
             if (newValue != 0) count.setPlain(count.getPlain() + 1);
         });
-        assert arrayIndex.getPlain() == maxSize();
+        if (arrayIndex.getPlain() != maxSize()) {
+            throw new IllegalStateException("Array index does not match the expected max size");
+        }
         // Update palette content
         updateAll(cache);
         this.count = count.getPlain();
@@ -249,7 +253,9 @@ final class FlexiblePalette implements SpecializedPalette, Cloneable {
 
     private void updateAll(int[] paletteValues) {
         final int size = maxSize();
-        assert paletteValues.length >= size;
+        if (paletteValues.length < size) {
+            throw new IllegalArgumentException("Palette values array length is smaller than the expected size");
+        }
         final int bitsPerEntry = this.bitsPerEntry;
         final int valuesPerLong = 64 / bitsPerEntry;
         final long clear = (1L << bitsPerEntry) - 1L;
@@ -274,7 +280,9 @@ final class FlexiblePalette implements SpecializedPalette, Cloneable {
         getAll(palette::set);
         this.bitsPerEntry = palette.bitsPerEntry;
         this.values = palette.values;
-        assert this.count == palette.count;
+        if (this.count != palette.count) {
+            throw new IllegalStateException("Palette count mismatch after resizing");
+        }
     }
 
     private int getPaletteIndex(int value) {
@@ -289,7 +297,9 @@ final class FlexiblePalette implements SpecializedPalette, Cloneable {
         final int lookup = valueToPaletteMap.putIfAbsent(value, lastPaletteIndex);
         if (lookup != -1) return lookup;
         this.paletteToValueList.add(value);
-        assert lastPaletteIndex < maxPaletteSize(bpe);
+        if (lastPaletteIndex >= maxPaletteSize(bpe)) {
+            throw new IllegalStateException("Palette size exceeded after adding new value");
+        }
         return lastPaletteIndex;
     }
 
