@@ -147,7 +147,9 @@ public final class ThreadDispatcher<P> {
                     if (partition == null) break;
                     // Update chunk's thread
                     Partition partitionEntry = partitions.get(partition);
-                    assert partitionEntry != null;
+                    if (partitionEntry == null) {
+                        throw new IllegalStateException("Partition entry cannot be null.");
+                    }
                     final TickThread previous = partitionEntry.thread;
                     final TickThread next = retrieveThread(partition);
                     if (next != previous) {

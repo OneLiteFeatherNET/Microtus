@@ -34,7 +34,9 @@ final class BlockLight implements Light {
         // Apply section light
         blockPalette.getAllPresent((x, y, z, stateId) -> {
             final Block block = Block.fromStateId((short) stateId);
-            assert block != null;
+            if (block == null) {
+                throw new IllegalStateException("Block cannot be null for stateId: " + stateId);
+            }
             final byte lightEmission = (byte) block.registry().lightEmission();
 
             final int index = x | (z << 4) | (y << 8);

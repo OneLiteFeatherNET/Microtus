@@ -105,10 +105,12 @@ public final class GeneratorImpl {
         public void setBlock(int x, int y, int z, @NotNull Block block) {
             resize(x, y, z);
             GenerationUnit section = findAbsolute(sections, minSection, width, height, depth, x, y, z);
-            assert section.absoluteStart().chunkX() == getChunkCoordinate(x) &&
+            boolean isValidSection = section.absoluteStart().chunkX() == getChunkCoordinate(x) &&
                     section.absoluteStart().section() == getChunkCoordinate(y) &&
-                    section.absoluteStart().chunkZ() == getChunkCoordinate(z) :
-                    "Invalid section " + section.absoluteStart() + " for " + x + ", " + y + ", " + z;
+                    section.absoluteStart().chunkZ() == getChunkCoordinate(z);
+            if (!isValidSection) {
+                throw new IllegalStateException("Invalid section " + section.absoluteStart() + " for coordinates (" + x + ", " + y + ", " + z + ")");
+            }
             section.modifier().setBlock(x, y, z, block);
         }
 
@@ -528,7 +530,9 @@ public final class GeneratorImpl {
 
     private static int findIndex(int width, int height, int depth,
                                  int x, int y, int z) {
-        assert width > 0 && height > 0 && depth > 0;
+        if (width <= 0 || height <= 0 || depth <= 0) {
+            throw new IllegalArgumentException("Dimensions (width, height, depth) must be positive");
+        }
         return (z * width * height) + (y * width) + x;
     }
 

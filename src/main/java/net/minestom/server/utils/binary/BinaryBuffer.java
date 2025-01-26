@@ -31,7 +31,9 @@ public final class BinaryBuffer {
 
     @ApiStatus.Internal
     public static BinaryBuffer wrap(ByteBuffer buffer) {
-        assert buffer.isDirect();
+        if (!buffer.isDirect()) {
+            throw new IllegalArgumentException("The buffer must be direct");
+        }
         return new BinaryBuffer(buffer);
     }
 

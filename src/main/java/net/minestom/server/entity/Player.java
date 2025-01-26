@@ -678,7 +678,9 @@ public class Player extends LivingEntity implements CommandSender, Localizable, 
                         throw new RuntimeException(e);
                     }
                     scheduler.process();
-                    assert isDone();
+                    if (!isDone()) {
+                        throw new IllegalStateException("Future should be completed before processing.");
+                    }
                 }
                 return super.join();
             }

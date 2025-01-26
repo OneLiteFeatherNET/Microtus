@@ -389,7 +389,9 @@ public final class PacketUtils {
 
     @ApiStatus.Internal
     public static int invalidPacketState(@NotNull Class<?> packetClass, @NotNull ConnectionState state, @NotNull ConnectionState... expected) {
-        assert expected.length > 0 : "Expected states cannot be empty: " + packetClass;
+        if (expected.length == 0) {
+            throw new IllegalArgumentException("Expected states cannot be empty: " + packetClass);
+        }
         StringBuilder expectedStr = new StringBuilder();
         for (ConnectionState connectionState : expected) {
             expectedStr.append(connectionState).append(", ");

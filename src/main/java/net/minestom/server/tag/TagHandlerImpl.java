@@ -185,7 +185,9 @@ final class TagHandlerImpl implements TagHandler {
             if (entry != null && entry.tag.entry.isPath()) {
                 // Existing path, continue navigating
                 final Node tmp = (Node) entry.value;
-                assert tmp.parent == local : "Path parent is invalid: " + tmp.parent + " != " + local;
+                if (tmp.parent != local) {
+                    throw new IllegalStateException("Path parent is invalid: " + tmp.parent + " != " + local);
+                }
                 local = tmp;
             } else {
                 if (!present) return null;
@@ -194,7 +196,9 @@ final class TagHandlerImpl implements TagHandler {
                     if (synEntry != null && synEntry.tag.entry.isPath()) {
                         // Existing path, continue navigating
                         final Node tmp = (Node) synEntry.value;
-                        assert tmp.parent == local : "Path parent is invalid: " + tmp.parent + " != " + local;
+                        if (tmp.parent != local) {
+                            throw new IllegalStateException("Path parent is invalid: " + tmp.parent + " != " + local);
+                        }
                         local = tmp;
                         continue;
                     }
@@ -306,7 +310,9 @@ final class TagHandlerImpl implements TagHandler {
                         return; // Empty node
                     value = copy;
                     nbt = copy.compound;
-                    assert nbt != null : "Node copy should also compute the compound";
+                    if (nbt == null) {
+                        throw new IllegalStateException("Node copy should also compute the compound");
+                    }
                 } else {
                     nbt = entry.updatedNbt();
                 }
@@ -356,7 +362,9 @@ final class TagHandlerImpl implements TagHandler {
         }
 
         void updateValue(T value) {
-            assert !tag.entry.isPath();
+            if (tag.entry.isPath()) {
+                throw new IllegalStateException("Cannot update value when the tag entry is a path.");
+            }
             this.value = value;
             this.nbt = null;
         }

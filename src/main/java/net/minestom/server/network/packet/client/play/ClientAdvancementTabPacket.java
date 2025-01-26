@@ -34,7 +34,9 @@ public record ClientAdvancementTabPacket(@NotNull AdvancementAction action,
     public void write(@NotNull NetworkBuffer writer) {
         writer.writeEnum(AdvancementAction.class, action);
         if (action == AdvancementAction.OPENED_TAB) {
-            assert tabIdentifier != null;
+            if (tabIdentifier == null) {
+                throw new IllegalStateException("Tab identifier must not be null.");
+            }
             if (tabIdentifier.length() > 256) {
                 throw new IllegalArgumentException("Tab identifier cannot be longer than 256 characters.");
             }

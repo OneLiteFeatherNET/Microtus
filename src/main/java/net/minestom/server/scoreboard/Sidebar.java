@@ -474,11 +474,15 @@ public class Sidebar implements Scoreboard {
         public void write(@NotNull NetworkBuffer writer) {
             writer.write(NetworkBuffer.VAR_INT, formatType.ordinal());
             if (formatType == FormatType.STYLED) {
-                assert content != null;
+                if (content == null) {
+                    throw new IllegalStateException("Content cannot be null when formatType is " + formatType);
+                }
                 writer.write(NetworkBuffer.COMPONENT, content);
             }
             else if (formatType == FormatType.FIXED) {
-                assert content != null;
+                if (content == null) {
+                    throw new IllegalStateException("Content cannot be null when formatType is " + formatType);
+                }
                 writer.write(NetworkBuffer.COMPONENT, content);
             }
         }

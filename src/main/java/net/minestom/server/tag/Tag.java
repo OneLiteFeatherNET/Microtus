@@ -46,7 +46,10 @@ public class Tag<T> {
         Function<?, ?> readComparator,
         Serializers.Entry<T, BinaryTag> entry,
         Supplier<T> defaultValue, PathEntry[] path, UnaryOperator<T> copy, int listScope) {
-        assert index == INDEX_MAP.get(key);
+        if (index != INDEX_MAP.get(key)) {
+            throw new IllegalArgumentException("Index must match the value in INDEX_MAP for the given key: " + key);
+        }
+
         this.index = index;
         this.key = key;
         this.readComparator = readComparator;

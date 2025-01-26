@@ -45,9 +45,13 @@ public record ScoreboardObjectivePacket(@NotNull String objectiveName, byte mode
         writer.write(STRING, objectiveName);
         writer.write(BYTE, mode);
         if (mode == 0 || mode == 2) {
-            assert objectiveValue != null;
+            if (objectiveValue == null) {
+                throw new IllegalStateException("Objective value cannot be null when mode is 0 or 2.");
+            }
             writer.write(COMPONENT, objectiveValue);
-            assert type != null;
+            if (type == null) {
+                throw new IllegalStateException("Type cannot be null when mode is 0 or 2.");
+            }
             writer.write(VAR_INT, type.ordinal());
             writer.writeOptional(numberFormat);
         }

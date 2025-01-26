@@ -37,7 +37,9 @@ public class PacketProcessor {
         NetworkBuffer buffer = new NetworkBuffer(body);
         final ClientPacket clientPacket = switch (connectionState) {
             case HANDSHAKE -> {
-                assert packetId == 0;
+                if (packetId != 0) {
+                    throw new IllegalArgumentException("Invalid packetId for HANDSHAKE state. Expected packetId 0.");
+                }
                 yield new ClientHandshakePacket(buffer);
             }
             case STATUS -> statusHandler.create(packetId, buffer);
@@ -57,7 +59,9 @@ public class PacketProcessor {
         }
 
         final Player player = connection.getPlayer();
-        assert player != null;
+        if (player == null) {
+            throw new IllegalStateException("Player should not be null");
+        }
         player.addPacketToQueue(packet);
         return packet;
     }

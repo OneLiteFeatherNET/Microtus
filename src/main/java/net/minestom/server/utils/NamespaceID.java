@@ -39,9 +39,15 @@ public record NamespaceID(@NotNull String domain, @NotNull String path) implemen
     public NamespaceID {
         domain = domain.intern();
         path = path.intern();
-        assert !domain.contains(".") && !domain.contains("/") : "Domain cannot contain a dot nor a slash character (" + asString() + ")";
-        assert domain.matches(LEGAL_LETTERS) : "Illegal character in domain (" + asString() + "). Must match " + LEGAL_LETTERS;
-        assert path.matches(LEGAL_PATH_LETTERS) : "Illegal character in path (" + asString() + "). Must match " + LEGAL_PATH_LETTERS;
+        if (domain.contains(".") || domain.contains("/")) {
+            throw new IllegalArgumentException("Domain cannot contain a dot nor a slash character (" + asString() + ")");
+        }
+        if (!domain.matches(LEGAL_LETTERS)) {
+            throw new IllegalArgumentException("Illegal character in domain (" + asString() + "). Must match " + LEGAL_LETTERS);
+        }
+        if (!path.matches(LEGAL_PATH_LETTERS)) {
+            throw new IllegalArgumentException("Illegal character in path (" + asString() + "). Must match " + LEGAL_PATH_LETTERS);
+        }
     }
 
     @Override

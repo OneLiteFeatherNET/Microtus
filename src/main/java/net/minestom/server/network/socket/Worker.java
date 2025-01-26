@@ -117,8 +117,12 @@ public final class Worker extends MinestomThread {
     }
 
     public void disconnect(PlayerSocketConnection connection, SocketChannel channel) {
-        assert !connection.isOnline();
-        assert Thread.currentThread() == this;
+        if (connection.isOnline()) {
+            throw new IllegalStateException("Connection is still online and cannot be disconnected.");
+        }
+        if (Thread.currentThread() != this) {
+            throw new IllegalStateException("Method must be called from the correct thread.");
+        }
         this.connectionMap.remove(channel);
         if (channel.isOpen()) {
             try {

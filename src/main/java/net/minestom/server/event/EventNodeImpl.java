@@ -276,7 +276,9 @@ non-sealed class EventNodeImpl<T extends Event> implements EventNode<T> {
     }
 
     void invalidateEventsFor(EventNodeImpl<? super T> node) {
-        assert Thread.holdsLock(GLOBAL_CHILD_LOCK);
+        if (!Thread.holdsLock(GLOBAL_CHILD_LOCK)) {
+            throw new IllegalStateException("Thread must hold the GLOBAL_CHILD_LOCK to call this method");
+        }
         for (Class<? extends T> eventType : listenerMap.keySet()) {
             node.invalidateEvent(eventType);
         }

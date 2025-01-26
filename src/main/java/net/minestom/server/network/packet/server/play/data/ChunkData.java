@@ -47,7 +47,9 @@ public record ChunkData(@NotNull CompoundBinaryTag heightmaps, byte @NotNull [] 
 
             writer.write(VAR_INT, registry.blockEntityId());
             final CompoundBinaryTag nbt = BlockUtils.extractClientNbt(block);
-            assert nbt != null;
+            if (nbt == null) {
+                throw new IllegalStateException("Block NBT cannot be null.");
+            }
             writer.write(NBT, nbt); // block nbt
         }
     }
